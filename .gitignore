@@ -1,0 +1,25 @@
+envs/
+pkgs/
+input/
+output/
+datasets/
+
+# Intellij IDEA files
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.classpath
+.project
+.settings/
+.ropeproject
+
+# gEdit temporal files
+*~
+
+# Python bytecode
+*.pyc
+*.egg-info/
+dist/
