@@ -1,35 +1,38 @@
 import os
 import csv
 import gzip
-
+import shutil
 
 from os import path
-
-import shutil
 from oncodrivefml.main import OncodriveFML
 from oncodrivefml.config import load_configuration
 
 
 class OncodriveFmlTask:
 
-    ID = "oncodrivefml"
+    def __init__(self, output_folder, config_file):
 
-    def __init__(self, name, output_folder, config_file):
-
-        self.name = name
-        self.config = load_configuration(config_file, override={'settings': {'cores': os.cpu_count()}})
+        self.name = None
+        self.config = load_configuration(config_file, override={'settings': {'cores': 2}})
         self.elements_file = self.config['elements']
 
-        os.makedirs(path.join(output_folder, OncodriveFmlTask.ID), exist_ok=True)
-        self.in_file = path.join(output_folder, OncodriveFmlTask.ID, "{}.in.gz".format(name))
-        self.in_skip = path.exists(self.in_file)
+        self.in_file = None
+        self.in_skip = False
         self.in_fd = None
         self.in_writer = None
 
-        self.out_file = path.join(output_folder, OncodriveFmlTask.ID, "{}.out.gz".format(name))
+        self.out_file = None
+        self.output_folder = path.join(output_folder, "oncodrivefml")
+        os.makedirs(self.output_folder, exist_ok=True)
 
     def __repr__(self):
         return "OncodriveFML '{}'".format(self.name)
+
+    def init(self, name):
+        self.name = name
+        self.in_file = path.join(self.output_folder, "{}.in.gz".format(name))
+        self.in_skip = path.exists(self.in_file)
+        self.out_file = path.join(self.output_folder, "{}.out.gz".format(name))
 
     def input_start(self):
         if not self.in_skip:
@@ -75,3 +78,16 @@ class OncodriveFmlTask:
             shutil.rmtree(tmp_folder)
 
         return self.out_file
+
+    def clean(self):
+
+        if path.exists(self.out_file):
+            os.unlink(self.out_file)
+
+        if path.exists(self.in_file):
+            os.unlink(self.in_file)
+
+        tmp_folder = self.out_file + ".tmp"
+        if path.exists(tmp_folder):
+            shutil.rmtree(tmp_folder)
+

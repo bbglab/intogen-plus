@@ -1,0 +1,7 @@
+numpy
+scipy
+biopython
+pandas
+MySQL-python
+bgreference
+futures
