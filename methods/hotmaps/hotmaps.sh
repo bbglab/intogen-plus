@@ -6,14 +6,14 @@ OUTPUT_FOLDER=$2
 CORES=$3
 
 # Configuration from the environment
-HYPERMUT=1000
-export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
-export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
-export MYSQL_HOST=127.0.0.1
-export MYSQL_PORT=3306
-export MYSQL_DB=mupit_modbase
-export MYSQL_USER=root
-export MYSQL_PASSWD=S82XWgESQjKJpLx3
+# export HYPERMUT=1000
+# export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
+# export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
+# export MYSQL_HOST=127.0.0.1
+# export MYSQL_PORT=3306
+# export MYSQL_DB=mupit_modbase
+# export MYSQL_USER=root
+# export MYSQL_PASSWD=S82XWgESQjKJpLx3
 
 # Preprocess
 INPUT_FOLDER=$(dirname "${INPUT_FILE}")
