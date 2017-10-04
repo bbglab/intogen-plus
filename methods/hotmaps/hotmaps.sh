@@ -5,7 +5,7 @@ INPUT_FILE=$1
 OUTPUT_FOLDER=$2
 CORES=$3
 
-# Configuration from the environment
+# Content hotmaps.sh
 # export HYPERMUT=1000
 # export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
 # export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
