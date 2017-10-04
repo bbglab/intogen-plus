@@ -192,7 +192,7 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
     if len(changes) < num_mutations * 2:
         logger.warning('There are only {} possible mutations in {}'.format(len(changes), geneid))
 
-    logger.info('{} - length: {} - missense variants: {}'.format(geneid, len(codons), len(changes) // 3))
+    logger.debug('{} - length: {} - missense variants: {}'.format(geneid, len(codons), len(changes) // 3))
 
     np_prob = np.array(prob)
     p_normalized = np_prob / np.sum(np_prob)
@@ -318,14 +318,12 @@ def randomize_region(number_mutations, input_regions, number_simulations=1,
 
     # Calculate (or load) the signature
     if input_signature is not None:
-        logger.info('Loading signatures')
         signatures = load_signature(input_signature)
 
     # Prepare the mutation data
     mutations[geneid] = {cancer_type: number_mutations}
 
     # Simulate the mutations of each region
-    logger.info("Simulating ...")
     results_header = [
         'CHROMOSOME', 'POSITION', 'REF', 'ALT', 'PDB_ID', 'CHAIN', 'STRAND',
         'SIG_REF', 'SIG_ALT', 'AA_REF', 'AA_ALT', 'POSITION_UPSTREAM', 'POSITION_DOWNSTREAM',
@@ -352,7 +350,6 @@ def randomize_region(number_mutations, input_regions, number_simulations=1,
             ]
         )))
 
-    logger.info("Done!")
     return results
 
 
@@ -420,11 +417,9 @@ def randomize_dataset(input_mutations, input_regions, input_signature=None, canc
 
     # Calculate (or load) the signature
     if input_signature is not None:
-        logger.info('Loading signatures')
         signatures = load_signature(input_signature)
 
     # Simulate the mutations of each region
-    logger.info("Simulating ...")
     with Pool(cores) as pool:
         with open(output_mutations, 'w', newline='\n') as fd:
             writer = csv.writer(fd, delimiter='\t')
@@ -449,7 +444,6 @@ def randomize_dataset(input_mutations, input_regions, input_signature=None, canc
                             mut.position_upstream, mut.position_downstream, mut.cancer_type, i
                         ])
 
-    logger.info("Done!")
     return
 
 

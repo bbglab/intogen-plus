@@ -163,9 +163,6 @@ def read_mutations(mut_path):
     return mut_dict
 
 
-
-
-
 def read_structure(pdb_path, structure_id, quiet=True):
     """Reads in a PDB structure.
 
@@ -214,4 +211,28 @@ def read_structure(pdb_path, structure_id, quiet=True):
     except:
         logger.info('Failed reading in structure {0}'.format(structure_id))
         return None
+
+
+def chunkizator(iterable, size=1000):
+    """
+    Creates chunks from an iterable
+
+    Args:
+        iterable:
+        size (int): elements in the chunk
+
+    Returns:
+        list. Chunk
+
+    """
+    s = 0
+    chunk = []
+    for i in iterable:
+        if s == size:
+            yield chunk
+            chunk = []
+            s = 0
+        chunk.append(i)
+        s += 1
+    yield chunk
 

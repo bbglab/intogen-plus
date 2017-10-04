@@ -1,14 +1,14 @@
 #!/bin/bash
-set -x
 
 # Script arguments
-INPUT_FILE="./example/input/KICH.maf"
-OUTPUT_FOLDER="./example/output"
+INPUT_FILE=$1
+OUTPUT_FOLDER=$2
+CORES=$3
 
 # Configuration from the environment
-export HYPERMUT=1000
+HYPERMUT=1000
 export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
-export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
+export DATASETS_PDB_FILE="fully_described_pdb_info.txt"
 export MYSQL_HOST=127.0.0.1
 export MYSQL_PORT=3306
 export MYSQL_DB=mupit_modbase
@@ -77,8 +77,8 @@ then
     python $SCRIPTS_FOLDER/hotspot.py \
         --log-level=INFO \
         -m $TEMP_FOLDER/mutation_tcga.$INPUT_TUMOR_TYPE.txt \
-        -a $DATASETS_FOLDER/DATASETS_PDB_FILE \
-        -t EVERY -n 10000 -r 10.0 \
+        -a $DATASETS_FOLDER/$DATASETS_PDB_FILE \
+        -t EVERY -n 10000 -r 10.0 -c $CORES \
         -o $TEMP_FOLDER/hotspot_$INPUT_FILENAME \
         -e $TEMP_FOLDER/$INPUT_FILENAME.err --log=stdout \
         -gc $DATASETS_FOLDER/coordinates.txt.gz

@@ -56,6 +56,7 @@ def compute_pvals(density, sim_null):
     return pvals, sim_null
 
 
+# TODO Profile this function
 def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
                        cog,
                        num_mutations,
@@ -113,7 +114,6 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
     
     # select a position to mutate at random
 
-
     results = randomizer_aa.randomize_region(number_mutations=num_mutations, input_regions=coordinates, number_simulations=num_sims,input_signature=signature,cancer_type=cancer_type,cores=4)
     #print results[0]
     mutated_pos_vec = sig.map_generated_mutations(struct_id, results,d_correspondence)
@@ -125,21 +125,13 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
         for (chain,mutated_pos) in mutated_pos_vec[key]: # tru of 
             # find equivalent chain letters to the one
 
-
             original_model = 0
             original_letter = chain
             chain_letters = pstruct.find_eq_letters(chain_info, chain)
             # mutate all models with equivalent chain letters
             for m in model_info:
                 for l in chain_letters:
-                    #position = res_keys[mutated_pos]
-                    position = list()
-                    position.append(struct_id)
-                    position.append(m)
-                    position.append(l)
-                    position.append((' ',mutated_pos,' '))
-                    
-                    position = tuple(position)
+                    position = (struct_id, m, l, (' ',mutated_pos,' '))
                     # check if this particular residue exists
                     # on these equivalent chains before adding
                     # a mutation
@@ -149,8 +141,7 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
                         model_diff = True
                     elif not position[2] == original_letter:
                         chain_diff = True
-                        #print("Equivalent residue does not exist on alternate chain")
-        
+
         # get mutation density and add to overall sim densities
         # only for positions that have a mutation
         obs_mut_counts = {k: tmp_mut_counts[k]
@@ -175,6 +166,7 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
     sim_null_dist = stats.itemfreq(sim_density)
 
     return sim_null_dist
+
 
 def read_file_coordinates(file_cordinates):
     """
