@@ -249,17 +249,11 @@ def main(opts):
             pb.update(done)
             output += result
 
-    logger.info('Writing results')
     output = [['Structure', 'Tumor Type', 'Model', 'Chain', 'Mutation Residues',
                'Residue Mutation Count', 'Mutation Density', 'Hotspot P-value',
               ]] + output
     with open(opts['output'], 'w') as handle:
         csv.writer(handle, delimiter='\t', lineterminator='\n').writerows(output)
-
-    print("NUM_MODEL_DIFF: " + str(simulation_signatures.NUM_MODEL_DIFF))
-    print("NUM_CHAIN_DIFF: " + str(simulation_signatures.NUM_CHAIN_DIFF))
-    print("STRUCT_MODEL_DIFF: " + str(simulation_signatures.STRUCT_MODEL_DIFF))
-    print("STRUCT_CHAIN_DIFF: " + str(simulation_signatures.STRUCT_CHAIN_DIFF))
     logger.info('Done')
 
 
