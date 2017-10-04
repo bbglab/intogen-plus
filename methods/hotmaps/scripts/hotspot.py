@@ -237,7 +237,6 @@ def main(opts):
 
     steps = 100 * opts['cores']
     chunk_size = int(len(pdb_info) / steps) + 1
-    print(chunk_size)
     process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"])
 
     # Progress bar

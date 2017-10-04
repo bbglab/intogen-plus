@@ -8,7 +8,7 @@ CORES=$3
 # Configuration from the environment
 HYPERMUT=1000
 export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
-export DATASETS_PDB_FILE="fully_described_pdb_info.txt"
+export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
 export MYSQL_HOST=127.0.0.1
 export MYSQL_PORT=3306
 export MYSQL_DB=mupit_modbase
