@@ -9,11 +9,11 @@ process PreprocessFromInput {
     publishDir OUTPUT
 
     output:
-        file "vep/*.in.gz" into IN_VEP
-        file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML
+        file "vep/*.in.gz" into IN_VEP mode flatten
+        file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
 
     """
-    python $baseDir/intogen4.py preprocess -i $INPUT -o . vep oncodrivefml
+    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml
     """
 
 }
@@ -26,7 +26,7 @@ process Vep {
         val task_file from IN_VEP
 
     output:
-        file "vep/*.out.gz" into OUT_VEP
+        file "vep/*.out.gz" into OUT_VEP mode flatten
         file "vep/logs/*.log" into LOG_VEP
 
     """
@@ -42,8 +42,8 @@ process PreprocessFromVep {
         val task_file from OUT_VEP
 
     output:
-        file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA
-        file "hotmaps/*.in.gz" into IN_HOTMAPS
+        file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA mode flatten
+        file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
 
     """
     python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega hotmaps
@@ -58,7 +58,7 @@ process OncodriveFML {
         val task_file from IN_ONCODRIVEFML
 
     output:
-        file "oncodrivefml/*.out.gz" into OUT_ONCODRIVEFML
+        file "oncodrivefml/*.out.gz" into OUT_ONCODRIVEFML mode flatten
         file "oncodrivefml/logs/*.log" into LOG_ONCODRIVEFML
 
     """
@@ -74,7 +74,7 @@ process OncodriveOmega {
         val task_file from IN_ONCODRIVEOMEGA
 
     output:
-        file "oncodriveomega/*.out.gz" into OUT_ONCODRIVEOMEGA
+        file "oncodriveomega/*.out.gz" into OUT_ONCODRIVEOMEGA mode flatten
         file "oncodriveomega/logs/*.log" into LOG_ONCODRIVEOMEGA
 
     """
@@ -91,7 +91,7 @@ process HotmapsSignature {
         val task_file from IN_HOTMAPS
 
     output:
-        file "hotmapssignature/*.out.gz" into OUT_HOTMAPS
+        file "hotmapssignature/*.out.gz" into OUT_HOTMAPS mode flatten
         file "hotmapssignature/logs/*.log" into LOG_HOTMAPS
 
     """
