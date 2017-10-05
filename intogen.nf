@@ -78,6 +78,7 @@ process OncodriveOmega {
         file "oncodriveomega/logs/*.log" into LOG_ONCODRIVEOMEGA
 
     """
+    export PROCESS_CPUS=$task.cpus
     python $baseDir/intogen4.py run -o . oncodriveomega $task_file
     """
 }
