@@ -3,16 +3,20 @@ import gzip
 import os
 
 from os import path
+from .base import Task
 from oncodriveomega.config import load_configuration
 from oncodriveomega.main import OncodriveOmega
 
 
-class OncodriveOmegaTask:
+class OncodriveOmegaTask(Task):
 
-    def __init__(self, output_folder, config_file):
+    KEY = 'oncodriveomega'
+
+    def __init__(self, output_folder, config):
+        super().__init__(output_folder, config)
 
         self.name = None
-        self.config_file = config_file
+        self.config_file = config[OncodriveOmegaTask.KEY]['config_file']
         # TODO add expression filter in config file
         self.expression_filter = None
 
@@ -27,12 +31,6 @@ class OncodriveOmegaTask:
 
     def __repr__(self):
         return "OncodriveOmega '{}'".format(self.name)
-
-    def init(self, name):
-        self.name = name
-        self.in_file = path.join(self.output_folder, "{}.in.gz".format(name))
-        self.in_skip = path.exists(self.in_file)
-        self.out_file = path.join(self.output_folder, "{}.out.gz".format(name))
 
     def input_start(self):
 

@@ -107,21 +107,21 @@ def read_maf(path, tumor_type):
     # fill in other variants with na's
     is_not_snv = (df_mis['Reference_Allele']=='-') | (df_mis['Tumor_Seq_Allele2']=='-')
     #df_mis.loc[df_mis['Variant_Type']!='SNP', 'HGVSp_Short'] = np.nan
-    df_mis.loc[is_not_snv, 'HGVSp_Short'] = np.nan
+    # FIXME df_mis.loc[is_not_snv, 'HGVSp_Short'] = np.nan
 
     # get the mutation info
-    df_mis['Reference Codon Position'] = df_mis['HGVSp_Short'].str[3:-1].copy()
+    # FIXME df_mis['Reference Codon Position'] = df_mis['HGVSp_Short'].str[3:-1].copy()
 
     # fix small number of errors in HGVS syntax
-    has_letter = df_mis['Reference Codon Position'].str.contains('[A-Za-z]').fillna(True)
-    df_mis.loc[has_letter, 'Reference Codon Position'] = '-1'
-    is_empty = df_mis['Reference Codon Position']==''
-    df_mis.loc[is_empty, 'Reference Codon Position'] = '-1'
+    # FIXME has_letter = df_mis['Reference Codon Position'].str.contains('[A-Za-z]').fillna(True)
+    # FIXME df_mis.loc[has_letter, 'Reference Codon Position'] = '-1'
+    # FIXME is_empty = df_mis['Reference Codon Position']==''
+    # FIXME df_mis.loc[is_empty, 'Reference Codon Position'] = '-1'
 
     # add mut info columns
-    df_mis['Reference Codon Position'] = df_mis['Reference Codon Position'].astype(int).copy()
-    df_mis['Reference AA'] = df_mis['HGVSp_Short'].str[2:3].copy()
-    df_mis['Alternate AA'] = df_mis['HGVSp_Short'].str[-1].copy()
+    # FIXME df_mis['Reference Codon Position'] = df_mis['Reference Codon Position'].astype(int).copy()
+    # FIXME df_mis['Reference AA'] = df_mis['HGVSp_Short'].str[2:3].copy()
+    # FIXME df_mis['Alternate AA'] = df_mis['HGVSp_Short'].str[-1].copy()
 
     # figure out whether 'chr' needs to be added
     df_mis['Chromosome'] = df_mis['Chromosome'].astype(str).copy()
@@ -152,7 +152,8 @@ def main(opts):
 
     # read in MAF file
     maf_df = read_maf(opts['maf'], opts['tumor_type'])
-    out_cols = ['ID', 'Sample ID', 'HUGO symbol', 'Reference Transcript', 'Reference Codon Position',
+    # FIXME 'Reference Codon Position',
+    out_cols = ['ID', 'Sample ID', 'HUGO symbol', 'Reference Transcript',
                 'Reference AA', 'Alternate AA', 'Chromosome', 'Position',
                 'Reference base(s)', 'Alternate base(s)', 'Strand']
                 #'Start_Position', 'End_Position']
@@ -226,8 +227,11 @@ def main(opts):
 
             count += 1
         tot_coverage = float(tot_mapped_count)/count*100
-        bio_coverage = float(mapped_bio_count)/(tot_mapped_count)*100
-        homology_coverage = float(mapped_homology_count)/(tot_mapped_count)*100
+
+        bio_coverage = 0.0
+        homology_coverage = 0.0
+        # FIXME bio_coverage = float(mapped_bio_count)/(tot_mapped_count)*100
+        # FIXME homology_coverage = float(mapped_homology_count)/(tot_mapped_count)*100
         cov_info_file.write('\t'.join((opts['tumor_type'], str(tot_coverage), str(bio_coverage), str(homology_coverage), str(count))) + '\n')
 
 

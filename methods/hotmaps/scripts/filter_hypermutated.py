@@ -76,8 +76,8 @@ def detect_hypermutators(file_path,
         number of mutations for each hypermutator sample
     """
     # get mutation counts for each sample
+
     with open(file_path) as handle:
-        print file_path
         myreader = csv.reader(handle, delimiter='\t')
 
         # parse header
@@ -135,7 +135,7 @@ def detect_hypermutators(file_path,
 def main(opts):
     # first get hypermutators
     for filename in os.listdir(opts['raw_dir']):
-        if re.search(opts['match_regex'], filename):
+        if opts['match_regex'] == filename:
             mut_file_path = os.path.join(opts['raw_dir'], filename)
             tissue = filename.split('.')[1]
             if tissue != 'PANCAN12':

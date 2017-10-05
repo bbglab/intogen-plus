@@ -9,17 +9,17 @@ from os import path
 from .base import Task
 
 
-class VepTask(Task):
+class HotmapsTask(Task):
 
-    KEY = 'vep'
+    KEY = 'hotmaps'
 
     def __init__(self, output_folder, config):
 
         super().__init__(output_folder, config)
 
         self.name = None
-        self.conda_env = config[VepTask.KEY]['conda_env']
-        self.vep_data = config[VepTask.KEY]['vep_data']
+        self.conda_env = config[self.KEY]['conda_env']
+        self.method_folder = config[self.KEY]['method_folder']
 
         self.in_fd = None
         self.in_writer = None
@@ -27,28 +27,38 @@ class VepTask(Task):
         self.in_skip = False
 
         self.out_file = None
-        self.output_folder = path.join(output_folder, 'vep')
+        self.output_folder = path.join(output_folder, self.KEY)
         os.makedirs(self.output_folder, exist_ok=True)
 
-    def __repr__(self):
-        return "Variant Effect Predictor '{}'".format(self.name)
-
     def input_start(self):
+
         if not self.in_skip:
             self.in_fd = gzip.open(self.in_file, 'wt')
             self.in_writer = csv.writer(self.in_fd, delimiter='\t')
+            self.in_writer.writerow(["Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele",
+                                     "Tumor_Seq_Allele2", "Tumor_Sample_Barcode", "Variant_Classification", "Transcript_ID"])
 
-    def input_write(self, identifier, mut):
+    def input_write(self, _, value):
+
         if not self.in_skip:
-            # chr - start - end - allele - strand - identifier
-            if mut['ALT_TYPE'] == 'snp':
-                self.in_writer.writerow( [
-                    mut['CHROMOSOME'],
-                    mut['POSITION'],
-                    mut['POSITION'],
-                    "{}/{}".format(mut['REF'], mut['ALT']),
-                    mut['STRAND'],
-                    "{}__{}__{}__{}".format(identifier, mut['SAMPLE'], mut['REF'], mut['ALT'])
+
+            # Hugo_Symbol Chromosome Start_Position End_Position Reference_Allele Tumor_Seq_Allele2 Tumor_Sample_Barcode
+            # Variant_Classification Transcript_ID
+            if value['CANONICAL'] == 'YES':
+                identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
+                chromosome, position = value['Location'].split(':')
+                consequence = value['Consequence'].split(',')[0].replace('missense_variant', 'Missense_Mutation')
+
+                self.in_writer.writerow([
+                    value['SYMBOL'],
+                    chromosome,
+                    position,
+                    position,
+                    ref,
+                    alt,
+                    sample,
+                    consequence,
+                    value['Feature']
                 ])
 
     def input_end(self):
@@ -61,11 +71,8 @@ class VepTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "bash -c 'source ~/.bashrc && source activate {0} && vep -i <(zcat {1}) -o STDOUT " \
-                  "--assembly GRCh37 --no_stats --cache --offline --symbol --tab --canonical --dir {3} " \
-                  "| grep -v ^## | gzip > {2}' &&" \
-                  "mv STDOUT_warnings.txt vep/logs/{4}.log".format(
-                self.conda_env, self.in_file, self.out_file, self.vep_data, self.name)
+            cmd = "bash -c 'source ~/.bashrc && source activate {0} && source {1}/hotmaps.config && {1}/hotmaps.sh {2} {3} {4}'".format(
+                self.conda_env, self.method_folder, self.in_file, self.output_folder, os.environ['PROCESS_CPUS'])
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
                 with open(self.out_file + ".pid", "wt") as fd:

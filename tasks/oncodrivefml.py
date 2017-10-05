@@ -4,16 +4,20 @@ import gzip
 import shutil
 
 from os import path
+from .base import Task
 from oncodrivefml.main import OncodriveFML
 from oncodrivefml.config import load_configuration
 
 
-class OncodriveFmlTask:
+class OncodriveFmlTask(Task):
 
-    def __init__(self, output_folder, config_file):
+    KEY = 'oncodrivefml'
+
+    def __init__(self, output_folder, config):
+        super().__init__(output_folder, config)
 
         self.name = None
-        self.config = load_configuration(config_file, override={'settings': {'cores': 2}})
+        self.config = load_configuration(config[OncodriveFmlTask.KEY]['config_file'], override={'settings': {'cores': 2}})
         self.elements_file = self.config['elements']
 
         self.in_file = None
@@ -27,12 +31,6 @@ class OncodriveFmlTask:
 
     def __repr__(self):
         return "OncodriveFML '{}'".format(self.name)
-
-    def init(self, name):
-        self.name = name
-        self.in_file = path.join(self.output_folder, "{}.in.gz".format(name))
-        self.in_skip = path.exists(self.in_file)
-        self.out_file = path.join(self.output_folder, "{}.out.gz".format(name))
 
     def input_start(self):
         if not self.in_skip:

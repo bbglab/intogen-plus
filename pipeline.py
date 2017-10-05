@@ -65,6 +65,7 @@ def run_task(task):
     _restore_output()
     if error is not None:
         LOG.error("{} [error] - '{}'".format(task, error))
+        LOG.exception(error)
 
     log_file.close()
 
@@ -91,7 +92,6 @@ def run_tasks(tasks, msg=None):
             executor.shutdown(wait=False)
             for pid, process in processes.items():
                 process.terminate()
-                #kill(pid, signal.SIGTERM)
 
             tasks_not_done = {t for t in tasks if t not in tasks_done}
             for t in tasks_not_done:
@@ -101,11 +101,8 @@ def run_tasks(tasks, msg=None):
             raise
 
 
-def prepare_task(tasks, reader, item):
+def prepare_task(reader, tasks, item):
     position, (group_key, group_data) = item
-
-    # Clone tasks
-    tasks = [copy(t) for t in tasks]
 
     # Initialize task name
     [t.init(group_key) for t in tasks]
@@ -122,24 +119,26 @@ def prepare_task(tasks, reader, item):
     # Input close
     [t.input_end() for t in tasks]
 
-    return group_key, tasks
+    return [(t.KEY, group_key) for t in tasks]
 
 
-def prepare_tasks(groups, tasks, reader, msg=None):
+def prepare_tasks(groups, reader, tasks, msg=None, cores=None):
 
     if msg:
         LOG.info(msg)
 
-    func = partial(prepare_task, tasks, reader)
+    func = partial(prepare_task, reader, tasks)
 
-    all_keys = []
     all_tasks = []
-    with ProcessPoolExecutor() as executor:
-        for key, tasks in executor.map(func, enumerate(groups)):
+    if cores > 1:
+        with ProcessPoolExecutor(cores) as executor:
+            for tasks in executor.map(func, enumerate(groups)):
+                all_tasks += tasks
+    else:
+        for tasks in map(func, enumerate(groups)):
             all_tasks += tasks
-            all_keys.append(key)
 
-    return all_keys, all_tasks
+    return all_tasks
 
 
 def execute(groups, reader, tasks, msg=None):

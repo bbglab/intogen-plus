@@ -47,8 +47,7 @@ def main(opts):
     # iterate through each tumor type
     for filename in os.listdir(opts['data_dir']):
         #if filename.startswith('tcga') and filename.endswith('.maf'):
-	print filename
-        if re.match(opts['match_regex'], filename):
+        if opts['match_regex'] == filename:
             tissue = filename.split('.')[1]
             distinct_variants = {}  # keep track to avoid duplicate variants
             print('Working on:' + tissue)
@@ -56,7 +55,6 @@ def main(opts):
             # get read file and write file
             file_path = os.path.join(opts['data_dir'], filename)
             write_path = os.path.join(opts['output_dir'], 'non_filtered_mupit.'+filename)
-	    print (write_path)
             with open(file_path) as f, open(write_path, 'w') as wf:
                 myreader = csv.reader(f, delimiter='\t')
 

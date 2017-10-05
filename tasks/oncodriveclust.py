@@ -13,7 +13,9 @@ NON_SYNONYMOUS = {"missense_variant", "stop_gained", "stop_lost", "initiator_cod
 
 class OncodriveClustTask:
 
-    def __init__(self, output_folder):
+    KEY = 'oncodriveclust'
+
+    def __init__(self, output_folder, config):
         self.name = None
 
         self.min_gene_mutations = 5
@@ -32,7 +34,14 @@ class OncodriveClustTask:
         return "OncodriveClust '{}'".format(self.name)
 
     def init(self, name):
-        self.name = name
+
+        if os.path.isabs(name):
+            self.in_file = name
+            self.name = os.path.basename(name).split('.')[0]
+        else:
+            self.name = name
+            self.in_file = os.path.join(self.output_folder, "{}.in.gz".format(name))
+
         self.out_file = join(self.output_folder, "{}.out.gz".format(name))
 
     def input_start(self):

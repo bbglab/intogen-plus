@@ -3,6 +3,8 @@ pkgs/
 input/
 output/
 datasets/
+work/
+.nextflow*
 
 # Intellij IDEA files
 .idea
