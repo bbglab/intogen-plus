@@ -5,6 +5,8 @@ output/
 datasets/
 work/
 .nextflow*
+trace.txt*
+timeline.html*
 
 # Intellij IDEA files
 .idea

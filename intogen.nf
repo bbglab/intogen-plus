@@ -22,6 +22,9 @@ process Vep {
     tag { task_file.fileName }
     publishDir OUTPUT
 
+    when:
+        checkOutput(OUTPUT, 'vep', task_file)
+
     input:
         val task_file from IN_VEP
 
@@ -54,6 +57,9 @@ process OncodriveFML {
     tag { task_file.fileName }
     publishDir OUTPUT
 
+    when:
+        checkOutput(OUTPUT, 'oncodrivefml', task_file)
+
     input:
         val task_file from IN_ONCODRIVEFML
 
@@ -69,6 +75,9 @@ process OncodriveFML {
 process OncodriveOmega {
     tag { task_file.fileName }
     publishDir OUTPUT
+
+    when:
+        checkOutput(OUTPUT, 'oncodriveomega', task_file)
 
     input:
         val task_file from IN_ONCODRIVEOMEGA
@@ -87,6 +96,9 @@ process HotmapsSignature {
     tag { task_file.fileName }
     publishDir OUTPUT
 
+    when:
+        checkOutput(OUTPUT, 'hotmapssignature', task_file)
+
     input:
         val task_file from IN_HOTMAPS
 
@@ -98,4 +110,10 @@ process HotmapsSignature {
     export PROCESS_CPUS=$task.cpus
     python $baseDir/intogen4.py run -o . hotmaps $task_file
     """
+}
+
+
+def checkOutput(output_folder, process_folder, task_file) {
+    final output_file = file(output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '.out.gz'))
+    return !output_file.exists()
 }

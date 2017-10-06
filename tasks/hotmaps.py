@@ -11,7 +11,7 @@ from .base import Task
 
 class HotmapsTask(Task):
 
-    KEY = 'hotmaps'
+    KEY = 'hotmapssignature'
 
     def __init__(self, output_folder, config):
 
