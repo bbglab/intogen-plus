@@ -21,16 +21,11 @@ TASKS = {t.KEY: t for t in [
 ]}
 
 
-CONDA_ENV = 'intogen2017'
-VEP_DATA = '/home/jordeu/workspace/intogen/intogen-plus/datasets/vep'
-ONCODRIVEFML_CONF = '/home/jordeu/workspace/intogen/intogen-plus/datasets/oncodrivefml/oncodrivefml.conf'
-ONCODRIVEOMEGA_CONF = '/home/jordeu/workspace/intogen/intogen-plus/datasets/oncodriveomega/oncodriveomega.conf'
-
 CONFIG = {
-    VepTask.KEY: {'conda_env': CONDA_ENV, 'vep_data': VEP_DATA},
-    OncodriveFmlTask.KEY: {'config_file': ONCODRIVEFML_CONF},
-    OncodriveOmegaTask.KEY: {'config_file': ONCODRIVEOMEGA_CONF},
-    HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': '/home/jordeu/workspace/intogen/intogen-plus/methods/hotmaps'}
+    VepTask.KEY: {'conda_env': os.environ['CONDA_ENV'], 'vep_data': os.environ['VEP_DATA']},
+    OncodriveFmlTask.KEY: {'config_file': os.environ['ONCODRIVEFML_CONF']},
+    OncodriveOmegaTask.KEY: {'config_file': os.environ['ONCODRIVEOMEGA_CONF']},
+    HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': os.environ['HOTMAPS_METHOD']}
 }
 
 logger = logging.getLogger('intogen')

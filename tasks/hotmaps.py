@@ -36,7 +36,7 @@ class HotmapsTask(Task):
             self.in_fd = gzip.open(self.in_file, 'wt')
             self.in_writer = csv.writer(self.in_fd, delimiter='\t')
             self.in_writer.writerow(["Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele",
-                                     "Tumor_Seq_Allele2", "Tumor_Sample_Barcode", "Variant_Classification", "Transcript_ID"])
+                                     "Tumor_Seq_Allele2", "Tumor_Sample_Barcode", "Variant_Classification", "Transcript_ID", "HGVSp_Short"])
 
     def input_write(self, _, value):
 
@@ -48,6 +48,14 @@ class HotmapsTask(Task):
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
                 chromosome, position = value['Location'].split(':')
                 consequence = value['Consequence'].split(',')[0].replace('missense_variant', 'Missense_Mutation')
+                if consequence == "Missense_Mutation":
+                    try:
+                        aa = value["Amino_acids"].split("/")
+                        hgv = "p.{}{}{}".format(aa[0], value['Protein_position'], aa[1])
+                    except:
+                        hgv = "."
+                else:
+                    hgv = "."
 
                 self.in_writer.writerow([
                     value['SYMBOL'],
@@ -58,7 +66,8 @@ class HotmapsTask(Task):
                     alt,
                     sample,
                     consequence,
-                    value['Feature']
+                    value['Feature'],
+                    hgv
                 ])
 
     def input_end(self):
