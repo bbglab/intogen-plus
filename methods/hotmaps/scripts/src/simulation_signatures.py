@@ -114,7 +114,7 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
     
     # select a position to mutate at random
 
-    results = randomizer_aa.randomize_region(number_mutations=num_mutations, input_regions=coordinates, number_simulations=num_sims,signatures=signatures,cancer_type=cancer_type,cores=4)
+    results = randomizer_aa.randomize_region(number_mutations=num_mutations, input_regions=coordinates, number_simulations=num_sims,signature=signatures,cancer_type=cancer_type,cores=4)
     #print results[0]
     mutated_pos_vec = sig.map_generated_mutations(struct_id, results,d_correspondence)
     if len(mutated_pos_vec) == 0:
