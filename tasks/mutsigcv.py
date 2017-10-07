@@ -97,13 +97,13 @@ class MutsigCvTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "mkdir -p {2}/tmp && mkdir -p {2}/mutsigcv && " \
+            cmd = "mkdir -p {2}/tmp && " \
                   "zcat {1} > {2}/tmp/INPUT.maf && " \
                   "singularity exec {0}/mutsigcv.img /opt/MutSigCV_1.4/run_MutSigCV.sh /opt/mcr/v81 " \
                   "{2}/tmp/INPUT.maf {0}/exome_full192.coverage.txt {0}/gene.covariates.txt " \
-                  "{2}/tmp {0}/mutation_type_dictionary_file.txt {0}/chr_files_hg19 && " \
-                  "cp {2}/tmp/INPUT.sig_genes.txt {2}/mutsigcv/{3}.out && " \
-                  "gzip {2}/mutsigcv/{3}.out".format(
+                  "{2}/tmp/INPUT {0}/mutation_type_dictionary_file.txt {0}/chr_files_hg19 && " \
+                  "cp {2}/tmp/INPUT.sig_genes.txt {2}/{3}.out && " \
+                  "gzip {2}/{3}.out".format(
                 os.environ['MUTSIGCV_DATA'], self.in_file, self.output_folder, self.name)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
