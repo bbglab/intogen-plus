@@ -92,7 +92,8 @@ then
         -t EVERY -n 10000 -r 10.0 -c $CORES \
         -o $TEMP_FOLDER/hotspot_$INPUT_FILENAME \
         -e $TEMP_FOLDER/$INPUT_FILENAME.err --log=stdout \
-        -gc $DATASETS_FOLDER/coordinates.txt.gz
+        -gc $DATASETS_FOLDER/coordinates.txt.gz \
+        --maf $MAF_FILE
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
 

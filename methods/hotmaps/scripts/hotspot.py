@@ -3,10 +3,11 @@ import csv
 import argparse
 import logging
 
+import pickle
 from tqdm import tqdm
 from multiprocessing import Pool
 from functools import partial
-from src import simulate_mutations_signatures
+from src import simulate_mutations_signatures, randomizer_aa
 from src import utils
 from src import simulation_signatures
 from src.mutations import mutation_density
@@ -23,6 +24,9 @@ def parse_arguments():
     parser.add_argument('-m', '--mutations',
                         type=str, required=True,
                         help='Mutation counts for specific structures')
+    parser.add_argument('-mf', '--maf',
+                        type=str, required=True,
+                        help='MAF input file')
     parser.add_argument('-a', '--annotation',
                         type=str, required=True,
                         help='Annotations about PDB')
@@ -94,7 +98,7 @@ def parse_arguments():
     return opts
 
 
-def process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates):
+def process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures):
 
     # skip structure if no mutations
     if not structure_mutations:
@@ -185,8 +189,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
                                                    opts['num_simulations'],
                                                    opts['seed'],
                                                    neighbors,
-                                                   os.environ[
-                                                       'DATASETS_FOLDER'] + "/signatures/" + tumour + ".signature",
+                                                   signatures,
                                                    tumour, d_correspondence,
                                                    opts['stop_criterion'],
                                                    max_obs_dens)
@@ -217,9 +220,12 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     output = []
     mutations = utils.read_mutations(mut_path)
     df_coordinates = simulation_signatures.read_file_coordinates(file_coordinates)
+    with open(opts['mutations'] + ".signature", "rb") as fd:
+        signatures = pickle.load(fd)
+
     for structure_id, struct_info in pdb_info:
         structure_mutations = mutations.get(structure_id, [])
-        result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates)
+        result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures)
         if result is not None:
             output.append(result)
     return output, len(pdb_info)
@@ -231,6 +237,11 @@ def main(opts):
     and tumor type.
     """
     pdb_info = utils.read_pdb_info(opts['annotation'])
+
+    logger.info("Compute signature")
+    signatures = randomizer_aa.compute_signature(opts["maf"])
+    with open(opts['mutations'] + ".signature", 'wb') as fd:
+        pickle.dump(signatures, fd)
 
     output = []
     quiet = opts['log_level'] != "DEBUG"

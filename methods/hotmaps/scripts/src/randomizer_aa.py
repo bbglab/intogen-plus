@@ -248,8 +248,35 @@ def load_signature(input_file):
     return signatures
 
 
+def compute_signature(mutations_file):
+
+    # Take into account if the mutations are 0 based or 1 based
+    offset = 1 #if self.start_at_0 is True else 2
+    signatures = {}
+    signatures['counts'] = defaultdict(int)
+
+    with open(mutations_file, 'r') as csvfile:
+        fd = csv.DictReader(csvfile, delimiter='\t')
+        count = 0
+        for line in fd:
+            chromosome = line["Chromosome"]
+            position = int(line["Start_Position"])
+            ref = line["Reference_Allele"]
+            alt = line["Tumor_Seq_Allele2"]
+            vtype = line["Variant_Type"]
+            if vtype != "SNP":
+                continue
+            signature_ref = hg19(chromosome, position - offset, size=3).upper()
+            signature_alt = ''.join([ref[0], alt, ref[-1]])
+            signatures['counts'][(signature_ref, signature_alt)] += 1
+            count += 1
+    signatures['probabilities'] = {k: v / count for k, v in signatures['counts'].items()}
+
+    return signatures
+
+
 def randomize_region(number_mutations, input_regions, number_simulations=1,
-                     start_at_0=True, input_signature=None, cancer_type=None, cores=1):
+                     start_at_0=True, signature=None, cancer_type=None, cores=1):
     """Randomize a single region instead of a dataset. This modules should be imported in a script.
 
     :param number_mutations: int, number of mutations to simulate
@@ -317,8 +344,7 @@ def randomize_region(number_mutations, input_regions, number_simulations=1,
         raise TypeError('"input_regions" should be a list of lists, a list of tuples, or a list of dictionaries')
 
     # Calculate (or load) the signature
-    if input_signature is not None:
-        signatures = load_signature(input_signature)
+    signatures = signature
 
     # Prepare the mutation data
     mutations[geneid] = {cancer_type: number_mutations}
