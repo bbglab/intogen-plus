@@ -263,8 +263,7 @@ def compute_signature(mutations_file):
             position = int(line["Start_Position"])
             ref = line["Reference_Allele"]
             alt = line["Tumor_Seq_Allele2"]
-            vtype = line["Variant_Type"]
-            if vtype != "SNP":
+            if len(ref)!=1 or len(alt)!=1 or ref not in "ACGT" or alt not in "ACGT":
                 continue
             signature_ref = hg19(chromosome, position - offset, size=3).upper()
             signature_alt = ''.join([ref[0], alt, ref[-1]])
