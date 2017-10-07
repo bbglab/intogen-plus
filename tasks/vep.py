@@ -63,8 +63,8 @@ class VepTask(Task):
         if not path.exists(self.out_file):
             cmd = "bash -c 'source ~/.bashrc && source activate {0} && vep -i <(zcat {1}) -o STDOUT " \
                   "--assembly GRCh37 --no_stats --cache --offline --symbol --tab --canonical --dir {3} " \
-                  "| grep -v ^## | gzip > {2}' &&" \
-                  "mkdir -p vep/logs && mv STDOUT_warnings.txt vep/logs/{4}.log".format(
+                  "| grep -v ^## | gzip > {2}'; " \
+                  "mkdir -p vep/logs; mv STDOUT_warnings.txt vep/logs/{4}.log; echo Done;".format(
                 self.conda_env, self.in_file, self.out_file, self.vep_data, self.name)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
