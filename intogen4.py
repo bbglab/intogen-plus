@@ -98,7 +98,7 @@ def preprocess_filtering(file, annotations=None, extra=False):
 @click.command(short_help='Create tasks input files')
 @click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
 @click.option('--output', '-o', required=True, help="Output folder")
-@click.option('--groupby', '-g', default="TISSUE", type=str, help="Input data group by field")
+@click.option('--groupby', '-g', default="DATASET", type=str, help="Input data group by field")
 @click.option('--cores', default=os.cpu_count(), type=int, help="Maximum groups to process in parallel")
 @click.argument('tasks', nargs=-1)
 def preprocess(input, output, groupby, cores, tasks):
