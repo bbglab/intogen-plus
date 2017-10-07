@@ -60,11 +60,16 @@ def preprocess_filtering(file, annotations=None, extra=False):
     MIN_CUTOFF = 1000
 
     # Find Hypermutators Samples
+    logger.info("Loading {}".format(file))
     logger.info("Computing hypermutators")
     sample_muts = Counter(
         [m['SAMPLE'] for m in readers.variants(file, annotations=annotations, extra=extra) if m['ALT_TYPE']=='snp']
     )
+
     vals = list(sample_muts.values())
+    if len(vals) == 0:
+        return
+
     iqr = np.subtract(*np.percentile(vals, [75, 25]))
     q3 = np.percentile(vals, 75)
     cutoff = max(MIN_CUTOFF, (q3 + 1.5 * iqr))
