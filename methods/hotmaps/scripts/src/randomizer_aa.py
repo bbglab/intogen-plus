@@ -269,7 +269,7 @@ def compute_signature(mutations_file):
             signature_alt = ''.join([ref[0], alt, ref[-1]])
             signatures['counts'][(signature_ref, signature_alt)] += 1
             count += 1
-    signatures['probabilities'] = {k: v / count for k, v in signatures['counts'].items()}
+    signatures['probabilities'] = {k: float(v) / float(count) for k, v in signatures['counts'].items()}
 
     return signatures
 
