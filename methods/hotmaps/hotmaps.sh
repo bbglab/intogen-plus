@@ -113,7 +113,7 @@ if [ ! -f "$TEMP_FOLDER/hotspot_gene_$INPUT_FILENAME" ]
 then
     python $SCRIPTS_FOLDER/find_hotspot_regions_gene.py \
         -m $TEMP_FOLDER/mtco_$INPUT_FILENAME \
-        -a $TEMP_FOLDER/$INPUT_FILENAME \
+        -a $TEMP_FOLDER/$INPUT_FILENAME.mupit \
         -p $DATASETS_FOLDER/$DATASETS_PDB_FILE \
         -r 10.0 -q 0.05 \
         -o $TEMP_FOLDER/hotspot_gene_$INPUT_FILENAME

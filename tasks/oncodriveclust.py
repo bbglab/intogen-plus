@@ -2,6 +2,9 @@ import csv
 import gzip
 import os
 
+import pickle
+
+from .base import Task
 from os.path import join, exists
 from oncodriveclust.analysis import OncodriveClustAnalysis, get_cluster_coordinates_output, sort_matrix, add_fdr
 
@@ -11,11 +14,13 @@ NON_SYNONYMOUS = {"missense_variant", "stop_gained", "stop_lost", "initiator_cod
                   "incomplete_terminal_codon_variant", "splice_donor_variant", "splice_acceptor_variant"}
 
 
-class OncodriveClustTask:
+class OncodriveClustTask(Task):
 
     KEY = 'oncodriveclust'
 
     def __init__(self, output_folder, config):
+        super().__init__(output_folder, config)
+
         self.name = None
 
         self.min_gene_mutations = 5
@@ -29,20 +34,6 @@ class OncodriveClustTask:
         self.out_file = None
         self.output_folder = join(output_folder, "oncodriveclust")
         os.makedirs(self.output_folder, exist_ok=True)
-
-    def __repr__(self):
-        return "OncodriveClust '{}'".format(self.name)
-
-    def init(self, name):
-
-        if os.path.isabs(name):
-            self.in_file = name
-            self.name = os.path.basename(name).split('.')[0]
-        else:
-            self.name = name
-            self.in_file = os.path.join(self.output_folder, "{}.in.gz".format(name))
-
-        self.out_file = join(self.output_folder, "{}.out.gz".format(name))
 
     def input_start(self):
         self.non_syn = {}
@@ -78,12 +69,15 @@ class OncodriveClustTask:
                 pass
 
     def input_end(self):
-        pass
+        with gzip.open(self.in_file, 'wb') as fd:
+            pickle.dump((self.non_syn, self.syn, self.cds_len), fd)
 
     def run(self):
 
-        analysis = OncodriveClustAnalysis()
+        with gzip.open(self.in_file, 'rb') as fd:
+            self.non_syn, self.syn, self.cds_len = pickle.load(fd)
 
+        analysis = OncodriveClustAnalysis()
         non_syn_accum_mut_pos, non_syn_cluster_coordinates, syn_gene_cluster_scores,\
         non_syn_gene_cluster_scores, non_syn_cluster_muts, non_syn_gene_cluster_scores_external_z = \
             analysis.run(

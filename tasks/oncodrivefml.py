@@ -29,9 +29,6 @@ class OncodriveFmlTask(Task):
         self.output_folder = path.join(output_folder, "oncodrivefml")
         os.makedirs(self.output_folder, exist_ok=True)
 
-    def __repr__(self):
-        return "OncodriveFML '{}'".format(self.name)
-
     def input_start(self):
         if not self.in_skip:
             self.in_fd = gzip.open(self.in_file, 'wt')
@@ -62,6 +59,11 @@ class OncodriveFmlTask(Task):
 
             tmp_folder = self.out_file + ".tmp"
             os.makedirs(tmp_folder, exist_ok=True)
+
+            # Check if whole genome
+            if "_WGS_" in os.path.basename(self.in_file):
+                self.config['signature']['normalize_by_sites'] = 'whole_genome'
+
             analysis = OncodriveFML(mutations_file=self.in_file,
                                     elements_file=self.elements_file,
                                     output_folder=tmp_folder,

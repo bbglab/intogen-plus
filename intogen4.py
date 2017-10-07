@@ -1,15 +1,21 @@
+import csv
+import gzip
 import os
 import logging
 import click
+import numpy as np
 
 from bgparsers import selector, readers
+from collections import Counter, defaultdict
+from intervaltree import IntervalTree
 
-from pipeline import read_file, prepare_tasks, run_task
+from pipeline import read_file, prepare_tasks
 from tasks.oncodriveclust import OncodriveClustTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.oncodriveomega import OncodriveOmegaTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
+from tasks.mutsigcv import MutsigCvTask
 
 
 TASKS = {t.KEY: t for t in [
@@ -17,7 +23,8 @@ TASKS = {t.KEY: t for t in [
     OncodriveFmlTask,
     OncodriveOmegaTask,
     OncodriveClustTask,
-    HotmapsTask
+    HotmapsTask,
+    MutsigCvTask
 ]}
 
 
@@ -47,6 +54,47 @@ def cli(debug):
         logger.debug('Debug mode enabled')
 
 
+def preprocess_filtering(file, annotations=None, extra=False):
+
+    # Minimum cutoff
+    MIN_CUTOFF = 1000
+
+    # Find Hypermutators Samples
+    logger.info("Computing hypermutators")
+    sample_muts = Counter(
+        [m['SAMPLE'] for m in readers.variants(file, annotations=annotations, extra=extra) if m['ALT_TYPE']=='snp']
+    )
+    vals = list(sample_muts.values())
+    iqr = np.subtract(*np.percentile(vals, [75, 25]))
+    q3 = np.percentile(vals, 75)
+    cutoff = max(MIN_CUTOFF, (q3 + 1.5 * iqr))
+    hypermutators = set([k for k, v in sample_muts.items() if v > cutoff])
+    if len(hypermutators) > 0:
+        logger.info("[QC] HYPERMUTATORS: {}".format(", ".join(["{} = {}".format(h, sample_muts[h]) for h in hypermutators])))
+
+    # Load coverage regions tree
+    logger.info("Loading coverage")
+    regions_file = os.environ['COVERAGE_REGIONS']
+    coverage_tree = defaultdict(IntervalTree)
+    with gzip.open(regions_file, 'rt') as fd:
+        reader = csv.reader(fd, delimiter='\t')
+        for i, r in enumerate(reader, start=1):
+            coverage_tree[r[0]][int(r[1]):(int(r[2]) + 1)] = i
+
+    # Read variants
+    for v in readers.variants(file, annotations=annotations, extra=extra):
+
+        # Skip hypermutators
+        if v['SAMPLE'] in hypermutators:
+            continue
+
+        if v['CHROMOSOME'] in coverage_tree:
+            if len(coverage_tree[v['CHROMOSOME']][v['POSITION']]) == 0:
+                logger.info("[QC] LOW COVERAGE: {} at {}:{}".format(v['SAMPLE'], v['CHROMOSOME'], v['POSITION']))
+                continue
+        yield v
+
+
 @click.command(short_help='Create tasks input files')
 @click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
 @click.option('--output', '-o', required=True, help="Output folder")
@@ -57,7 +105,7 @@ def preprocess(input, output, groupby, cores, tasks):
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
-    prepare_tasks(groups, readers.variants, tasks, msg="Preprocessing", cores=cores)
+    prepare_tasks(groups, preprocess_filtering, tasks, cores=cores)
 
 
 @click.command(short_help='Create tasks input files')
@@ -67,7 +115,7 @@ def preprocess(input, output, groupby, cores, tasks):
 def read(input, output, tasks):
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
-    prepare_tasks([(group_key, input)], read_file, tasks, msg="Reading", cores=1)
+    prepare_tasks([(group_key, input)], read_file, tasks, cores=1)
 
 
 @click.command(short_help='Run a task')
@@ -77,7 +125,7 @@ def read(input, output, tasks):
 def run(output, task, key):
     task = TASKS[task](output, CONFIG)
     task.init(key)
-    run_task(task)
+    task.run()
 
 
 cli.add_command(preprocess)

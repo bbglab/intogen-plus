@@ -81,7 +81,7 @@ class OncodriveOmegaTask(Task):
         if not path.exists(covariates_file):
             covariates_file = path.join(config['datasets']['covariates_folder'], "GENERIC.covariates_ensembl.tsv")
 
-        analysis = OncodriveOmega(self.in_file, signature_file, covariates_file, config=config, cores=os.environ['PROCESS_CPUS'])
+        analysis = OncodriveOmega(self.in_file, signature_file, covariates_file, config=config, cores=int(os.environ.get('PROCESS_CPUS', os.cpu_count())))
         analysis.prepare_mutations(cache=False)
         analysis.prepare_regression(cache=False)
 
