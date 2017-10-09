@@ -3,6 +3,7 @@ import numpy as np
 import schulze
 import pickle
 
+
 def get_voters(gene, d):
     """
     Args:
@@ -36,6 +37,7 @@ def get_voters(gene, d):
         ranks = None
     return methods, best_methods, best_rank, ranks
 
+
 def output_to_dataframe(ranking, d_results,cancer):
     '''
     Args:
@@ -64,6 +66,7 @@ def output_to_dataframe(ranking, d_results,cancer):
     df_info = pd.DataFrame(l_info, columns=["Cancer_Type", "SYMBOL", "RANKING", "CGC", "Median_Ranking", "Best_Ranking",
                                             "Total_Bidders", "Highest_Bidder", "All_Bidders"])
     return df_info
+
 
 if __name__ == '__main__':
 

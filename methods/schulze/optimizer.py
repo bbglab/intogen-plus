@@ -1,14 +1,16 @@
+import os
 import gzip
-
-from scipy.stats import dirichlet, beta
-from scipy.optimize import minimize, basinhopping
-import pathos.pools
-from functools import partial
+import click
 import pickle
+#import pathos.pools
+import pandas as pd
+from functools import partial
+from scipy.stats import dirichlet
+from scipy.optimize import minimize
+
 from schulze import Election
 from evaluation.Evaluation_Enrichment import Evaluation_Enrichment
-import click
-import pandas as pd
+
 gniter = None
 gepsilon = None
 gavaliable_methods = None
@@ -19,6 +21,8 @@ order_methods = []
 gweights = []
 gt_combination = None
 method_optimization = None
+
+
 def create_constrains():
     '''
     Create the cosntrains for the optimization process. If all methods are present, simply include the default constrains. If not, it does not include the contrain of minimum value per method.
@@ -104,12 +108,14 @@ def create_constrains():
 
         return cons
 
+
 def get_position(method):
     i = 0
     for method_q in order_methods:
         if method == method_q:
             return i
         i+=1
+
 
 def optimize_with_seed(arg):
     '''
@@ -135,7 +141,8 @@ def optimize_with_seed(arg):
         res = minimize(g, w, method='COBYLA', constraints=cons, options={'maxiter': niter, "tol":1e-6,"disp":True,"rhobeg":epsilon})
     return res
 
-def optimizer(func, a=3, seeds=1,methods=['oncodrivefml', 'oncodriveomega', 'mutsigcv', 'oncodriveclust', 'oncodrivemut']):
+
+def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'oncodriveomega', 'mutsigcv', 'oncodriveclust', 'oncodrivemut']):
         # define symmetric dirichlet distribution with concentration parameter = a
         n = len(methods)
         alpha = [a] * n
@@ -146,13 +153,15 @@ def optimizer(func, a=3, seeds=1,methods=['oncodrivefml', 'oncodriveomega', 'mut
         # parallel hill-climbing with different seeds
         w = list(zip([func]*seeds, l_weights))
         results = []
-        n_cores = seeds
-        with pathos.pools.ProcessPool(n_cores) as pool:
-            for a in pool.imap(optimize_with_seed, w):
-                results.append([a.x, a.fun])
+
+        # FIXME Use pathos?
+        # n_cores = seeds
+        # with pathos.pools.ProcessPool(n_cores) as pool:
+        for a in map(optimize_with_seed, w):
+            results.append([a.x, a.fun])
 
         # sort and show the results
-        print (results)
+        print(results)
         res = sorted(results, key=lambda x: x[1], reverse=False)
         return res
 
@@ -169,6 +178,8 @@ def set_default_weight(d_result):
         w[method] = "w["+str(i)+"]"
         i = i +1
     return w
+
+
 def set_type_weights(methods,weights):
     d = {}
     i = 0
@@ -217,14 +228,15 @@ def prepare_output(methods_order,solutions):
     '''
     l_solutions = []
 
-    for weights,area in solutions:
+    for weights, area in solutions:
         d = {}
         i = 0
         for method in methods_order:
             d[method] = weights[i]
             i = i +1
-        l_solutions.append((d,area))
+        l_solutions.append((d, area))
     return l_solutions
+
 
 def read_discarded_methods(file_discarded,ttype,t_combination):
     '''
@@ -252,21 +264,20 @@ def read_discarded_methods(file_discarded,ttype,t_combination):
 @click.option('--niter', default=100,help='Number of iterations')
 @click.option('--epsilon', default=0.1,help='Epsilon for the optimization function')
 @click.option('--foutput',type=click.Path(),help="File of output",required=True)
-@click.option('--cancer',help="Cancer type to run the input",required=True)
 @click.option('--input_rankings',type=click.Path(exists=True),help="Dictionary with the ranking of the methods",required=True)
 @click.option('--discarded_methods',type=click.Path(),help="File with the discarded methods for each cancer type",required=False)
 @click.option('--t_combination',help="Type of combination, ranking or threshold. Default ranking",required=True,default="RANKING")
 @click.option('--optimization_algorithm',help="Algorithm for optimization. [SLSQP,COBYLA]",required=False,default="SLSQP")
 @click.option('--percentage_cgc', default=1.0,help='Percentage of CGC used in the optimization. Default all.')
-#@click.option('--log',type=click.Path(),help="Log file with the weights of the optimization steps",required=False,default=None)
-#/workspace/projects/intogen/intogen4/runs/intogen4_20170614/plots/discarted_analyses.txt
-def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_methods,t_combination,optimization_algorithm,percentage_cgc):
+def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,discarded_methods,t_combination,optimization_algorithm,percentage_cgc):
 
-    global gniter,gepsilon,gavaliable_methods,order_methods,gt_combination,method_optimization
+    # FIXME
+    cancer = os.path.basename(input_rankings).replace(".out.gz.step1", "")
+
+    global gniter, gepsilon, gavaliable_methods, order_methods, gt_combination, method_optimization
     gniter = niter
     gepsilon = epsilon
 
-    print("Directory output",foutput)
     # Select order methods
     gt_combination = t_combination
     method_optimization = optimization_algorithm
@@ -275,8 +286,11 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
     else:
         order_methods = order_methods_threshold
 
+    print(input_rankings)
     with gzip.open(input_rankings, "rb") as fd:
         d_results_methodsr = pickle.load(fd)
+
+    print(d_results_methodsr)
 
     # Prepare the list of available methods and the dictionary of weights
     l = []
@@ -289,7 +303,7 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
     for method in gavaliable_methods:
         if method in discarded:
             gavaliable_methods.remove(method)
-    print ("Running on " + str(gavaliable_methods))
+    print("Running on " + str(gavaliable_methods))
     # Set to empty disct those methods discarded or not present
     for method in order_methods:
         if not method in gavaliable_methods:
@@ -304,8 +318,8 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
         g = lambda w: -f({"oncodriveclust_t": w[0], "oncodriveomega_t": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"mutsigcv_t": w[4]})
 
     niter = gniter
-    res = optimizer(g,methods=d_results_methodsr.keys(),seeds = seeds)
-    output = prepare_output(order_methods,res)
+    res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)
+    output = prepare_output(order_methods, res)
     if len(output)>0:
         methods = list(output[0][0].keys())
         matrix = []
@@ -315,13 +329,11 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
                 row.append(seed[0][method])
             row.append(seed[1])
             matrix.append(row)
-        o =  pd.DataFrame(matrix,columns=methods+["Objective_Function"])
+        o = pd.DataFrame(matrix,columns=methods+["Objective_Function"])
     else:
-        o =  pd.DataFrame([],columns=order_methods+["Objective_Function"])
-    #pickle.dump(output,open(foutput,"wb"))
+        o = pd.DataFrame([],columns=order_methods+["Objective_Function"])
 
-    #o.to_pickle(foutput+cancer+"_"+t_combination+".pickle")
-    o.to_csv(foutput+cancer+"_weights"+".tsv",sep="\t",index=False)
+    o.to_csv(foutput, sep="\t", index=False, compression="gzip")
 
 
 if __name__ == '__main__':

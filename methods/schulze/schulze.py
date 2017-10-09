@@ -1,7 +1,8 @@
+import gzip
 from collections import defaultdict
 from functools import partial
 import operator
-import pathos.pools
+#import pathos.pools
 import pickle
 import glob
 import re
@@ -124,9 +125,11 @@ class Election(object):
         n_chunks = n_cores
         chunk_list = chunkizate(self.all_candidates, n_chunks)
         results = defaultdict(lambda: defaultdict(float))
-        with pathos.pools.ProcessPool(n_cores) as pool:
-            for a in pool.imap(f, chunk_list):
-                results.update(a)
+
+        # FIXME Use pools ??
+        #with pathos.pools.ProcessPool(n_cores) as pool:
+        for a in map(f, chunk_list):
+            results.update(a)
         self.spath = results
 
     def scores_dict(self):
@@ -219,51 +222,41 @@ def strongest_paths_by_chunk(all_candidates, spath, chunk):
                                          )
     return spath
 
-def read_optimized_dicts(dir_optimized_pickles,d_results,output_dir,output_dict,name_run,suffix):
-    '''
+
+def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict):
+    """
     Generate the optmized ranking by the weights calculated by the opmitzer
-    :param dir_optimized_pickles: path of the outputs of the optimizer
+    :param optimized_pickles: path of the outputs of the optimizer
     :param d_results: dictionary of results of the individual methods
     :param output_dir: directory of the output of the reports of individual cohorts
     :param output_dict: location of the output directory
     :param output_report: location of the output report
     :return: None
-    '''
-    d_total = {}
-    l_data = []
-    #suffix = "weights"
-    print (dir_optimized_pickles+"/*_"+"weights.csv")
-    for file_optimized in glob.glob(dir_optimized_pickles+"/*_"+"weights"+".tsv"):
-        m = re.search("/([A-Z]+)_"+"weights.tsv", file_optimized)
-        if m:
+    """
 
-            cancer_type = m.group(1)
-            d_total[cancer_type] = {}
+    df = pd.read_csv(optimized_pickles, sep="\t", compression="gzip")
 
-            df = pd.read_csv(file_optimized,sep="\t")
+    dict_optimal_weights = {}
+    for method in d_results:
 
-            #df.sort_values("Objective_Function",inplace=True)
-            dict_optimal_weights = {}
-            for method in d_results[cancer_type]:
+        if method in df.columns.values:
 
-                if method in df.columns.values:
+            dict_optimal_weights[method] =  df[method].values[0]
 
-                    dict_optimal_weights[method] =  df[method].values[0]
+    election = Election(d_results)
+    election.add_weights(dict_optimal_weights)
 
-            election = Election(d_results[cancer_type])
-            election.add_weights(dict_optimal_weights)
-            print (cancer_type)
-            print ( dict_optimal_weights)
-            election.prepare()
-            election.strongest_paths()
-            ranking1 = election.combination_ranking()
-            d_total[cancer_type][name_run] = ranking1#d_total[cancer_type]["Combination_Threshold_Optimized"] = ranking1
-            df = summary.output_to_dataframe(ranking1, d_results,cancer_type)
-            df.sort_values("RANKING").to_csv(output_dir+"/"+cancer_type+"_"+suffix+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+cancer_type+".tsv",sep="\t",index=False)
-            l_data.append(df)
-    df = pd.concat(l_data)
-    df.sort_values("RANKING").to_csv(output_dir+"/"+"TOTAL"+"_"+suffix+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+"TOTAL"+".tsv",sep="\t",index=False)
-    pickle.dump( d_total, open( output_dict, "wb" ) )
+    print ( dict_optimal_weights)
+    election.prepare()
+    election.strongest_paths()
+    ranking1 = election.combination_ranking()
+    df = summary.output_to_dataframe(ranking1, d_results, cancer_type)
+
+    df.sort_values("RANKING").to_csv(output_file, sep="\t", index=False, compression="gzip")
+
+    with gzip.open(output_dict, "wb") as fd:
+        pickle.dump(ranking1, fd)
+
 
 def run_default_weights(d_results,output_dir,output_dict,name_run,suffix):
     '''
@@ -303,10 +296,8 @@ def run_default_weights(d_results,output_dir,output_dict,name_run,suffix):
     pickle.dump( d_total, open( output_dict, "wb" ) )#pickle.dump( d_total, open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_optimized.pickle", "wb" ) )
 
 
-
-
-def read_optimized_dicts_cv(dir_optimized_pickles,d_results,output_dir,output_dict,metaname):
-    '''
+def read_optimized_dicts_cv(dir_optimized_pickles, d_results, output_dir, output_dict):
+    """
     Generate the optmized ranking by the weights calculated by the opmitzer
     :param dir_optimized_pickles: path of the outputs of the optimizer
     :param d_results: dictionary of results of the individual methods
@@ -314,65 +305,49 @@ def read_optimized_dicts_cv(dir_optimized_pickles,d_results,output_dir,output_di
     :param output_dict: location of the output directory
     :param output_report: location of the output report
     :return: None
-    '''
-    d_total = {}
-    l_data = []
+    """
 
-    for file_optimized in glob.glob(dir_optimized_pickles+"/*/*.csv"):
-        m = re.search("/([A-Z]+)/([0-9]+).csv", file_optimized)
+    df = pd.read_csv(dir_optimized_pickles, sep="\t")
+    df.sort_values("Objective_Function",inplace=True)
+    dict_optimal_weights = {}
+    for method in d_results:
+        if method in df.columns.values:
+            dict_optimal_weights[method] = df[method].values[0]
 
-        if m:
+    election = Election(d_results)
+    election.add_weights(dict_optimal_weights)
+    print(dict_optimal_weights)
+    election.prepare()
+    election.strongest_paths()
+    ranking1 = election.combination_ranking()
+    df = summary.output_to_dataframe(ranking1, d_results, cancer_type)
+    df.sort_values("RANKING").to_csv(output_dir, sep="\t", index=False, compression="gzip")
 
-            cancer_type = m.group(1)
-            name_run = m.group(2)
-            print (name_run)
-            d_total[cancer_type] = {}
-            df = pd.read_csv(file_optimized,sep="\t")
-            df.sort_values("Objective_Function",inplace=True)
-            dict_optimal_weights = {}
-            for method in d_results[cancer_type]:
-
-                if method in df.columns.values:
-
-                    dict_optimal_weights[method] =  df[method].values[0]
-
-            election = Election(d_results[cancer_type])
-            election.add_weights(dict_optimal_weights)
-            print (cancer_type)
-            print ( dict_optimal_weights)
-            election.prepare()
-            election.strongest_paths()
-            ranking1 = election.combination_ranking()
-            d_total[cancer_type][name_run] = ranking1#d_total[cancer_type]["Combination_Threshold_Optimized"] = ranking1
-            df = summary.output_to_dataframe(ranking1, d_results,cancer_type)
-            df.sort_values("RANKING").to_csv(output_dir+"/"+cancer_type+"/"+metaname+"_"+name_run+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+cancer_type+".tsv",sep="\t",index=False)
-            l_data.append(df)
-    df = pd.concat(l_data)
-    df.sort_values("RANKING").to_csv(output_dir+"/"+"TOTAL"+metaname+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+"TOTAL"+".tsv",sep="\t",index=False)
-    pickle.dump( d_total, open( output_dict, "wb" ) )#pickle.dump( d_total, open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_optimized.pickle", "wb" ) )
-
-
+    with gzip.open(output_dict, "wb") as fd:
+        pickle.dump( ranking1, fd)
 
 
 @click.command()
-@click.option('--input_data',type=click.Path(exists=True),help="Dictionary with the ranking of the individual methods",required=True)
-@click.option('--directory_optimize_weights', type=click.Path(),help="Directory of the optimize weights")
-@click.option('--directory_output', type=click.Path(),help="Directory of the output reports",required=True)
-@click.option('--dict_output', type=click.Path(),help="Directory of the output dictionary",required=True)
-@click.option('--name',help="Name of the run",required=True) # Example "Combination_Ranking_Optimized"
+@click.option('--input_data',type=click.Path(exists=True),help="Dictionary with the ranking of the individual methods", required=True)
+@click.option('--optimize_weights', type=click.Path(), help="Optimize weights file")
+@click.option('--report_output', type=click.Path(), help="Output reports file",required=True)
+@click.option('--dict_output', type=click.Path(),help="Output dictionary file", required=True)
 @click.option('--type_run',help="Type of run. Optimization of the weights or default wegihts. [default,optimization,cross_validation]",required=True,default="optimization") # Example "Combination_Ranking_Optimized"
-@click.option('--type_input',help="Type of input. Threshold or Ranking [ranking,threshold]",required=True,default="ranking") # Example "Combination_Ranking_Optimized"
+@click.option('--type_input',help="Type of input. Threshold or Ranking [ranking,threshold]",required=True, default="ranking") # Example "Combination_Ranking_Optimized"
+def run_schulze(input_data, optimize_weights, report_output, dict_output, type_run, type_input):
 
-def run_schulze(input_data,directory_optimize_weights,directory_output,dict_output,name,type_run,type_input):
-    d_results= pickle.load( open( input_data, "rb" ) )
+    with open(input_data, "rb") as fd:
+        d_results = pickle.load(fd)
+
     if type_run == "optimization":
-        read_optimized_dicts(directory_optimize_weights,d_results,directory_output,dict_output,name,type_input)
-    elif type_run == "cross_validation":
+        read_optimized_dicts(optimize_weights, d_results, report_output, dict_output)
 
-        read_optimized_dicts_cv(directory_optimize_weights,d_results,directory_output,dict_output,name)
+    elif type_run == "cross_validation":
+        read_optimized_dicts_cv(optimize_weights, d_results, report_output, dict_output)
+
     elif type_run == "default":
-        run_default_weights(d_results,directory_output,dict_output,name,type_input)
-        return  # To do
+        run_default_weights(d_results, report_output, dict_output, name, type_input)
+        return  # TODO
 
 
 

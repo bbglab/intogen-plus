@@ -53,6 +53,7 @@ def get_qvalue(row,df_density_aa):
         return 0.0
     return np.min(df_density_aa[(df_density_aa["HUGO Symbol"]==row["GENE"])&(df_density_aa["Tumor Type"]==row["Cancer_Type"])]["q-value"].values)
 
+
 def main(file_hotspots_gene, f_info_density, f_output):
     df_hotspots = find_hotspots_gene_cancer(file_hotspots_gene)
     df_density_aa = get_density_and_pvalue_gene(f_info_density)
@@ -63,6 +64,9 @@ def main(file_hotspots_gene, f_info_density, f_output):
         df_hotspots["Min p-value"] = df_hotspots.apply(lambda row: get_pvalue(row, df_density_aa), axis=1)
         df_hotspots["q-value"] = df_hotspots.apply(lambda row: get_qvalue(row, df_density_aa), axis=1)
         df_hotspots = df_hotspots[df_hotspots["Cancer_Type"] != 'REF']
+    else:
+        df_hotspots["Min p-value"] = np.nan
+        df_hotspots["q-value"] = np.nan
 
     rows = []
     for index, row in df_density_aa.iterrows():

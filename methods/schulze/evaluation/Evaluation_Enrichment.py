@@ -1,4 +1,4 @@
-
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -14,25 +14,20 @@ class Evaluation_Enrichment:
         selected = int(total * percentage)
         return set(random.sample(list(cgc), selected))
 
-
     @staticmethod
     def load_cgc(percentage=1.0):
-        cgc = pd.read_csv("/workspace/datasets/CGC/generated_data2/CGCMay17_cancer_types_TCGA.tsv",sep="\t")
+        cgc = pd.read_csv(os.path.join(os.environ["SCHULZE_DATA"], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
         cgc = set(cgc["Gene Symbol"].values)
-        #cgc = pd.read_csv("/workspace/datasets/CGC/generated_data2/top5_cgc.tsv",sep="\t")
-        #cgc = set(cgc["SYMBOL"].values)
         if percentage < 1.0:
             cgc_f = Evaluation_Enrichment.randomize_subset(cgc,percentage)
         else:
             cgc_f = cgc
-        return  cgc_f
+        return cgc_f
 
     def __init__(self,percentage):
 
         self.type_evaluation = "CGC_Enrichment"
         self.cgc = Evaluation_Enrichment.load_cgc(percentage)
-
-
 
     def get_weight(self,i,weight):
         '''
@@ -77,6 +72,7 @@ class Evaluation_Enrichment:
 
             area = area + x_i*weight_i
         return area
+
     def get_maximum_area(self,position,weight):
         '''
         Returns the maxmimum theoric weighted area for that position
@@ -86,7 +82,6 @@ class Evaluation_Enrichment:
         '''
         maxv = sum([ 1*self.get_weight(i,weight) for i in range(position+1)])
         return maxv
-
 
     def evaluate_enrichment_method_relative(self,ranking,weight="log"):
         '''

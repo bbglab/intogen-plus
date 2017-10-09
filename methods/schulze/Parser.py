@@ -59,9 +59,9 @@ class Parser():
 
         d = {}
         for method in self.methods:
-            path = self.path + method +  "/" + cancer + ".out.gz"
+            path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
             if os.path.exists(path):
-                df = pd.read_csv(path,sep="\t")
+                df = pd.read_csv(path, sep="\t")
                 if df.shape[0]>0:
                     if method == "oncodriveomega" or method == "oncodriveclust":
                         # Include the Hugo_Symbol
@@ -104,7 +104,7 @@ class Parser():
 def run_parser(input, cancer, output, selection):
     p = Parser(input)
     d_outr = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
-    with gzip.open("{}.step1".format(output), "wb") as fd:
+    with gzip.open("{}".format(output), "wb") as fd:
         pickle.dump(d_outr, fd)
 
 
