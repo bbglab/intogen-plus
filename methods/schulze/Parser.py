@@ -1,5 +1,8 @@
+import csv
 import gzip
 import os
+from collections import defaultdict
+
 import pandas as pd
 import pickle
 import click
@@ -8,15 +11,15 @@ import click
 class Parser():
 
     methods = ["hotmapssignature","oncodrivefml","mutsigcv","oncodriveomega","oncodriveclust"] # "oncodriveclust","oncodriveomega"
-    column_keys = {"hotmapssignature":["GENE","q-value"],"oncodrivefml":["SYMBOL","Q_VALUE"],"mutsigcv":["gene","q"],"oncodriveomega":["SYMBOL","q_value"],"oncodriveclust":["SYMBOL","QVALUE"]}
+    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"], "mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"]}
 
-    def __init__(self, path, thresholds ={"hotmapssignature":0.1,"oncodrivefml":0.1,"mutsigcv":0.1,"oncodriveomega":0.1,"oncodriveclust":0.1} ):
+    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"mutsigcv":0.1,"oncodriveomega":0.1,"oncodriveclust":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
     @staticmethod
     def read_hugo(path=os.environ['SCHULZE_DATA']):
-        with open(os.path.join(path, "ENSEMBL_HUGO_1807107.pickle"),"rb") as fd:
+        with open(os.path.join(path, "ENSEMBL_HUGO_1807107.pickle"), "rb") as fd:
             return pickle.load(fd)
 
     @staticmethod
@@ -58,14 +61,24 @@ class Parser():
         suffix = type_selection[0]
 
         d = {}
+        pvalues = defaultdict(dict)
         for method in self.methods:
             path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
             if os.path.exists(path):
                 df = pd.read_csv(path, sep="\t")
+
                 if df.shape[0]>0:
                     if method == "oncodriveomega" or method == "oncodriveclust":
                         # Include the Hugo_Symbol
                         df["SYMBOL"] = df.apply(lambda row: str(d_hugo[row["GENE"]]) if row["GENE"] in d_hugo else "-" ,axis=1 )
+
+                    for i, r in df.iterrows():
+                        try:
+                            pvalues[r[self.column_keys[method][0]]][method] = r[self.column_keys[method][2]]
+                        except KeyError as e:
+                            print(path)
+                            print(r)
+                            raise e
 
                     df = df[self.column_keys[method]].drop_duplicates()
                     q_value_c = self.column_keys[method][1] # Q-value column name
@@ -93,7 +106,7 @@ class Parser():
                     rankings = df["Ranking"].values
                     d[method+"_"+suffix] = Parser.create_dict_rankings(genes,rankings)
 
-        return d
+        return d, pvalues
 
 
 @click.command()
@@ -103,10 +116,15 @@ class Parser():
 @click.option('--selection', help="[ranking,threshold]", default="ranking")
 def run_parser(input, cancer, output, selection):
     p = Parser(input)
-    d_outr = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
+    d_outr, pvalues = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
     with gzip.open("{}".format(output), "wb") as fd:
         pickle.dump(d_outr, fd)
 
+    with gzip.open("{}b".format(output), "wt") as fd:
+        writer = csv.writer(fd, delimiter='\t')
+        writer.writerow(['SYMBOL'] + ["PVALUE_{}".format(h) for h in p.methods])
+        for gene, values in pvalues.items():
+            writer.writerow([gene] + [values.get(m, None) for m in p.methods])
 
 if __name__ == "__main__":
     run_parser()

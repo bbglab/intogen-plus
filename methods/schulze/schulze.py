@@ -250,7 +250,7 @@ def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict)
     election.prepare()
     election.strongest_paths()
     ranking1 = election.combination_ranking()
-    df = summary.output_to_dataframe(ranking1, d_results, cancer_type)
+    df = summary.output_to_dataframe(ranking1, d_results)
 
     df.sort_values("RANKING").to_csv(output_file, sep="\t", index=False, compression="gzip")
 
@@ -258,7 +258,7 @@ def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict)
         pickle.dump(ranking1, fd)
 
 
-def run_default_weights(d_results,output_dir,output_dict,name_run,suffix):
+def run_default_weights(d_results, output_dir, output_dict):
     '''
     Generate the optmized ranking by the weights calculated by the opmitzer
     :param dir_optimized_pickles: path of the outputs of the optimizer
@@ -268,32 +268,26 @@ def run_default_weights(d_results,output_dir,output_dict,name_run,suffix):
     :param output_report: location of the output report
     :return: None
     '''
-    d_total = {}
-    l_data = []
 
-    for cancer_type in d_results.keys():
+    num_methods = float(len(d_results.keys()))
+    dict_optimal_weights = {}
 
-            d_total[cancer_type] = {}
-            num_methods = float(len(d_results[cancer_type].keys()))
-            dict_optimal_weights = {}
-            for method in d_results[cancer_type]:
+    for method in d_results:
+        dict_optimal_weights[method] =  1.0 / num_methods
 
-                dict_optimal_weights[method] =  1.0 / num_methods
+    election = Election(d_results)
+    election.add_weights(dict_optimal_weights)
+    print(dict_optimal_weights)
 
-            election = Election(d_results[cancer_type])
-            election.add_weights(dict_optimal_weights)
-            print (cancer_type)
-            print ( dict_optimal_weights)
-            election.prepare()
-            election.strongest_paths()
-            ranking1 = election.combination_ranking()
-            d_total[cancer_type][name_run] = ranking1#d_total[cancer_type]["Combination_Threshold_Optimized"] = ranking1
-            df = summary.output_to_dataframe(ranking1, d_results,cancer_type)
-            df.sort_values("RANKING").to_csv(output_dir+"/"+cancer_type+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+cancer_type+".tsv",sep="\t",index=False)
-            l_data.append(df)
-    df = pd.concat(l_data)
-    df.sort_values("RANKING").to_csv(output_dir+"/"+"TOTAL"+".tsv",sep="\t",index=False)#df.sort_values("RANKING").to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/optimization/threshold/"+"TOTAL"+".tsv",sep="\t",index=False)
-    pickle.dump( d_total, open( output_dict, "wb" ) )#pickle.dump( d_total, open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_optimized.pickle", "wb" ) )
+    election.prepare()
+    election.strongest_paths()
+    ranking1 = election.combination_ranking()
+
+    df = summary.output_to_dataframe(ranking1, d_results)
+    df.sort_values("RANKING").to_csv(output_dir, sep="\t", index=False, compression="gzip")
+
+    with gzip.open( output_dict, "wb") as fd:
+        pickle.dump(ranking1, fd)
 
 
 def read_optimized_dicts_cv(dir_optimized_pickles, d_results, output_dir, output_dict):
@@ -320,11 +314,11 @@ def read_optimized_dicts_cv(dir_optimized_pickles, d_results, output_dir, output
     election.prepare()
     election.strongest_paths()
     ranking1 = election.combination_ranking()
-    df = summary.output_to_dataframe(ranking1, d_results, cancer_type)
+    df = summary.output_to_dataframe(ranking1, d_results)
     df.sort_values("RANKING").to_csv(output_dir, sep="\t", index=False, compression="gzip")
 
     with gzip.open(output_dict, "wb") as fd:
-        pickle.dump( ranking1, fd)
+        pickle.dump(ranking1, fd)
 
 
 @click.command()
@@ -332,11 +326,10 @@ def read_optimized_dicts_cv(dir_optimized_pickles, d_results, output_dir, output
 @click.option('--optimize_weights', type=click.Path(), help="Optimize weights file")
 @click.option('--report_output', type=click.Path(), help="Output reports file",required=True)
 @click.option('--dict_output', type=click.Path(),help="Output dictionary file", required=True)
-@click.option('--type_run',help="Type of run. Optimization of the weights or default wegihts. [default,optimization,cross_validation]",required=True,default="optimization") # Example "Combination_Ranking_Optimized"
-@click.option('--type_input',help="Type of input. Threshold or Ranking [ranking,threshold]",required=True, default="ranking") # Example "Combination_Ranking_Optimized"
-def run_schulze(input_data, optimize_weights, report_output, dict_output, type_run, type_input):
+@click.option('--type_run',help="Type of run. Optimization of the weights or default wegihts. [default,optimization,cross_validation]", required=True, default="optimization")
+def run_schulze(input_data, optimize_weights, report_output, dict_output, type_run):
 
-    with open(input_data, "rb") as fd:
+    with gzip.open(input_data, "rb") as fd:
         d_results = pickle.load(fd)
 
     if type_run == "optimization":
@@ -346,87 +339,9 @@ def run_schulze(input_data, optimize_weights, report_output, dict_output, type_r
         read_optimized_dicts_cv(optimize_weights, d_results, report_output, dict_output)
 
     elif type_run == "default":
-        run_default_weights(d_results, report_output, dict_output, name, type_input)
+        run_default_weights(d_results, report_output, dict_output)
         return  # TODO
 
 
-
-
-
 if __name__ == '__main__':
-    '''
-    Example 1. Toy model.
-    x = Ballot({'mutsigcv': {'A': 1, 'B': 2, 'C': 3, 'D': 4}})
-    y = Ballot({'oncodrivefml': {'A': 1, 'B': 2, 'C': 2, 'D': 4}})
-    z = Ballot({'omega1': {'A': 2, 'B': 2, 'C': 2, 'D': 1}})
-    x.validate()
-    y.validate()
-    z.validate()
-    election = Election(x.dict)
-    election.add_ballot(y)
-    election.add_ballot(z)
-    weights = {'mutsigcv': 0, 'oncodrivefml': 0, 'omega1': 1}
-    election.add_weights(weights)
-    election.prepare()
-    print(election.dict)
-    # election.strongest_paths()
-    election.strongest_paths_multithread(n_cores=2)
-    print(election.spath)
-    ranking = election.combination_ranking()
-    print(ranking)
-    print(chunkizate([1,2,3,4,5,6,7,8,9,10,11], 4))
-    '''
-
-    '''
-    Example 2.LIHC, [mutsigcv,oncodrivefml, oncodriveomega]
-
-
-    d_results= pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_ranking.pickle", "rb" ) )
-    weights = {'mutsigcv_r': 0.182, 'oncodrivefml_r': 0.185, 'oncodriveomega_r': 0.20,"oncodriveclust_r":0.12,"hotmapssignature_r":0.30} # Default
-    weights ={'hotmapssignature_r': 0.099315862543989927, 'oncodrivefml_r': 0.13913990142371621, 'mutsigcv_r': 0.24596849605476062, 'oncodriveomega_r': 0.32088383525594577, 'oncodriveclust_r': 0.19469190472158751}
-    cancers = ["LIHC"]
-
-    for cancer in cancers:
-        election = Election(d_results[cancer])
-        election.add_weights(weights)
-        election.prepare()
-        print(election.dict)
-        # election.strongest_paths_multithread(n_cores=2)
-        election.strongest_paths()
-        print(election.spath)
-        ranking1 = election.combination_ranking()
-        ranking2 = election.combination_ranking()
-    #pickle.dump( ranking1, open( "/workspace/projects/intogen/intogen4/scripts/data/test_3.pickle", "wb" ) )
-    print([x[0] for x in sorted(ranking1.items(),key=lambda x: (x[1],x[0]))])
-    e = Evaluation_Enrichment()
-    dict_auc1 = e.calculate_area({"Combination_Ranking": ranking1})
-
-    print (dict_auc1)
-    '''
-    '''
-    Run for all cancer types with default weights
-
-
-    d_results= pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold_simulated.pickle", "rb" ) )
-
-
-    cancer_types = ["ACC","BLCA","BRCA","CESC","CHOL","COAD","COADREAD","DLBC","ESCA","GBM","HNSC","KICH","KIRC","KIRP","LAML","LGG","LIHC","LUAD","LUSC","MESO","OV","PAAD","PCPG","PRAD","READ","SARC","SKCM","STAD","TGCT","THCA","THYM","UCEC","UCS","UVM"]
-    d_ranking = {}
-    for cancer in cancer_types:
-        print (cancer)
-        d_ranking[cancer] = {}
-        election = Election(d_results[cancer])
-
-        election.prepare()
-        election.strongest_paths_multithread(n_cores=4)
-        ranking = election.combination_ranking()
-        d_ranking[cancer]["Combination_Threshold"] = ranking
-
-    pickle.dump( d_ranking, open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_simulated.pickle", "wb" ) )
-    '''
-    '''
-    Read the optimized weights and generate the runs
-    python /workspace/projects/intogen/intogen4/scripts/Schulze/schulze.py --input_data /workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold.pickle --directory_optimize_weights /workspace/projects/intogen/intogen4/scripts/data/results/optimization/weights/ --directory_output  /workspace/projects/intogen/intogen4/scripts/data/results/optimization/threshold --dict_output /workspace/projects/intogen/intogen4/scripts/data/results/optimization/threshold/dict_threshold_combination_optimized.pickle --name Combination_Threshold_Optimized --type_run optimization --type_input threshold
-
-    '''
     run_schulze()

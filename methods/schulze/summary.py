@@ -1,3 +1,5 @@
+
+import os
 import pandas as pd
 import numpy as np
 import schulze
@@ -38,7 +40,7 @@ def get_voters(gene, d):
     return methods, best_methods, best_rank, ranks
 
 
-def output_to_dataframe(ranking, d_results,cancer):
+def output_to_dataframe(ranking, d_results):
     '''
     Args:
         ranking: ranking dict: dict mapping candidates to ranks
@@ -48,11 +50,11 @@ def output_to_dataframe(ranking, d_results,cancer):
     '''
 
     l_info = []
-    cgc = pd.read_csv("/workspace/datasets/CGC/generated_data2/CGCMay17_cancer_types_TCGA.tsv", sep="\t")
+    cgc = pd.read_csv(os.path.join(os.environ['SCHULZE_DATA'], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
     cancer_drivers = cgc['Gene Symbol'].unique()
-    d = d_results[cancer]
+
     for gene, rk in ranking.items():
-        methods, best_methods, best_rank, ranks = get_voters(gene, d)
+        methods, best_methods, best_rank, ranks = get_voters(gene, d_results)
         try:
             median_rank = np.median(ranks)
             best_rank = min(ranks)
@@ -60,10 +62,10 @@ def output_to_dataframe(ranking, d_results,cancer):
             median_rank = None
             best_rank = None
         l_info.append(
-            [cancer, gene, rk, (gene in cancer_drivers), median_rank, best_rank, len(methods),
+            [gene, rk, (gene in cancer_drivers), median_rank, best_rank, len(methods),
              ",".join(best_methods), ",".join(methods)])
 
-    df_info = pd.DataFrame(l_info, columns=["Cancer_Type", "SYMBOL", "RANKING", "CGC", "Median_Ranking", "Best_Ranking",
+    df_info = pd.DataFrame(l_info, columns=["SYMBOL", "RANKING", "CGC", "Median_Ranking", "Best_Ranking",
                                             "Total_Bidders", "Highest_Bidder", "All_Bidders"])
     return df_info
 

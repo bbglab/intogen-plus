@@ -78,7 +78,7 @@ class HotmapsTask(Task):
 
     def run(self):
 
-        # Run vep
+        # Run HotMaps Signature
         if not path.exists(self.out_file):
             cmd = "bash -c 'source ~/.bashrc && source activate {0} && source {1}/hotmaps.config && {1}/hotmaps.sh {2} {3} {4}'".format(
                 self.conda_env, self.method_folder, self.in_file, self.output_folder, os.environ['PROCESS_CPUS'])

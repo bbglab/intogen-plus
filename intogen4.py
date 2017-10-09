@@ -16,6 +16,7 @@ from tasks.oncodriveomega import OncodriveOmegaTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
 from tasks.mutsigcv import MutsigCvTask
+from tasks.schulze import SchulzeTask
 
 
 TASKS = {t.KEY: t for t in [
@@ -24,7 +25,8 @@ TASKS = {t.KEY: t for t in [
     OncodriveOmegaTask,
     OncodriveClustTask,
     HotmapsTask,
-    MutsigCvTask
+    MutsigCvTask,
+    SchulzeTask
 ]}
 
 
@@ -58,10 +60,9 @@ def preprocess_filtering(file, annotations=None, extra=False):
 
     # Minimum cutoff
     MIN_CUTOFF = 1000
+    CHROMOSOMES = set(list(range(1, 23)) + ['X', 'Y'])
 
     # Find Hypermutators Samples
-    logger.info("Loading {}".format(file))
-    logger.info("Computing hypermutators")
     sample_muts = Counter(
         [m['SAMPLE'] for m in readers.variants(file, annotations=annotations, extra=extra) if m['ALT_TYPE']=='snp']
     )
@@ -75,10 +76,9 @@ def preprocess_filtering(file, annotations=None, extra=False):
     cutoff = max(MIN_CUTOFF, (q3 + 1.5 * iqr))
     hypermutators = set([k for k, v in sample_muts.items() if v > cutoff])
     if len(hypermutators) > 0:
-        logger.info("[QC] HYPERMUTATORS: {}".format(", ".join(["{} = {}".format(h, sample_muts[h]) for h in hypermutators])))
+        logger.info("[QC] {} HYPERMUTATORS at {}:  {}".format(file, cutoff, ", ".join(["{} = {}".format(h, sample_muts[h]) for h in hypermutators])))
 
     # Load coverage regions tree
-    logger.info("Loading coverage")
     regions_file = os.environ['COVERAGE_REGIONS']
     coverage_tree = defaultdict(IntervalTree)
     with gzip.open(regions_file, 'rt') as fd:
@@ -93,9 +93,12 @@ def preprocess_filtering(file, annotations=None, extra=False):
         if v['SAMPLE'] in hypermutators:
             continue
 
+        if v['CHROMOSOME'] not in CHROMOSOMES:
+            continue
+
         if v['CHROMOSOME'] in coverage_tree:
             if len(coverage_tree[v['CHROMOSOME']][v['POSITION']]) == 0:
-                logger.info("[QC] LOW COVERAGE: {} at {}:{}".format(v['SAMPLE'], v['CHROMOSOME'], v['POSITION']))
+                logger.info("[QC] {} LOW COVERAGE: {} at {}:{}".format(file, v['SAMPLE'], v['CHROMOSOME'], v['POSITION']))
                 continue
         yield v
 
