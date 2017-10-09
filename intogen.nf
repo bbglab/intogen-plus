@@ -67,12 +67,14 @@ process OncodriveClust {
         val task_file from IN_ONCODRIVECLUST
 
     output:
-        val task_file into OUT_ONCODRIVECLUST
+        file "oncodriveclust/*.out.gz" into OUT_ONCODRIVECLUST mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodriveclust', task_file)}" ]
     then
         python $baseDir/intogen4.py run -o . oncodriveclust $task_file
+    else
+        mkdir -p ./oncodriveclust && cp ${outputFile(OUTPUT, 'oncodriveclust', task_file)} ./oncodriveclust/
     fi
     """
 }
@@ -85,12 +87,14 @@ process OncodriveFML {
         val task_file from IN_ONCODRIVEFML
 
     output:
-        val task_file into OUT_ONCODRIVEFML
+        file "oncodrivefml/*.out.gz" into OUT_ONCODRIVEFML mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodrivefml', task_file)}" ]
     then
         python $baseDir/intogen4.py run -o . oncodrivefml $task_file
+    else
+        mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
     fi
     """
 }
@@ -103,13 +107,15 @@ process HotmapsSignature {
         val task_file from IN_HOTMAPS
 
     output:
-        val task_file into OUT_HOTMAPS
+        file "hotmapssignature/*.out.gz" into OUT_HOTMAPS mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'hotmapssignature', task_file)}" ]
     then
         export PROCESS_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . hotmapssignature $task_file
+    else
+        mkdir -p ./hotmapssignature && cp ${outputFile(OUTPUT, 'hotmapssignature', task_file)} ./hotmapssignature/
     fi
     """
 }
@@ -123,13 +129,15 @@ process OncodriveOmega {
         val task_file from IN_ONCODRIVEOMEGA
 
     output:
-        val task_file into OUT_ONCODRIVEOMEGA
+        file "oncodriveomega/*.out.gz" into OUT_ONCODRIVEOMEGA mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodriveomega', task_file)}" ]
     then
         export PROCESS_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . oncodriveomega $task_file
+    else
+        mkdir -p ./oncodriveomega && cp ${outputFile(OUTPUT, 'oncodriveomega', task_file)} ./oncodriveomega/
     fi
     """
 }
@@ -142,12 +150,14 @@ process MutsigCV {
         val task_file from IN_MUTSIGCV
 
     output:
-        val task_file into OUT_MUTSIGCV
+        file "mutsigcv/*.out.gz" into OUT_MUTSIGCV mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'mutsigcv', task_file)}" ]
     then
         python $baseDir/intogen4.py run -o . mutsigcv $task_file
+    else
+        mkdir -p ./mutsigcv && cp ${outputFile(OUTPUT, 'mutsigcv', task_file)} ./mutsigcv/
     fi
     """
 }
