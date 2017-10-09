@@ -59,15 +59,14 @@ def main(file_hotspots_gene, f_info_density, f_output):
     df_density_aa = df_density_aa.groupby(["HUGO Symbol", "Sequence Ontology Transcript", "Tumor Type"],
                                           as_index=False).agg({"Min p-value": np.min, "q-value": np.min})
 
-    df_hotspots["Min p-value"] = df_hotspots.apply(lambda row: get_pvalue(row, df_density_aa), axis=1)
-    df_hotspots["q-value"] = df_hotspots.apply(lambda row: get_qvalue(row, df_density_aa), axis=1)
-
-    df_hotspots = df_hotspots[df_hotspots["Cancer_Type"] != 'REF']
+    if len(df_hotspots) > 0:
+        df_hotspots["Min p-value"] = df_hotspots.apply(lambda row: get_pvalue(row, df_density_aa), axis=1)
+        df_hotspots["q-value"] = df_hotspots.apply(lambda row: get_qvalue(row, df_density_aa), axis=1)
+        df_hotspots = df_hotspots[df_hotspots["Cancer_Type"] != 'REF']
 
     rows = []
     for index, row in df_density_aa.iterrows():
-        if df_hotspots[(df_hotspots["GENE"] == row["HUGO Symbol"]) & (
-            df_hotspots["Cancer_Type"] == row["Tumor Type"])].shape[0] == 0:
+        if df_hotspots[(df_hotspots["GENE"] == row["HUGO Symbol"]) & (df_hotspots["Cancer_Type"] == row["Tumor Type"])].shape[0] == 0:
             rows.append([row["HUGO Symbol"], row["Tumor Type"], 0, 0, 0, row["Min p-value"], row["q-value"]])
 
     df_non_significant = pd.DataFrame(rows, columns=df_hotspots.columns.values)

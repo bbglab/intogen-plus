@@ -225,7 +225,7 @@ def main(opts):
                 wf.write(line_str)
 
             count += 1
-        tot_coverage = float(tot_mapped_count)/count*100
+        tot_coverage = 0 if count == 0 else float(tot_mapped_count)/count*100
 
         bio_coverage = float(mapped_bio_count)/(tot_mapped_count)*100
         homology_coverage = float(mapped_homology_count)/(tot_mapped_count)*100

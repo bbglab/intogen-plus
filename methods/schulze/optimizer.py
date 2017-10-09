@@ -1,3 +1,5 @@
+import gzip
+
 from scipy.stats import dirichlet, beta
 from scipy.optimize import minimize, basinhopping
 import pathos.pools
@@ -175,7 +177,8 @@ def set_type_weights(methods,weights):
         i = i+1
     return d
 
-def calculate_objective_function(d_ranking, cancer, weights, objective_method="Combination_Ranking",objetive_function=None,  methods=["oncodriveclust","oncodriveomega","oncodrivefml","hotmapssignature","mutsigcv"],log=False):
+
+def calculate_objective_function(d_ranking, weights, objective_method="Combination_Ranking",objetive_function=None,  methods=["oncodriveclust","oncodriveomega","oncodrivefml","hotmapssignature","mutsigcv"],log=False):
     '''
     Given a distribution of weights returns the value of the objetive function (default: enrichment, combination_ranking)
 
@@ -188,16 +191,12 @@ def calculate_objective_function(d_ranking, cancer, weights, objective_method="C
     :return float of the current value of the objetive function for the input weights.
     '''
     global gweights
-    d_query = {}
-    d_query[cancer] = {}
-    election = Election(d_ranking[cancer])
-    #weightsn = set_type_weights(methods,weights)
-
+    election = Election(d_ranking)
     election.add_weights(weights)
     election.prepare()
-    #election.strongest_paths_multithread(n_cores=1)
     election.strongest_paths()
     ranking = election.combination_ranking()
+
     d_f = {}
     d_f[objective_method] = dict(ranking)
     if gt_combination == "RANKING":
@@ -206,8 +205,8 @@ def calculate_objective_function(d_ranking, cancer, weights, objective_method="C
         type = "relative"
     d_area = objetive_function.calculate_area(d_f,type_method=type)
 
-
     return d_area[objective_method]
+
 
 def prepare_output(methods_order,solutions):
     '''
@@ -266,8 +265,8 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
     global gniter,gepsilon,gavaliable_methods,order_methods,gt_combination,method_optimization
     gniter = niter
     gepsilon = epsilon
-    print ("Tumor type",cancer)
-    print ("Directory output",foutput)
+
+    print("Directory output",foutput)
     # Select order methods
     gt_combination = t_combination
     method_optimization = optimization_algorithm
@@ -275,13 +274,16 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
         order_methods = order_methods_ranking
     else:
         order_methods = order_methods_threshold
-    d_results_methodsr= pickle.load( open( input_rankings, "rb" ) )
+
+    with gzip.open(input_rankings, "rb") as fd:
+        d_results_methodsr = pickle.load(fd)
 
     # Prepare the list of available methods and the dictionary of weights
     l = []
-    for method in d_results_methodsr[cancer].keys():
+    for method in d_results_methodsr.keys():
         l.append(method)
     gavaliable_methods = list(l)
+
     # Remove methods that do not reach the quality metrics
     discarded = read_discarded_methods(discarded_methods,cancer,t_combination)
     for method in gavaliable_methods:
@@ -291,18 +293,18 @@ def run_optimizer(seeds,niter,epsilon,foutput,cancer,input_rankings,discarded_me
     # Set to empty disct those methods discarded or not present
     for method in order_methods:
         if not method in gavaliable_methods:
-            d_results_methodsr[cancer][method] = {}
+            d_results_methodsr[method] = {}
 
     objetive_function = Evaluation_Enrichment(percentage_cgc)
 
-    f = partial(calculate_objective_function, d_results_methodsr, cancer,objetive_function=objetive_function,methods=list(d_results_methodsr[cancer].keys()))
+    f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function, methods=list(d_results_methodsr.keys()))
     if t_combination == "RANKING":
         g = lambda w: -f({"oncodriveclust_r": w[0], "oncodriveomega_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"mutsigcv_r": w[4]})
     else:
         g = lambda w: -f({"oncodriveclust_t": w[0], "oncodriveomega_t": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"mutsigcv_t": w[4]})
 
     niter = gniter
-    res = optimizer(g,methods=d_results_methodsr[cancer].keys(),seeds = seeds)
+    res = optimizer(g,methods=d_results_methodsr.keys(),seeds = seeds)
     output = prepare_output(order_methods,res)
     if len(output)>0:
         methods = list(output[0][0].keys())

@@ -1,3 +1,4 @@
+import gzip
 import os
 import pandas as pd
 import pickle
@@ -7,7 +8,6 @@ import click
 class Parser():
 
     methods = ["hotmapssignature","oncodrivefml","mutsigcv","oncodriveomega","oncodriveclust"] # "oncodriveclust","oncodriveomega"
-    cancer_types = ["ACC","BLCA","BRCA","CESC","CHOL","COAD","COADREAD","DLBC","ESCA","GBM","HNSC","KICH","KIRC","KIRP","LAML","LGG","LIHC","LUAD","LUSC","MESO","OV","PAAD","PCPG","PRAD","READ","SARC","SKCM","STAD","TGCT","THCA","THYM","UCEC","UCS","UVM"]
     column_keys = {"hotmapssignature":["GENE","q-value"],"oncodrivefml":["SYMBOL","Q_VALUE"],"mutsigcv":["gene","q"],"oncodriveomega":["SYMBOL","q_value"],"oncodriveclust":["SYMBOL","QVALUE"]}
 
     def __init__(self, path, thresholds ={"hotmapssignature":0.1,"oncodrivefml":0.1,"mutsigcv":0.1,"oncodriveomega":0.1,"oncodriveclust":0.1} ):
@@ -15,8 +15,9 @@ class Parser():
         self.thresholds = thresholds
 
     @staticmethod
-    def read_hugo(path="/workspace/projects/intogen/intogen4/scripts/data/"):
-        return pickle.load(open(path+"ENSEMBL_HUGO_1807107.pickle","rb"))
+    def read_hugo(path=os.environ['SCHULZE_DATA']):
+        with open(os.path.join(path, "ENSEMBL_HUGO_1807107.pickle"),"rb") as fd:
+            return pickle.load(fd)
 
     @staticmethod
     def create_dict_rankings(genes,rankings):
@@ -58,10 +59,7 @@ class Parser():
 
         d = {}
         for method in self.methods:
-            if method != "mutsigcv":
-                path = self.path + method +  "/" + cancer + ".out.gz"
-            else:
-                path = self.path + method + "/" + cancer + ".sig_genes.txt"
+            path = self.path + method +  "/" + cancer + ".out.gz"
             if os.path.exists(path):
                 df = pd.read_csv(path,sep="\t")
                 if df.shape[0]>0:
@@ -99,15 +97,15 @@ class Parser():
 
 
 @click.command()
-@click.option('--input_dir',type=click.Path(exists=True),help="Directory of the run to be parsed",required=True)
-@click.option('--type_selection', help="[ranking,threshold]",required=True,default="ranking")
-@click.option('--output_dir', type=click.Path(),help="Directory of the output reports",required=True)
-@click.option('--name_output', help="name of the output directory",required=True)
+@click.option('--input',type=click.Path(exists=True),help="Input data directory", required=True)
 @click.option('--cancer', type=str, required=True)
-def run_parser(input_dir,type_selection, output_dir, name_output, cancer):
-    p = Parser(input_dir)
-    d_outr = p.create_dictionary_outputs(type_selection=type_selection, cancer=cancer)
-    pickle.dump( d_outr, open( output_dir+"/"+name_output+".pickle", "wb"))
+@click.option('--output', type=click.Path(),help="Output file", required=True)
+@click.option('--selection', help="[ranking,threshold]", default="ranking")
+def run_parser(input, cancer, output, selection):
+    p = Parser(input)
+    d_outr = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
+    with gzip.open("{}.step1".format(output), "wb") as fd:
+        pickle.dump(d_outr, fd)
 
 
 if __name__ == "__main__":
