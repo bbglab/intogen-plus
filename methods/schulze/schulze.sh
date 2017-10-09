@@ -25,7 +25,7 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # STEP2. Optimize a couple of cancer types
 echo "## STEP2"
-python $SCRIPTS_FOLDER/optimizer.py --seeds 1 --niter 1 --epsilon 0.1 --t_combination RANKING \
+python $SCRIPTS_FOLDER/optimizer.py --seeds 12 --niter 1000 --epsilon 0.01 --t_combination RANKING \
  --foutput $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --input_rankings $OUTPUT/tmp/$RUN_FILENAME.step1 \
  --discarded_methods $SCHULZE_DATA/discarted_analyses.txt
@@ -58,7 +58,8 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # STEP5. Generate the two tiers list
 echo "## STEP5"
-python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.01 --column_filter QVALUE_stouffer_w \
+python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.01 \
+    --column_filter QVALUE_stouffer_w \
     --input $OUTPUT/$RUN_FILENAME.stouffer.out.gz \
     --output_file $OUTPUT/$RUN_FILENAME.out.gz
 
