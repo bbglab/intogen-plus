@@ -73,7 +73,7 @@ def read_maf(path, tumor_type):
         skip_rows = 1 if first_line.startswith('#') else 0
 
     # read in data frame
-    df = pd.read_csv(path, sep='\t', skiprows=skip_rows)
+    df = pd.read_csv(path, sep='\t', skiprows=skip_rows, dtype={'Tumor_Sample_Barcode': 'str'})
 
     # drop duplicate mutations
     #df['Tumor_Sample_Barcode_short'] = df['Tumor_Sample_Barcode'].str[:12]
