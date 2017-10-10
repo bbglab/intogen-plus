@@ -49,7 +49,8 @@ class Filter:
         """
         parser = Parser(method=method, gene_coordinates=PATH_REGIONS)
         df = parser.read(input_file)
-        positive = set(df[df['QVALUE'] < 0.1]['SYMBOL'])
+        sigp = df[df['QVALUE'] < 0.1]
+        positive = set(sigp['SYMBOL']) if len(sigp) > 0 else set()
         cgc = pd.read_csv(os.path.join(os.environ["SCHULZE_DATA"], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
         cgc = set(cgc["Gene Symbol"].values)
         true_positive = positive & cgc
