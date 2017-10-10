@@ -1,3 +1,6 @@
+import csv
+import gzip
+
 import pandas as pd
 import glob
 import re
@@ -46,17 +49,25 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter):
     df.sort_values(column_filter,inplace=True)
     df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy()
 
-    ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0]
+    ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
 
+    headers = ["SYMBOL", "METHOD_NAME","TIER","All_Bidders", column_filter, "RANKING"]
     if ranking_limit:
-        dfq = df_f[df_f["RANKING"]<ranking_limit].copy()
+
+        # Compute tiers
+        dfq = df_f[df_f["RANKING"] < ranking_limit].copy()
         dfq = dfq[np.isfinite(dfq[column_filter])].copy()
         d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold)
         dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
         dfq["METHOD_NAME"] = name_method
 
-        df_tiers = dfq[["SYMBOL", "METHOD_NAME","TIER","All_Bidders", column_filter, "RANKING"]]
+        df_tiers = dfq[headers]
         df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
+    else:
+
+        # No results
+        with gzip.open(output_file, 'wb') as fd:
+            csv.writer(fd, delimiter='\t').writerow(headers)
 
 
 if __name__ == '__main__':

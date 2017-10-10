@@ -156,6 +156,19 @@ process MutsigCV {
     if [ ! -f "${outputFile(OUTPUT, 'mutsigcv', task_file)}" ]
     then
         python $baseDir/intogen4.py run -o . mutsigcv $task_file
+
+        rc=$?;
+        if [[ $rc != 0 ]]
+        then
+            if [[ `grep "not enough mutations" .command.log` ]]
+            then
+                echo -e "gene\texpr\treptime\thic\tN_nonsilent\tN_silent\tN_noncoding\tn_nonsilent\tn_silent\tn_noncoding\tnnei\tx\tX\tp\tq" | gzip > mutsigcv/${task_file.fileName}
+                exit 0;
+            else
+                exit $rc;
+            fi
+        fi
+
     else
         mkdir -p ./mutsigcv && cp ${outputFile(OUTPUT, 'mutsigcv', task_file)} ./mutsigcv/
     fi
