@@ -2,12 +2,14 @@ import os
 import gzip
 import click
 import pickle
-#import pathos.pools
+import numpy as np
 import pandas as pd
 from functools import partial
 from scipy.stats import dirichlet
 from scipy.optimize import minimize
 
+from qc.deviations import Deviation
+from qc.parser import Parser
 from schulze import Election
 from evaluation.Evaluation_Enrichment import Evaluation_Enrichment
 
@@ -21,6 +23,85 @@ order_methods = []
 gweights = []
 gt_combination = None
 method_optimization = None
+
+PATH_REGIONS = os.path.join(os.environ['SCHULZE_DATA'], '02_cds.regions.gz')
+METHODS = [
+    'oncodrivefml',
+    'oncodriveclust',
+    'oncodriveomega',
+    'hotmapssignature',
+    'mutsigcv',
+]
+
+
+class Filter:
+    def __init__(self, input_run, tumor):
+        self.methods = METHODS
+        self.data = self.create_table(input_run, tumor)
+
+    @staticmethod
+    def statistic_outputs(input_file, tumor_name, method):
+        """Calculate some statistic on the input_file
+        :param input_file: path, path of the input_file
+        :param tumor_name: str, name of the tumor
+        :param method: str, name of the method used in the analysis
+        :return: dict
+        """
+        parser = Parser(method=method, gene_coordinates=PATH_REGIONS)
+        df = parser.read(input_file)
+        positive = set(df[df['QVALUE'] < 0.1]['SYMBOL'])
+        cgc = pd.read_csv(os.path.join(os.environ["SCHULZE_DATA"], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
+        cgc = set(cgc["Gene Symbol"].values)
+        true_positive = positive & cgc
+
+        #try:
+        #    false_positive = positive & NEGATIVE_GENES_PER_TUMOR[tumor_name]
+        #except KeyError as err:
+        false_positive = None
+
+        qc = Deviation(df=df, description=parser.name)
+        deviation_obs_half = qc.deviation_from_null(half=True)
+
+        result = {
+            'KTP': len(true_positive),
+            'KFP': np.nan if false_positive is None else len(false_positive),
+            'QQPLOT_STD_HALF': deviation_obs_half['deviation'],
+            'QQPLOT_SLOPE_HALF': deviation_obs_half['slope'],
+            'AREA_RANKING_ABSOLUTE': qc.calculate_absolute_area()
+        }
+        return result
+
+    def create_table(self, input_run, tumor):
+        """Run the statistics for each method on a cancer type
+        :param input_run: path, location of the results folder
+        :param tumor: str, name of the tumor
+        :return: pandas dataframe
+        """
+        results = {}
+        for method in self.methods:
+            input_file = os.path.join(input_run, method, '{}.out.gz'.format(tumor))
+            results[method] = self.statistic_outputs(input_file, tumor, method)
+        return pd.DataFrame(results).T
+
+    @staticmethod
+    def find_outliers(data):
+        """Find the borders of the outliers
+        :param data: list of values
+        :return: borders
+        """
+        q75, q25 = np.percentile(data, [75, 25])
+        iqr = q75 - q25
+        outliers_down = max(0, q25 - (iqr * 1.5))
+        outliers_up = q75 + (iqr * 1.5)
+        return outliers_down, outliers_up
+
+    def filters(self, by='AREA_RANKING_ABSOLUTE'):
+        values = self.data[by].tolist()
+        methods = self.data.index.tolist()
+        finite_values = [x for x in values if np.isfinite(x)]
+        down, up = self.find_outliers(finite_values)
+        discarded = [methods[i] for i, v in enumerate(values) if (np.isfinite(v) and v < down)]
+        return discarded
 
 
 def create_constrains():
@@ -238,41 +319,18 @@ def prepare_output(methods_order,solutions):
     return l_solutions
 
 
-def read_discarded_methods(file_discarded,ttype,t_combination):
-    '''
-    Read the discarded methods by quality control and remove then from the voting system
-    :param file_discarded: File with the tabulated file with the information
-    :param ttype: tumor type
-    :param t_combination: type of combination. RANKING or THRESHOLD
-    :return: the name of discarded methods, if any
-    '''
-
-    df = pd.read_csv(file_discarded,sep="\t")
-
-    methods = df[(df["TUMOR"]==ttype)&(df["METRIC"].str.contains(t_combination))]["METHOD"].values
-    l = list()
-    for method in methods:
-        if t_combination == "RANKING":
-            l.append(method+"_r")
-        else:
-            l.append(method+"_t")
-    return l
-
-
 @click.command()
 @click.option('--seeds',default=1,  help='Number of seeds.')
 @click.option('--niter', default=100,help='Number of iterations')
 @click.option('--epsilon', default=0.1,help='Epsilon for the optimization function')
 @click.option('--foutput',type=click.Path(),help="File of output",required=True)
 @click.option('--input_rankings',type=click.Path(exists=True),help="Dictionary with the ranking of the methods",required=True)
-@click.option('--discarded_methods',type=click.Path(),help="File with the discarded methods for each cancer type",required=False)
 @click.option('--t_combination',help="Type of combination, ranking or threshold. Default ranking",required=True,default="RANKING")
 @click.option('--optimization_algorithm',help="Algorithm for optimization. [SLSQP,COBYLA]",required=False,default="SLSQP")
 @click.option('--percentage_cgc', default=1.0,help='Percentage of CGC used in the optimization. Default all.')
-def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,discarded_methods,t_combination,optimization_algorithm,percentage_cgc):
-
-    # FIXME
-    cancer = os.path.basename(input_rankings).replace(".out.gz.step1", "")
+@click.option('--moutput',type=click.Path(exists=True),help="Input data directory", required=True)
+@click.option('--cancer', type=str, required=True)
+def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optimization_algorithm,percentage_cgc, moutput, cancer):
 
     global gniter, gepsilon, gavaliable_methods, order_methods, gt_combination, method_optimization
     gniter = niter
@@ -299,10 +357,12 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,discarded_methods,t
     gavaliable_methods = list(l)
 
     # Remove methods that do not reach the quality metrics
-    discarded = read_discarded_methods(discarded_methods,cancer,t_combination)
-    for method in gavaliable_methods:
-        if method in discarded:
-            gavaliable_methods.remove(method)
+    discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+    if len(discarded) > 0:
+        print("[QC] {} discarted {}".format(cancer, discarded))
+
+    gavaliable_methods = [m for m in gavaliable_methods if m not in discarded]
+
     print("Running on " + str(gavaliable_methods))
     # Set to empty disct those methods discarded or not present
     for method in order_methods:

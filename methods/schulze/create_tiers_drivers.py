@@ -66,7 +66,7 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter):
     else:
 
         # No results
-        with gzip.open(output_file, 'wb') as fd:
+        with gzip.open(output_file, 'wt') as fd:
             csv.writer(fd, delimiter='\t').writerow(headers)
 
 

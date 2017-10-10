@@ -28,7 +28,8 @@ echo "## STEP2"
 python $SCRIPTS_FOLDER/optimizer.py --seeds 12 --niter 1000 --epsilon 0.01 --t_combination RANKING \
  --foutput $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --input_rankings $OUTPUT/tmp/$RUN_FILENAME.step1 \
- --discarded_methods $SCHULZE_DATA/discarted_analyses.txt
+ --moutput $OUTPUT/../ \
+ --cancer $RUN_FILENAME
 
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi

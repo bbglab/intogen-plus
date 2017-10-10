@@ -5,11 +5,12 @@ import logging
 import click
 import numpy as np
 
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
 from bgparsers import selector, readers
 from collections import Counter, defaultdict
 from intervaltree import IntervalTree
 
-from pipeline import read_file, prepare_tasks
 from tasks.oncodriveclust import OncodriveClustTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.oncodriveomega import OncodriveOmegaTask
@@ -41,19 +42,50 @@ logger = logging.getLogger('intogen')
 LOG_FILE = 'intogen.log'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+###############33
 
-@click.group(context_settings=CONTEXT_SETTINGS)
-@click.option('--debug', is_flag=True, help='Enable debugging')
-@click.version_option()
-def cli(debug):
-    if debug:
-        fmt = logging.Formatter('%(asctime)s %(message)s', datefmt='%H:%M:%S')
-        fh = logging.FileHandler(LOG_FILE, 'w')
-        fh.setLevel(logging.DEBUG if debug else logging.INFO)
-        fh.setFormatter(fmt)
-        logger.addHandler(fh)
-        logger.setLevel(logging.DEBUG)
-        logger.debug('Debug mode enabled')
+
+def read_file(tsv_file):
+    with gzip.open(tsv_file, "rt") as fd:
+        reader = csv.DictReader(fd, delimiter='\t')
+        for row in reader:
+            yield row
+
+
+def prepare_task(reader, tasks, item):
+    position, (group_key, group_data) = item
+
+    # Initialize task name
+    [t.init(group_key) for t in tasks]
+
+    # Input start
+    [t.input_start() for t in tasks]
+
+    # Input write
+    for i, mut in enumerate(reader(group_data)):
+        id = "I{:010d}".format(i)
+        for t in tasks:
+            t.input_write(id, mut)
+
+    # Input close
+    [t.input_end() for t in tasks]
+
+    return [(t.KEY, group_key) for t in tasks]
+
+
+def prepare_tasks(groups, reader, tasks, cores=None):
+    func = partial(prepare_task, reader, tasks)
+
+    all_tasks = []
+    if cores > 1:
+        with ProcessPoolExecutor(cores) as executor:
+            for tasks in executor.map(func, enumerate(groups)):
+                all_tasks += tasks
+    else:
+        for tasks in map(func, enumerate(groups)):
+            all_tasks += tasks
+
+    return all_tasks
 
 
 def preprocess_filtering(file, annotations=None, extra=False):
@@ -101,6 +133,22 @@ def preprocess_filtering(file, annotations=None, extra=False):
                 logger.info("[QC] {} LOW COVERAGE: {} at {}:{}".format(file, v['SAMPLE'], v['CHROMOSOME'], v['POSITION']))
                 continue
         yield v
+
+######################
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.option('--debug', is_flag=True, help='Enable debugging')
+@click.version_option()
+def cli(debug):
+    if debug:
+        fmt = logging.Formatter('%(asctime)s %(message)s', datefmt='%H:%M:%S')
+        fh = logging.FileHandler(LOG_FILE, 'w')
+        fh.setLevel(logging.DEBUG if debug else logging.INFO)
+        fh.setFormatter(fmt)
+        logger.addHandler(fh)
+        logger.setLevel(logging.DEBUG)
+        logger.debug('Debug mode enabled')
 
 
 @click.command(short_help='Create tasks input files')

@@ -1,18 +1,15 @@
-# Intogen 4
+## IntOGen 2017 ##
 
+# INSTALL
 
-# Environment
+1. Install miniconda or conda python distributions
+2. Create two environments:
+    # conda create -n hotmaps --file conda_env_hotmaps.txt
+    # conda create -n intogen2017 --file conda_env_intogen2017.txt
+3. TODO How to install Hotmaps database??
+4. Edit configuration files at config/*.conf
 
-Option 1
+# USAGE
 
-conda install variant-effect-predictor
-vep_install.pl -a cf -s homo_sapiens -y GRCh37 -c /home/jordeu/workspace/intogen/intogen-plus/vepdata
-vep_convert_cache.pl -species homo_sapiens -version 86_GRCh37 -d /home/jordeu/workspace/intogen/intogen-plus/vepdata
-
-
-Option 2
-
-
-conda install ensembl-vep
-vep_install -a cf -s homo_sapiens -y GRCh38 -c /home/jordeu/workspace/intogen/intogen-plus/vepdata --CONVERT
+nextflow run intogen.nf -profile local --input ./input --output ./output
 

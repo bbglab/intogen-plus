@@ -17,24 +17,21 @@ class MutsigCvTask(Task):
         ("Splice_Site", ["splice_acceptor_variant", "splice_donor_variant", "transcript_ablation", "exon_loss_variant"]),
         ("Nonsense_Mutation", ['stop_gained']),
         ("Nonstop_Mutation", ['stop_lost']),
+        ("Intron", ["transcript_amplification", "intron_variant", "INTRAGENIC", "intragenic_variant"]),
         ("Translation_Start_Site", ["initiator_codon_variant", "start_lost"]),
         ("Silent", ["incomplete_terminal_codon_variant", "synonymous_variant", "stop_retained_variant", "NMD_transcript_variant"]),
         ("Missense_Mutation", ["missense_variant", "coding_sequence_variant", "conservative_missense_variant", "rare_amino_acid_variant"]),
+        ("Frame_Shift_Del", ['frameshift_variant', 'protein_altering_variant']),
+        ("In_Frame_Ins", ['inframe_insertion', 'disruptive_inframe_insertion', 'protein_altering_variant']),
+        ("In_Frame_Del", ['inframe_deletion','disruptive_inframe_deletion', 'protein_altering_variant']),
+        ("Splice_Region", ['splice_region_variant']),
+        ("RNA", ['mature_miRNA_variant', 'exon_variant', 'non_coding_exon_variant', 'non_coding_transcript_exon_variant', 'non_coding_transcript_variant', 'nc_transcript_variant']),
+        ("5'UTR", ['5_prime_UTR_variant', '5_prime_UTR_premature_start_codon_gain_variant']),
+        ("3'UTR", ['3_prime_UTR_variant']),
+        ("IGR", ['TF_binding_site_variant', 'regulatory_region_variant', 'regulatory_region', 'intergenic_variant', 'intergenic_region']),
+        ("5'Flank", ['upstream_gene_variant']),
+        ("3'Flank", ['downstream_gene_variant'])
     ]
-
-    # TODO
-    # return "Frame_Shift_Del" if(( $effect eq 'frameshift_variant' or ( $effect eq 'protein_altering_variant' and !$inframe )) and $var_type eq 'DEL' );
-    # return "Frame_Shift_Ins" if(( $effect eq 'frameshift_variant' or ( $effect eq 'protein_altering_variant' and !$inframe )) and $var_type eq 'INS' );
-    # return "In_Frame_Ins" if( $effect =~ /^(inframe_insertion|disruptive_inframe_insertion)$/ or ( $effect eq 'protein_altering_variant' and $inframe and $var_type eq 'INS' ));
-    # return "In_Frame_Del" if( $effect =~ /^(inframe_deletion|disruptive_inframe_deletion)$/ or ( $effect eq 'protein_altering_variant' and $inframe and $var_type eq 'DEL' ));
-    # return "Intron" if ( $effect =~ /^(transcript_amplification|intron_variant|INTRAGENIC|intragenic_variant)$/ );
-    # return "Splice_Region" if( $effect eq 'splice_region_variant' );
-    # return "RNA" if( $effect =~ /^(mature_miRNA_variant|exon_variant|non_coding_exon_variant|non_coding_transcript_exon_variant|non_coding_transcript_variant|nc_transcript_variant)$/ );
-    # return "5'UTR" if( $effect =~ /^(5_prime_UTR_variant|5_prime_UTR_premature_start_codon_gain_variant)$/ );
-    # return "3'UTR" if( $effect eq '3_prime_UTR_variant' );
-    # return "IGR" if( $effect =~ /^(TF_binding_site_variant|regulatory_region_variant|regulatory_region|intergenic_variant|intergenic_region)$/ );
-    # return "5'Flank" if( $effect eq 'upstream_gene_variant' );
-    # return "3'Flank" if ( $effect eq 'downstream_gene_variant' );
 
     VEP_TO_MAF_CT = {}
     for m, veps in MAF_TO_VEP:

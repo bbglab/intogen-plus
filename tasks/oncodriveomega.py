@@ -1,6 +1,9 @@
 import csv
+import glob
 import gzip
 import os
+import pandas as pd
+import numpy as np
 
 from os import path
 from .base import Task
@@ -17,6 +20,7 @@ class OncodriveOmegaTask(Task):
 
         self.name = None
         self.config_file = config[OncodriveOmegaTask.KEY]['config_file']
+
         # TODO add expression filter in config file
         self.expression_filter = None
 
@@ -66,19 +70,31 @@ class OncodriveOmegaTask(Task):
             self.in_writer = None
             self.in_fd = None
 
+    def get_tissue(self, tissues):
+        for t in tissues:
+            if "_{}_".format(t) in self.name or self.name.endswith("_{}".format(t)):
+                return t
+        return None
+
     def run(self):
 
         # Load config
         config = load_configuration(self.config_file)
 
-        signature_file = path.join(config['datasets']['signatures_folder'],
-                                   "{}.txt_signature_full.pickle.gz".format(self.name))
+        tissues = []
+        for f in glob.glob(os.path.join(config['datasets']['covariates_folder'], "*.covariates_ensembl.tsv")):
+            t = os.path.basename(f).split(".")[0]
+            if t != "GENERIC":
+                tissues.append(t)
 
-        if not path.exists(signature_file):
+        tissue = self.get_tissue(self.name)
+        if tissue is not None:
+            signature_file = path.join(config['datasets']['signatures_folder'], "{}.txt_signature_full.pickle.gz".format(tissue))
+            if not os.path.exists(signature_file):
+                signature_file = None
+            covariates_file = path.join(config['datasets']['covariates_folder'], "{}.covariates_ensembl.tsv".format(self.name))
+        else:
             signature_file = None
-
-        covariates_file = path.join(config['datasets']['covariates_folder'], "{}.covariates_ensembl.tsv".format(self.name))
-        if not path.exists(covariates_file):
             covariates_file = path.join(config['datasets']['covariates_folder'], "GENERIC.covariates_ensembl.tsv")
 
         analysis = OncodriveOmega(self.in_file, signature_file, covariates_file, config=config, cores=int(os.environ.get('PROCESS_CPUS', os.cpu_count())))
@@ -100,6 +116,9 @@ class OncodriveOmegaTask(Task):
             with open(self.expression_filter, 'rt') as fd:
                 expressed = set([e[0].strip() for e in csv.reader(fd, delimiter='\t')])
             elements = elements.intersection(expressed)
+        else:
+            expressed = self.compute_expression(covariates_file)
+            elements = elements.intersection(expressed)
 
         results = analysis.run(elements)
 
@@ -109,3 +128,12 @@ class OncodriveOmegaTask(Task):
 
         if path.exists(self.out_file):
             os.unlink(self.out_file)
+
+    def compute_expression(self, covariates_file):
+        c = pd.read_csv(covariates_file, sep='\t', header=0, usecols=['GENE', 'expr', 'reptime', 'hic'], engine='python')
+        v = c.expr.values
+        v = np.log(v[v != 0] + 1)
+        v = v[~np.isnan(v)]
+        cutoff = np.exp(np.percentile(v, 25)) - 1
+        return set(list(c[c.expr > cutoff]['GENE'].values))
+
