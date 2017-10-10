@@ -111,13 +111,14 @@ class MutsigCvTask(Task):
             except subprocess.CalledProcessError as e:
 
                 # Don't fail if there are not enough mutations just create and empty output
-                if "not enough mutations" in e.output.decode():
-                    print(e.output.decode())
+                out = e.output.decode()
+                if "not enough mutations" in out or "not applicable to single patients" in out:
+                    print(out)
                     with gzip.open(self.out_file) as fd:
                         fd.write("gene\texpr\treptime\thic\tN_nonsilent\tN_silent\tN_noncoding\tn_nonsilent\tn_silent\tn_noncoding\tnnei\tx\tX\tp\tq\n")
                     sys.exit(0)
                 else:
-                    print(e.output.decode())
+                    print(out)
                     sys.exit(e.returncode)
             print(o.decode())
 
