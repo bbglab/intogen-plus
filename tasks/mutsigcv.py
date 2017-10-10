@@ -106,19 +106,20 @@ class MutsigCvTask(Task):
                   "gzip {2}/{3}.out".format(
                 os.environ['MUTSIGCV_DATA'], self.in_file, self.output_folder, self.name)
 
-            with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
-                with open(self.out_file + ".pid", "wt") as fd:
-                    fd.write("{}\n".format(p.pid))
-                try:
-                    errcode = p.wait()
-                except:
-                    p.kill()
-                    p.wait()
-                    raise
-            os.unlink(self.out_file + ".pid")
+            try:
+                o = subprocess.check_output(cmd, shell=True)
+            except subprocess.CalledProcessError as e:
 
-            if errcode != 0:
-                raise RuntimeError("{} [error] - code {}".format(self, errcode))
+                # Don't fail if there are not enough mutations just create and empty output
+                if e.returncode == 1 and "not enough mutations" in e.output.decode():
+                    print(e.output.decode())
+                    with gzip.open(self.out_file) as fd:
+                        fd.write("gene\texpr\treptime\thic\tN_nonsilent\tN_silent\tN_noncoding\tn_nonsilent\tn_silent\tn_noncoding\tnnei\tx\tX\tp\tq\n")
+                    sys.exit(0)
+                else:
+                    print(e.output.decode())
+                    sys.exit(e.returncode)
+            print(o.decode())
 
         return self.out_file
 
