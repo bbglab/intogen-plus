@@ -182,7 +182,7 @@ process Schulze {
     """
     if [ ! -f "${outputFile(OUTPUT, 'schulze', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o $OUTPUT schulze $task_file[0]
+        python $baseDir/intogen4.py run -o $OUTPUT schulze $task_file
     fi
     """
 }

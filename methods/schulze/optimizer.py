@@ -8,6 +8,7 @@ from functools import partial
 from scipy.stats import dirichlet
 from scipy.optimize import minimize
 
+from qc.drivers import CGC_GENES_PER_TUMOR, NEGATIVE_GENES_PER_TUMOR
 from qc.deviations import Deviation
 from qc.parser import Parser
 from schulze import Election
@@ -34,6 +35,13 @@ METHODS = [
 ]
 
 
+def get_tissue(name):
+    for t in NEGATIVE_GENES_PER_TUMOR.keys():
+        if "_{}_".format(t) in name or name.endswith("_{}".format(t)):
+            return t
+    return None
+
+
 class Filter:
     def __init__(self, input_run, tumor):
         self.methods = METHODS
@@ -45,30 +53,31 @@ class Filter:
         :param input_file: path, path of the input_file
         :param tumor_name: str, name of the tumor
         :param method: str, name of the method used in the analysis
-        :return: dict
+        :return: dict or None if the input file is empty
         """
         parser = Parser(method=method, gene_coordinates=PATH_REGIONS)
         df = parser.read(input_file)
-        sigp = df[df['QVALUE'] < 0.1]
-        positive = set(sigp['SYMBOL']) if len(sigp) > 0 else set()
-        cgc = pd.read_csv(os.path.join(os.environ["SCHULZE_DATA"], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
-        cgc = set(cgc["Gene Symbol"].values)
-        true_positive = positive & cgc
-
-        #try:
-        #    false_positive = positive & NEGATIVE_GENES_PER_TUMOR[tumor_name]
-        #except KeyError as err:
-        false_positive = None
+        if len(df) == 0:
+            return None
+        positive = df[df['QVALUE'] < 0.1]
+        positive = set(positive['SYMBOL']) if len(positive) > 0 else set()
+        true_positive = positive & CGC_GENES_PER_TUMOR['PANCANCER']
+        try:
+            false_positive = positive & NEGATIVE_GENES_PER_TUMOR[get_tissue(tumor_name)]
+        except KeyError as err:
+            false_positive = None
 
         qc = Deviation(df=df, description=parser.name)
         deviation_obs_half = qc.deviation_from_null(half=True)
+        areas = qc.calculate_areas()
 
         result = {
             'KTP': len(true_positive),
             'KFP': np.nan if false_positive is None else len(false_positive),
             'QQPLOT_STD_HALF': deviation_obs_half['deviation'],
             'QQPLOT_SLOPE_HALF': deviation_obs_half['slope'],
-            'AREA_RANKING_ABSOLUTE': qc.calculate_absolute_area()
+            'AREA_RANKING_ABSOLUTE': areas['absolute'],
+            'AREA_RANKING_RELATIVE': areas['relative']
         }
         return result
 
@@ -81,7 +90,9 @@ class Filter:
         results = {}
         for method in self.methods:
             input_file = os.path.join(input_run, method, '{}.out.gz'.format(tumor))
-            results[method] = self.statistic_outputs(input_file, tumor, method)
+            res = self.statistic_outputs(input_file, tumor, method)
+            if res is not None:
+                results[method] = res
         return pd.DataFrame(results).T
 
     @staticmethod
@@ -96,13 +107,24 @@ class Filter:
         outliers_up = q75 + (iqr * 1.5)
         return outliers_down, outliers_up
 
-    def filters(self, by='AREA_RANKING_ABSOLUTE'):
+    def filter_by(self, by):
+        """Identifies methods that show abnormal values for a given metric
+        :param by: str, name of the column containing the desired metric
+        :return: set, discarded methods
+        """
         values = self.data[by].tolist()
         methods = self.data.index.tolist()
         finite_values = [x for x in values if np.isfinite(x)]
         down, up = self.find_outliers(finite_values)
         discarded = [methods[i] for i, v in enumerate(values) if (np.isfinite(v) and v < down)]
-        return discarded
+        return set(discarded)
+
+    def filters(self):
+        """Identifies methods to be discarded by applying two filters,
+        AREA_RANKING_ABSOLUTE and AREA_RANKING_RELATIVE
+        :return: set, discarted methods
+        """
+        return self.filter_by(by='AREA_RANKING_ABSOLUTE') & self.filter_by(by='AREA_RANKING_RELATIVE')
 
 
 def create_constrains():
