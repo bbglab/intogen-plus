@@ -12,6 +12,7 @@ process PreprocessFromInput {
     output:
         file "vep/*.in.gz" into IN_VEP mode flatten
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
+        file "preprocess/*.json" into LOGS_PREPROCESS
 
     """
     python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml

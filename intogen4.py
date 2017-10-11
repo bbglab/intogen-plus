@@ -1,6 +1,5 @@
+import json
 import os
-import gzip
-import csv
 import logging
 import click
 
@@ -16,7 +15,7 @@ from tasks.vep import VepTask
 from tasks.mutsigcv import MutsigCvTask
 from tasks.schulze import SchulzeTask
 
-from filters.base import VariantsReader
+from filters.base import VariantsReader, TSVReader
 from filters.preprocess import PreprocessFilter
 
 
@@ -43,13 +42,6 @@ LOG_FILE = 'intogen.log'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def read_file(group_key, tsv_file):
-    with gzip.open(tsv_file, "rt") as fd:
-        reader = csv.DictReader(fd, delimiter='\t')
-        for row in reader:
-            yield row
-
-
 def prepare_task(reader, tasks, item):
     position, (group_key, group_data) = item
 
@@ -60,7 +52,7 @@ def prepare_task(reader, tasks, item):
     [t.input_start() for t in tasks]
 
     # Input write
-    for i, mut in enumerate(reader(group_key, group_data)):
+    for i, mut in enumerate(reader.run(group_key, group_data)):
         id = "I{:010d}".format(i)
         for t in tasks:
             t.input_write(id, mut)
@@ -68,7 +60,14 @@ def prepare_task(reader, tasks, item):
     # Input close
     [t.input_end() for t in tasks]
 
-    return [(t.KEY, group_key) for t in tasks]
+    # Check errors and remove inputs
+    errors = [e for e in reader.stats.get(group_key, {}).keys() if e.startswith("error_")]
+    if len(errors) > 0:
+        for t in tasks:
+            if os.path.exists(t.in_file):
+                os.unlink(t.in_file)
+
+    return [(t.KEY, group_key) for t in tasks], reader.stats
 
 
 def prepare_tasks(groups, reader, tasks, cores=None):
@@ -77,8 +76,9 @@ def prepare_tasks(groups, reader, tasks, cores=None):
     all_tasks = []
     if cores > 1:
         with ProcessPoolExecutor(cores) as executor:
-            for tasks in executor.map(func, enumerate(groups)):
+            for tasks, stats in executor.map(func, enumerate(groups)):
                 all_tasks += tasks
+                reader.stats.update(stats)
     else:
         for tasks in map(func, enumerate(groups)):
             all_tasks += tasks
@@ -112,9 +112,18 @@ def preprocess(input, output, groupby, cores, tasks):
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
 
     reader = VariantsReader()
-    filter = PreprocessFilter(reader)
+    for f in [PreprocessFilter]:
+        reader = f(reader)
 
-    prepare_tasks(groups, filter.run, tasks, cores=cores)
+    prepare_tasks(groups, reader, tasks, cores=cores)
+
+    # Store filters stats
+    stats_folder = os.path.join(output, "preprocess")
+    os.makedirs(stats_folder, exist_ok=True)
+    while reader.parent is not None:
+        with open(os.path.join(stats_folder, "{}.json".format(reader.KEY)), "wt") as fd:
+            json.dump(reader.stats, fd, indent=4, sort_keys=True)
+        reader = reader.parent
 
 
 @click.command(short_help='Create tasks input files')
@@ -124,7 +133,8 @@ def preprocess(input, output, groupby, cores, tasks):
 def read(input, output, tasks):
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
-    prepare_tasks([(group_key, input)], read_file, tasks, cores=1)
+    reader = TSVReader()
+    prepare_tasks([(group_key, input)], reader, tasks, cores=1)
 
 
 @click.command(short_help='Run a task')
