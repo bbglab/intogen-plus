@@ -57,8 +57,10 @@ class Filter:
         """
         parser = Parser(method=method, gene_coordinates=PATH_REGIONS)
         df = parser.read(input_file)
-        if len(df) == 0:
+
+        if df is None or len(df) == 0:
             return None
+
         positive = df[df['QVALUE'] < 0.1]
         positive = set(positive['SYMBOL']) if len(positive) > 0 else set()
         true_positive = positive & CGC_GENES_PER_TUMOR['PANCANCER']
