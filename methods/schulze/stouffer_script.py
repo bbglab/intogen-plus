@@ -51,11 +51,38 @@ def impute(pvals):
     return pvals
 
 
+def trim_nans(pvals):
+    """
+    provides reduced list of pvalues removing nans
+    """
+
+    nan_mask = np.isnan(pvals)
+    reduced_pvals = pvals[~nan_mask]
+    return reduced_pvals, nan_mask
+
+
+def truncate(pvals, threshold=1e-16):
+
+    mask = (pvals < threshold)
+    pvals[mask] = threshold
+    return pvals
+
+
+def trimmed_stouffer_w(pvals, weights):
+    """
+    conducts stouffer_w where pvals and weights are clean from nans
+    """
+
+    reduced_pvals, nan_mask = trim_nans(pvals)
+    reduced_weights = weights[~nan_mask]
+    return stouffer_w(truncate(reduced_pvals), weights=reduced_weights)
+
+
 def combine_pvals(df, path_weights):
 
     weight_dict = parse_optimized_weights(path_weights)
     weights = np.array([weight_dict[m] for m in DEFAULT_METHODS])
-    func = lambda x: stouffer_w(impute(x), weights=weights)
+    func = lambda x: trimmed_stouffer_w(x, weights)
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)
     df['QVALUE_' + 'stouffer_w'] = multicomp.multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
     return df
