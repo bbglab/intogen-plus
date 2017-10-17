@@ -12,7 +12,7 @@ process PreprocessFromInput {
     output:
         file "vep/*.in.gz" into IN_VEP mode flatten
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
-        file "preprocess/*.json" into LOGS_PREPROCESS
+        file "filters/*.json" into LOGS_FILTERS
 
     """
     python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml
@@ -54,6 +54,7 @@ process PreprocessFromVep {
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
         file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
         file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
+        file "filters/*.json" into LOGS_FILTERS
 
     """
     python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega hotmapssignature oncodriveclust mutsigcv
