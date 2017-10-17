@@ -16,7 +16,7 @@ from tasks.mutsigcv import MutsigCvTask
 from tasks.schulze import SchulzeTask
 
 from filters.base import VariantsReader, TSVReader
-from filters.preprocess import PreprocessFilter
+from filters.variants import VariantsFilter
 
 
 TASKS = {t.KEY: t for t in [
@@ -83,6 +83,14 @@ def prepare_tasks(groups, reader, tasks, cores=None):
         for tasks in map(func, enumerate(groups)):
             all_tasks += tasks
 
+    # Store filters stats
+    stats_folder = os.path.join(output, "filters")
+    os.makedirs(stats_folder, exist_ok=True)
+    while reader.parent is not None:
+        with open(os.path.join(stats_folder, "{}.json".format(reader.KEY)), "wt") as fd:
+            json.dump(reader.stats, fd, indent=4, sort_keys=True)
+        reader = reader.parent
+
     return all_tasks
 
 
@@ -112,18 +120,10 @@ def preprocess(input, output, groupby, cores, tasks):
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
 
     reader = VariantsReader()
-    for f in [PreprocessFilter]:
+    for f in [VariantsFilter]:
         reader = f(reader)
 
     prepare_tasks(groups, reader, tasks, cores=cores)
-
-    # Store filters stats
-    stats_folder = os.path.join(output, "preprocess")
-    os.makedirs(stats_folder, exist_ok=True)
-    while reader.parent is not None:
-        with open(os.path.join(stats_folder, "{}.json".format(reader.KEY)), "wt") as fd:
-            json.dump(reader.stats, fd, indent=4, sort_keys=True)
-        reader = reader.parent
 
 
 @click.command(short_help='Create tasks input files')
@@ -134,6 +134,9 @@ def read(input, output, tasks):
     tasks = [TASKS[t](output, CONFIG) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
     reader = TSVReader()
+    for f in [VepFilter]:
+        reader = f(reader)
+
     prepare_tasks([(group_key, input)], reader, tasks, cores=1)
 
 

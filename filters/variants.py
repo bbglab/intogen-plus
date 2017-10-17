@@ -12,9 +12,9 @@ from intervaltree import IntervalTree
 logger = logging.getLogger(__name__)
 
 
-class PreprocessFilter(Filter):
+class VariantsFilter(Filter):
 
-    KEY = "filters"
+    KEY = "variants"
 
     # Minimum cutoff
     MIN_CUTOFF = 1000
@@ -163,3 +163,6 @@ class PreprocessFilter(Filter):
             self.stats[group_key]["error_genome_reference_mismatch"] = "There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(count_mismatch, count_snp)
         elif ratio_mismatch > 0.05:
             self.stats[group_key]["warning_genome_reference_mismatch"] = "There are {} of {} genome reference mismatches.".format(count_mismatch, count_snp)
+
+        if count_after == 0:
+            self.stats[group_key]["error_no_entries"] = "There are no variants after filtering"
