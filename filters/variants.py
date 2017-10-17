@@ -47,9 +47,10 @@ class VariantsFilter(Filter):
                 indel_per_sample[s] = indel_per_sample.get(s, 0) + 1
 
             mut_per_sample[s] = mut_per_sample.get(s, 0) + 1
-            s = donors.get(m['DONOR'], set())
-            s.add(m['SAMPLE'])
-            donors[m['DONOR']] = s
+            if 'DONOR' in m:
+                s = donors.get(m['DONOR'], set())
+                s.add(m['SAMPLE'])
+                donors[m['DONOR']] = s
 
         return indel_per_sample, mut_per_sample, snp_per_sample, donors
 
