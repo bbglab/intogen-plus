@@ -70,7 +70,7 @@ def prepare_task(reader, tasks, item):
     return [(t.KEY, group_key) for t in tasks], reader.stats
 
 
-def prepare_tasks(groups, reader, tasks, cores=None):
+def prepare_tasks(output, groups, reader, tasks, cores=None):
     func = partial(prepare_task, reader, tasks)
 
     all_tasks = []
@@ -123,7 +123,7 @@ def preprocess(input, output, groupby, cores, tasks):
     for f in [VariantsFilter]:
         reader = f(reader)
 
-    prepare_tasks(groups, reader, tasks, cores=cores)
+    prepare_tasks(output, groups, reader, tasks, cores=cores)
 
 
 @click.command(short_help='Create tasks input files')
@@ -137,7 +137,7 @@ def read(input, output, tasks):
     for f in [VepFilter]:
         reader = f(reader)
 
-    prepare_tasks([(group_key, input)], reader, tasks, cores=1)
+    prepare_tasks(output, [(group_key, input)], reader, tasks, cores=1)
 
 
 @click.command(short_help='Run a task')
