@@ -1,13 +1,7 @@
 import os
-import csv
-import gzip
 import logging
-import numpy as np
 
-from bgreference import hg19
 from .base import Filter
-from collections import Counter, defaultdict
-from intervaltree import IntervalTree
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +22,7 @@ class VepFilter(Filter):
 
         genes = {}
         consequence = {}
+        chromosomes = {}
 
         count_before = 0
         count_after = 0
@@ -38,6 +33,9 @@ class VepFilter(Filter):
             if v['CANONICAL'] != "YES":
                 continue
 
+            chromosome = v['Location'].split(":")[0]
+            chromosomes[chromosome] = consequence.get(chromosome, 0) + 1
+
             count_after += 1
             consequence[v['Consequence']] = consequence.get(v['Consequence'], 0) + 1
             genes[v['SYMBOL']] = genes.get(v['SYMBOL'], 0) + 1
@@ -45,6 +43,7 @@ class VepFilter(Filter):
             yield v
 
         self.stats[group_key]['consequence'] = consequence
+        self.stats[group_key]['chromosomes'] = chromosomes
         self.stats[group_key]['genes'] = genes
         self.stats[group_key]['count'] = {
             'after': count_after,
