@@ -94,6 +94,10 @@ def partial_correction(df, fml_data):
     c = dh['Q_VALUE'].values
     mask = ~np.isnan(c)
     a = dh['PVALUE_' + 'stouffer_w'].values
+
+    if len(a[mask]) == 0:
+        raise RuntimeError("No data after filtering NaN OncodriveFML q-values")
+
     c[mask] = multicomp.multipletests(a[mask], method='fdr_bh')[1]
     dh['QVALUE_' + 'stouffer_w'] = c
     del dh['Q_VALUE']
