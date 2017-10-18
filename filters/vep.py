@@ -35,7 +35,6 @@ class VepFilter(Filter):
 
             chromosome = v['Location'].split(":")[0]
             chromosomes[chromosome] = chromosomes.get(chromosome, 0) + 1
-
             count_after += 1
             consequence[v['Consequence']] = consequence.get(v['Consequence'], 0) + 1
             genes[v['SYMBOL']] = genes.get(v['SYMBOL'], 0) + 1
@@ -49,6 +48,7 @@ class VepFilter(Filter):
             'after': count_after,
             'before': count_before
         }
+        self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
 
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "There is no VEP output"
