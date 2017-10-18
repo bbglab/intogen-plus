@@ -34,7 +34,7 @@ class VepFilter(Filter):
                 continue
 
             chromosome = v['Location'].split(":")[0]
-            chromosomes[chromosome] = consequence.get(chromosome, 0) + 1
+            chromosomes[chromosome] = chromosomes.get(chromosome, 0) + 1
 
             count_after += 1
             consequence[v['Consequence']] = consequence.get(v['Consequence'], 0) + 1
@@ -54,7 +54,7 @@ class VepFilter(Filter):
             self.stats[group_key]["error_no_entries"] = "There is no VEP output"
 
         if len(chromosomes) < 20:
-            self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations"
+            self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations".format(len(chromosomes))
         elif len(chromosomes) < 23:
-            self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations"
+            self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations".format(len(chromosomes))
 
