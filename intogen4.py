@@ -17,6 +17,7 @@ from tasks.schulze import SchulzeTask
 
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
+from filters.vep import VepFilter
 
 
 TASKS = {t.KEY: t for t in [
@@ -84,10 +85,10 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
             all_tasks += tasks
 
     # Store filters stats
-    stats_folder = os.path.join(output, "filters")
-    os.makedirs(stats_folder, exist_ok=True)
+    stats_file = os.path.join(output, "filters", "{}.json".format(reader.KEY))
+    os.makedirs(os.path.dirname(stats_file), exist_ok=True)
     while reader.parent is not None:
-        with open(os.path.join(stats_folder, "{}.json".format(reader.KEY)), "wt") as fd:
+        with open(stats_file, "wt") as fd:
             json.dump(reader.stats, fd, indent=4, sort_keys=True)
         reader = reader.parent
 

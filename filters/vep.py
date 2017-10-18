@@ -21,6 +21,8 @@ class VepFilter(Filter):
 
     def run(self, group_key, group_data):
 
+        self.KEY = "vep{}{}".format(os.path.sep, group_key)
+
         genes = {}
         consequence = {}
 
