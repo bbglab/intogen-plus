@@ -33,6 +33,9 @@ class VepFilter(Filter):
             if v['CANONICAL'] != "YES":
                 continue
 
+            # Remove multiple consequences
+            v['Consequence'] = v['Consequence'].split(',')[0]
+
             chromosome = v['Location'].split(":")[0]
             chromosomes[chromosome] = chromosomes.get(chromosome, 0) + 1
             count_after += 1
