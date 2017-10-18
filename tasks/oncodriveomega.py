@@ -98,8 +98,15 @@ class OncodriveOmegaTask(Task):
             covariates_file = path.join(config['datasets']['covariates_folder'], "GENERIC.covariates_ensembl.tsv")
 
         analysis = OncodriveOmega(self.in_file, signature_file, covariates_file, config=config, cores=int(os.environ.get('PROCESS_CPUS', os.cpu_count())))
+
+        # Prepare phase
         analysis.prepare_mutations(cache=False)
-        analysis.prepare_regression(cache=False)
+        analysis.load_site_counts()
+
+        offset_factor = 0.0
+        c = 1 + (offset_factor / 100.)
+        analysis.prepare_regression(c, cache=False, cached_expected_syn=None)
+        analysis.site_counts = {}
 
         # Load all mutated elements
         with gzip.open(self.in_file, 'rt') as fd:
@@ -108,7 +115,7 @@ class OncodriveOmegaTask(Task):
             elements = set([e[5].strip() for e in reader])
 
         # Genes in regression
-        genes_in_regression = set(analysis.regression_dataframe.index)
+        genes_in_regression = set(analysis.regression_dataframe['GENE'])
         elements = elements.intersection(genes_in_regression)
 
         # Genes with expression filter
@@ -129,7 +136,8 @@ class OncodriveOmegaTask(Task):
         if path.exists(self.out_file):
             os.unlink(self.out_file)
 
-    def compute_expression(self, covariates_file):
+    @staticmethod
+    def compute_expression(covariates_file):
         c = pd.read_csv(covariates_file, sep='\t', header=0, usecols=['GENE', 'expr', 'reptime', 'hic'], engine='python')
         v = c.expr.values
         v = np.log(v[v != 0] + 1)
