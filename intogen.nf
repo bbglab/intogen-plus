@@ -54,7 +54,7 @@ process PreprocessFromVep {
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
         file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
         file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
-        file "filters/*.json" into FILTERS_VEP
+        file "filters/vep/*.json" into FILTERS_VEP
 
     """
     python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega hotmapssignature oncodriveclust mutsigcv
