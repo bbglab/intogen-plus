@@ -12,6 +12,9 @@ from intervaltree import IntervalTree
 logger = logging.getLogger(__name__)
 
 
+
+
+
 class VariantsFilter(Filter):
 
     KEY = "variants"
@@ -22,6 +25,12 @@ class VariantsFilter(Filter):
 
     def __init__(self, parent):
         super().__init__(parent)
+
+    @staticmethod
+    def __none_to_string(value):
+        if value is None:
+            return "None"
+        return None
 
     def hypermutators_cutoff(self, snp_per_sample):
         vals = list(snp_per_sample.values())
@@ -67,7 +76,7 @@ class VariantsFilter(Filter):
             'snp_per_sample': snp_per_sample,
             'indel_per_sample': indel_per_sample
         }
-        self.stats[group_key]['donors'] = {d: list(s) for d, s in donors.items()}
+        self.stats[group_key]['donors'] = {self.__none_to_string(d): list(s) for d, s in donors.items()}
 
         if len(snp_per_sample) < 1:
             self.stats[group_key]['error_no_samples_with_snp'] = "Any sample has a SNP variant"
