@@ -88,8 +88,12 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
     stats_file = os.path.join(output, "filters", "{}.json".format(reader.KEY))
     os.makedirs(os.path.dirname(stats_file), exist_ok=True)
     while reader.parent is not None:
-        with open(stats_file, "wt") as fd:
-            json.dump(reader.stats, fd, indent=4, sort_keys=True)
+        try:
+            with open(stats_file, "wt") as fd:
+                json.dump(reader.stats, fd, indent=4, sort_keys=True)
+        except TypeError as e:
+            logger.error(e)
+
         reader = reader.parent
 
     return all_tasks
