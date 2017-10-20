@@ -73,6 +73,13 @@ class VariantsFilter(Filter):
             self.stats[group_key]['error_no_samples_with_snp'] = "Any sample has a SNP variant"
             return
 
+        if None in donors:
+            self.stats[group_key]['warning_no_donor_id'] = "There is no DONOR id"
+
+        donors_with_multiple_samples = [d for d, s in donors.items() if len(s) > 1]
+        if len(donors_with_multiple_samples) > 0:
+            self.stats[group_key]['warning_multiple_samples_per_donor'] = "{}".format(donors_with_multiple_samples)
+
         cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample)
         self.stats[group_key]['hypermutators'] = {
             'cutoff': cutoff,
