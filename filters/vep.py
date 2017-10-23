@@ -57,7 +57,7 @@ class VepFilter(Filter):
             self.stats[group_key]["error_no_entries"] = "There is no VEP output"
 
         if len(chromosomes) < 14:
-            self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations".format(len(chromosomes))
+            self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
         elif len(chromosomes) < 23:
-            self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations".format(len(chromosomes))
+            self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
 
