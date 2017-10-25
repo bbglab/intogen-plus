@@ -35,6 +35,23 @@ def classify_genes_tiers(df,threshold=0.01,column_ranking="RANKING",column_filte
         else:
             d_class[row["SYMBOL"]] = 4
     return d_class
+def get_recovered_genes(df,column,threshold):
+    '''
+    Method to rescue CGC genes after FDR correction limited to CGC genes.
+    :param df: the input dataframe
+    :param column: colum of the QVALUE of FDR-CGC correction
+    :param threshold: the limit threshold
+    :return: the symbol ID of the genes below the threshold
+    '''
+    l = set(df[df[column]<threshold]["SYMBOL"].values)
+    return l
+def rescue_genes(row,list_genes_recovered):
+    if row["TIER"] <4:
+        return row["TIER"]
+    if row["SYMBOL"] in list_genes_recovered:
+        return 3
+    return 4
+
 
 
 @click.command()
@@ -43,7 +60,10 @@ def classify_genes_tiers(df,threshold=0.01,column_ranking="RANKING",column_filte
 @click.option('--threshold', help="Directory of the output reports",required=False,default=0.01,type=float)
 @click.option('--name_method', help="Name of the method in the output dataframe",default="SCHULZE_THRESHOLD_STOUFFER_WEIGHTED")
 @click.option('--column_filter', help="Column to be used by the filtering",default="QVALUE_schulze_weighted")
-def run_create_tiers(input, output_file, threshold, name_method, column_filter):
+@click.option('--column_filter_cgc', help="Column to be used by the rescue of CGC",default="QVALUE_CGC_stouffer_w")
+
+
+def run_create_tiers(input, output_file, threshold, name_method, column_filter,column_filter_cgc):
 
     df = pd.read_csv(input, sep="\t", compression="gzip")
     df.sort_values(column_filter,inplace=True)
@@ -60,7 +80,8 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter):
         d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold)
         dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
         dfq["METHOD_NAME"] = name_method
-
+        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold)
+        dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
         df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
     else:

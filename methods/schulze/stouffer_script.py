@@ -76,8 +76,22 @@ def trimmed_stouffer_w(pvals, weights):
     reduced_pvals, nan_mask = trim_nans(pvals)
     reduced_weights = weights[~nan_mask]
     return stouffer_w(truncate(reduced_pvals), weights=reduced_weights)
-
-
+def load_cgc():
+    '''
+    Loads the CGC set and returns a set of CGC genes
+    :return: set of cgc gene names
+    '''
+    df_cgc = pd.read_csv("//workspace/projects/intogen_2017/data/latest/CGC_set.tsv",sep="\t")
+    return set(df_cgc["Gene Symbol"].values)
+def set_qvalue_cgc(row,qvalues_cgc,cgc_set):
+    '''
+    Set the CGC qvalue to rows that are CGC genes
+    :param row:
+    :return: the corrected qvalue or nan
+    '''
+    i = 0
+    if row["SYMBOL"].isin(cgc_set):
+        i
 def combine_pvals(df, path_weights):
 
     weight_dict = parse_optimized_weights(path_weights)
@@ -85,7 +99,13 @@ def combine_pvals(df, path_weights):
     func = lambda x: trimmed_stouffer_w(x, weights)
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)
     df['QVALUE_' + 'stouffer_w'] = multicomp.multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
-    return df
+    cgc_set = load_cgc()
+    df_cgc = df[df["SYMBOL"].isin(cgc_set)].copy()
+    pvalues_cgc = df_cgc['PVALUE_' + 'stouffer_w'].values
+    qvalues_cgc = multicomp.multipletests(pvalues_cgc, method='fdr_bh')[1]
+    df_cgc['QVALUE_CGC_' + 'stouffer_w'] = qvalues_cgc
+    df_final = pd.merge(left=df,right=df_cgc[["SYMBOL","QVALUE_CGC_stouffer_w"]],left_on="SYMBOL",right_on=["SYMBOL"],how="left")
+    return df_final
 
 
 def partial_correction(df, fml_data):
