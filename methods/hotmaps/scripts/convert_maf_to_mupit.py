@@ -4,6 +4,8 @@ import MySQLdb
 import argparse
 import pandas as pd
 import numpy as np
+import time
+
 import maf_utils as mu
 
 def parse_arguments():
@@ -143,11 +145,22 @@ def read_maf(path, tumor_type):
 
 def main(opts):
     # get mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
 
     # read in MAF file
