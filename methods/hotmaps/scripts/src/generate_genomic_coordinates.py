@@ -167,6 +167,8 @@ def generate_file_genomic_information(list_pdb_ids,opts,dict_d):
                 
                 f.write( chr+sep+str(first)+sep+str(last)+sep+strand+sep+struct+sep+chain+"\n")
     f.close()
+    cursor.close()
+    db.close()
                
 def generate_unique_chains(list_pdbs,opts):
    
@@ -200,6 +202,10 @@ def generate_unique_chains(list_pdbs,opts):
             else:
                 dict_d[id_struct].append(chain)
                 dict_descript[id_struct].append(hugo)
+
+    cursor.close()
+    db.close()
+
     return dict_d 
    
 def check_proteins_present_outputfile(list_pdbs,fileoutput):

@@ -120,6 +120,8 @@ def main(opts):
                     for result in cursor.fetchall():
                         (pdbid, seqres) = result
                         wf.write('\t'.join([pdbid, seqres, sample+';'+gene+';'+effect]) + '\n')
+    cursor.close()
+    db.close()
 
 
 if __name__ == '__main__':
