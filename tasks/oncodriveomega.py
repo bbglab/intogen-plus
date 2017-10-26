@@ -127,6 +127,8 @@ class OncodriveOmegaTask(Task):
             expressed = self.compute_expression(covariates_file)
             elements = elements.intersection(expressed)
 
+        elements = {"ENSG00000105976"}
+
         results = analysis.run(elements)
 
         analysis.wrap_results(results, self.out_file)
