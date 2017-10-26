@@ -53,7 +53,7 @@ class DndsCvTask(Task):
 
         if not path.exists(self.out_file):
 
-            cmd = "singularity exec {0}/dndscv.img {0}/run.R {1} {2}".format(
+            cmd = "singularity exec {0}/dndscv.img Rscript {0}/run.R {1} {2}".format(
                 os.environ['DNDSCV_DATA'],
                 self.in_file,
                 self.out_file)
