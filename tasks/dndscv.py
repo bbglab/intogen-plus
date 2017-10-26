@@ -58,7 +58,13 @@ class DndsCvTask(Task):
                 self.in_file,
                 self.out_file)
 
-            os.system(cmd)
+            try:
+                o = subprocess.check_output(cmd, shell=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output.decode())
+                sys.exit(e.returncode)
+
+            print(o.decode())
 
         return self.out_file
 
