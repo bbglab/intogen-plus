@@ -7,8 +7,8 @@ from scipy.stats import combine_pvalues, uniform
 import statsmodels.sandbox.stats.multicomp as multicomp
 
 
-DEFAULT_METHODS = ['oncodrivefml', 'oncodriveclust', 'oncodriveomega', 'hotmapssignature', 'mutsigcv']
-
+#DEFAULT_METHODS = ['oncodrivefml', 'oncodriveclust', 'oncodriveomega', 'hotmapssignature', 'mutsigcv']
+DEFAULT_METHODS = ["oncodriveclust", "dndscv","oncodrivefml", "hotmapssignature"]
 
 def parse_optimized_weights(path_weights):
     cap = lambda a: a[:-2]

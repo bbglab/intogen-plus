@@ -10,10 +10,10 @@ import click
 
 class Parser():
 
-    methods = ["hotmapssignature","oncodrivefml","mutsigcv","oncodriveomega","oncodriveclust"] # "oncodriveclust","oncodriveomega"
-    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"], "mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"]}
+    methods = ["hotmapssignature","oncodrivefml","dndscv","oncodriveclust"] # "oncodriveclust","oncodriveomega","mutsigcv",
+    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"],"dndscv":["gene_name","qallsubs_cv","pallsubs_cv"]}#"mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],
 
-    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"mutsigcv":0.1,"oncodriveomega":0.1,"oncodriveclust":0.1} ):
+    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"oncodriveclust":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
@@ -87,14 +87,8 @@ class Parser():
                     df = self.set_ranking_genes(df,q_value_c)
                     if type_selection=="threshold": # Select genes below the threshold
                         df = df[df[q_value_c]<=self.thresholds[method]].copy()
-                        if method == "oncodriveomega":
-                            df = df.head(limit_mutsigcv).copy()
-                        if method == "oncodriveclust":
-                            df = df.head(limit_hts).copy()
-                        if method == "mutsigcv":
-                            limit_mutsigcv = df.shape[0]
-                        if method == "hotmapssignature":
-                            limit_hts = df.shape[0]
+
+
                     else: # Select the ranking genes. In case there is a tie, returns the top 40 + the tied ones.
                         if strict == False:
                             df = df[(df["Ranking"]<number_top)&(df[q_value_c]<1.0)].copy()
