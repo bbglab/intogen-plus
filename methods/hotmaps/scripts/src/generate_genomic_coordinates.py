@@ -9,6 +9,7 @@ import argparse
 import sys
 import os
 
+import time
 
 
 def arguments():
@@ -87,11 +88,22 @@ def generate_file_genomic_information(list_pdb_ids,opts,dict_d):
     
     
     # make mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
     # query for getting all the genomic information of the structure
     out_f = opts["output_file"]
@@ -167,15 +179,28 @@ def generate_file_genomic_information(list_pdb_ids,opts,dict_d):
                 
                 f.write( chr+sep+str(first)+sep+str(last)+sep+strand+sep+struct+sep+chain+"\n")
     f.close()
+    cursor.close()
+    db.close()
                
 def generate_unique_chains(list_pdbs,opts):
    
     # make mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
     # query for getting all the genomic information of the structure
     
@@ -200,6 +225,10 @@ def generate_unique_chains(list_pdbs,opts):
             else:
                 dict_d[id_struct].append(chain)
                 dict_descript[id_struct].append(hugo)
+
+    cursor.close()
+    db.close()
+
     return dict_d 
    
 def check_proteins_present_outputfile(list_pdbs,fileoutput):

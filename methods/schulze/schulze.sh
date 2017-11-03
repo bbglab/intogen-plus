@@ -57,10 +57,17 @@ python $SCRIPTS_FOLDER/stouffer_script.py \
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-# STEP5. Generate the two tiers list
+# STEP5. Generate the two tiers list at 0.01
 echo "## STEP5"
 python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.01 \
     --column_filter QVALUE_stouffer_w \
     --input $OUTPUT/$RUN_FILENAME.stouffer.out.gz \
-    --output_file $OUTPUT/$RUN_FILENAME.out.gz
+    --output_file $OUTPUT/$RUN_FILENAME.01.out.gz
+
+# STEP6. Generate the two tiers list at 0.05
+echo "## STEP6"
+python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.05 \
+    --column_filter QVALUE_stouffer_w \
+    --input $OUTPUT/$RUN_FILENAME.stouffer.out.gz \
+    --output_file $OUTPUT/$RUN_FILENAME.05.out.gz
 

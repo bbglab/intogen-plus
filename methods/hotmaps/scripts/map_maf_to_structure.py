@@ -6,6 +6,8 @@ import argparse
 import csv
 import re
 
+import time
+
 
 def parse_arguments():
     info = 'Map mutations onto protein structures'
@@ -37,11 +39,23 @@ def parse_arguments():
 
 def main(opts):
     # make mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
 
     # iterate through each tumor type
@@ -120,6 +134,8 @@ def main(opts):
                     for result in cursor.fetchall():
                         (pdbid, seqres) = result
                         wf.write('\t'.join([pdbid, seqres, sample+';'+gene+';'+effect]) + '\n')
+    cursor.close()
+    db.close()
 
 
 if __name__ == '__main__':

@@ -4,6 +4,8 @@ import MySQLdb
 import argparse
 import pandas as pd
 import numpy as np
+import time
+
 import maf_utils as mu
 
 def parse_arguments():
@@ -143,11 +145,22 @@ def read_maf(path, tumor_type):
 
 def main(opts):
     # get mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
 
     # read in MAF file
@@ -230,6 +243,9 @@ def main(opts):
         bio_coverage = 0 if tot_mapped_count == 0 else float(mapped_bio_count)/(tot_mapped_count)*100
         homology_coverage = 0 if tot_mapped_count == 0 else float(mapped_homology_count)/(tot_mapped_count)*100
         cov_info_file.write('\t'.join((opts['tumor_type'], str(tot_coverage), str(bio_coverage), str(homology_coverage), str(count))) + '\n')
+
+    cursor.close()
+    db.close()
 
 
 if __name__ == "__main__":

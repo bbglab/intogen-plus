@@ -7,6 +7,9 @@ Module that given the ouput of generating random mutations in a structure retunr
 import MySQLdb
 import os
 
+import time
+
+
 def read_generated_mutations(structure_id,file_mutations,cancer_type,number_mutations):
     """Read the generated mutations.
 
@@ -26,11 +29,22 @@ def read_generated_mutations(structure_id,file_mutations,cancer_type,number_muta
         list of tuples containing the mutaitons (RES,CHAIN). Duplicates are allowed. 
     """
     # make mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                         port=int(os.environ['MYSQL_PORT']),
-                         user=os.environ['MYSQL_USER'],
-                         passwd=os.environ['MYSQL_PASSWD'],
-                         db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
     # query for getting all the genomic information of the structure
     
@@ -65,8 +79,12 @@ def read_generated_mutations(structure_id,file_mutations,cancer_type,number_muta
         for result in cursor.fetchall():# Now get the PDB position 
             pos = int(result[0])
             list_results.append((chain,pos))
-        
+
+    cursor.close()
+    db.close()
+
     return list_results
+
 def map_generated_mutations(structure_id,list_output,d_correspondence):
     """Read the generated mutations.
 
@@ -110,12 +128,24 @@ def map_generated_mutations(structure_id,list_output,d_correspondence):
 
 # TODO Fix mysql configuration
 def generate_correspondence(structure_id):
+
     # make mysql connection
-    db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                          port=int(os.environ['MYSQL_PORT']),
-                          user=os.environ['MYSQL_USER'],
-                          passwd=os.environ['MYSQL_PASSWD'],
-                          db=os.environ['MYSQL_DB'])
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     cursor = db.cursor()
     # query for getting all the genomic information of the structure
 
@@ -141,6 +171,9 @@ def generate_correspondence(structure_id):
         d_correspondence[pdb_id][pos1] = posPDB
         d_correspondence[pdb_id][pos2] = posPDB
         d_correspondence[pdb_id][pos3] = posPDB
+
+    cursor.close()
+    db.close()
     return d_correspondence
 
 #print read_generated_mutations("1a08","/home/fran/Documents/clusters3D/coordinates/out_test.results","GBM",{"host":"localhost","mysql_user":"fran","mysql_passwd":"platano","db":"mupit_modbase"})    

@@ -12,10 +12,11 @@ process PreprocessFromInput {
     output:
         file "vep/*.in.gz" into IN_VEP mode flatten
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
+        file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml
+    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv
     """
 
 }
@@ -81,6 +82,26 @@ process OncodriveClust {
     """
 }
 
+process DndsCV {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_DNDSCV
+
+    output:
+        file "dndscv/*.out.gz" into OUT_DNDSCV mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'dndscv', task_file)}" ]
+    then
+        python $baseDir/intogen4.py run -o . dndscv $task_file
+    else
+        mkdir -p ./dndscv && cp ${outputFile(OUTPUT, 'dndscv', task_file)} ./dndscv/
+    fi
+    """
+}
+
 process OncodriveFML {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
@@ -104,6 +125,8 @@ process OncodriveFML {
 process HotmapsSignature {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
+
+    maxForks 10
 
     input:
         val task_file from IN_HOTMAPS

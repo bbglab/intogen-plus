@@ -7,6 +7,7 @@ from functools import partial
 from bgparsers import selector
 from concurrent.futures import ProcessPoolExecutor
 
+from tasks.dndscv import DndsCvTask
 from tasks.oncodriveclust import OncodriveClustTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.oncodriveomega import OncodriveOmegaTask
@@ -27,7 +28,8 @@ TASKS = {t.KEY: t for t in [
     OncodriveClustTask,
     HotmapsTask,
     MutsigCvTask,
-    SchulzeTask
+    SchulzeTask,
+    DndsCvTask
 ]}
 
 
