@@ -110,7 +110,7 @@ def combine_pvals(df, path_weights):
 
 def partial_correction(df, fml_data):
 
-    dh = pd.merge(left=df, right=fml_data[['SYMBOL', 'Q_VALUE']], left_on=['SYMBOL'], right_on=['SYMBOL'], how="left")
+    dh = pd.merge(left=df, right=fml_data[['SYMBOL', 'Q_VALUE',"SAMPLES","MUTS","MUTS_RECURRENCE"]], left_on=['SYMBOL'], right_on=['SYMBOL'], how="left")
     c = dh['Q_VALUE'].values
     mask = ~np.isnan(c)
     a = dh['PVALUE_' + 'stouffer_w'].values
@@ -121,6 +121,11 @@ def partial_correction(df, fml_data):
     c[mask] = multicomp.multipletests(a[mask], method='fdr_bh')[1]
     dh['QVALUE_' + 'stouffer_w'] = c
     del dh['Q_VALUE']
+    return dh
+
+def include_excess(df,path_dndscv):
+    dnds_data = pd.read_csv(path_dndscv, sep='\t', compression="gzip")
+    dh = pd.merge(left=df, right=dnds_data[['gene_name', 'wmis_cv',"wnon_cv","wspl_cv"]], left_on=['SYMBOL'], right_on=['gene_name'], how="left")
     return dh
 
 
@@ -136,12 +141,15 @@ def combine_from_tumor(df, path_to_output, path_fml):
 @click.option('--path_rankings', type=click.Path(), help="Path to dataframe produced by the voting system", required=True)
 @click.option('--path_weights', type=click.Path(), help="Path to dataframe with weights", required=True)
 @click.option('--path_fml', type=click.Path(), help="Path to OncodriveFML results folder", required=True)
-def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml):
+@click.option('--path_dndscv', type=click.Path(), help="Path to dndsCV results folder", required=True)
+
+def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml,path_dndscv):
 
     df = pd.read_csv(input_path, sep='\t', compression="gzip")
     dg = retrieve_ranking(df, path_rankings)
     dh = combine_pvals(dg, path_weights)
-    combine_from_tumor(dh, output_path, path_fml)
+    di = include_excess(dh, path_dndscv)
+    combine_from_tumor(di, output_path, path_fml)
 
 
 if __name__ == '__main__':
