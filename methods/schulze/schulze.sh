@@ -52,6 +52,7 @@ python $SCRIPTS_FOLDER/stouffer_script.py \
     --path_rankings $OUTPUT/tmp/$RUN_FILENAME.step3 \
     --path_weights $OUTPUT/tmp/$RUN_FILENAME.step2 \
     --path_fml $OUTPUT/../oncodrivefml/$RUN_FILENAME.out.gz \
+    --path_dndscv $OUTPUT/../dndscv/$RUN_FILENAME.out.gz \
     --output_path $OUTPUT/$RUN_FILENAME.stouffer.out.gz
 
 # Exit on error

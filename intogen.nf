@@ -51,14 +51,12 @@ process PreprocessFromVep {
         val task_file from OUT_VEP
 
     output:
-        file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA mode flatten
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
         file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
-        file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega hotmapssignature oncodriveclust mutsigcv
+    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature oncodriveclust
     """
 }
 
@@ -146,56 +144,12 @@ process HotmapsSignature {
 }
 
 
-process OncodriveOmega {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    input:
-        val task_file from IN_ONCODRIVEOMEGA
-
-    output:
-        file "oncodriveomega/*.out.gz" into OUT_ONCODRIVEOMEGA mode flatten
-
-    """
-    if [ ! -f "${outputFile(OUTPUT, 'oncodriveomega', task_file)}" ]
-    then
-        export PROCESS_CPUS=$task.cpus
-        python $baseDir/intogen4.py run -o . oncodriveomega $task_file
-    else
-        mkdir -p ./oncodriveomega && cp ${outputFile(OUTPUT, 'oncodriveomega', task_file)} ./oncodriveomega/
-    fi
-    """
-}
-
-process MutsigCV {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    input:
-        val task_file from IN_MUTSIGCV
-
-    output:
-        file "mutsigcv/*.out.gz" into OUT_MUTSIGCV mode flatten
-
-    """
-    if [ ! -f "${outputFile(OUTPUT, 'mutsigcv', task_file)}" ]
-    then
-        python $baseDir/intogen4.py run -o . mutsigcv $task_file
-    else
-        mkdir -p ./mutsigcv && cp ${outputFile(OUTPUT, 'mutsigcv', task_file)} ./mutsigcv/
-    fi
-    """
-}
-
-
 IN_SCHULZE = OUT_ONCODRIVECLUST
                     .phase(OUT_ONCODRIVEFML){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
-                    .phase(OUT_ONCODRIVEOMEGA){ it -> it.fileName }
-                    .map{ it[0] }
-                    .phase(OUT_MUTSIGCV){ it -> it.fileName }
+                    .phase(OUT_DNDSCV){ it -> it.fileName }
                     .map{ it[0] }
 
 process Schulze {
