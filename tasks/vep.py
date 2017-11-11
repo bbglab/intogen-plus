@@ -41,15 +41,14 @@ class VepTask(Task):
     def input_write(self, identifier, mut):
         if not self.in_skip:
             # chr - start - end - allele - strand - identifier
-            if mut['ALT_TYPE'] == 'snp':
-                self.in_writer.writerow( [
-                    mut['CHROMOSOME'],
-                    mut['POSITION'],
-                    mut['POSITION'],
-                    "{}/{}".format(mut['REF'], mut['ALT']),
-                    mut['STRAND'],
-                    "{}__{}__{}__{}".format(identifier, mut['SAMPLE'], mut['REF'], mut['ALT'])
-                ])
+            self.in_writer.writerow( [
+                mut['CHROMOSOME'],
+                mut['POSITION'],
+                mut['POSITION'],
+                "{}/{}".format(mut['REF'], mut['ALT']),
+                mut['STRAND'],
+                "{}__{}__{}__{}".format(identifier, mut['SAMPLE'], mut['REF'], mut['ALT'])
+            ])
 
     def input_end(self):
         if not self.in_skip:
