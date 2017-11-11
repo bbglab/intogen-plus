@@ -124,7 +124,7 @@ process HotmapsSignature {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
-    maxForks 10
+    maxForks 40
 
     input:
         val task_file from IN_HOTMAPS

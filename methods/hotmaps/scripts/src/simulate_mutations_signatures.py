@@ -126,25 +126,7 @@ def map_generated_mutations(structure_id,list_output,d_correspondence):
     return dict_results
 
 
-# TODO Fix mysql configuration
-def generate_correspondence(structure_id):
-
-    # make mysql connection
-    retries = 5
-    while retries > 0:
-        try:
-            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                                 port=int(os.environ['MYSQL_PORT']),
-                                 user=os.environ['MYSQL_USER'],
-                                 passwd=os.environ['MYSQL_PASSWD'],
-                                 db=os.environ['MYSQL_DB'])
-            break
-        except Exception:
-            time.sleep(5)
-            retries -= 1
-
-    if retries == 0:
-        raise RuntimeError("Impossible to connect")
+def generate_correspondence(structure_id, db):
 
     cursor = db.cursor()
     # query for getting all the genomic information of the structure
@@ -158,22 +140,24 @@ def generate_correspondence(structure_id):
     cursor.execute(myquery)
     for result in cursor.fetchall():# Now get the PDB position
         try:
-        	posPDB = int(result[0])
-	except:
-		posPDB = 1
+            posPDB = int(result[0])
+        except:
+            posPDB = 1
+
         pos1 = str(result[1])
         pos2 = str(result[2])
         pos3 = str(result[3])
         pdb_id =result[4]
-        if not(pdb_id in d_correspondence):
 
+        if not(pdb_id in d_correspondence):
             d_correspondence[pdb_id] = {}
+
         d_correspondence[pdb_id][pos1] = posPDB
         d_correspondence[pdb_id][pos2] = posPDB
         d_correspondence[pdb_id][pos3] = posPDB
 
     cursor.close()
-    db.close()
+
     return d_correspondence
 
 #print read_generated_mutations("1a08","/home/fran/Documents/clusters3D/coordinates/out_test.results","GBM",{"host":"localhost","mysql_user":"fran","mysql_passwd":"platano","db":"mupit_modbase"})    

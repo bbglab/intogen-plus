@@ -2,6 +2,9 @@ import os
 import csv
 import argparse
 import logging
+import MySQLdb
+import time
+
 
 import pickle
 from tqdm import tqdm
@@ -98,7 +101,7 @@ def parse_arguments():
     return opts
 
 
-def process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures):
+def process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db):
 
     # skip structure if no mutations
     if not structure_mutations:
@@ -142,7 +145,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
 
     # get neigbours for all residues
     neighbors = find_neighbors(all_res_centers_of_geometry, opts['radius'])
-    d_correspondence = simulate_mutations_signatures.generate_correspondence(structure_id)
+    d_correspondence = simulate_mutations_signatures.generate_correspondence(structure_id, db)
     # iterate through each tumour type
     for tumour in unique_ttypes:
         # skip tumor types if not one specified
@@ -223,11 +226,31 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     with open(opts['mutations'] + ".signature", "rb") as fd:
         signatures = pickle.load(fd)
 
+    # make mysql connection
+    retries = 5
+    while retries > 0:
+        try:
+            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
+                                 port=int(os.environ['MYSQL_PORT']),
+                                 user=os.environ['MYSQL_USER'],
+                                 passwd=os.environ['MYSQL_PASSWD'],
+                                 db=os.environ['MYSQL_DB'])
+            break
+        except Exception:
+            time.sleep(5)
+            retries -= 1
+
+    if retries == 0:
+        raise RuntimeError("Impossible to connect")
+
     for structure_id, struct_info in pdb_info:
         structure_mutations = mutations.get(structure_id, [])
-        result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures)
+        result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
         if result is not None:
             output.append(result)
+
+    db.close()
+
     return output, len(pdb_info)
 
 
