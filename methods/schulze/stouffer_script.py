@@ -35,7 +35,6 @@ def retrieve_ranking(df, path_ranking):
 
 
 def stouffer_w(pvals, weights=None):
-
     return combine_pvalues(pvals, method='stouffer', weights=weights)[1]
 
 
@@ -95,8 +94,9 @@ def set_qvalue_cgc(row,qvalues_cgc,cgc_set):
 def combine_pvals(df, path_weights):
 
     weight_dict = parse_optimized_weights(path_weights)
-    weights = np.array([weight_dict[m] for m in DEFAULT_METHODS])
+    weights = np.abs(np.array([weight_dict[m] for m in DEFAULT_METHODS]))
     func = lambda x: trimmed_stouffer_w(x, weights)
+
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)
     df['QVALUE_' + 'stouffer_w'] = multicomp.multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
     cgc_set = load_cgc()
