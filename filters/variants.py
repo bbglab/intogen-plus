@@ -30,7 +30,7 @@ class VariantsFilter(Filter):
     def __none_to_string(value):
         if value is None:
             return "None"
-        return None
+        return value
 
     def hypermutators_cutoff(self, snp_per_sample):
         vals = list(snp_per_sample.values())
