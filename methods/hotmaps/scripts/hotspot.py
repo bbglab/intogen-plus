@@ -219,12 +219,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
                        ','.join(map(str, obs_pvals)), ]
 
 
-def process_structures(quiet, mut_path, file_coordinates, pdb_info):
-    output = []
-    mutations = utils.read_mutations(mut_path)
-    df_coordinates = simulation_signatures.read_file_coordinates(file_coordinates)
-    with open(opts['mutations'] + ".signature", "rb") as fd:
-        signatures = pickle.load(fd)
+def connect_mysql():
 
     # make mysql connection
     retries = 5
@@ -243,9 +238,27 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     if retries == 0:
         raise RuntimeError("Impossible to connect")
 
+    return db
+
+def process_structures(quiet, mut_path, file_coordinates, pdb_info):
+    output = []
+    mutations = utils.read_mutations(mut_path)
+    df_coordinates = simulation_signatures.read_file_coordinates(file_coordinates)
+    with open(opts['mutations'] + ".signature", "rb") as fd:
+        signatures = pickle.load(fd)
+
+    db = connect_mysql()
+
     for structure_id, struct_info in pdb_info:
         structure_mutations = mutations.get(structure_id, [])
-        result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
+
+        try:
+            result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
+        except MySQLdb.OperationalError:
+            # Try to reconnect DB
+            db = connect_mysql()
+            result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
+
         if result is not None:
             output.append(result)
 
