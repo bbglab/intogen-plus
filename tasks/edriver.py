@@ -59,8 +59,13 @@ class EDriverTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "singularity run {0}/edriver.simg 1 {1} {0}/iur_and_pfam_ensembl_v85.txt {0}/ensembl_v85_seqs_parsed_header.txt {2}/{3}".format(
-                os.environ['EDRIVER_DATA'], self.in_file, self.output_folder, self.name)
+            cmd = "mkdir -p {2}/tmp_{3} && " \
+                  "zcat {1} > {2}/tmp_{3}/input.txt && " \
+                  "singularity run {0}/edriver.simg 1 {2}/tmp_{3}/input.txt {0}/iur_and_pfam_ensembl_v85.txt {0}/ensembl_v85_seqs_parsed_header.txt {2}/tmp_{3}/ed &&" \
+                  "cat {2}/tmp_{3}/ed_unknown_with_corrected_p_values.txt | gzip > {2}/{3}.out.gz &&" \
+                  "rm -rf {2}/tmp_{3}".format(
+                os.environ['EDRIVER_DATA'], self.in_file, self.output_folder, self.name
+            )
 
             stdout = subprocess.check_output(cmd, shell=True)
             print(stdout.decode())
