@@ -8,6 +8,7 @@ from bgparsers import selector
 from concurrent.futures import ProcessPoolExecutor
 
 from tasks.dndscv import DndsCvTask
+from tasks.edriver import EDriverTask
 from tasks.oncodriveclust import OncodriveClustTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.oncodriveomega import OncodriveOmegaTask
@@ -29,7 +30,8 @@ TASKS = {t.KEY: t for t in [
     HotmapsTask,
     MutsigCvTask,
     SchulzeTask,
-    DndsCvTask
+    DndsCvTask,
+    EDriverTask
 ]}
 
 
@@ -37,7 +39,7 @@ CONFIG = {
     VepTask.KEY: {'conda_env': os.environ['CONDA_ENV'], 'vep_data': os.environ['VEP_DATA']},
     OncodriveFmlTask.KEY: {'config_file': os.environ['ONCODRIVEFML_CONF']},
     OncodriveOmegaTask.KEY: {'config_file': os.environ['ONCODRIVEOMEGA_CONF']},
-    HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': os.environ['HOTMAPS_METHOD']}
+    HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': os.environ['HOTMAPS_METHOD']},
 }
 
 logger = logging.getLogger('intogen')
