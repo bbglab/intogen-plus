@@ -65,6 +65,9 @@ class EDriverTask(Task):
                 os.environ['EDRIVER_DATA'], self.in_file, os.path.abspath(self.output_folder), self.name
             )
 
+            stdout = subprocess.check_output(cmd, shell=True)
+            print(stdout.decode())
+
             with gzip.open("{}/mart_export_85.txt.gz".format(os.environ['EDRIVER_DATA']), 'rt') as fd:
                 prot_to_gene = {v['Ensembl Protein ID']: v['Ensembl Gene ID'] for v in csv.DictReader(fd, delimiter='\t')}
 
@@ -82,8 +85,5 @@ class EDriverTask(Task):
                 writer.writerow(['GENE', 'PVALUE', 'QVALUE'])
                 for gene, vals in sorted(results.items(), key=lambda v: v[1][0]):
                     writer.writerow([gene, vals[0], vals[1]])
-
-            stdout = subprocess.check_output(cmd, shell=True)
-            print(stdout.decode())
 
         return self.out_file
