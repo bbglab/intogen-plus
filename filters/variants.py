@@ -79,15 +79,15 @@ class VariantsFilter(Filter):
         self.stats[group_key]['donors'] = {self.__none_to_string(d): list(s) for d, s in donors.items()}
 
         if len(snp_per_sample) < 1:
-            self.stats[group_key]['error_no_samples_with_snp'] = "Any sample has a SNP variant"
+            self.stats[group_key]['error_no_samples_with_snp'] = "[{}] Any sample has a SNP variant".format(group_key)
             return
 
         if None in donors:
-            self.stats[group_key]['warning_no_donor_id'] = "There is no DONOR id"
+            self.stats[group_key]['warning_no_donor_id'] = "[{}] There is no DONOR id".format(group_key)
 
         donors_with_multiple_samples = [d for d, s in donors.items() if len(s) > 1]
         if len(donors_with_multiple_samples) > 0:
-            self.stats[group_key]['warning_multiple_samples_per_donor'] = "{}".format(donors_with_multiple_samples)
+            self.stats[group_key]['warning_multiple_samples_per_donor'] = "[{}] {}".format(group_key, donors_with_multiple_samples)
 
         cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample)
         self.stats[group_key]['hypermutators'] = {
@@ -177,9 +177,9 @@ class VariantsFilter(Filter):
 
         ratio_mismatch = count_mismatch / count_snp
         if ratio_mismatch > 0.1:
-            self.stats[group_key]["error_genome_reference_mismatch"] = "There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(count_mismatch, count_snp)
+            self.stats[group_key]["error_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(group_key, count_mismatch, count_snp)
         elif ratio_mismatch > 0.05:
-            self.stats[group_key]["warning_genome_reference_mismatch"] = "There are {} of {} genome reference mismatches.".format(count_mismatch, count_snp)
+            self.stats[group_key]["warning_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches.".format(group_key, count_mismatch, count_snp)
 
         if count_after == 0:
-            self.stats[group_key]["error_no_entries"] = "There are no variants after filtering"
+            self.stats[group_key]["error_no_entries"] = "[{}] There are no variants after filtering".format(group_key)
