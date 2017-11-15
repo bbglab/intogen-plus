@@ -1,8 +1,6 @@
 import os
-import sys
 import csv
 import gzip
-import signal
 import subprocess
 
 from os import path
@@ -66,6 +64,24 @@ class EDriverTask(Task):
                   "rm -rf {2}/tmp_{3}".format(
                 os.environ['EDRIVER_DATA'], self.in_file, os.path.abspath(self.output_folder), self.name
             )
+
+            with gzip.open("{}/mart_export_85.txt.gz".format(os.environ['EDRIVER_DATA']), 'rt') as fd:
+                prot_to_gene = {v['Ensembl Protein ID']: v['Ensembl Gene ID'] for v in csv.DictReader(fd, delimiter='\t')}
+
+            with gzip.open(self.out_file, 'rt') as fd:
+                results = {}
+                for row in csv.DictReader(fd, delimiter='\t'):
+                    if row['Protein'] in prot_to_gene:
+                        gene = prot_to_gene[row['Protein']]
+                        v = results.get(gene, (2.0, 2.0))
+                        if float(row['p']) < v[0]:
+                            results[gene] = (float(row['p']), float(row['q']))
+
+            with gzip.open("{}/{}.genes.out.gz".format(self.output_folder, self.name), 'wt') as fd:
+                writer = csv.writer(fd, delimiter='\t')
+                writer.writerow(['GENE', 'PVALUE', 'QVALUE'])
+                for gene, vals in sorted(results.items(), key=lambda v: v[1][0]):
+                    writer.writerow([gene, vals[0], vals[1]])
 
             stdout = subprocess.check_output(cmd, shell=True)
             print(stdout.decode())
