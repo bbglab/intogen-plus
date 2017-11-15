@@ -62,7 +62,7 @@ class EDriverTask(Task):
             cmd = "mkdir -p {2}/tmp_{3} && " \
                   "zcat {1} > {2}/tmp_{3}/input.txt && " \
                   "singularity run {0}/edriver.simg 1 {2}/tmp_{3}/input.txt {0}/iur_and_pfam_ensembl_v85.txt {0}/ensembl_v85_seqs_parsed_header.txt {2}/tmp_{3}/ed &&" \
-                  "cat {2}/tmp_{3}/ed_unknown_with_corrected_p_values.txt | gzip > {2}/{3}.out.gz &&" \
+                  "cat <(head -n1 {2}/tmp_{3}/ed_unknown_with_corrected_p_values.txt) <(grep unknown {2}/tmp_{3}/ed_unknown_with_corrected_p_values.txt) | cut -f2- | gzip > {2}/{3}.out.gz &&" \
                   "rm -rf {2}/tmp_{3}".format(
                 os.environ['EDRIVER_DATA'], self.in_file, os.path.abspath(self.output_folder), self.name
             )
