@@ -37,14 +37,14 @@ class EDriverTask(Task):
 
         if not self.in_skip:
 
-            ensp = value['ENSP']
-            if ensp != "-":
+            ensp, position = value['ENSP'], value['Protein_position']
+            if ensp != "-" and position != "-":
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
 
                 # ENSP Protein_position sample tissue
                 self.in_writer.writerow([
                     ensp,
-                    value['Protein_position'],
+                    position,
                     sample,
                     "unknown"
                 ])
