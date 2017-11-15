@@ -68,7 +68,7 @@ class EDriverTask(Task):
             with gzip.open("{}/mart_export_85.txt.gz".format(os.environ['EDRIVER_DATA']), 'rt') as fd:
                 prot_to_gene = {v['Ensembl Protein ID']: v['Ensembl Gene ID'] for v in csv.DictReader(fd, delimiter='\t')}
 
-            with gzip.open(self.out_file, 'rt') as fd:
+            with gzip.open(os.path.abspath(self.out_file), 'rt') as fd:
                 results = {}
                 for row in csv.DictReader(fd, delimiter='\t'):
                     if row['Protein'] in prot_to_gene:
