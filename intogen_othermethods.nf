@@ -1,10 +1,6 @@
 #!/usr/bin/env nextflow
 
 OUTPUT = file(params.output)
-METHODS = ""
-if ( params.omega ) { METHODS += "oncodriveomega " }
-if ( params.mutsigcv ) { METHODS += "mutsigcv " }
-if ( params.edriver ) { METHODS += "edriver " }
 
 
 OUT_VEP = Channel.fromPath( OUTPUT + '/vep/*.out.gz' )
@@ -13,9 +9,6 @@ process PreprocessFromVep {
 
     publishDir OUTPUT, mode: 'copy'
     afterScript "cp .command.log $OUTPUT/preprocess_from_vep.log"
-
-    when:
-        METHODS
 
     input:
         val task_file from OUT_VEP
@@ -26,7 +19,7 @@ process PreprocessFromVep {
         file "edriver/*.in.gz" into IN_EDRIVER mode flatten
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . ${METHODS}
+    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv edriver
     """
 }
 
