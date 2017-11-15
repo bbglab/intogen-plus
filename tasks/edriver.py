@@ -31,7 +31,7 @@ class EDriverTask(Task):
 
         if not self.in_skip:
             self.in_fd = gzip.open(self.in_file, 'wt')
-            self.in_writer = csv.writer(self.in_fd, delimiter='\t')
+            self.in_writer = csv.writer(self.in_fd, delimiter='\t', lineterminator='\n')
 
     def input_write(self, _, value):
 
