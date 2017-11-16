@@ -148,9 +148,6 @@ process EDriver {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
-    when:
-        params.edriver
-
     input:
         val task_file from IN_EDRIVER
 
