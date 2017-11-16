@@ -153,7 +153,6 @@ process EDriver {
 
     output:
         file "edriver/*.out.gz" into OUT_EDRIVER mode flatten
-        file "edriver/*.genes.out.gz" into OUT_GENES_EDRIVER mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'edriver', task_file)}" ]
