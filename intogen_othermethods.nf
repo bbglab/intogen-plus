@@ -16,10 +16,9 @@ process PreprocessFromVep {
     output:
         file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA mode flatten
         file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
-        file "edriver/*.in.gz" into IN_EDRIVER mode flatten
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv edriver
+    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv
     """
 }
 
@@ -68,29 +67,6 @@ process MutsigCV {
         python $baseDir/intogen4.py run -o . mutsigcv $task_file
     else
         mkdir -p ./mutsigcv && cp ${outputFile(OUTPUT, 'mutsigcv', task_file)} ./mutsigcv/
-    fi
-    """
-}
-
-process EDriver {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    when:
-        params.edriver
-
-    input:
-        val task_file from IN_EDRIVER
-
-    output:
-        file "edriver/*.out.gz" into OUT_EDRIVER mode flatten
-
-    """
-    if [ ! -f "${outputFile(OUTPUT, 'edriver', task_file)}" ]
-    then
-        python $baseDir/intogen4.py run -o . edriver $task_file
-    else
-        mkdir -p ./edriver && cp ${outputFile(OUTPUT, 'edriver', task_file)} ./edriver/
     fi
     """
 }

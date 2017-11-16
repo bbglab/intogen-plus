@@ -52,11 +52,12 @@ process PreprocessFromVep {
 
     output:
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
+        file "edriver/*.in.gz" into IN_EDRIVER mode flatten
         file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature oncodriveclust
+    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature oncodriveclust edriver
     """
 }
 
@@ -143,6 +144,29 @@ process HotmapsSignature {
     """
 }
 
+process EDriver {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    when:
+        params.edriver
+
+    input:
+        val task_file from IN_EDRIVER
+
+    output:
+        file "edriver/*.genes.out.gz" into OUT_EDRIVER mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'edriver', task_file)}" ]
+    then
+        python $baseDir/intogen4.py run -o . edriver $task_file
+    else
+        mkdir -p ./edriver && cp ${outputFile(OUTPUT, 'edriver', task_file)} ./edriver/
+    fi
+    """
+}
+
 
 IN_SCHULZE = OUT_ONCODRIVECLUST
                     .phase(OUT_ONCODRIVEFML){ it -> it.fileName }
@@ -150,6 +174,8 @@ IN_SCHULZE = OUT_ONCODRIVECLUST
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_DNDSCV){ it -> it.fileName }
+                    .map{ it[0] }
+                    .phase(OUT_EDRIVER){ it -> it.fileName }
                     .map{ it[0] }
 
 process Schulze {
