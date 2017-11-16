@@ -55,9 +55,10 @@ def trim_nans(pvals):
     provides reduced list of pvalues removing nans
     """
 
-    nan_mask = np.isnan(pvals)
-    reduced_pvals = pvals[~nan_mask]
-    return reduced_pvals, nan_mask
+    nan_mask = np.isnan(pvals) # used to exclude nan p-values from combination
+    anti_one_mask = pvals[pvals < 1.] # used to exclude p-values 1.0 from combination
+    mask = ~nan_mask & anti_one_mask
+    return pvals[mask], mask
 
 
 def truncate(pvals, threshold=1e-16):
