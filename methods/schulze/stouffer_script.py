@@ -8,7 +8,7 @@ import statsmodels.sandbox.stats.multicomp as multicomp
 
 
 #DEFAULT_METHODS = ['oncodrivefml', 'oncodriveclust', 'oncodriveomega', 'hotmapssignature', 'mutsigcv']
-DEFAULT_METHODS = ["oncodriveclust", "dndscv","oncodrivefml", "hotmapssignature"]
+DEFAULT_METHODS = ["oncodriveclust", "dndscv","oncodrivefml", "hotmapssignature","edriver"]
 
 def parse_optimized_weights(path_weights):
     cap = lambda a: a[:-2]
@@ -35,6 +35,7 @@ def retrieve_ranking(df, path_ranking):
 
 
 def stouffer_w(pvals, weights=None):
+
     return combine_pvalues(pvals, method='stouffer', weights=weights)[1]
 
 
@@ -73,8 +74,8 @@ def trimmed_stouffer_w(pvals, weights):
     conducts stouffer_w where pvals and weights are clean from nans
     """
 
-    reduced_pvals, nan_mask = trim_nans(pvals)
-    reduced_weights = weights[~nan_mask]
+    reduced_pvals, mask = trim_nans(pvals)
+    reduced_weights = weights[mask]
     return stouffer_w(truncate(reduced_pvals), weights=reduced_weights)
 def load_cgc():
     '''
@@ -96,6 +97,7 @@ def combine_pvals(df, path_weights):
 
     weight_dict = parse_optimized_weights(path_weights)
     weights = np.abs(np.array([weight_dict[m] for m in DEFAULT_METHODS]))
+
     func = lambda x: trimmed_stouffer_w(x, weights)
 
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)

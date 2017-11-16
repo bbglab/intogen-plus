@@ -10,10 +10,10 @@ import click
 
 class Parser():
 
-    methods = ["hotmapssignature","oncodrivefml","dndscv","oncodriveclust"] # "oncodriveclust","oncodriveomega","mutsigcv",
-    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"],"dndscv":["gene_name","qallsubs_cv","pallsubs_cv"]}#"mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],
+    methods = ["hotmapssignature","oncodrivefml","dndscv","oncodriveclust","edriver"] # "oncodriveclust","oncodriveomega","mutsigcv",
+    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"],"dndscv":["gene_name","qallsubs_cv","pallsubs_cv"],"edriver":["SYMBOL","PVALUE","QVALUE"]}#"mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],
 
-    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"oncodriveclust":0.1} ):
+    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"oncodriveclust":0.1,"edriver":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
@@ -63,12 +63,16 @@ class Parser():
         d = {}
         pvalues = defaultdict(dict)
         for method in self.methods:
-            path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
+            if method != "edriver":
+                path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
+            else:
+                path = os.path.join(self.path, method, "{}.genes.out.gz".format(cancer))
+
             if os.path.exists(path):
                 df = pd.read_csv(path, sep="\t")
 
                 if df.shape[0]>0:
-                    if method == "oncodriveomega" or method == "oncodriveclust":
+                    if method == "oncodriveomega" or method == "oncodriveclust" or method == "edriver":
                         # Include the Hugo_Symbol
                         df["SYMBOL"] = df.apply(lambda row: str(d_hugo[row["GENE"]]) if row["GENE"] in d_hugo else "-" ,axis=1 )
 
@@ -113,7 +117,7 @@ def run_parser(input, cancer, output, selection):
     d_outr, pvalues = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
     with gzip.open("{}".format(output), "wb") as fd:
         pickle.dump(d_outr, fd)
-
+    print (d_outr)
     with gzip.open("{}b".format(output), "wt") as fd:
         writer = csv.writer(fd, delimiter='\t')
         writer.writerow(['SYMBOL'] + ["PVALUE_{}".format(h) for h in p.methods])
