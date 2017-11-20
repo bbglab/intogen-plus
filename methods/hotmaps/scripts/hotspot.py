@@ -108,6 +108,9 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
         return None
 
     # get pdb info
+    if 'path' not in struct_info:
+        return None
+
     pdb_path = struct_info.pop('path')
 
     # read in structure

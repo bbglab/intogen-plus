@@ -60,6 +60,10 @@ def summarize_residues(mutations, pdb_info, radius,
         #print structure_id
         # get pdb info
         struct_info = pdb_info[structure_id]
+
+        if 'path' not in struct_info:
+            continue
+
         pdb_path = struct_info.pop('path')
 
         # read in structure

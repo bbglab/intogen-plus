@@ -258,6 +258,10 @@ def main(opts):
             if pdb_id not in pdb_info:
                 continue
             struct_info = pdb_info[pdb_id].copy()
+
+            if 'path' not in struct_info:
+                continue
+
             pdb_path = struct_info.pop('path')
             struct_chains = []
             for d in struct_info:
