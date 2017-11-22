@@ -70,7 +70,7 @@ class CBaseTask(Task):
 
         if not self.in_skip:
 
-            if value['ALT_TYPE'] == 'snp':
+            if value['CANONICAL'] == 'YES':
 
                 consequence = value['Consequence'].split(',')[0]
                 mut_eff = self.VEP_TO_CBASE.get(consequence, None)
