@@ -83,7 +83,7 @@ class CBaseTask(Task):
                 chromosome, position = value['Location'].split(':')
                 gene = value['SYMBOL']
 
-                ref = hg19(chromosome, position - 1, size=3).upper()
+                ref = hg19(chromosome, int(position) - 1, size=3).upper()
                 context = self.CONTEXT.get(ref, None)
                 if context is None:
                     return
