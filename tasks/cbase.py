@@ -106,7 +106,8 @@ class CBaseTask(Task):
         if not path.exists(self.out_file):
 
             cmd = "mkdir -p {2}_tmp &&" \
-                  "cd {2}_tmp && bash -c 'singularity run {0}/cbase.simg {1} <(zcat {0}/Input) 0 1' &&" \
+                  "zcat {1} > {2}_tmp/input.txt &&" \
+                  "cd {2}_tmp && singularity run {0}/cbase.simg {2}_tmp/input.txt {0}/Input 0 1' &&" \
                   "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
                 os.environ['CBASE_DATA'],
                 self.in_file,
