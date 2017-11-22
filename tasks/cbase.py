@@ -109,9 +109,9 @@ class CBaseTask(Task):
                   "zcat {1} > {2}_tmp/input.txt &&" \
                   "cd {2}_tmp && singularity run {0}/cbase.simg {2}_tmp/input.txt {0}/Input 0 1 &&" \
                   "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
-                os.environ['CBASE_DATA'],
-                self.in_file,
-                self.out_file)
+                os.path.abspath(os.environ['CBASE_DATA']),
+                os.path.abspath(self.in_file),
+                os.path.abspath(self.out_file))
 
             try:
                 o = subprocess.check_output(cmd, shell=True)
