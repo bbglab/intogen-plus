@@ -80,6 +80,10 @@ class CBaseTask(Task):
                     return
 
                 _, _, _, mut_nuc = value['#Uploaded_variation'].split('__')
+
+                if mut_nuc not in "ACGT":
+                    return
+
                 chromosome, position = value['Location'].split(':')
                 gene = value['SYMBOL']
 
