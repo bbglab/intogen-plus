@@ -79,10 +79,11 @@ class CBaseTask(Task):
                 if mut_eff is None:
                     return
 
+                _, _, _, mut_nuc = value['#Uploaded_variation'].split('__')
+                chromosome, position = value['Location'].split(':')
                 gene = value['SYMBOL']
-                mut_nuc = value['ALT']
 
-                ref = hg19(value['CHROMOSOME'], value['POSITION'] - 1, size=3).upper()
+                ref = hg19(chromosome, position - 1, size=3).upper()
                 context = self.CONTEXT.get(ref, None)
                 if context is None:
                     return
