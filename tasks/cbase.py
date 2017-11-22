@@ -107,7 +107,7 @@ class CBaseTask(Task):
 
             cmd = "mkdir -p {2}_tmp &&" \
                   "zcat {1} > {2}_tmp/input.txt &&" \
-                  "cd {2}_tmp && singularity run {0}/cbase.simg {2}_tmp/input.txt {0}/Input 0 1' &&" \
+                  "cd {2}_tmp && singularity run {0}/cbase.simg {2}_tmp/input.txt {0}/Input 0 1 &&" \
                   "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
                 os.environ['CBASE_DATA'],
                 self.in_file,
