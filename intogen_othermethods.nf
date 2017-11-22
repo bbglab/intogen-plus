@@ -8,7 +8,6 @@ process PreprocessFromVep {
     tag { task_file.fileName }
 
     publishDir OUTPUT, mode: 'copy'
-    afterScript "cp .command.log $OUTPUT/preprocess_from_vep.log"
 
     input:
         val task_file from OUT_VEP
@@ -16,9 +15,10 @@ process PreprocessFromVep {
     output:
         file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA mode flatten
         file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
+        file "cbase/*.in.gz" into IN_CBASE mode flatten
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv
+    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv cbase
     """
 }
 
@@ -67,6 +67,29 @@ process MutsigCV {
         python $baseDir/intogen4.py run -o . mutsigcv $task_file
     else
         mkdir -p ./mutsigcv && cp ${outputFile(OUTPUT, 'mutsigcv', task_file)} ./mutsigcv/
+    fi
+    """
+}
+
+process CBase {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    when:
+        params.cbase
+
+    input:
+        val task_file from IN_CBASE
+
+    output:
+        file "cbase/*.out.gz" into OUT_CBASE mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'cbase', task_file)}" ]
+    then
+        python $baseDir/intogen4.py run -o . cbase $task_file
+    else
+        mkdir -p ./cbase && cp ${outputFile(OUTPUT, 'cbase', task_file)} ./cbase/
     fi
     """
 }
