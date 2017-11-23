@@ -18,8 +18,8 @@ gniter = None
 gepsilon = None
 gavaliable_methods = None
 gdiscarded_methods = None
-order_methods_ranking = ["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r"]#,"mutsigcv_r"
-order_methods_threshold = ["oncodriveclust_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t"]#mutsigcv_t
+order_methods_ranking = ["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r"]#,"mutsigcv_r"
+order_methods_threshold = ["oncodriveclust_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_r"]#mutsigcv_t
 order_methods = []
 gweights = []
 gt_combination = None
@@ -31,7 +31,9 @@ METHODS = [
     'oncodriveclust',
     'dndscv',
     'hotmapssignature',
-    'edriver'
+    'edriver',
+    'cbase'
+
 ]#mutsigcv
 
 
@@ -139,7 +141,7 @@ def create_constrains():
     :return: the constrains
     '''
     # constraints of the optimization problem
-    # methods=["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r]
+    # methods=["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase"]
     # constraint 1: sum weights = 1;
     # constraint 2: for each weight, weight >= 0.05;
     # constraint 3: clust + hotmaps+edriver <= 0.5;
@@ -149,13 +151,13 @@ def create_constrains():
     if method_optimization == "SLSQP":
             cons = ( {'type': 'eq', 'fun': lambda w: sum(w) - 1},
                     {'type': 'ineq', 'fun': lambda w: - w[0] - w[3] -w[4] + 0.5},
-                    {'type': 'ineq', 'fun': lambda w: - w[1] + 0.5},
+                    {'type': 'ineq', 'fun': lambda w: - w[1] -w[5] + 0.5},
                     {'type': 'ineq', 'fun': lambda w: - w[2] + 0.5})
     else:
             cons = ( {'type': 'ineq', 'fun': lambda w: sum(w) - 1},
                      {'type': 'ineq', 'fun': lambda w: -sum(w) + 1},
                     {'type': 'ineq', 'fun': lambda w: - w[0] - w[3]-w[4] + 0.5},
-                    {'type': 'ineq', 'fun': lambda w: - w[1] + 0.5},
+                    {'type': 'ineq', 'fun': lambda w: - w[1] - w[5] + 0.5},
                     {'type': 'ineq', 'fun': lambda w: - w[2] + 0.5})
     if len(gavaliable_methods) == len(order_methods):
 
@@ -163,7 +165,8 @@ def create_constrains():
         {'type': 'ineq', 'fun': lambda w: w[1] - 0.05},
         {'type': 'ineq', 'fun': lambda w: w[2] - 0.05},
         {'type': 'ineq', 'fun': lambda w: w[3] - 0.05},
-        {'type': 'ineq', 'fun': lambda w: w[4] - 0.05}
+        {'type': 'ineq', 'fun': lambda w: w[4] - 0.05},
+        {'type': 'ineq', 'fun': lambda w: w[5] - 0.05}
         )
         return cons
     else: # Some method is missing
@@ -214,6 +217,14 @@ def create_constrains():
             else:
                 l.append({'type': 'ineq', 'fun': lambda w: -w[4] })
                 l.append({'type': 'ineq', 'fun': lambda w: w[4] })
+        if "cbase_r" in list_presents:
+            l.append( {'type': 'ineq', 'fun': lambda w: w[5] - 0.05})
+        else:
+            if method_optimization == "SLSQP":
+                l.append({'type': 'eq', 'fun': lambda w: w[5] })
+            else:
+                l.append({'type': 'ineq', 'fun': lambda w: -w[5] })
+                l.append({'type': 'ineq', 'fun': lambda w: w[5] })
 
         cons = cons + tuple(l)
 
@@ -254,7 +265,7 @@ def optimize_with_seed(arg):
     return res
 
 
-def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclust', 'oncodrivemut',"edriver"]):
+def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclust', 'oncodrivemut',"edriver","cbase"]):
         # define symmetric dirichlet distribution with concentration parameter = a
         n = len(methods)
         alpha = [a] * n
@@ -301,7 +312,7 @@ def set_type_weights(methods,weights):
     return d
 
 
-def calculate_objective_function(d_ranking, weights, objective_method="Combination_Ranking",objetive_function=None,  methods=["oncodriveclust","dnds","oncodrivefml","hotmapssignature","edriver"],log=False):
+def calculate_objective_function(d_ranking, weights, objective_method="Combination_Ranking",objetive_function=None,  methods=["oncodriveclust","dnds","oncodrivefml","hotmapssignature","edriver","cbase"],log=False):
     '''
     Given a distribution of weights returns the value of the objetive function (default: enrichment, combination_ranking)
 
@@ -404,9 +415,9 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optim
 
     f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function, methods=list(d_results_methodsr.keys()))
     if t_combination == "RANKING":
-        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4]})
+        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5]})
     else:
-        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4]})
+        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5]})
 
     niter = gniter
     res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)
