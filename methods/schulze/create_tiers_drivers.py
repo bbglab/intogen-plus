@@ -2,8 +2,8 @@ import csv
 import gzip
 
 import pandas as pd
-import glob
-import re
+
+from oncodriverole.main import classify
 import numpy as np
 import click
 
@@ -83,7 +83,9 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter,c
         rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold)
         dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
-        df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
+        df_roles = classify(df_tiers)
+        df_tiers_final = pd.merge(left=df_tiers,right=df_roles,how="left")
+        df_tiers_final.to_csv(output_file, sep="\t", index=False, compression="gzip")
     else:
 
         # No results
