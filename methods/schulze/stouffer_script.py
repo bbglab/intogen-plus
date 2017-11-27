@@ -128,7 +128,7 @@ def partial_correction(df, fml_data):
 
 def include_excess(df,path_dndscv):
     dnds_data = pd.read_csv(path_dndscv, sep='\t', compression="gzip")
-    dh = pd.merge(left=df, right=dnds_data[['gene_name', 'wmis_cv',"wnon_cv","wspl_cv"]], left_on=['SYMBOL'], right_on=['gene_name'], how="left")
+    dh = pd.merge(left=df, right=dnds_data[['gene_name', 'wmis_cv',"wnon_cv","wspl_cv","wind_cv"]], left_on=['SYMBOL'], right_on=['gene_name'], how="left")
     return dh
 
 
