@@ -184,7 +184,7 @@ def create_constrains():
             else:
                 l.append({'type': 'ineq', 'fun': lambda w: -w[0] })
                 l.append({'type': 'ineq', 'fun': lambda w: w[0] })
-        if "dnds_r" in list_presents:
+        if "dndscv_r" in list_presents:
             l.append( {'type': 'ineq', 'fun': lambda w: w[1] - 0.05})
         else:
             if method_optimization == "SLSQP":
@@ -421,6 +421,7 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optim
 
     niter = gniter
     res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)
+
     output = prepare_output(order_methods, res)
     if len(output)>0:
         methods = list(output[0][0].keys())
