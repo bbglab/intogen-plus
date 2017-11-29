@@ -116,10 +116,12 @@ class VariantsFilter(Filter):
         count_snp = 0
         count_indel = 0
         count_mismatch = 0
+        count_duplicated = 0
 
         # Read variants
 
         signature = {}
+        variants_by_sample = {}
 
         for v in self.parent.run(group_key, group_data):
             count_before += 1
@@ -139,6 +141,17 @@ class VariantsFilter(Filter):
                     skip_coverage += 1
                     skip_coverage_positions.append((v['SAMPLE'], v['CHROMOSOME'], v['POSITION']))
                     continue
+
+            # Check duplicates
+            var_value = "{}:{}:{}>{}".format(v['CHROMOSOME'], v['POSITION'], v['REF'], v['ALT'])
+            if v['SAMPLE'] in variants_by_sample:
+                if var_value in variants_by_sample[v['SAMPLE']]:
+                    count_duplicated += 1
+                    continue
+                else:
+                    variants_by_sample[v['SAMPLE']].add(var_value)
+            else:
+                variants_by_sample[v['SAMPLE']] = {var_value}
 
             count_after += 1
             if v['ALT_TYPE'] == 'snp':
@@ -170,7 +183,8 @@ class VariantsFilter(Filter):
             'after': count_after,
             'snp': count_snp,
             'indel': count_indel,
-            'mismatch': count_mismatch
+            'mismatch': count_mismatch,
+            'duplicated': count_duplicated
         }
 
         self.stats[group_key]['signature'] = signature
@@ -183,3 +197,6 @@ class VariantsFilter(Filter):
 
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "[{}] There are no variants after filtering".format(group_key)
+
+        if count_duplicated > 0:
+            self.stats[group_key]["warning_duplicated_variants"] = "[{}] There are {} duplicated variants".format(group_key, count_duplicated)
