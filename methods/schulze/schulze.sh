@@ -25,7 +25,7 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # STEP2. Optimize a couple of cancer types
 echo "## STEP2"
-python $SCRIPTS_FOLDER/optimizer.py --seeds 12 --niter 1000 --epsilon 0.01 --t_combination RANKING \
+python $SCRIPTS_FOLDER/optimizer.py --seeds 24 --niter 1000 --epsilon 0.01 --t_combination RANKING \
  --foutput $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --input_rankings $OUTPUT/tmp/$RUN_FILENAME.step1 \
  --moutput $OUTPUT/../ \
