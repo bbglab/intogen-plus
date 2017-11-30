@@ -376,13 +376,13 @@ def prepare_output(methods_order,solutions):
 @click.option('--percentage_cgc', default=1.0,help='Percentage of CGC used in the optimization. Default all.')
 @click.option('--moutput',type=click.Path(exists=True),help="Input data directory", required=True)
 @click.option('--cancer', type=str, required=True)
-@click.option('--seed', default="T",type=bool,help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]", required=True)
-def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optimization_algorithm,percentage_cgc, moutput, cancer,seed):
+@click.option('--seed', default="T", type=str, help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]", required=True)
+def run_optimizer(seeds, niter, epsilon, foutput, input_rankings, t_combination, optimization_algorithm, percentage_cgc, moutput, cancer, seed):
 
     global gniter, gepsilon, gavaliable_methods, order_methods, gt_combination, method_optimization
     gniter = niter
     gepsilon = epsilon
-    if seed =="T":
+    if seed == "T":
         np.random.seed(1)
     # Select order methods
     gt_combination = t_combination
@@ -421,9 +421,9 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optim
 
     f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function, methods=list(d_results_methodsr.keys()))
     if t_combination == "RANKING":
-        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5]})
+        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3], "edriver_r":w[4], "cbase_r":w[5]})
     else:
-        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5]})
+        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3], "edriver_t":w[4], "cbase_t":w[5]})
 
     niter = gniter
     res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)
@@ -438,9 +438,9 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optim
                 row.append(seed[0][method])
             row.append(seed[1])
             matrix.append(row)
-        o = pd.DataFrame(matrix,columns=methods+["Objective_Function"])
+        o = pd.DataFrame(matrix, columns=methods+["Objective_Function"])
     else:
-        o = pd.DataFrame([],columns=order_methods+["Objective_Function"])
+        o = pd.DataFrame([], columns=order_methods+["Objective_Function"])
 
     o.to_csv(foutput, sep="\t", index=False, compression="gzip")
 
