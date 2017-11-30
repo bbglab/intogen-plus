@@ -7,7 +7,7 @@ import pandas as pd
 from functools import partial
 from scipy.stats import dirichlet
 from scipy.optimize import minimize
-
+from scipy.optimize import basinhopping
 from qc.drivers import CGC_GENES_PER_TUMOR, NEGATIVE_GENES_PER_TUMOR
 from qc.deviations import Deviation
 from qc.parser import Parser
@@ -260,6 +260,10 @@ def optimize_with_seed(arg):
     epsilon = gepsilon
     if method_optimization == "SLSQP":
         res = minimize(g, w, method='SLSQP', constraints=cons, options={'maxiter': niter, 'eps': epsilon,"ftol":1e-6,"disp":True})
+        #minimizer_kwargs = {"constraints":cons, "method": "SLSQP"}
+        #x0 = [1/6 for _ in range(6)]
+        #res = basinhopping(g,x0,minimizer_kwargs=minimizer_kwargs, niter=5, T=1,stepsize=epsilon)
+        #print (res)
     if method_optimization == "COBYLA":
         res = minimize(g, w, method='COBYLA', constraints=cons, options={'maxiter': niter, "tol":1e-6,"disp":True,"rhobeg":epsilon})
     return res
@@ -372,12 +376,14 @@ def prepare_output(methods_order,solutions):
 @click.option('--percentage_cgc', default=1.0,help='Percentage of CGC used in the optimization. Default all.')
 @click.option('--moutput',type=click.Path(exists=True),help="Input data directory", required=True)
 @click.option('--cancer', type=str, required=True)
-def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optimization_algorithm,percentage_cgc, moutput, cancer):
+@click.option('--seed', default="T",type=bool,help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]", required=True)
+def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optimization_algorithm,percentage_cgc, moutput, cancer,seed):
 
     global gniter, gepsilon, gavaliable_methods, order_methods, gt_combination, method_optimization
     gniter = niter
     gepsilon = epsilon
-
+    if seed =="T":
+        np.random.seed(1)
     # Select order methods
     gt_combination = t_combination
     method_optimization = optimization_algorithm
