@@ -20,7 +20,7 @@ class VariantsFilter(Filter):
     KEY = "variants"
 
     # Minimum cutoff
-    MIN_CUTOFF = 1000
+    MIN_CUTOFF = {"WXS": 1000, "WGS": 10000}
     CHROMOSOMES = set([str(c) for c in range(1, 23)] + ['X', 'Y'])
 
     def __init__(self, parent):
@@ -32,12 +32,12 @@ class VariantsFilter(Filter):
             return "None"
         return value
 
-    def hypermutators_cutoff(self, snp_per_sample):
+    def hypermutators_cutoff(self, snp_per_sample, sequence_type="WXS"):
         vals = list(snp_per_sample.values())
         iqr = np.subtract(*np.percentile(vals, [75, 25]))
         q3 = np.percentile(vals, 75)
         computed_cutoff = (q3 + 1.5 * iqr)
-        cutoff = max(self.MIN_CUTOFF, computed_cutoff)
+        cutoff = max(self.MIN_CUTOFF[sequence_type], computed_cutoff)
         return cutoff, computed_cutoff, set([k for k, v in snp_per_sample.items() if v > cutoff])
 
     def sample_stats(self, group_key, group_data):
@@ -89,7 +89,8 @@ class VariantsFilter(Filter):
         if len(donors_with_multiple_samples) > 0:
             self.stats[group_key]['warning_multiple_samples_per_donor'] = "[{}] {}".format(group_key, donors_with_multiple_samples)
 
-        cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample)
+        sequence_type = "WGS" if "WGS" in group_key else "WXS"
+        cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample, sequence_type=sequence_type)
         self.stats[group_key]['hypermutators'] = {
             'cutoff': cutoff,
             'computed_cutoff': theorical_cutoff,

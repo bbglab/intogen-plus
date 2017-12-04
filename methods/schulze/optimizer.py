@@ -377,8 +377,8 @@ def prepare_output(methods_order,solutions):
 @click.option('--percentage_cgc', default=1.0,help='Percentage of CGC used in the optimization. Default all.')
 @click.option('--moutput',type=click.Path(exists=True),help="Input data directory", required=True)
 @click.option('--cancer', type=str, required=True)
-@click.option('--seed', default="T",help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]", required=True)
-def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optimization_algorithm,percentage_cgc, moutput, cancer,seed):
+@click.option('--seed', default="T", type=str, help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]", required=True)
+def run_optimizer(seeds, niter, epsilon, foutput, input_rankings, t_combination, optimization_algorithm, percentage_cgc, moutput, cancer, seed):
 
     global gniter, gepsilon, gavaliable_methods, order_methods, gt_combination, method_optimization
     gniter = niter
