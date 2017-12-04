@@ -18,8 +18,8 @@ gniter = None
 gepsilon = None
 gavaliable_methods = None
 gdiscarded_methods = None
-order_methods_ranking = ["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r"]#,"mutsigcv_r"
-order_methods_threshold = ["oncodriveclust_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_r"]#mutsigcv_t
+order_methods_ranking = ["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r","oncodriveclustl_r"]#,"mutsigcv_r"
+order_methods_threshold = ["oncodriveclust_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_t","oncodriveclustl_t"]#mutsigcv_t
 order_methods = []
 gweights = []
 gt_combination = None
@@ -32,7 +32,8 @@ METHODS = [
     'dndscv',
     'hotmapssignature',
     'edriver',
-    'cbase'
+    'cbase',
+'oncodriveclust'
 
 ]#mutsigcv
 
@@ -141,7 +142,7 @@ def create_constrains():
     :return: the constrains
     '''
     # constraints of the optimization problem
-    # methods=["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase"]
+    # methods=["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase","oncodriveclustl]
     # constraint 1: sum weights = 1;
     # constraint 2: for each weight, weight >= 0.05;
     # constraint 3: clust + hotmaps+edriver <= 0.5;
@@ -269,7 +270,7 @@ def optimize_with_seed(arg):
     return res
 
 
-def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclust', 'oncodrivemut',"edriver","cbase"]):
+def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclust', 'oncodrivemut',"edriver","cbase","oncodriveclustl"]):
         # define symmetric dirichlet distribution with concentration parameter = a
         n = len(methods)
         alpha = [a] * n
@@ -316,7 +317,7 @@ def set_type_weights(methods,weights):
     return d
 
 
-def calculate_objective_function(d_ranking, weights, objective_method="Combination_Ranking",objetive_function=None,  methods=["oncodriveclust","dnds","oncodrivefml","hotmapssignature","edriver","cbase"],log=False):
+def calculate_objective_function(d_ranking, weights, objective_method="Combination_Ranking",objetive_function=None,log=False):
     '''
     Given a distribution of weights returns the value of the objetive function (default: enrichment, combination_ranking)
 
@@ -325,7 +326,7 @@ def calculate_objective_function(d_ranking, weights, objective_method="Combinati
     :param cancer: cancer type.
     :param objetive_method: objetive METHOD to optimize, default Combination_Ranking.
     :param objetive_function: function to optimize
-    :param  methods:  list of methods to optimize the weights.
+
     :return float of the current value of the objetive function for the input weights.
     '''
     global gweights
@@ -419,11 +420,11 @@ def run_optimizer(seeds,niter,epsilon,foutput,input_rankings,t_combination,optim
 
     objetive_function = Evaluation_Enrichment(percentage_cgc)
 
-    f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function, methods=list(d_results_methodsr.keys()))
+    f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function)
     if t_combination == "RANKING":
-        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5]})
+        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5],"oncodriveclustl_r":w[6]})
     else:
-        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5]})
+        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5],"oncodriveclustl_t":w[6]})
 
     niter = gniter
     res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)
