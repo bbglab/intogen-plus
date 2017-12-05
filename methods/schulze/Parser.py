@@ -11,7 +11,17 @@ import click
 class Parser():
 
     methods = ["hotmapssignature","oncodrivefml","dndscv","oncodriveclust","edriver","cbase","oncodriveclustl"] # "oncodriveclust","oncodriveomega","mutsigcv",
-    column_keys = {"hotmapssignature":["GENE","q-value", "Min p-value"],"oncodrivefml":["SYMBOL","Q_VALUE", "P_VALUE"],"oncodriveclust":["SYMBOL","QVALUE", "PVALUE"],"dndscv":["gene_name","qallsubs_cv","pallsubs_cv"],"edriver":["SYMBOL","PVALUE","QVALUE"],"cbase":["gene","p_phi_pos","q_phi_pos"],"oncodriveclustl":["SYM","E_PVAL","E_QVAL"]}#"mutsigcv":["gene","q", "p"],"oncodriveomega":["SYMBOL","q_value", "p_value"],
+    column_keys = {
+        "hotmapssignature":     ["GENE",        "q-value",      "Min p-value"],
+        "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
+        "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
+        "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
+        "edriver":              ["SYMBOL",      "QVALUE",       "PVALUE"],
+        "cbase":                ["gene",        "q_phi_pos",    "p_phi_pos"],
+        "oncodriveclustl":      ["SYM",         "E_QVAL",       "E_PVAL"]
+        # "mutsigcv": ["gene","q", "p"],
+        # "oncodriveomega": ["SYMBOL","q_value", "p_value"],
+    }
 
     def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"oncodriveclust":0.1,"edriver":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
         self.path = path
