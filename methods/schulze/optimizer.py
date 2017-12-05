@@ -33,8 +33,7 @@ METHODS = [
     'hotmapssignature',
     'edriver',
     'cbase',
-    'oncodriveclust'
-
+    'oncodriveclustl'
 ]#mutsigcv
 
 
