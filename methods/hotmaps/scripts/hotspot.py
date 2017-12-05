@@ -212,14 +212,16 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
         # compute p-values for observed
         obs_pvals, sim_cdf = simulation_signatures.compute_pvals(mut_list, sim_null_dist)
 
-        return [structure_id, tumour,
-                       ','.join([str(o[0][1]) for o in mut_list]),
-                       ','.join([str(o[0][2]) for o in mut_list]),
-                       ','.join([str(o[0][3][1]) for o in mut_list]),
-                       ','.join([str(t_mut_res_mutation_counts[o[0]])
-                                 for o in mut_list]),
-                       ','.join([str(o[1]) for o in mut_list]),
-                       ','.join(map(str, obs_pvals)), ]
+        return [
+            structure_id,
+            tumour,
+            ','.join([str(o[0][1]) for o in mut_list]),
+            ','.join([str(o[0][2]) for o in mut_list]),
+            ','.join([str(o[0][3][1]) for o in mut_list]),
+            ','.join([str(t_mut_res_mutation_counts[o[0]]) for o in mut_list]),
+            ','.join([str(o[1]) for o in mut_list]),
+            ','.join(map(str, obs_pvals))
+        ]
 
 
 def connect_mysql():
@@ -282,28 +284,32 @@ def main(opts):
     with open(opts['mutations'] + ".signature", 'wb') as fd:
         pickle.dump(signatures, fd)
 
-    output = []
     quiet = opts['log_level'] != "DEBUG"
 
     steps = 100 * opts['cores']
     chunk_size = int(len(pdb_info) / steps) + 1
     process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"])
 
-    # Progress bar
-    with tqdm(total=len(pdb_info), desc="Computing PDB structures".rjust(40)) as pb:
+    header = [[
+        'Structure', 'Tumor Type', 'Model', 'Chain', 'Mutation Residues',
+        'Residue Mutation Count', 'Mutation Density', 'Hotspot P-value',
+    ]]
 
-        # Multiprocess pool
-        pool = Pool(opts['cores'])
-        map_method = pool.imap_unordered
-        for result, done in map_method(process_task, utils.chunkizator(pdb_info.items(), size=chunk_size)):
-            pb.update(done)
-            output += result
-
-    output = [['Structure', 'Tumor Type', 'Model', 'Chain', 'Mutation Residues',
-               'Residue Mutation Count', 'Mutation Density', 'Hotspot P-value',
-              ]] + output
     with open(opts['output'], 'w') as handle:
-        csv.writer(handle, delimiter='\t', lineterminator='\n').writerows(output)
+        writer = csv.writer(handle, delimiter='\t', lineterminator='\n')
+
+        writer.writerows(header)
+
+        # Progress bar
+        with tqdm(total=len(pdb_info), desc="Computing PDB structures".rjust(40)) as pb:
+
+            # Multiprocess pool
+            pool = Pool(opts['cores'])
+            map_method = pool.imap_unordered
+            for result, done in map_method(process_task, utils.chunkizator(pdb_info.items(), size=chunk_size)):
+                pb.update(done)
+                writer.writerows(result)
+
     logger.info('Done')
 
 
