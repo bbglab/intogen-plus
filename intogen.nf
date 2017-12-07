@@ -205,7 +205,7 @@ process Schulze {
         val task_file from IN_SCHULZE
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'schulze', task_file)}" ]
+    if [ ! -f "${outputSchulze(OUTPUT, task_file)}" ]
     then
         python $baseDir/intogen4.py run -o $OUTPUT schulze $task_file
     fi
@@ -213,6 +213,9 @@ process Schulze {
 }
 
 
+def outputSchulze(output_folder, task_file) {
+    return output_folder.toString() + '/schulze/' + task_file.fileName.toString().replace('.in.gz', '.05.out.gz')
+}
 
 def outputFile(output_folder, process_folder, task_file) {
     return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '.out.gz')
