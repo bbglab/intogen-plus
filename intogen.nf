@@ -214,7 +214,7 @@ process Schulze {
 
 
 def outputSchulze(output_folder, task_file) {
-    return output_folder.toString() + '/schulze/' + task_file.fileName.toString().replace('.in.gz', '.05.out.gz')
+    return output_folder.toString() + '/schulze/' + task_file.fileName.toString().replace('.out.gz', '.05.out.gz')
 }
 
 def outputFile(output_folder, process_folder, task_file) {
