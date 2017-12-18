@@ -10,20 +10,20 @@ import click
 
 class Parser():
 
-    methods = ["hotmapssignature","oncodrivefml","dndscv","oncodriveclust","edriver","cbase","oncodriveclustl"] # "oncodriveclust","oncodriveomega","mutsigcv",
+    methods = ["hotmapssignature","oncodrivefml","dndscv","edriver","cbase","oncodriveclustl"] # "oncodriveclust","oncodriveomega","mutsigcv",
     column_keys = {
         "hotmapssignature":     ["GENE",        "q-value",      "Min p-value"],
         "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
-        "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
         "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
         "edriver":              ["SYMBOL",      "QVALUE",       "PVALUE"],
         "cbase":                ["gene",        "q_phi_pos",    "p_phi_pos"],
         "oncodriveclustl":      ["SYM",         "E_QVAL",       "E_PVAL"]
+        # "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
         # "mutsigcv": ["gene","q", "p"],
         # "oncodriveomega": ["SYMBOL","q_value", "p_value"],
     }
 
-    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"oncodriveclust":0.1,"edriver":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
+    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"edriver":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
@@ -88,7 +88,7 @@ class Parser():
 
                     for i, r in df.iterrows():
                         try:
-                            pvalues[r[self.column_keys[method][0]]][method] = r[self.column_keys[method][2]]
+                            pvalues[r[self.column_keys[method][0]]][method] = (r[self.column_keys[method][2]],r[self.column_keys[method][1]])
                         except KeyError as e:
                             print(path)
                             print(r)
@@ -115,6 +115,13 @@ class Parser():
                     d[method+"_"+suffix] = Parser.create_dict_rankings(genes,rankings)
 
         return d, pvalues
+    @staticmethod
+    def get_value(dict_values, key, position=0):
+
+        if key in dict_values:
+            return dict_values[key][position] # Position = 0 for pvalue, Position = 1 for Qvalue
+        else:
+            return None
 
 
 @click.command()
@@ -123,6 +130,7 @@ class Parser():
 @click.option('--output', type=click.Path(),help="Output file", required=True)
 @click.option('--selection', help="[ranking,threshold]", default="ranking")
 def run_parser(input, cancer, output, selection):
+
     p = Parser(input)
     d_outr, pvalues = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
     with gzip.open("{}".format(output), "wb") as fd:
@@ -130,9 +138,11 @@ def run_parser(input, cancer, output, selection):
     print (d_outr)
     with gzip.open("{}b".format(output), "wt") as fd:
         writer = csv.writer(fd, delimiter='\t')
-        writer.writerow(['SYMBOL'] + ["PVALUE_{}".format(h) for h in p.methods])
+        writer.writerow(['SYMBOL'] + ["PVALUE_{}".format(h) for h in p.methods]+["QVALUE_{}".format(h) for h in p.methods])
+
         for gene, values in pvalues.items():
-            writer.writerow([gene] + [values.get(m, None) for m in p.methods])
+            writer.writerow([gene] + [Parser.get_value(values,m,0) for m in p.methods] + [Parser.get_value(values,m,1) for m in p.methods] )
+
 
 if __name__ == "__main__":
     run_parser()

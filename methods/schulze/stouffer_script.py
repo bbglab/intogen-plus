@@ -8,8 +8,18 @@ import statsmodels.sandbox.stats.multicomp as multicomp
 
 
 #DEFAULT_METHODS = ['oncodrivefml', 'oncodriveclust', 'oncodriveomega', 'hotmapssignature', 'mutsigcv']
-DEFAULT_METHODS = ["oncodriveclust", "dndscv","oncodrivefml", "hotmapssignature","edriver","cbase","oncodriveclustl"]
-
+DEFAULT_METHODS = ["oncodriveclustl", "dndscv","oncodrivefml", "hotmapssignature","edriver","cbase"]
+column_keys = {
+        "hotmapssignature":     ["GENE",        "q-value",      "Min p-value"],
+        "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
+        "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
+        "edriver":              ["SYMBOL",      "QVALUE",       "PVALUE"],
+        "cbase":                ["gene",        "q_phi_pos",    "p_phi_pos"],
+        "oncodriveclustl":      ["SYM",         "E_QVAL",       "E_PVAL"]
+        # "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
+        # "mutsigcv": ["gene","q", "p"],
+        # "oncodriveomega": ["SYMBOL","q_value", "p_value"],
+    }
 def parse_optimized_weights(path_weights):
     cap = lambda a: a[:-2]
     df = pd.read_csv(path_weights, sep='\t', compression="gzip")
@@ -134,12 +144,38 @@ def include_excess(df,path_dndscv):
     dh = pd.merge(left=df, right=dnds_data[columns], left_on=['SYMBOL'], right_on=['gene_name'], how="left")
     return dh
 
-
 def combine_from_tumor(df, path_to_output, path_fml):
     fml_data = pd.read_csv(path_fml, sep='\t', compression="gzip")
     dh = partial_correction(df, fml_data)
     dh.to_csv(path_to_output, sep='\t', index=False, compression="gzip")
 
+def select_significant_bidders(row,QVALUE_threshold=0.1):
+    '''
+    Function to detect the significant bidders based on the
+    :param row:
+    :return:
+    '''
+    methods = []
+    if len(str(row["All_Bidders"]))>3: # Check whether there is a method (not nan)
+        bidders = str(row["All_Bidders"]).split(",")
+        for bidder in bidders:
+
+            method_name = bidder.split("_")[0]
+
+            name_key = "QVALUE_"+method_name
+            if row[name_key] <= QVALUE_threshold:
+                methods.append(method_name)
+        return ",".join(methods)
+    return ""
+
+def add_significant_bidders(df):
+    '''
+    Add a column of the methods that have a significant bid
+    :param df:
+    :return: the input dataframe with a new column of significant bidders
+    '''
+    df["Significant_Bidders"] = df.apply(lambda row: select_significant_bidders(row),axis=1)
+    return df
 
 @click.command()
 @click.option('--input_path', type=click.Path(exists=True), help="Path to input dataframe with SYMBOL and p-value for each method", required=True)
@@ -155,7 +191,8 @@ def run_stouffer_script(input_path, output_path, path_rankings, path_weights, pa
     dg = retrieve_ranking(df, path_rankings)
     dh = combine_pvals(dg, path_weights)
     di = include_excess(dh, path_dndscv)
-    combine_from_tumor(di, output_path, path_fml)
+    dg = add_significant_bidders(di)
+    combine_from_tumor(dg, output_path, path_fml)
 
 
 if __name__ == '__main__':

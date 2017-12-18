@@ -33,6 +33,7 @@ def get_voters(gene, d):
         best_rank = sorted_methods[0][1]
         best_methods = [k for k, v in sorted_methods if v == best_rank]
         ranks = list(d_rank.values())
+
     except:
         best_rank = None
         best_methods = None

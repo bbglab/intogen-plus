@@ -18,8 +18,8 @@ gniter = None
 gepsilon = None
 gavaliable_methods = None
 gdiscarded_methods = None
-order_methods_ranking = ["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r","oncodriveclustl_r"]#,"mutsigcv_r"
-order_methods_threshold = ["oncodriveclust_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_t","oncodriveclustl_t"]#mutsigcv_t
+order_methods_ranking = ["oncodriveclustl_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r"]
+order_methods_threshold = ["oncodriveclustl_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_t"]
 order_methods = []
 gweights = []
 gt_combination = None
@@ -28,12 +28,12 @@ method_optimization = None
 PATH_REGIONS = os.path.join(os.environ['SCHULZE_DATA'], '02_cds.regions.gz')
 METHODS = [
     'oncodrivefml',
-    'oncodriveclust',
+    'oncodriveclustl',
     'dndscv',
     'hotmapssignature',
     'edriver',
-    'cbase',
-    'oncodriveclustl'
+    'cbase'
+
 ]#mutsigcv
 
 
@@ -141,7 +141,7 @@ def create_constrains():
     :return: the constrains
     '''
     # constraints of the optimization problem
-    # methods=["oncodriveclust_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase","oncodriveclustl]
+    # methods=["oncodriveclustl_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase"]
     # constraint 1: sum weights = 1;
     # constraint 2: for each weight, weight >= 0.05;
     # constraint 3: clust + hotmaps+edriver <= 0.5;
@@ -269,7 +269,7 @@ def optimize_with_seed(arg):
     return res
 
 
-def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclust', 'oncodrivemut',"edriver","cbase","oncodriveclustl"]):
+def optimizer(func, a=3, seeds=1, methods=['oncodrivefml', 'dndscv',  'oncodriveclustl', 'oncodrivemut',"edriver","cbase"]):
         # define symmetric dirichlet distribution with concentration parameter = a
         n = len(methods)
         alpha = [a] * n
@@ -421,9 +421,9 @@ def run_optimizer(seeds, niter, epsilon, foutput, input_rankings, t_combination,
 
     f = partial(calculate_objective_function, d_results_methodsr, objetive_function=objetive_function)
     if t_combination == "RANKING":
-        g = lambda w: -f({"oncodriveclust_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5],"oncodriveclustl_r":w[6]})
+        g = lambda w: -f({"oncodriveclustl_r": w[0], "dndscv_r": w[1],"oncodrivefml_r": w[2], "hotmapssignature_r": w[3],"edriver_r":w[4],"cbase_r":w[5]})
     else:
-        g = lambda w: -f({"oncodriveclust_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5],"oncodriveclustl_t":w[6]})
+        g = lambda w: -f({"oncodriveclustl_t": w[0], "dndscv_r": w[1],"oncodrivefml_t": w[2], "hotmapssignature_t": w[3],"edriver_t":w[4],"cbase_t":w[5]})
 
     niter = gniter
     res = optimizer(g, methods=d_results_methodsr.keys(), seeds=seeds)

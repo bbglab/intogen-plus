@@ -71,7 +71,7 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter,c
 
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
 
-    headers = ["SYMBOL", "METHOD_NAME","TIER","All_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"]
+    headers = ["SYMBOL", "METHOD_NAME","TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"]
     if ranking_limit:
 
         # Compute tiers
