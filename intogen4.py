@@ -11,12 +11,13 @@ from tasks.cbase import CBaseTask
 from tasks.dndscv import DndsCvTask
 from tasks.edriver import EDriverTask
 from tasks.oncodriveclust import OncodriveClustTask
+from tasks.oncodriveclustl import OncodriveClustlTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.oncodriveomega import OncodriveOmegaTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
 from tasks.mutsigcv import MutsigCvTask
-from tasks.schulze import SchulzeTask
+from tasks.combination import CombinationTask
 
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
@@ -26,11 +27,12 @@ from filters.vep import VepFilter
 TASKS = {t.KEY: t for t in [
     VepTask,
     OncodriveFmlTask,
+    OncodriveClustlTask,
     OncodriveOmegaTask,
     OncodriveClustTask,
     HotmapsTask,
     MutsigCvTask,
-    SchulzeTask,
+    CombinationTask,
     DndsCvTask,
     EDriverTask,
     CBaseTask

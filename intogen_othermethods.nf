@@ -14,10 +14,31 @@ process PreprocessFromVep {
 
     output:
         file "oncodriveomega/*.in.gz" into IN_ONCODRIVEOMEGA mode flatten
+        file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
         file "mutsigcv/*.in.gz" into IN_MUTSIGCV mode flatten
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv
+    python $baseDir/intogen4.py read -i $task_file -o . oncodriveomega mutsigcv oncodriveclust
+    """
+}
+
+process OncodriveClust {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_ONCODRIVECLUST
+
+    output:
+        file "oncodriveclust/*.out.gz" into OUT_ONCODRIVECLUST mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'oncodriveclust', task_file)}" ]
+    then
+        python $baseDir/intogen4.py run -o . oncodriveclust $task_file
+    else
+        mkdir -p ./oncodriveclust && cp ${outputFile(OUTPUT, 'oncodriveclust', task_file)} ./oncodriveclust/
+    fi
     """
 }
 
@@ -30,8 +51,6 @@ process OncodriveOmega {
 
     input:
         val task_file from IN_ONCODRIVEOMEGA
-
-
 
     output:
         file "oncodriveomega/*.out.gz" into OUT_ONCODRIVEOMEGA mode flatten

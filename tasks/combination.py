@@ -9,9 +9,9 @@ from os import path
 from .base import Task
 
 
-class SchulzeTask(Task):
+class CombinationTask(Task):
 
-    KEY = 'schulze'
+    KEY = 'combination'
 
     def __init__(self, output_folder, config):
 

@@ -12,11 +12,12 @@ process PreprocessFromInput {
     output:
         file "vep/*.in.gz" into IN_VEP mode flatten
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
+        file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv
+    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl
     """
 
 }
@@ -53,34 +54,15 @@ process PreprocessFromVep {
     output:
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
         file "edriver/*.in.gz" into IN_EDRIVER mode flatten
-        file "oncodriveclust/*.in.gz" into IN_ONCODRIVECLUST mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature oncodriveclust edriver cbase
+    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature edriver cbase
     """
 }
 
-process OncodriveClust {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
 
-    input:
-        val task_file from IN_ONCODRIVECLUST
-
-    output:
-        file "oncodriveclust/*.out.gz" into OUT_ONCODRIVECLUST mode flatten
-
-    """
-    if [ ! -f "${outputFile(OUTPUT, 'oncodriveclust', task_file)}" ]
-    then
-        python $baseDir/intogen4.py run -o . oncodriveclust $task_file
-    else
-        mkdir -p ./oncodriveclust && cp ${outputFile(OUTPUT, 'oncodriveclust', task_file)} ./oncodriveclust/
-    fi
-    """
-}
 
 process DndsCV {
     tag { task_file.fileName }
@@ -121,6 +103,29 @@ process OncodriveFML {
     fi
     """
 }
+
+
+process OncodriveClustl {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_ONCODRIVECLUSTL
+
+    output:
+        file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'oncodriveclustl', task_file)}" ]
+    then
+        export PROCESS_CPUS=$task.cpus
+        python $baseDir/intogen4.py run -o . oncodriveclustl $task_file
+    else
+        mkdir -p ./oncodriveclustl && cp ${outputFile(OUTPUT, 'oncodriveclustl', task_file)} ./oncodriveclustl/
+    fi
+    """
+}
+
 
 process HotmapsSignature {
     tag { task_file.fileName }
@@ -186,8 +191,8 @@ process CBase {
 }
 
 
-IN_SCHULZE = OUT_ONCODRIVECLUST
-                    .phase(OUT_ONCODRIVEFML){ it -> it.fileName }
+IN_COMBINATION = OUT_ONCODRIVEFML
+                    .phase(OUT_ONCODRIVECLUSTL){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
@@ -198,23 +203,23 @@ IN_SCHULZE = OUT_ONCODRIVECLUST
                     .phase(OUT_CBASE){ it -> it.fileName }
                     .map{ it[0] }
 
-process Schulze {
+process Combination {
     tag { task_file.fileName }
 
     input:
-        val task_file from IN_SCHULZE
+        val task_file from IN_COMBINATION
 
     """
-    if [ ! -f "${outputSchulze(OUTPUT, task_file)}" ]
+    if [ ! -f "${outputCombination(OUTPUT, task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o $OUTPUT schulze $task_file
+        python $baseDir/intogen4.py run -o $OUTPUT combination $task_file
     fi
     """
 }
 
 
-def outputSchulze(output_folder, task_file) {
-    return output_folder.toString() + '/schulze/' + task_file.fileName.toString().replace('.out.gz', '.05.out.gz')
+def outputCombination(output_folder, task_file) {
+    return output_folder.toString() + '/combination/' + task_file.fileName.toString().replace('.out.gz', '.05.out.gz')
 }
 
 def outputFile(output_folder, process_folder, task_file) {
