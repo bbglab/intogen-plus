@@ -12,9 +12,6 @@ from intervaltree import IntervalTree
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class VariantsFilter(Filter):
 
     KEY = "variants"
@@ -111,6 +108,7 @@ class VariantsFilter(Filter):
         skip_chromosome_names = set()
         skip_coverage = 0
         skip_coverage_positions = []
+        skip_same_alt = 0
 
         count_before = 0
         count_after = 0
@@ -128,6 +126,10 @@ class VariantsFilter(Filter):
             count_before += 1
 
             # Skip hypermutators
+            if v['REF'] == v['ALT']:
+                skip_same_alt += 1
+                continue
+
             if v['SAMPLE'] in hypermutators:
                 skip_hypermutators += 1
                 continue
@@ -176,7 +178,8 @@ class VariantsFilter(Filter):
         self.stats[group_key]['skip'] = {
             'hypermuptators': (skip_hypermutators, None),
             'invalid_chromosome': (skip_chromosome, list(skip_chromosome_names)),
-            'coverage': (skip_coverage, skip_coverage_positions)
+            'coverage': (skip_coverage, skip_coverage_positions),
+            'same_alt': skip_same_alt
         }
 
         self.stats[group_key]['count'] = {
@@ -195,6 +198,9 @@ class VariantsFilter(Filter):
             self.stats[group_key]["error_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(group_key, count_mismatch, count_snp)
         elif ratio_mismatch > 0.05:
             self.stats[group_key]["warning_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches.".format(group_key, count_mismatch, count_snp)
+
+        if skip_same_alt > 0:
+            self.stats[group_key]["warning_same_alternate"] = "[{}] There are {} entries with same reference and alternate".format(group_key, skip_same_alt)
 
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "[{}] There are no variants after filtering".format(group_key)
