@@ -310,7 +310,7 @@ def optimize_with_seed(func, w0, low_quality=set()):
     epsilon = 0.02
     options = {'maxiter': niter, 'eps': epsilon, 'ftol': 1e-3, 'disp': True}
     minimizer_kwargs = {'method': 'SLSQP', 'options': options, 'constraints': cons}
-    res = basinhopping(func, w0, minimizer_kwargs=minimizer_kwargs, niter=10, stepsize=0.05)
+    res = basinhopping(func, w0, minimizer_kwargs=minimizer_kwargs, niter=1, stepsize=0.05)
     return res
 
 
