@@ -185,6 +185,7 @@ def prepare_output(methods_order, solutions):
 
 # constraint function wrappers
 
+
 def array_component(w, i):
     return w[i]
 
@@ -243,19 +244,17 @@ def grid_optimize(func, low_quality=set()):
         low_quality_index = [methods_list.index(v) for v in low_quality]
     low = [0.05 if v not in low_quality else 0 for v in methods_list]  # change lower bound on discarded methods
     for w in itertools.product(np.linspace(0, 1, 21), repeat=5):
-        w = list(w)
-        if low_quality_index is not None:  # low quality zeros
-            for ind in low_quality_index:
-                w[ind] = 0
         if sum(w) <= 0.95:  # belongs to simplex
-            w = np.append(w, [1 - sum(w)])
+            w = list(np.append(w, [1 - sum(w)]))
+            if low_quality_index is not None:  # add zeros at discarded / low-quality methods
+                for ind in low_quality_index:
+                    w[ind] = 0.
             if (low[0] <= w[0] < 0.5) and (low[3] <= w[3] < 0.5) and (low[4] <= w[4] < 0.5):
                 if w[0] + w[3] + w[4] < 0.5:  # cluster constraint
                     if low[2] <= w[2] < 0.5:    # fm bias constraint
                         if (low[1] <= w[1] < 0.5) and (low[5] <= w[5] < 0.5):
                             if w[1] + w[5] < 0.5:  # recurrence constraint
                                 f = func(w)
-                                print(f)
                                 if optimum['Objective_Function'] > f:
                                     optimum['Objective_Function'] = f
                                     optimum['oncodriveclustl_r'] = w[0]
@@ -264,7 +263,6 @@ def grid_optimize(func, low_quality=set()):
                                     optimum['hotmapssignature_r'] = w[3]
                                     optimum['edriver_r'] = w[4]
                                     optimum['cbase_r'] = w[5]
-                                    print(optimum)
     return optimum
 
 
@@ -275,9 +273,9 @@ def create_scipy_constraints(low_quality=set()):
 
     # constraints of the optimization problem
     # methods=["oncodriveclustl_r", "dndscv_r", "oncodrivefml_r", "hotmapssignature_r", "edriver_r", "cbase"]
-    # constraint 1: sum weights = 1;
-    # constraint 2: for each weight, weight >= 0.05;
-    # constraint 3: clust + hotmaps+edriver <= 0.5;
+    # constraint 1: sum weights = 1
+    # constraint 2: for each weight, weight >= 0.05
+    # constraint 3: clust + hotmaps+edriver <= 0.5
     # constraint 4: dndscv <= 0.5
     # constraint 5: fml <= 0.5
 
@@ -293,6 +291,21 @@ def create_scipy_constraints(low_quality=set()):
             cons += [{'type': 'ineq', 'fun': partial(lower_bound, i=ind)}]
             cons += [{'type': 'ineq', 'fun': partial(upper_bound, i=ind)}]
     return tuple(cons)
+
+
+def satisfy_constraints(w, low_quality=set()):
+    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    satisfy = True
+    for i, v in enumerate(methods_list):
+        if v in low_quality:
+            satisfy = satisfy and (abs(array_component(w, i)) < 0.01)
+        else:
+            satisfy = satisfy and (lower_bound(w, i) >= 0)
+    satisfy = satisfy and (fm_bound(w) >= 0)
+    satisfy = satisfy and (clustering_bound(w) >= 0)
+    satisfy = satisfy and (recurrence_bound(w) >= 0)
+    satisfy = satisfy and (abs(simplex_bound(w)) < 0.01)
+    return satisfy
 
 
 def optimize_with_seed(func, w0, low_quality=set()):
@@ -404,15 +417,24 @@ def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutpu
 
     all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
 
+    # best solution in 1/20 resolution grid, augmented with basin-hopping/SLSQP optimization
     grid_optimum = grid_optimize(func, low_quality=discarded)  # get optimum candidate in the grid
     w = np.array([grid_optimum[k] for k in all_methods])
     res = optimize_with_seed(func, w)  # basin-hopping/SLSQP using grid optimum candidate as initial guess
     res_dict = dict(zip(all_methods, list(res.x)))
     res_dict['Objective_Function'] = res.fun
-    if res_dict['Objective_Function'] < grid_optimum['Objective_Function']:
-        out_df = pd.DataFrame({k: [v] for k, v in res_dict.items()})
-    else:
+
+    # choose the best one grid or basin-hopping, unless basin-hopping does not fulfill the constraints
+    if res_dict['Objective_Function'] > grid_optimum['Objective_Function']:
         out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
+    else:
+        r = np.array([res_dict[k] for k in all_methods])
+        if satisfy_constraints(r, low_quality=discarded):
+            out_df = pd.DataFrame({k: [v] for k, v in res_dict.items()})
+        else:
+            out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
+
+    # write to table
     out_df.to_csv(foutput, sep="\t", index=False, compression="gzip")
 
 
