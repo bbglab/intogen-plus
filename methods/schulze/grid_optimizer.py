@@ -347,10 +347,10 @@ def optimize_with_seed(func, w0, low_quality=set()):
               type=click.Path(exists=True),
               help="Input data directory",
               required=True)
-# @click.option('--method_reject',
-#               type=click.STRING,
-#               help="Method for which weight in combination is forced to be zero",
-#               required=False)
+@click.option('--method_reject',
+               type=click.STRING,
+               help="Method for which weight in combination is forced to be zero",
+               required=False)
 @click.option('--cancer',
               type=str,
               required=True)
@@ -359,7 +359,7 @@ def optimize_with_seed(func, w0, low_quality=set()):
               type=str,
               help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]",
               required=True)
-def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutput, cancer, seed):
+def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutput, cancer, seed, method_reject):
 
     global gavaliable_methods, order_methods, gt_combination
     if seed == 'T':
@@ -380,7 +380,8 @@ def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutpu
     # Prepare the list of available methods and the dictionary of weights
     l = []
     for method in d_results_methodsr.keys():
-        l.append(method)
+        if not(method_reject is None) and method != method_reject+"_r":
+            l.append(method)
     gavaliable_methods = list(l)
 
     # Remove methods that do not reach the quality metrics
