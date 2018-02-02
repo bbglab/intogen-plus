@@ -249,6 +249,8 @@ def grid_optimize(func, low_quality=set()):
             if low_quality_index is not None:  # add zeros at discarded / low-quality methods
                 for ind in low_quality_index:
                     w[ind] = 0.
+                total_weight = sum(w)
+                w = [v / total_weight for v in w]
             if (low[0] <= w[0] < 0.5) and (low[3] <= w[3] < 0.5) and (low[4] <= w[4] < 0.5):
                 if w[0] + w[3] + w[4] < 0.5:  # cluster constraint
                     if low[2] <= w[2] < 0.5:    # fm bias constraint
