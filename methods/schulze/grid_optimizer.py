@@ -380,12 +380,17 @@ def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutpu
     # Prepare the list of available methods and the dictionary of weights
     l = []
     for method in d_results_methodsr.keys():
-        if not(method_reject is None) and method != method_reject+"_r":
-            l.append(method)
+        l.append(method)
     gavaliable_methods = list(l)
 
     # Remove methods that do not reach the quality metrics
-    discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+    if not(method_reject is None):
+        discarded = set()
+        discarded.add(method_reject+"_r")
+    else:
+        discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+    # Include discarded from command line
+
     if len(discarded) > 0:
         print("[QC] {} discarded {}".format(cancer, discarded))
 
