@@ -329,6 +329,112 @@ def optimize_with_seed(func, w0, low_quality=set()):
     return res
 
 
+
+def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed, t_combination):
+
+    global gavaliable_methods, order_methods, gt_combination
+    if seed == 'T':
+        np.random.seed(1)
+    # Select order methods
+    gt_combination = t_combination
+    if t_combination == "RANKING":
+        order_methods = order_methods_ranking
+    else:
+        order_methods = order_methods_threshold
+    print(input_rankings)
+    with gzip.open(input_rankings, "rb") as fd:
+        d_results_methodsr = pickle.load(fd)
+    print(d_results_methodsr.keys())
+    # Prepare the list of available methods and the dictionary of weights
+    l = []
+    for method in d_results_methodsr.keys():
+        l.append(method)
+    gavaliable_methods = list(l)
+    # Remove methods that do not reach the quality metrics
+    if not (method_reject is None):
+        discarded = set()
+        discarded.add(method_reject + "_r")
+    else:
+        discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+    # Include discarded from command line
+    if len(discarded) > 0:
+        print("[QC] {} discarded {}".format(cancer, discarded))
+    gavaliable_methods = [m for m in gavaliable_methods if m not in discarded]
+    print("Running on " + str(gavaliable_methods))
+    # Set to empty those methods discarded or not present
+    for method in order_methods:
+        if method not in gavaliable_methods:
+            d_results_methodsr[method] = {}
+    print(d_results_methodsr)
+    # Instantiate the enrichment objective function
+    objective_function = Evaluation_Enrichment(percentage_cgc)
+    f = partial(calculate_objective_function, d_results_methodsr, objective_function=objective_function)
+    if t_combination == "RANKING":
+        def func(w):
+            return -f({"oncodriveclustl_r": w[0],
+                       "dndscv_r": w[1],
+                       "oncodrivefml_r": w[2],
+                       "hotmapssignature_r": w[3],
+                       "edriver_r": w[4],
+                       "cbase_r": w[5]})
+    else:
+        def func(w):
+            return -f({"oncodriveclustl_t": w[0],
+                       "dndscv_r": w[1],
+                       "oncodrivefml_t": w[2],
+                       "hotmapssignature_t": w[3],
+                       "edriver_t": w[4],
+                       "cbase_t": w[5]})
+    all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    # best solution in 1/20 resolution grid, augmented with basin-hopping/SLSQP optimization
+    grid_optimum = grid_optimize(func, low_quality=discarded)  # get optimum candidate in the grid
+    w = np.array([grid_optimum[k] for k in all_methods])
+    res = optimize_with_seed(func, w)  # basin-hopping/SLSQP using grid optimum candidate as initial guess
+    res_dict = dict(zip(all_methods, list(res.x)))
+    res_dict['Objective_Function'] = res.fun
+    # choose the best one grid or basin-hopping, unless basin-hopping does not fulfill the constraints
+    if res_dict['Objective_Function'] > grid_optimum['Objective_Function']:
+        out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
+    else:
+        r = np.array([res_dict[k] for k in all_methods])
+        if satisfy_constraints(r, low_quality=discarded):
+            out_df = pd.DataFrame({k: [v] for k, v in res_dict.items()})
+        else:
+            out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
+    return out_df
+
+
+def skip_optimizer(input_rankings, method_reject, moutput, cancer):
+
+    global gavaliable_methods
+    with gzip.open(input_rankings, "rb") as fd:
+        d_results_methodsr = pickle.load(fd)
+    l = []
+    for method in d_results_methodsr.keys():
+        l.append(method)
+    gavaliable_methods = list(l)
+
+    # Remove methods that do not reach the quality metrics
+    if not (method_reject is None):
+        discarded = set()
+        discarded.add(method_reject + "_r")
+    else:
+        discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+    # Include discarded from command line
+    gavaliable_methods = [m for m in gavaliable_methods if m not in discarded]
+    print("Running on " + str(gavaliable_methods))
+    # Create a uniform vector of weights
+    N = len(gavaliable_methods)
+    df = pd.DataFrame({k: [1/N] for k in gavaliable_methods})
+    if len(discarded) > 0:
+        print("[QC] {} discarded {}".format(cancer, discarded))
+        for md in discarded:
+            df[md] = 0.0
+    df["Objective_Function"] = np.nan
+    return df
+
+
+
 @click.command()
 @click.option('--foutput',
               type=click.Path(),
@@ -361,87 +467,14 @@ def optimize_with_seed(func, w0, low_quality=set()):
               type=str,
               help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]",
               required=True)
-def run_optimizer(foutput, input_rankings, t_combination, percentage_cgc, moutput, cancer, seed, method_reject):
 
-    global gavaliable_methods, order_methods, gt_combination
-    if seed == 'T':
-        np.random.seed(1)
 
-    # Select order methods
-    gt_combination = t_combination
-    if t_combination == "RANKING":
-        order_methods = order_methods_ranking
+def run_optimizer( foutput, input_rankings, t_combination, percentage_cgc, moutput, cancer, seed, method_reject):
+
+    if float(percentage_cgc) > 0.0:
+        out_df = full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed, t_combination)
     else:
-        order_methods = order_methods_threshold
-
-    print(input_rankings)
-    with gzip.open(input_rankings, "rb") as fd:
-        d_results_methodsr = pickle.load(fd)
-    print(d_results_methodsr.keys())
-
-    # Prepare the list of available methods and the dictionary of weights
-    l = []
-    for method in d_results_methodsr.keys():
-        l.append(method)
-    gavaliable_methods = list(l)
-
-    # Remove methods that do not reach the quality metrics
-    if not(method_reject is None):
-        discarded = set()
-        discarded.add(method_reject+"_r")
-    else:
-        discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
-    # Include discarded from command line
-
-    if len(discarded) > 0:
-        print("[QC] {} discarded {}".format(cancer, discarded))
-
-    gavaliable_methods = [m for m in gavaliable_methods if m not in discarded]
-    print("Running on " + str(gavaliable_methods))
-
-    # Set to empty those methods discarded or not present
-    for method in order_methods:
-        if method not in gavaliable_methods:
-            d_results_methodsr[method] = {}
-    print(d_results_methodsr)
-
-    # Instantiate the enrichment objective function
-    objective_function = Evaluation_Enrichment(percentage_cgc)
-    f = partial(calculate_objective_function, d_results_methodsr, objective_function=objective_function)
-    if t_combination == "RANKING":
-        def func(w): return -f({"oncodriveclustl_r": w[0],
-                                "dndscv_r": w[1],
-                                "oncodrivefml_r": w[2],
-                                "hotmapssignature_r": w[3],
-                                "edriver_r": w[4],
-                                "cbase_r": w[5]})
-    else:
-        def func(w): return -f({"oncodriveclustl_t": w[0],
-                                "dndscv_r": w[1],
-                                "oncodrivefml_t": w[2],
-                                "hotmapssignature_t": w[3],
-                                "edriver_t": w[4],
-                                "cbase_t": w[5]})
-
-    all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
-
-    # best solution in 1/20 resolution grid, augmented with basin-hopping/SLSQP optimization
-    grid_optimum = grid_optimize(func, low_quality=discarded)  # get optimum candidate in the grid
-    w = np.array([grid_optimum[k] for k in all_methods])
-    res = optimize_with_seed(func, w)  # basin-hopping/SLSQP using grid optimum candidate as initial guess
-    res_dict = dict(zip(all_methods, list(res.x)))
-    res_dict['Objective_Function'] = res.fun
-
-    # choose the best one grid or basin-hopping, unless basin-hopping does not fulfill the constraints
-    if res_dict['Objective_Function'] > grid_optimum['Objective_Function']:
-        out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
-    else:
-        r = np.array([res_dict[k] for k in all_methods])
-        if satisfy_constraints(r, low_quality=discarded):
-            out_df = pd.DataFrame({k: [v] for k, v in res_dict.items()})
-        else:
-            out_df = pd.DataFrame({k: [v] for k, v in grid_optimum.items()})
-
+        out_df = skip_optimizer(input_rankings,method_reject,moutput,cancer)
     # write to table
     out_df.to_csv(foutput, sep="\t", index=False, compression="gzip")
 
