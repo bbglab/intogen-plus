@@ -125,7 +125,7 @@ class Filter:
         methods = self.data.index.tolist()
         finite_values = [x for x in values if np.isfinite(x)]
         down, up = self.find_outliers(finite_values)
-        discarded = [methods[i] for i, v in enumerate(values) if (np.isfinite(v) and v < down)]
+        discarded = [methods[i] for i, v in enumerate(values) if (np.isfinite(v) and v <= down)]
         return set(discarded)
 
     def filters(self):
@@ -407,12 +407,8 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
 def skip_optimizer(input_rankings, method_reject, moutput, cancer):
 
     global gavaliable_methods
-    with gzip.open(input_rankings, "rb") as fd:
-        d_results_methodsr = pickle.load(fd)
-    l = []
-    for method in d_results_methodsr.keys():
-        l.append(method)
-    gavaliable_methods = list(l)
+
+    gavaliable_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
 
     # Remove methods that do not reach the quality metrics
     if not (method_reject is None):
