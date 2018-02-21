@@ -109,6 +109,7 @@ class VariantsFilter(Filter):
         skip_coverage = 0
         skip_coverage_positions = []
         skip_same_alt = 0
+        skip_n_sequence = 0
 
         count_before = 0
         count_after = 0
@@ -118,7 +119,6 @@ class VariantsFilter(Filter):
         count_duplicated = 0
 
         # Read variants
-
         signature = {}
         variants_by_sample = {}
 
@@ -156,6 +156,11 @@ class VariantsFilter(Filter):
             else:
                 variants_by_sample[v['SAMPLE']] = {var_value}
 
+            # Skip variants that has an N
+            if 'N' in v['ALT'] or 'N' in v['REF']:
+                skip_n_sequence += 1
+                continue
+
             count_after += 1
             if v['ALT_TYPE'] == 'snp':
                 count_snp += 1
@@ -179,7 +184,8 @@ class VariantsFilter(Filter):
             'hypermuptators': (skip_hypermutators, None),
             'invalid_chromosome': (skip_chromosome, list(skip_chromosome_names)),
             'coverage': (skip_coverage, skip_coverage_positions),
-            'same_alt': skip_same_alt
+            'same_alt': skip_same_alt,
+            'n_sequence': skip_n_sequence
         }
 
         self.stats[group_key]['count'] = {
@@ -207,3 +213,6 @@ class VariantsFilter(Filter):
 
         if count_duplicated > 0:
             self.stats[group_key]["warning_duplicated_variants"] = "[{}] There are {} duplicated variants".format(group_key, count_duplicated)
+
+        if skip_n_sequence > 0:
+            self.stats[group_key]["warning_n_sequence"] = "[{}] There are {} variants with a 'N' in the reference or alternate sequence".format(group_key, skip_n_sequence)
