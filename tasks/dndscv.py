@@ -53,10 +53,13 @@ class DndsCvTask(Task):
 
         if not path.exists(self.out_file):
 
-            cmd = "singularity exec {0}/dndscv.img Rscript {0}/run.R {1} {2}".format(
+            cmd = "singularity exec {0}/dndscv.img Rscript {0}/run.R {1} {2} {3} {4}".format(
                 os.environ['DNDSCV_DATA'],
                 self.in_file,
-                self.out_file)
+                self.out_file,
+                self.out_file.replace(".out.gz", "_annotmuts.out.gz"),
+                self.out_file.replace(".out.gz", "_genemuts.out.gz")
+            )
 
             try:
                 o = subprocess.check_output(cmd, shell=True)
