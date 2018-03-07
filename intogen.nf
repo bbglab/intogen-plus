@@ -114,7 +114,6 @@ process OncodriveClustl {
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
-        file "oncodriveclustl/*.clusters.gz" into CLUSTERS_ONCODRIVECLUSTL mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodriveclustl', task_file)}" ]
