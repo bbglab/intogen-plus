@@ -63,7 +63,7 @@ class OncodriveClustlTask(Task):
                 self.name,
                 os.environ.get("ONCODRIVECLUSTL_REGIONS"),
                 os.environ.get("PROCESS_CPUS", 4),
-                os.path.join(os.environ.get("VEP_OUTPUT"), "vep", self.name),
+                os.path.join(os.environ.get("VEP_OUTPUT"), "vep", "{}.out.gz".format(self.name)),
                 (5 if 'SKCM' in self.name else 3)
             )
 
