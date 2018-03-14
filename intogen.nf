@@ -119,6 +119,7 @@ process OncodriveClustl {
     if [ ! -f "${outputFile(OUTPUT, 'oncodriveclustl', task_file)}" ]
     then
         export PROCESS_CPUS=$task.cpus
+        export VEP_OUTPUT=$OUTPUT
         python $baseDir/intogen4.py run -o . oncodriveclustl $task_file
     else
         mkdir -p ./oncodriveclustl && cp ${outputFile(OUTPUT, 'oncodriveclustl', task_file)} ./oncodriveclustl/
