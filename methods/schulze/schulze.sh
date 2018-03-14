@@ -22,7 +22,7 @@ export PYTHONPATH=$SCRIPTS_FOLDER:$PYTHONPATH
 
 # STEP1. Read the output of intogen
 echo "## STEP1"
-python $SCRIPTS_FOLDER/Parser.py --input $OUTPUT/ --cancer $RUN_FILENAME --output $OUTPUT/tmp/$RUN_FILENAME.step1
+python $SCRIPTS_FOLDER/Parser.py --input $OUTPUT/../ --cancer $RUN_FILENAME --output $OUTPUT/tmp/$RUN_FILENAME.step1
 
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
@@ -32,7 +32,7 @@ echo "## STEP2"
 python $SCRIPTS_FOLDER/grid_optimizer.py --t_combination RANKING \
  --foutput $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --input_rankings $OUTPUT/tmp/$RUN_FILENAME.step1 \
- --moutput $OUTPUT \
+ --moutput $OUTPUT/../ \
  --cancer $RUN_FILENAME
 
 # Exit on error
@@ -55,8 +55,8 @@ python $SCRIPTS_FOLDER/stouffer_script.py \
     --input_path $OUTPUT/tmp/$RUN_FILENAME.step1b \
     --path_rankings $OUTPUT/tmp/$RUN_FILENAME.step3 \
     --path_weights $OUTPUT/tmp/$RUN_FILENAME.step2 \
-    --path_fml $OUTPUT/oncodrivefml/$RUN_FILENAME.out.gz \
-    --path_dndscv $OUTPUT/dndscv/$RUN_FILENAME.out.gz \
+    --path_fml $OUTPUT/../oncodrivefml/$RUN_FILENAME.out.gz \
+    --path_dndscv $OUTPUT/../dndscv/$RUN_FILENAME.out.gz \
     --output_path $OUTPUT/$RUN_FILENAME.stouffer.out.gz
 
 # Exit on error
