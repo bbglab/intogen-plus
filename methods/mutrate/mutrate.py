@@ -8,7 +8,7 @@ from reader import Reader
 import click
 import json
 
-config_file = '/workspace/users/fmuinos/mutrate/mutrate.conf'
+config_file = os.path.join(os.path.dirname(__file__), 'mutrate.conf')
 
 
 def cosmic_sigfit_format(cosmic_exome_scope):
