@@ -49,6 +49,9 @@ echo "## STEP3: Compute mut expectation per bp as {gene : {sample : {context : e
 mkdir -p ${OUTPUT_FOLDER}/genes
 source deactivate
 source activate intogen2017_mutrate_python
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export OMP_NUM_THREADS=1
 if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
                     compute_mutrate -a ${ANNOTMUTS} \
                                     -g ${GENEMUTS} \
