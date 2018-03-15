@@ -17,6 +17,7 @@ export PYTHONPATH=${SCRIPTS_FOLDER}:${PYTHONPATH}
 # STEP1. Prepare files for sigfit to do signature fitting
 echo "## STEP1: Preparing files for sigfit..."
 mkdir -p ${OUTPUT_FOLDER}
+source deactivate
 source activate intogen2017_mutrate_python
 
 if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
@@ -31,6 +32,7 @@ fi
 # STEP2. Run signature fitting with the full catalogue
 echo "## STEP2: Running sigfit..."
 mkdir -p ${OUTPUT_FOLDER}/sigfit_results
+source deactivate
 source activate intogen2017_mutrate_r
 if Rscript --vanilla ${SCRIPTS_FOLDER}/cosmic_exome_fit.r -m ${OUTPUT_FOLDER}/mutational_catalogue.tsv \
                                                              -c ${SCRIPTS_FOLDER}/datasets/cosmic_exome.tsv \
@@ -45,6 +47,7 @@ fi
 # STEP3. Compute mut expectation per bp as {gene : {sample : {context : expectation}}}
 echo "## STEP3: Compute mut expectation per bp as {gene : {sample : {context : expectation}}}"
 mkdir -p ${OUTPUT_FOLDER}/genes
+source deactivate
 source activate intogen2017_mutrate_python
 if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
                     compute_mutrate -a ${ANNOTMUTS} \
