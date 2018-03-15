@@ -16,7 +16,7 @@ class Parser():
         "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
         "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
         "edriver":              ["SYMBOL",      "QVALUE",       "PVALUE"],
-        "cbase":                ["gene",        "q_phi_pos",    "p_phi_pos"],
+        "cbase":                ["gene",        "q_pos",    "p_pos"],
         "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"]
         # "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
         # "mutsigcv": ["gene","q", "p"],
