@@ -33,7 +33,7 @@ echo "## STEP2: Running sigfit..."
 mkdir -p ${OUTPUT_FOLDER}/sigfit_results
 source activate intogen2017_mutrate_r
 if Rscript --vanilla ${SCRIPTS_FOLDER}/cosmic_exome_fit.r -m ${OUTPUT_FOLDER}/mutational_catalogue.tsv \
-                                                             -c ${SCRIPTS_FOLDER}/data/cosmic_exome.tsv \
+                                                             -c ${SCRIPTS_FOLDER}/datasets/cosmic_exome.tsv \
                                                              -i ${ITERATIONS} \
                                                              -o ${OUTPUT_FOLDER}/sigfit_results; then
     echo "STEP2 launched successfully"
