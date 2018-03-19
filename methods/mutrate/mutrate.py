@@ -213,7 +213,7 @@ def mutrate():
               type=click.Path())
 def sigfit(annotmuts_path, mut_catalogue_path):
     reader = Reader(config_file)
-    annotmuts = pd.read_csv(annotmuts_path, sep='\t')
+    annotmuts = pd.read_csv(annotmuts_path, sep='\t', dtype={'sampleID': 'object'})
     exon_triplets, genomewide_triplets = tuple(map(reader.read_triplets, ['exon', 'full']))
     prepare_sigfit(annotmuts, genomewide_triplets, exon_triplets, mut_catalogue_path)
 
