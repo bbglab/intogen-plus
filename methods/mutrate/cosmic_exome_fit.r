@@ -20,6 +20,8 @@ cosmic.exome.file <- opt$cosmic
 iterations <- strtoi(opt$iterations)
 output.folder <- opt$output
 
+# cosmic_signatures
+data("cosmic_signatures", package = "sigfit")
 
 # read mutational catalogue
 catalogue.data.frame <- read.csv(file=catalogue.file, colClasses=c("NULL", rep(NA, 96)), 
@@ -32,6 +34,8 @@ cosmic.exome.data.frame <- read.csv(file=cosmic.exome.file, colClasses=c("NULL",
                                     header=TRUE, sep="\t", row.names = NULL, check.names = FALSE)
 cosmic.exome.data.frame[is.na(cosmic.exome.data.frame)] <- 0
 cosmic.exome.signatures <- data.matrix(cosmic.exome.data.frame)
+rownames(cosmic.exome.signatures) <- rownames(cosmic_signatures)
+
 
 # MCMC fitting
 mcmc_samples_fit <- sigfit::fit_signatures(counts = mutations.matrix, 
@@ -41,7 +45,7 @@ mcmc_samples_fit <- sigfit::fit_signatures(counts = mutations.matrix,
 
 # retrieve exposures mean and credible interval from fitting
 exposures <- retrieve_pars(mcmc_samples_fit, feature = "exposures", 
-                           hpd_prob = 0.90, signature_names = rownames(cosmic.exome.signatures))
+                           hpd_prob = 0.90, signature_names = rownames(cosmic_signatures))
 
 # check carefully, as in the first version the method to fill out dataframe cells was wrong!
 df.mean <- data.frame(matrix(unlist(exposures$mean), nrow=dim(mutations.matrix)[1], byrow=F))
@@ -53,10 +57,24 @@ write.table(df.mean, file=file.path(output.folder, "mean_exposure.tsv"), sep = "
 write.table(df.lower, file=file.path(output.folder, "lower_exposure.tsv"), sep = "\t", quote = FALSE)
 write.table(df.upper, file=file.path(output.folder, "upper_exposure.tsv"), sep = "\t", quote = FALSE)
 
+# plot catalogue
+plot_spectrum(mutations.matrix, pdf_path = file.path(output.folder, "catalogue.pdf"))
+
+# plot exposures
+plot_exposures(counts = mutations.matrix, exposures = exposures,
+               pdf_path = file.path(output.folder, "exposure.pdf"),
+               signature_names = rownames(cosmic_signatures))
+
+# plot_reconstruction
+plot_reconstruction(counts = mutations.matrix,
+                    mcmc_samples = mcmc_samples_fit,
+                    signatures = cosmic.exome.signatures,
+                    pdf_path = file.path(output.folder, "reconstruction.pdf"))
+
 # plot: summary reconstruction: cohort-wise
-sigfit::plot_all(mutations.matrix, 
-                 out_path = output.folder, 
-                 mcmc_samples = mcmc_samples_fit, 
-                 signatures = cosmic.exome.signatures,
-                 signature_names = rownames(cosmic.exome.signatures),
-                 prefix = "fitting")
+# sigfit::plot_all(mutations.matrix,
+#                  out_path = output.folder,
+#                  mcmc_samples = mcmc_samples_fit,
+#                  signatures = cosmic.exome.signatures,
+#                  signature_names = rownames(cosmic.exome.signatures),
+#                  prefix = "fitting")
