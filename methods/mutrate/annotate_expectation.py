@@ -50,19 +50,18 @@ def retrieve_expectation(exp_dict, v):
     return exp_dict[sample][mut_keys.index(key)]
 
 
-@click.command(context_settings={'help_option_names': ['-h', '--help']})
+@click.command(context_settings={'help_option_names': ['-h', '--help'], 'max_content_width': 120})
 @click.option('--genes_path', type=click.Path(exists=True), help='folder with gene jsons')
 @click.option('--maf_path', type=click.Path(exists=True), help='mutations file')
 @click.option('--dnds_path', type=click.Path(exists=True), help='dnds output file')
 @click.option('--output', '-o', type=click.Path(exists=False), help='output_file')
 def mutrate(genes_path, maf_path, dnds_path, output):
     """
-    Example
-    -------
-
-    python annotate_expectation.py --genes_path /workspace/projects/intogen_2017/runs/20180307/mutrate/PCATLAS_WXS_UCEC/genes/ \
-    --maf_path /workspace/projects/intogen_2017/runs/20180307/dndscv/PCATLAS_WXS_UCEC_annotmuts.out.gz \
-    --dnds_path /workspace/projects/intogen_2017/runs/20180307/dndscv/PCATLAS_WXS_UCEC.out.gz.tsv
+    \b
+    python annotate_expectation.py \\
+    --genes_path /workspace/projects/intogen_2017/runs/20180307/mutrate/PCATLAS_WXS_UCEC/genes/ \\
+    --maf_path /workspace/projects/intogen_2017/runs/20180307/dndscv/PCATLAS_WXS_UCEC_annotmuts.out.gz \\
+    --dnds_path /workspace/projects/intogen_2017/runs/20180307/dndscv/PCATLAS_WXS_UCEC.out.gz.tsv \\
     --output /workspace/users/fmuinos/mutrate/ppln_results/BRCA_TCGA/UCEC_annotmuts_expect.tsv
     """
     annotmuts = pd.read_csv(maf_path, sep='\t')

@@ -141,8 +141,12 @@ def spread_expected(sample_expect, contrib_dict):
         expected_dict: dict: sample -> dict(c -> expected number of mutations in context c)
     """
     expected_dict = {}
+    #  sample_expect has been derived from the raw mutations file,
+    #  so it may include some samples which only harbour mutations in non-SNV elements,
+    #  the probabilities of which do not matter to us at the moment
     for sample, expect in sample_expect.items():
-        expected_dict[sample] = {c: contrib_dict[sample][c] * expect for c in contrib_dict[sample]}
+        if sample in contrib_dict:
+            expected_dict[sample] = {c: contrib_dict[sample][c] * expect for c in contrib_dict[sample]}
     return expected_dict
 
 
@@ -193,6 +197,9 @@ def genewise_run(hugo_gene, hugo_ensembl_dict, site_count, cosmic, gw_triplets,
         expected_dict = compute_expected_dict(contrib_dict, ensembl_gene, genemuts, rel_syn_burden, ensembl_hugo_dict)
         return {hugo_gene: compute_bp_expected(expected_dict, syn_sites)}
     except:
+        #  KeyErrors are expected where an ENSEMBL symbol does not match any keys in the ENSEMBL -> HUGO dictionary
+        #  bare except aims to prevent similar errors that may or may not have showed up during tests
+        #  like ValueErrors or IndexErrors
         return {hugo_gene: None}
 
 
