@@ -73,8 +73,8 @@ source deactivate
 source activate intogen2017_mutrate_python
 if python -W ignore ${SCRIPTS_FOLDER}/annotate_expectation.py \
                    --genes_path ${OUTPUT_FOLDER}/genes/ \
-                   --maf_path ${ANNOTMUTS}
-                   --dnds_path ${DNDSOUT}
+                   --maf_path ${ANNOTMUTS} \
+                   --dnds_path ${DNDSOUT} \
                    --output ${OUTPUT_FOLDER}/annotmuts_expect.tsv; then
     echo "STEP4 launched successfully"
 else

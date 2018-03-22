@@ -16,6 +16,9 @@ class Task:
 
     def init(self, name):
 
+        if name is None:
+            name = "None"
+
         if path.isabs(name):
             self.in_file = name
             self.name = path.basename(name).split('.')[0]

@@ -62,6 +62,8 @@ class VariantsFilter(Filter):
 
     def run(self, group_key, group_data):
 
+        group_key = 'None' if group_key is None else group_key
+
         # To store errors and statistics
         self.stats[group_key] = {}
 
