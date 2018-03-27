@@ -24,7 +24,14 @@ order_methods = []
 gweights = []
 gt_combination = None
 method_optimization = None
-
+null_dict =  {
+            'KTP': 0,
+            'KFP': np.nan,
+            'QQPLOT_STD_HALF': 0,
+            'QQPLOT_SLOPE_HALF': 0,
+            'AREA_RANKING_ABSOLUTE': 0,
+            'AREA_RANKING_RELATIVE': 0
+        }
 PATH_REGIONS = os.path.join(os.environ['SCHULZE_DATA'], '02_cds.regions.gz')
 METHODS = [
     'oncodrivefml',
@@ -92,13 +99,17 @@ class Filter:
         """
         results = {}
         for method in self.methods:
-            if method!="edriver":
+            if method != "edriver":
                 input_file = os.path.join(input_run, method, '{}.out.gz'.format(tumor))
             else:
                 input_file = os.path.join(input_run, method, '{}.genes.out.gz'.format(tumor))
             res = self.statistic_outputs(input_file, tumor, method)
+
             if res is not None:
                 results[method] = res
+            else:
+                results[method] = null_dict
+
         return pd.DataFrame(results).T
 
     @staticmethod
