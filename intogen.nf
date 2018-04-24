@@ -58,7 +58,7 @@ process PreprocessFromVep {
         file "filters/vep/*.json" into FILTERS_VEP
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature edriver cbase
+    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature edriver cbase deconstructsig
     """
 }
 

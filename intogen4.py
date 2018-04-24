@@ -8,6 +8,7 @@ from bgparsers import selector
 from concurrent.futures import ProcessPoolExecutor
 
 from tasks.cbase import CBaseTask
+from tasks.deconstructsig import DeconstructSigTask
 from tasks.dndscv import DndsCvTask
 from tasks.edriver import EDriverTask
 from tasks.oncodriveclust import OncodriveClustTask
@@ -31,6 +32,7 @@ TASKS = {t.KEY: t for t in [
     OncodriveOmegaTask,
     OncodriveClustTask,
     HotmapsTask,
+    DeconstructSigTask,
     MutsigCvTask,
     CombinationTask,
     DndsCvTask,
