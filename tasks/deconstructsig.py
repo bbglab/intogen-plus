@@ -10,7 +10,7 @@ from .base import Task
 from bgreference import hg19
 
 PYRIMIDINES = {'C', 'T'}
-BASE_COMPLEMENT =  {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+BASE_COMPLEMENT = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
 
 
 class DeconstructSigTask(Task):
@@ -52,8 +52,8 @@ class DeconstructSigTask(Task):
                 context = hg19(chromosome, int(position)-1, size=3)
                 mutation_type = "{}[{}>{}]{}".format(
                     context[0],
-                    BASE_COMPLEMENT.get(ref, ref) if ref in PYRIMIDINES else ref,
-                    BASE_COMPLEMENT.get(alt, alt) if ref in PYRIMIDINES else alt,
+                    ref if ref in PYRIMIDINES else BASE_COMPLEMENT.get(ref, ref),
+                    alt if ref in PYRIMIDINES else BASE_COMPLEMENT.get(alt, alt),
                     context[-1]
                 )
 
