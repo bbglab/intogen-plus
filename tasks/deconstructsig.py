@@ -50,12 +50,20 @@ class DeconstructSigTask(Task):
                 chromosome, position = value['Location'].split(':')
 
                 context = hg19(chromosome, int(position)-1, size=3)
-                mutation_type = "{}[{}>{}]{}".format(
-                    context[0],
-                    ref if ref in PYRIMIDINES else BASE_COMPLEMENT.get(ref, ref),
-                    alt if ref in PYRIMIDINES else BASE_COMPLEMENT.get(alt, alt),
-                    context[-1]
-                )
+                if ref in PYRIMIDINES:
+                    mutation_type = "{}[{}>{}]{}".format(
+                        context[0],
+                        ref,
+                        alt,
+                        context[-1]
+                    )
+                else:
+                    mutation_type = "{}[{}>{}]{}".format(
+                        context[0],
+                        BASE_COMPLEMENT.get(ref, ref),
+                        BASE_COMPLEMENT.get(alt, alt),
+                        context[-1]
+                    )
 
                 self.in_writer.writerow([
                     chromosome,
