@@ -56,6 +56,7 @@ process PreprocessFromVep {
         file "edriver/*.in.gz" into IN_EDRIVER mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
+        file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
     python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature edriver cbase deconstructsig
