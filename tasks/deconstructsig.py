@@ -22,8 +22,6 @@ class DeconstructSigTask(Task):
         super().__init__(output_folder, config)
 
         self.name = None
-        self.conda_env = config[self.KEY]['conda_env']
-        self.method_folder = config[self.KEY]['method_folder']
 
         self.in_fd = None
         self.in_writer = None
