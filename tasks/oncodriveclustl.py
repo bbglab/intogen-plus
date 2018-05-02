@@ -54,7 +54,7 @@ class OncodriveClustlTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "oncodriveclustl -i {0} -o {1}/{2} -r {3} -c {4} -vep {5} -sim exon_restricted -simw 25 -sw 31 -cw 21 -cmut 3 -emut 3 -kmer {6} --cds --oncohort -n 10000 &&" \
+            cmd = "oncodriveclustl -i {0} -o {1}/{2} -r {3} -c {4} -sim exon_restricted -simw 35 -sw 45 -cw 45 -cmut 2 -emut 2 -kmer {5} --cds --conseq --oncohort -n 10000 &&" \
                   "(cat {1}/{2}/elements_results.txt | gzip > {1}/{2}.out.gz) &&" \
                   "(cat {1}/{2}/clusters_results.tsv | gzip > {1}/{2}_clusters.out.gz) && " \
                   "(cat {1}/{2}/oncohortdrive_results.out | gzip > {1}/{2}_oncohortdrive.out.gz)".format(
@@ -63,7 +63,6 @@ class OncodriveClustlTask(Task):
                 self.name,
                 os.environ.get("ONCODRIVECLUSTL_REGIONS"),
                 os.environ.get("PROCESS_CPUS", 4),
-                os.path.join(os.environ.get("VEP_OUTPUT"), "vep", "{}.out.gz".format(self.name)),
                 (5 if 'SKCM' in self.name else 3)
             )
 
