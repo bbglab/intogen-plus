@@ -90,7 +90,7 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter,c
         d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold)
         dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
         dfq["METHOD_NAME"] = name_method
-        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold)
+        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,0.1)
         dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
         df_roles = classify(df_tiers)
