@@ -29,12 +29,14 @@ def classify_genes_tiers(df,threshold=0.01,column_ranking="RANKING",column_filte
         elif row["RANKING"] >= threshold_rejected:
             d_class[row["SYMBOL"]] = 4
         elif row["RANKING"] < threshold_rejected and row[column_filter] <= threshold:
-            d_class[row["SYMBOL"]] = 2
+            d_class[row["SYMBOL"]] = 3
         elif row["RANKING"] < threshold_rejected and row[column_filter] > threshold:
             d_class[row["SYMBOL"]] = 4
         else:
             d_class[row["SYMBOL"]] = 4
     return d_class
+
+
 def get_recovered_genes(df,column,threshold):
     '''
     Method to rescue CGC genes after FDR correction limited to CGC genes.
@@ -45,11 +47,19 @@ def get_recovered_genes(df,column,threshold):
     '''
     l = set(df[df[column]<threshold]["SYMBOL"].values)
     return l
+
+
 def rescue_genes(row,list_genes_recovered):
+    '''
+
+    :param row:
+    :param list_genes_recovered:
+    :return:
+    '''
     if row["TIER"] <4:
         return row["TIER"]
     if row["SYMBOL"] in list_genes_recovered:
-        return 3
+        return 2
     return 4
 
 

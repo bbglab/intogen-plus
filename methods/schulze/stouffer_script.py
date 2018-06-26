@@ -4,7 +4,7 @@ import click as click
 import pandas as pd
 import numpy as np
 from scipy.stats import combine_pvalues, uniform
-import statsmodels.sandbox.stats.multicomp as multicomp
+from statsmodels.stats.multitest import multipletests
 
 
 #DEFAULT_METHODS = ['oncodrivefml', 'oncodriveclust', 'oncodriveomega', 'hotmapssignature', 'mutsigcv']
@@ -87,6 +87,8 @@ def trimmed_stouffer_w(pvals, weights):
     reduced_pvals, mask = trim_nans(pvals)
     reduced_weights = weights[mask]
     return stouffer_w(truncate(reduced_pvals), weights=reduced_weights)
+
+
 def load_cgc():
     '''
     Loads the CGC set and returns a set of CGC genes
@@ -94,35 +96,46 @@ def load_cgc():
     '''
     df_cgc = pd.read_csv("//workspace/projects/intogen_2017/data/latest/CGC_set.tsv",sep="\t")
     return set(df_cgc["Gene Symbol"].values)
-def set_qvalue_cgc(row,qvalues_cgc,cgc_set):
-    '''
-    Set the CGC qvalue to rows that are CGC genes
-    :param row:
-    :return: the corrected qvalue or nan
-    '''
-    i = 0
-    if row["SYMBOL"].isin(cgc_set):
-        i
+
+
 def combine_pvals(df, path_weights):
+    '''
+
+    :param df: df with raw pvalues
+    :param path_weights: path to the weights
+    :return:
+    '''
 
     weight_dict = parse_optimized_weights(path_weights)
     weights = np.abs(np.array([weight_dict[m] for m in DEFAULT_METHODS]))
 
     func = lambda x: trimmed_stouffer_w(x, weights)
-
+    # Get the stouffer pvalues
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)
-    df['QVALUE_' + 'stouffer_w'] = multicomp.multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
+    # Filter out nan p-values for fdr correction
+    df_non_nan = df[np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
+    df_non_nan['QVALUE_' + 'stouffer_w'] = multipletests(df_non_nan['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
+    # Perform cgc correction
     cgc_set = load_cgc()
-    df_cgc = df[df["SYMBOL"].isin(cgc_set)].copy()
+    df_cgc = df_non_nan[df_non_nan["SYMBOL"].isin(cgc_set)].copy()
     pvalues_cgc = df_cgc['PVALUE_' + 'stouffer_w'].values
-    qvalues_cgc = multicomp.multipletests(pvalues_cgc, method='fdr_bh')[1]
+    qvalues_cgc = multipletests(pvalues_cgc, method='fdr_bh')[1]
     df_cgc['QVALUE_CGC_' + 'stouffer_w'] = qvalues_cgc
-    df_final = pd.merge(left=df,right=df_cgc[["SYMBOL","QVALUE_CGC_stouffer_w"]],left_on="SYMBOL",right_on=["SYMBOL"],how="left")
+    # Merge with the non_nan dataframe
+    df_final_non_nan = pd.merge(left=df_non_nan,right=df_cgc[["SYMBOL","QVALUE_CGC_stouffer_w"]],left_on="SYMBOL",right_on=["SYMBOL"],how="left")
+    # Concat the non_nan dataframe with the non-corrected nan-containing dataframe
+    df_final_nan = df[~np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
+    df_final = pd.concat([df_final_non_nan,df_final_nan])
     return df_final
 
 
 def partial_correction(df, fml_data):
+    '''
 
+    :param df:
+    :param fml_data:
+    :return:
+    '''
     dh = pd.merge(left=df, right=fml_data[['SYMBOL', 'Q_VALUE',"SAMPLES","MUTS","MUTS_RECURRENCE"]], left_on=['SYMBOL'], right_on=['SYMBOL'], how="left")
     c = dh['Q_VALUE'].values
     mask = ~np.isnan(c)
@@ -131,12 +144,18 @@ def partial_correction(df, fml_data):
     if len(a[mask]) == 0:
         raise RuntimeError("No data after filtering NaN OncodriveFML q-values")
 
-    c[mask] = multicomp.multipletests(a[mask], method='fdr_bh')[1]
+    c[mask] = multipletests(a[mask], method='fdr_bh')[1]
     dh['QVALUE_' + 'stouffer_w'] = c
     del dh['Q_VALUE']
     return dh
 
 def include_excess(df,path_dndscv):
+    '''
+
+    :param df:
+    :param path_dndscv:
+    :return:
+    '''
     dnds_data = pd.read_csv(path_dndscv, sep='\t', compression="gzip")
     columns = ['gene_name', 'wmis_cv',"wnon_cv","wspl_cv"]
     if "wind_cv" in dnds_data.columns.values:
@@ -145,9 +164,19 @@ def include_excess(df,path_dndscv):
     return dh
 
 def combine_from_tumor(df, path_to_output, path_fml):
+    '''
+
+    :param df:
+    :param path_to_output:
+    :param path_fml:
+    :return:
+    '''
+
     fml_data = pd.read_csv(path_fml, sep='\t', compression="gzip")
     dh = partial_correction(df, fml_data)
-    dh.to_csv(path_to_output, sep='\t', index=False, compression="gzip")
+    column_order = ["SYMBOL","PVALUE_cbase","PVALUE_dndscv","QVALUE_dndscv","PVALUE_edriver","QVALUE_edriver","PVALUE_hotmapssignature","QVALUE_hotmapssignature","PVALUE_oncodriveclustl","QVALUE_oncodriveclustl","PVALUE_oncodrivefml","QVALUE_oncodrivefml","PVALUE_stouffer_w","QVALUE_stouffer_w","QVALUE_CGC_stouffer_w","All_Bidders","Significant_Bidders","Median_Ranking","RANKING","Total_Bidders","wmis_cv","wnon_cv","wspl_cv","wind_cv","SAMPLES","MUTS","MUTS_RECURRENCE"]
+    dh[column_order].to_csv(path_to_output, sep='\t', index=False, compression="gzip")
+
 
 def select_significant_bidders(row,QVALUE_threshold=0.1):
     '''
