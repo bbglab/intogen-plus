@@ -174,7 +174,9 @@ def combine_from_tumor(df, path_to_output, path_fml):
 
     fml_data = pd.read_csv(path_fml, sep='\t', compression="gzip")
     dh = partial_correction(df, fml_data)
-    column_order = ["SYMBOL","PVALUE_cbase","PVALUE_dndscv","QVALUE_dndscv","PVALUE_edriver","QVALUE_edriver","PVALUE_hotmapssignature","QVALUE_hotmapssignature","PVALUE_oncodriveclustl","QVALUE_oncodriveclustl","PVALUE_oncodrivefml","QVALUE_oncodrivefml","PVALUE_stouffer_w","QVALUE_stouffer_w","QVALUE_CGC_stouffer_w","All_Bidders","Significant_Bidders","Median_Ranking","RANKING","Total_Bidders","wmis_cv","wnon_cv","wspl_cv","wind_cv","SAMPLES","MUTS","MUTS_RECURRENCE"]
+    column_order = ["SYMBOL","PVALUE_cbase","PVALUE_dndscv","QVALUE_dndscv","PVALUE_edriver","QVALUE_edriver","PVALUE_hotmapssignature","QVALUE_hotmapssignature","PVALUE_oncodriveclustl","QVALUE_oncodriveclustl","PVALUE_oncodrivefml","QVALUE_oncodrivefml","PVALUE_stouffer_w","QVALUE_stouffer_w","QVALUE_CGC_stouffer_w","All_Bidders","Significant_Bidders","Median_Ranking","RANKING","Total_Bidders","wmis_cv","wnon_cv","wspl_cv","SAMPLES","MUTS","MUTS_RECURRENCE"]
+    if "wind_cv" in dh.columns.values:
+        column_order.append("wind_cv")
     dh[column_order].to_csv(path_to_output, sep='\t', index=False, compression="gzip")
 
 
