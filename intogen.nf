@@ -63,7 +63,26 @@ process PreprocessFromVep {
     """
 }
 
+process DeconstructSig {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
 
+    input:
+        val task_file from IN_DECONSTRUCTSIG
+
+    output:
+        file "deconstructsig/*.out.gz" into OUT_DECONSTRUCTSIG
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'deconstructsig', task_file)}" ]
+    then
+        python $baseDir/intogen4.py run -o . deconstructsig $task_file
+    else
+        mkdir -p ./dndscv && cp ${outputFile(OUTPUT, 'dndscv', task_file)} ./dndscv/
+    fi
+    """
+
+}
 
 process DndsCV {
     tag { task_file.fileName }

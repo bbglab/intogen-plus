@@ -87,23 +87,22 @@ class DeconstructSigTask(Task):
 
         # Run HotMaps Signature
         if not path.exists(self.out_file):
-            # cmd = "bash -c 'source ~/.bashrc && source activate {0} && source {1}/hotmaps.config && {1}/hotmaps.sh {2} {3} {4}'".format(
-            #     self.conda_env, self.method_folder, self.in_file, self.output_folder, os.environ['PROCESS_CPUS'])
-            #
-            # with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
-            #     with open(self.out_file + ".pid", "wt") as fd:
-            #         fd.write("{}\n".format(p.pid))
-            #     try:
-            #         errcode = p.wait()
-            #     except:
-            #         p.kill()
-            #         p.wait()
-            #         raise
-            # os.unlink(self.out_file + ".pid")
-            #
-            # if errcode != 0:
-            #     raise RuntimeError("{} [error] - code {}".format(self, errcode))
-            pass
+            cmd = "bash -c 'source ~/.bashrc && source activate intogen_deconstructsig && python {0}/deconstructsig/assign_signature_to_mutation.py -i {1} -o {2}'".format(
+                os.environ['INTOGEN_METHODS'], self.in_file, self.out_file)
+
+            with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
+                with open(self.out_file + ".pid", "wt") as fd:
+                    fd.write("{}\n".format(p.pid))
+                try:
+                    errcode = p.wait()
+                except:
+                    p.kill()
+                    p.wait()
+                    raise
+            os.unlink(self.out_file + ".pid")
+
+            if errcode != 0:
+                raise RuntimeError("{} [error] - code {}".format(self, errcode))
 
         return self.out_file
 
