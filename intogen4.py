@@ -11,13 +11,10 @@ from tasks.cbase import CBaseTask
 from tasks.deconstructsig import DeconstructSigTask
 from tasks.dndscv import DndsCvTask
 from tasks.edriver import EDriverTask
-from tasks.oncodriveclust import OncodriveClustTask
 from tasks.oncodriveclustl import OncodriveClustlTask
 from tasks.oncodrivefml import OncodriveFmlTask
-from tasks.oncodriveomega import OncodriveOmegaTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
-from tasks.mutsigcv import MutsigCvTask
 from tasks.combination import CombinationTask
 
 from filters.base import VariantsReader, TSVReader
@@ -29,11 +26,8 @@ TASKS = {t.KEY: t for t in [
     VepTask,
     OncodriveFmlTask,
     OncodriveClustlTask,
-    OncodriveOmegaTask,
-    OncodriveClustTask,
     HotmapsTask,
     DeconstructSigTask,
-    MutsigCvTask,
     CombinationTask,
     DndsCvTask,
     EDriverTask,
@@ -44,7 +38,6 @@ TASKS = {t.KEY: t for t in [
 CONFIG = {
     VepTask.KEY: {'conda_env': os.environ['CONDA_ENV'], 'vep_data': os.environ['VEP_DATA']},
     OncodriveFmlTask.KEY: {'config_file': os.environ['ONCODRIVEFML_CONF']},
-    OncodriveOmegaTask.KEY: {'config_file': os.environ['ONCODRIVEOMEGA_CONF']},
     HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': os.environ['HOTMAPS_METHOD']},
 }
 
