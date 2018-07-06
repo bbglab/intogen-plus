@@ -54,7 +54,7 @@ def get_qvalue(row,df_density_aa):
     return np.min(df_density_aa[(df_density_aa["HUGO Symbol"]==row["GENE"])&(df_density_aa["Tumor Type"]==row["Cancer_Type"])]["q-value"].values)
 
 
-def main(file_hotspots_gene, f_info_density, f_output):
+def main(file_hotspots_gene, f_info_density, f_output, f_output_clusters):
     df_hotspots = find_hotspots_gene_cancer(file_hotspots_gene)
     df_density_aa = get_density_and_pvalue_gene(f_info_density)
     df_density_aa = df_density_aa.groupby(["HUGO Symbol", "Sequence Ontology Transcript", "Tumor Type"],
@@ -76,7 +76,10 @@ def main(file_hotspots_gene, f_info_density, f_output):
     df_non_significant = pd.DataFrame(rows, columns=df_hotspots.columns.values)
 
     df_hotspots_all = pd.concat([df_hotspots, df_non_significant])
+
+
     df_hotspots_all.to_csv(f_output, sep="\t", index=False, compression="gzip")
+    df_density_aa.to_csv(f_output_clusters, sep="\t", index=False, compression="gzip")
 
 
 if __name__ == "__main__":
