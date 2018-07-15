@@ -124,6 +124,6 @@ fi
 ## STEP10. Output parser
 if [ ! -f "$OUTPUT_FOLDER/$INPUT_TUMOR_TYPE.out.gz" ]
 then
-    python $SCRIPTS_FOLDER/postprocess.py $TEMP_FOLDER/hotspot_gene_$INPUT_FILENAME $TEMP_FOLDER/mtco_$INPUT_FILENAME $OUTPUT_FOLDER/$INPUT_TUMOR_TYPE.out.gz $OUTPUT_FOLDER/aa_clusters_$INPUT_TUMOR_TYPE.out.gz
+    python $SCRIPTS_FOLDER/postprocess.py $TEMP_FOLDER/hotspot_gene_$INPUT_FILENAME $TEMP_FOLDER/mtco_$INPUT_FILENAME $OUTPUT_FOLDER/$INPUT_TUMOR_TYPE.out.gz $OUTPUT_FOLDER/$INPUT_TUMOR_TYPE_clusters.out.gz
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
