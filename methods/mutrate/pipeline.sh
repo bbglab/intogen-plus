@@ -12,6 +12,12 @@ ITERATIONS=$4
 OUTPUT_FOLDER=$5
 CORES=$6
 
+if [ -d "$OUTPUT_FOLDER" ]; then
+   echo "Output folder exists"
+   exit 0
+fi
+
+
 SCRIPTS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=${SCRIPTS_FOLDER}:${PYTHONPATH}
 
