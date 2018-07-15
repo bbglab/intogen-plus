@@ -25,7 +25,7 @@ flag = 0
 for (sample in unique(x$Sample))
 {
 
-    if (nrow(x[which(x$Sample==sample),]) > 50) # here I restrict the analysis for only samples with more than 100 mutations
+    if (nrow(x[which(x$Sample==sample),]) > 25) # here I restrict the analysis for only samples with more than 25 mutations
     {
         test = whichSignatures(tumor.ref = sigs.input, 
                                signatures.ref = signatures.cosmic, 
