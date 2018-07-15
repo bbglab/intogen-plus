@@ -78,7 +78,7 @@ process DeconstructSig {
     then
         python $baseDir/intogen4.py run -o . deconstructsig $task_file
     else
-        mkdir -p ./dndscv && cp ${outputFile(OUTPUT, 'dndscv', task_file)} ./dndscv/
+        mkdir -p ./deconstructsig && cp -r ${outputFile(OUTPUT, 'deconstructsig', task_file)} ./deconstructsig/
     fi
     """
 
