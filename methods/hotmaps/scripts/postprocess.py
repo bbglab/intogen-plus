@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 
+
 def find_hotspots_gene_cancer(file_hotspots_gene):
     # Structure	Cancer_Type	HotSpot1	HotSpot2...
     f = open(file_hotspots_gene)
@@ -83,4 +84,4 @@ def main(file_hotspots_gene, f_info_density, f_output, f_output_clusters):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
