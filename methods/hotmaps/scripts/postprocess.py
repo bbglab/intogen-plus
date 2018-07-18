@@ -58,19 +58,19 @@ def get_qvalue(row,df_density_aa):
 def main(file_hotspots_gene, f_info_density, f_output, f_output_clusters):
     df_hotspots = find_hotspots_gene_cancer(file_hotspots_gene)
     df_density_aa = get_density_and_pvalue_gene(f_info_density)
-    df_density_aa = df_density_aa.groupby(["HUGO Symbol", "Sequence Ontology Transcript", "Tumor Type"],
+    df_density_aa_grouped = df_density_aa.groupby(["HUGO Symbol", "Sequence Ontology Transcript", "Tumor Type"],
                                           as_index=False).agg({"Min p-value": np.min, "q-value": np.min})
 
     if len(df_hotspots) > 0:
-        df_hotspots["Min p-value"] = df_hotspots.apply(lambda row: get_pvalue(row, df_density_aa), axis=1)
-        df_hotspots["q-value"] = df_hotspots.apply(lambda row: get_qvalue(row, df_density_aa), axis=1)
+        df_hotspots["Min p-value"] = df_hotspots.apply(lambda row: get_pvalue(row, df_density_aa_grouped), axis=1)
+        df_hotspots["q-value"] = df_hotspots.apply(lambda row: get_qvalue(row, df_density_aa_grouped), axis=1)
         df_hotspots = df_hotspots[df_hotspots["Cancer_Type"] != 'REF']
     else:
         df_hotspots["Min p-value"] = np.nan
         df_hotspots["q-value"] = np.nan
 
     rows = []
-    for index, row in df_density_aa.iterrows():
+    for index, row in df_density_aa_grouped.iterrows():
         if df_hotspots[(df_hotspots["GENE"] == row["HUGO Symbol"]) & (df_hotspots["Cancer_Type"] == row["Tumor Type"])].shape[0] == 0:
             rows.append([row["HUGO Symbol"], row["Tumor Type"], 0, 0, 0, row["Min p-value"], row["q-value"]])
 
