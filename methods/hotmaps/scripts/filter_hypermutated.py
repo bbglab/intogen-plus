@@ -138,13 +138,10 @@ def main(opts):
         if opts['match_regex'] == filename:
             mut_file_path = os.path.join(opts['raw_dir'], filename)
             tissue = filename.split('.')[1]
+            '''
             if tissue != 'PANCAN12':
                 # detect which samples are hyper-mutators
-                hypermut_samps, num_mut_list = detect_hypermutators(mut_file_path,
-                                                                    opts['sample_col'],
-                                                                    opts['tumor_type_col'],
-                                                                    opts['mut_threshold'])
-
+                #hypermut_samps, num_mut_list = detect_hypermutators(mut_file_path,opts['sample_col'],opts['tumor_type_col'],opts['mut_threshold'])
                 # write the hypermutated samples to a file
                 hypermut_file = os.path.join(opts['data_dir'], 'hypermutated.'+tissue+'.txt')
                 with open(hypermut_file, 'w') as writer:
@@ -152,7 +149,8 @@ def main(opts):
                         writer.write(l+'\t'+str(num_mut_list[i])+'\n')
             else:
                 hypermut_samps = []
-
+            '''
+            hypermut_samps = []
             # get file path to read in
             #mupit_filename = 'non_filtered_mupit.TCGA.{tissue}.Xena.dat'.format(tissue=tissue)
             mupit_filename = 'non_filtered_mupit.' + filename
