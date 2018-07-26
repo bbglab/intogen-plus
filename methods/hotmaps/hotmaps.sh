@@ -7,7 +7,7 @@ OUTPUT_FOLDER=$2
 CORES=$3
 
 # Content hotmaps.sh
-# export HYPERMUT=1000
+# export HYPERMUT=1000000
 # export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
 # export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
 # export MYSQL_HOST=127.0.0.1
