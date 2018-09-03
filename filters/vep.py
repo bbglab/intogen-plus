@@ -16,6 +16,9 @@ class VepFilter(Filter):
         with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
             self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
 
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+            self.genes = set([r[1] for r in csv.reader(fd, delimiter='\t')])
+
     def run(self, group_key, group_data):
 
         # To store errors and statistics
@@ -30,11 +33,21 @@ class VepFilter(Filter):
         count_before = 0
         count_after = 0
 
+        orphan_genes = set()
+
+
         for v in self.parent.run(group_key, group_data):
             count_before += 1
 
             if v['ENSP'] not in self.proteins:
+                if v['Gene'] in self.genes:
+                    # Selected gene without matching protein id
+                    orphan_genes.add(v['Gene'])
+
                 continue
+
+            if v['Gene'] in orphan_genes:
+                orphan_genes.remove(v['Gene'])
 
             # Remove multiple consequences
             v['Consequence'] = v['Consequence'].split(',')[0]
@@ -55,6 +68,10 @@ class VepFilter(Filter):
             'before': count_before
         }
         self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
+
+        if len(orphan_genes) > 0:
+            self.stats[group_key]['orphan_genes'] = orphan_genes
+            self.stats[group_key]["warning_orphan_genes"] = "There are {} orphan genes at {}".format(len(orphan_genes), group_key)
 
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "There is no VEP output"
