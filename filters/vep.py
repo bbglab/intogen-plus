@@ -13,6 +13,9 @@ class VepFilter(Filter):
     def __init__(self, parent):
         super().__init__(parent)
 
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
+
     def run(self, group_key, group_data):
 
         # To store errors and statistics
@@ -30,7 +33,7 @@ class VepFilter(Filter):
         for v in self.parent.run(group_key, group_data):
             count_before += 1
 
-            if v['CANONICAL'] != "YES":
+            if v['ENSP'] not in self.proteins:
                 continue
 
             # Remove multiple consequences

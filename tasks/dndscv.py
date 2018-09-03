@@ -2,7 +2,6 @@ import os
 import sys
 import csv
 import gzip
-import signal
 import subprocess
 
 from os import path

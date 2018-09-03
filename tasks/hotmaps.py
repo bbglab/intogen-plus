@@ -30,6 +30,9 @@ class HotmapsTask(Task):
         self.output_folder = path.join(output_folder, self.KEY)
         os.makedirs(self.output_folder, exist_ok=True)
 
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
+
     def input_start(self):
 
         if not self.in_skip:
@@ -44,7 +47,7 @@ class HotmapsTask(Task):
 
             # Hugo_Symbol Chromosome Start_Position End_Position Reference_Allele Tumor_Seq_Allele2 Tumor_Sample_Barcode
             # Variant_Classification Transcript_ID
-            if value['CANONICAL'] == 'YES':
+            if value['ENSP'] in self.proteins:
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
                 chromosome, position = value['Location'].split(':')
                 consequence = value['Consequence'].split(',')[0].replace('missense_variant', 'Missense_Mutation')

@@ -59,6 +59,10 @@ class CBaseTask(Task):
         self.output_folder = path.join(output_folder, self.KEY)
         os.makedirs(self.output_folder, exist_ok=True)
 
+
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
+
     def input_start(self):
 
         if not self.in_skip:
@@ -70,7 +74,7 @@ class CBaseTask(Task):
 
         if not self.in_skip:
 
-            if value['CANONICAL'] == 'YES':
+            if value['ENSP'] in self.proteins:
 
                 consequence = value['Consequence'].split(',')[0]
                 mut_eff = self.VEP_TO_CBASE.get(consequence, None)

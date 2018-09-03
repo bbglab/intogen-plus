@@ -25,6 +25,9 @@ class EDriverTask(Task):
         self.output_folder = path.join(output_folder, self.KEY)
         os.makedirs(self.output_folder, exist_ok=True)
 
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
+
     def input_start(self):
 
         if not self.in_skip:
@@ -36,7 +39,7 @@ class EDriverTask(Task):
         if not self.in_skip:
 
             ensp, position = value['ENSP'], value['Protein_position']
-            if ensp != "-" and position != "-":
+            if ensp != "-" and position != "-" and ensp in self.proteins:
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
 
                 # ENSP Protein_position sample tissue
