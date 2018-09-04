@@ -1,4 +1,5 @@
 import os
+import csv
 import logging
 
 from .base import Filter
