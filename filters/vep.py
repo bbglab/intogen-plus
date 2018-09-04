@@ -71,7 +71,7 @@ class VepFilter(Filter):
         self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
 
         if len(orphan_genes) > 0:
-            self.stats[group_key]['orphan_genes'] = orphan_genes
+            self.stats[group_key]['orphan_genes'] = [g for g in orphan_genes]
             self.stats[group_key]["warning_orphan_genes"] = "There are {} orphan genes at {}".format(len(orphan_genes), group_key)
 
         if count_after == 0:
