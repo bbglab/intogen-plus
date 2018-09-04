@@ -31,7 +31,7 @@ for (sample in unique(x$Sample))
                                signatures.ref = signatures.cosmic, 
                                sample.id = sample,
                                contexts.needed = TRUE,
-                               tri.counts.method = 'default')
+                               tri.counts.method = 'exome2genome')
 
         a = test$weights # save the weights for each signature. 
         a['SSE']  = round(sqrt(sum(test$diff * test$diff)), digits = 3) # compute the error rate

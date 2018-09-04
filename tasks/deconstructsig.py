@@ -62,10 +62,10 @@ class DeconstructSigTask(Task):
                     )
                 else:
                     mutation_type = "{}[{}>{}]{}".format(
-                        context[0],
+                        BASE_COMPLEMENT.get(context[-1], context[-1]),
                         BASE_COMPLEMENT.get(ref, ref),
                         BASE_COMPLEMENT.get(alt, alt),
-                        context[-1]
+                        BASE_COMPLEMENT.get(context[0], context[0])
                     )
 
                 self.in_writer.writerow([
