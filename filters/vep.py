@@ -36,7 +36,8 @@ class VepFilter(Filter):
         count_skip_consequence = 0
         count_after = 0
 
-        orphan_genes = set()
+        skip_genes = set()
+        process_genes = set()
 
 
         for v in self.parent.run(group_key, group_data):
@@ -49,12 +50,12 @@ class VepFilter(Filter):
             if v['ENSP'] not in self.proteins:
                 if v['Gene'] in self.genes:
                     # Selected gene without matching protein id
-                    orphan_genes.add(v['Gene'])
+                    skip_genes.add(v['Gene'])
 
                 continue
 
             if v['Gene'] in orphan_genes:
-                orphan_genes.remove(v['Gene'])
+                process_genes.add(v['Gene'])
 
             # Remove multiple consequences
             v['Consequence'] = v['Consequence'].split(',')[0]
@@ -78,6 +79,7 @@ class VepFilter(Filter):
 
         self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
 
+        orphan_genes = skip_genes - process_genes
         if len(orphan_genes) > 0:
             self.stats[group_key]['orphan_genes'] = [g for g in orphan_genes]
             self.stats[group_key]["warning_orphan_genes"] = "There are {} orphan genes at {}".format(len(orphan_genes), group_key)
