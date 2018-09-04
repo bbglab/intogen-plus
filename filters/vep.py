@@ -54,8 +54,7 @@ class VepFilter(Filter):
 
                 continue
 
-            if v['Gene'] in orphan_genes:
-                process_genes.add(v['Gene'])
+            process_genes.add(v['Gene'])
 
             # Remove multiple consequences
             v['Consequence'] = v['Consequence'].split(',')[0]
