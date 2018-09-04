@@ -3,6 +3,7 @@ import csv
 import logging
 
 from .base import Filter
+from tasks.base import valid_consequence
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class VepFilter(Filter):
         chromosomes = {}
 
         count_before = 0
+        count_skip_consequence = 0
         count_after = 0
 
         orphan_genes = set()
@@ -39,6 +41,10 @@ class VepFilter(Filter):
 
         for v in self.parent.run(group_key, group_data):
             count_before += 1
+
+            if not valid_consequence(v['Consequence']):
+                count_skip_consequence += 1
+                continue
 
             if v['ENSP'] not in self.proteins:
                 if v['Gene'] in self.genes:
@@ -66,8 +72,10 @@ class VepFilter(Filter):
         self.stats[group_key]['genes'] = genes
         self.stats[group_key]['count'] = {
             'after': count_after,
-            'before': count_before
+            'before': count_before,
+            'skip_consequence': count_skip_consequence
         }
+
         self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
 
         if len(orphan_genes) > 0:

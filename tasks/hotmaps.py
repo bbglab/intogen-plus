@@ -6,7 +6,7 @@ import signal
 import subprocess
 
 from os import path
-from .base import Task
+from .base import Task, valid_consequence
 
 
 class HotmapsTask(Task):
@@ -47,7 +47,7 @@ class HotmapsTask(Task):
 
             # Hugo_Symbol Chromosome Start_Position End_Position Reference_Allele Tumor_Seq_Allele2 Tumor_Sample_Barcode
             # Variant_Classification Transcript_ID
-            if value['ENSP'] in self.proteins:
+            if valid_consequence(value['Consequence']) and value['ENSP'] in self.proteins:
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
                 chromosome, position = value['Location'].split(':')
                 consequence = value['Consequence'].split(',')[0].replace('missense_variant', 'Missense_Mutation')

@@ -4,7 +4,7 @@ import gzip
 import subprocess
 
 from os import path
-from .base import Task
+from .base import Task, valid_consequence
 
 
 class EDriverTask(Task):
@@ -39,7 +39,7 @@ class EDriverTask(Task):
         if not self.in_skip:
 
             ensp, position = value['ENSP'], value['Protein_position']
-            if ensp != "-" and position != "-" and ensp in self.proteins:
+            if ensp != "-" and position != "-" and valid_consequence(value['Consequence']) and ensp in self.proteins:
                 identifier, sample, ref, alt = value['#Uploaded_variation'].split('__')
 
                 # ENSP Protein_position sample tissue
