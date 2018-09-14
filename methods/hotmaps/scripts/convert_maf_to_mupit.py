@@ -93,11 +93,14 @@ def read_maf(path, tumor_type):
         strat_col = None
     else:
         strat_col = 'tumor_type'
-    hypermut_samps, num_mut_list = mu.detect_hypermutators(opts['maf'],
-                                                           samp_colname='Tumor_Sample_Barcode',
-                                                           stratify_col=strat_col,
-                                                           mut_threshold=opts['mut_threshold'])
-    df = df[~df['Tumor_Sample_Barcode'].isin(hypermut_samps)].copy()
+
+    # WARNING: No need to filter hypermutators, intogen is filtering them.
+
+    #hypermut_samps, num_mut_list = mu.detect_hypermutators(opts['maf'],
+    #                                                       samp_colname='Tumor_Sample_Barcode',
+    #                                                       stratify_col=strat_col,
+    #                                                       mut_threshold=opts['mut_threshold'])
+    #df = df[~df['Tumor_Sample_Barcode'].isin(hypermut_samps)].copy()
 
     # keep only missense mutations
     df_mis = df[df['Variant_Classification']=='Missense_Mutation'].copy()
