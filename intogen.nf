@@ -7,7 +7,6 @@ OUTPUT = file(params.output)
 process PreprocessFromInput {
     tag { 'Reading variants' }
     publishDir OUTPUT, mode: 'copy'
-    afterScript "cp .command.log $OUTPUT/preprocess_from_input.log"
 
     output:
         file "vep/*.in.gz" into IN_VEP mode flatten
@@ -46,7 +45,6 @@ process PreprocessFromVep {
     tag { task_file.fileName }
 
     publishDir OUTPUT, mode: 'copy'
-    afterScript "cp .command.log $OUTPUT/preprocess_from_vep.log"
 
     input:
         val task_file from OUT_VEP
@@ -152,7 +150,7 @@ process HotmapsSignature {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
-    maxForks 8
+    maxForks 12
 
     input:
         val task_file from IN_HOTMAPS
