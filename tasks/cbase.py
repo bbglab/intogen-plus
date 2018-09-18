@@ -74,7 +74,7 @@ class CBaseTask(Task):
 
         if not self.in_skip:
 
-            if valid_consequence(value['Consequence']) and value['ENSP'] in self.proteins:
+            if value['ENSP'] in self.proteins:
 
                 consequence = value['Consequence'].split(',')[0]
                 mut_eff = self.VEP_TO_CBASE.get(consequence, None)
