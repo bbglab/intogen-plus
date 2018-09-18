@@ -85,7 +85,7 @@ fi
 ## STEP7. Run HotMAPS (input: mutation_tcga.INPUT_TUMOR_TYPE.txt output:hotspot_INPUT_FILENAME)
 if [ ! -f "$TEMP_FOLDER/hotspot_$INPUT_FILENAME" ]
 then
-    python $SCRIPTS_FOLDER/hotspot.py \
+    python $SCRIPTS_FOLDER/hotspot_sqlite.py \
         --log-level=INFO \
         -m $TEMP_FOLDER/mutation_tcga.$INPUT_TUMOR_TYPE.txt \
         -a $DATASETS_FOLDER/$DATASETS_PDB_FILE \
