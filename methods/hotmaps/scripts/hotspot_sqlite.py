@@ -231,9 +231,10 @@ def connect_mysql():
     while retries > 0:
         try:
             db = sqlite3.connect(os.environ['HOTMAPS_DB'])
-            db.execute('pragma cache_size = -3000000;')
+            db.execute('pragma cache_size = -300000;')
             db.execute('pragma journal_mode=wal;')
             db.execute('pragma query_only = ON;')
+            db.execute('pragma case_sensitive_like = ON;')
             break
         except Exception:
             time.sleep(5)
