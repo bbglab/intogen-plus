@@ -191,7 +191,7 @@ def main(opts):
 
             # query genome2pdb
             myquery = (
-                "SELECT gp.PDBId, gp.seqRes, CONCAT(gp.pos1, ',', gp.pos2, ',', gp.pos3) as `Reference Genomic Position` "
+                "SELECT gp.PDBId, gp.seqRes, gp.pos1 || ',' || gp.pos2 || ',' || gp.pos3 as `Reference Genomic Position` "
                 "FROM ( "
                     "SELECT PDBId, seqRes, pos1, pos2, pos3 "
                     "FROM Genome2PDB "
