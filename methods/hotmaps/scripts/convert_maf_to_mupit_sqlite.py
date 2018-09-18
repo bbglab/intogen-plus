@@ -151,7 +151,7 @@ def main(opts):
     retries = 5
     while retries > 0:
         try:
-            db = sqlite3.connect(os.environ['HOTMAPS_DB'])
+            db = sqlite3.connect("{}?mode=ro".format(os.environ['HOTMAPS_DB']))
             break
         except Exception:
             time.sleep(5)
