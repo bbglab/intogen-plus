@@ -27,3 +27,5 @@ timeline.html*
 *.pyc
 *.egg-info/
 dist/
+
+*.simg

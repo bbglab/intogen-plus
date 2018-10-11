@@ -1,20 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 set -x
 
 # Script arguments
 INPUT_FILE=$1
 OUTPUT_FOLDER=$2
 CORES=$3
-
-# Content hotmaps.sh
-# export HYPERMUT=1000000
-# export DATASETS_FOLDER=~/workspace/intogen/intogen-plus/datasets/hotmaps
-# export DATASETS_PDB_FILE="tp53_described_pdb_info.txt"
-# export MYSQL_HOST=127.0.0.1
-# export MYSQL_PORT=3306
-# export MYSQL_DB=mupit_modbase
-# export MYSQL_USER=root
-# export MYSQL_PASSWD=S82XWgESQjKJpLx3
 
 # Preprocess
 INPUT_FOLDER=$(dirname "${INPUT_FILE}")
@@ -36,7 +26,6 @@ then
     python $SCRIPTS_FOLDER/map_maf_to_structure.py \
         --data-dir $TEMP_FOLDER \
         --match-regex $INPUT_FILENAME \
-        --host $MYSQL_HOST --db $MYSQL_DB --mysql-user $MYSQL_USER --mysql-passwd S82XWgESQjKJpLx3 \
         --output-dir $TEMP_FOLDER
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
@@ -46,7 +35,6 @@ if [ ! -f "$TEMP_FOLDER/$INPUT_FILENAME.mupit" ]
 then
     python $SCRIPTS_FOLDER/convert_maf_to_mupit.py \
         --maf $MAF_FILE \
-        -mh $MYSQL_HOST -mdb $MYSQL_DB --mysql-user $MYSQL_USER --mysql-passwd $MYSQL_PASSWD \
         --tumor-type $INPUT_TUMOR_TYPE \
         --no-stratify \
         -mt $HYPERMUT \

@@ -2,7 +2,6 @@
 then evaluates the clustering to detect hotspot residues.
 """
 import numpy as np
-import scipy.stats as stats
 import src.mutations as muts
 import src.pdb_structure as pstruct
 import randomizer_aa
@@ -163,7 +162,10 @@ def generate_null_dist_sig(struct_id,coordinates,model_info, chain_info,
         STRUCT_CHAIN_DIFF.append(struct_id)
 
     # get the frequency of each clustering pattern
-    sim_null_dist = stats.itemfreq(sim_density)
+    # sim_null_dist = stats.itemfreq(sim_density)
+
+    v, c = np.unique(sim_density, return_counts=True)
+    sim_null_dist = np.array([v, c]).T
 
     return sim_null_dist
 

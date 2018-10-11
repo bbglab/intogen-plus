@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: alpine:3.8
+
+%environment
+    HYPERMUT=1000
+    DATASETS_FOLDER=/datasets
+    BGDATA_LOCAL=/datasets/bgdata
+    DATASETS_PDB_FILE="fully_described_pdb_info.txt"
+    HOTMAPS_DB=/datasets/mupit_database.db
+    HOTMAPS_PDB_FOLDER=/datasets/pdb
+    export HYPERMUT DATASETS_FOLDER DATASETS_PDB_FILE HOTMAPS_DB BGDATA_LOCAL HOTMAPS_PDB_FOLDER
+
+%runscript
+    exec "/bin/sh" "/hotmaps/hotmaps.sh" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/hotmaps
+    cp -r scripts ${SINGULARITY_ROOTFS}/hotmaps/
+    cp hotmaps.sh ${SINGULARITY_ROOTFS}/hotmaps/
+
+    mkdir ${SINGULARITY_ROOTFS}/datasets
+    cp -vr ../../datasets/hotmaps/* ${SINGULARITY_ROOTFS}/datasets/
+    rm ${SINGULARITY_ROOTFS}/datasets/mupit_database.sql.gz
+
+%post
+    apk add --no-cache python-dev py-pip py-curl zlib-dev make ncurses-dev g++
+    pip --no-cache-dir install pandas tqdm futures bgreference biopython
+
+
+# sh hotmaps.sh example.in.gz ./output 2

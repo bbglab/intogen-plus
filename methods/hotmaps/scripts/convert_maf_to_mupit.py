@@ -1,6 +1,6 @@
 import sys
 import os
-import MySQLdb
+import sqlite3
 import argparse
 import pandas as pd
 import numpy as np
@@ -20,20 +20,6 @@ def parse_arguments():
     parser.add_argument('-n', '--no-stratify',
                         action='store_true', default=False,
                         help='Flag indicating whether hypermutators are stratified by tumor type')
-    parser.add_argument('-mh', '--mysql-host',
-                        type=str,
-                        default='karchin-db01.icm.jhu.edu',
-                        help='Host name for mysql')
-    parser.add_argument('-mdb', '--mysql-db',
-                        type=str,
-                        default='mupit_modbase',
-                        help='Database name for mupit')
-    parser.add_argument('--mysql-user',
-                        type=str, required=True,
-                        help='MySQL user name')
-    parser.add_argument('--mysql-passwd',
-                        type=str, required=True,
-                        help='MySQL password')
     parser.add_argument('-mt', '--mut-threshold',
                         type=int, default=None,
                         help='Use flat mutation count for hypermutator filter (Default: None)')
@@ -151,11 +137,11 @@ def main(opts):
     retries = 5
     while retries > 0:
         try:
-            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                                 port=int(os.environ['MYSQL_PORT']),
-                                 user=os.environ['MYSQL_USER'],
-                                 passwd=os.environ['MYSQL_PASSWD'],
-                                 db=os.environ['MYSQL_DB'])
+            db = sqlite3.connect(os.environ['HOTMAPS_DB'])
+            db.execute('pragma cache_size = -300000;')
+            db.execute('pragma journal_mode=wal;')
+            db.execute('pragma query_only = ON;')
+            db.execute('pragma case_sensitive_like = ON;')
             break
         except Exception:
             time.sleep(5)
@@ -195,7 +181,7 @@ def main(opts):
 
             # query genome2pdb
             myquery = (
-                "SELECT gp.PDBId, gp.seqRes, CONCAT(gp.pos1, ',', gp.pos2, ',', gp.pos3) as `Reference Genomic Position` "
+                "SELECT gp.PDBId, gp.seqRes, gp.pos1 || ',' || gp.pos2 || ',' || gp.pos3 as `Reference Genomic Position` "
                 "FROM ( "
                     "SELECT PDBId, seqRes, pos1, pos2, pos3 "
                     "FROM Genome2PDB "

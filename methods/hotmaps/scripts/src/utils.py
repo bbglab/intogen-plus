@@ -32,6 +32,7 @@ mod_base = ["TargetBeg", "TargetEnd", "SequenceIdentity", "EValue",
             "tsvmodNo35", "tsvmodRMSD"]
 ModBase = namedtuple('ModBase', mod_base)
 
+
 def start_logging(log_file='', log_level='INFO', verbose=False):
     """Start logging information into the log directory.
 
@@ -107,7 +108,7 @@ def read_pdb_info(pdb_info_path):
                 gene2chain[chain_description] = [l[1] for l in lines_subset]
 
             # add path info
-            gene2chain['path'] = lines[0][4]
+            gene2chain['path'] = os.path.join(os.environ['HOTMAPS_PDB_FOLDER'], lines[0][4])
 
             pdb_info_dict[pdbid] = gene2chain
     return pdb_info_dict
@@ -210,7 +211,7 @@ def read_structure(pdb_path, structure_id, quiet=True):
         # stop if they kill program
         raise
     except:
-        logger.info('Failed reading in structure {0}'.format(structure_id))
+        logger.info('Fail reading {0}'.format(pdb_path))
         return None
 
 

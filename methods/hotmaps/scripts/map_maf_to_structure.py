@@ -1,7 +1,7 @@
 """Maps mutations obtained from maf to protein structure."""
 import sys
 import os
-import MySQLdb
+import sqlite3
 import argparse
 import csv
 import re
@@ -18,18 +18,6 @@ def parse_arguments():
     parser.add_argument('-m', '--match-regex',
                         type=str, default='^TCGA.+.maf$',
                         help='Regex which only matches the initial mutation files')
-    parser.add_argument('--host',
-                        type=str, required=True,
-                        help='MySQL host')
-    parser.add_argument('--db',
-                        type=str, default='mupit_modbase',
-                        help='MySQL MuPIT database name (default: mupit_modbase)')
-    parser.add_argument('--mysql-user',
-                        type=str, required=True,
-                        help='MySQL user name')
-    parser.add_argument('--mysql-passwd',
-                        type=str, required=True,
-                        help='MySQL password')
     parser.add_argument('-o', '--output-dir',
                         type=str, required=True,
                         help='Directory to output results after mapping to protein structure')
@@ -43,11 +31,11 @@ def main(opts):
     retries = 5
     while retries > 0:
         try:
-            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                                 port=int(os.environ['MYSQL_PORT']),
-                                 user=os.environ['MYSQL_USER'],
-                                 passwd=os.environ['MYSQL_PASSWD'],
-                                 db=os.environ['MYSQL_DB'])
+            db = sqlite3.connect(os.environ['HOTMAPS_DB'])
+            db.execute('pragma cache_size = -300000;')
+            db.execute('pragma journal_mode=wal;')
+            db.execute('pragma query_only = ON;')
+            db.execute('pragma case_sensitive_like = ON;')
             break
         except Exception:
             time.sleep(5)

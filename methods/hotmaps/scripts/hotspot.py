@@ -2,7 +2,7 @@ import os
 import csv
 import argparse
 import logging
-import MySQLdb
+import sqlite3
 import time
 
 
@@ -230,11 +230,11 @@ def connect_mysql():
     retries = 5
     while retries > 0:
         try:
-            db = MySQLdb.connect(host=os.environ['MYSQL_HOST'],
-                                 port=int(os.environ['MYSQL_PORT']),
-                                 user=os.environ['MYSQL_USER'],
-                                 passwd=os.environ['MYSQL_PASSWD'],
-                                 db=os.environ['MYSQL_DB'])
+            db = sqlite3.connect(os.environ['HOTMAPS_DB'])
+            db.execute('pragma cache_size = -300000;')
+            db.execute('pragma journal_mode=wal;')
+            db.execute('pragma query_only = ON;')
+            db.execute('pragma case_sensitive_like = ON;')
             break
         except Exception:
             time.sleep(5)
@@ -244,6 +244,7 @@ def connect_mysql():
         raise RuntimeError("Impossible to connect")
 
     return db
+
 
 def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     output = []
@@ -259,7 +260,7 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
 
         try:
             result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
-        except MySQLdb.OperationalError:
+        except sqlite3.Error:
             # Try to reconnect DB
             db = connect_mysql()
             result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
