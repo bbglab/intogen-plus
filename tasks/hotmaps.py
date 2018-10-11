@@ -83,7 +83,7 @@ class HotmapsTask(Task):
 
         # Run HotMaps Signature
         if not path.exists(self.out_file):
-            cmd = "singularity run {0}/hotmaps.simg {2} {3} {4}".format(
+            cmd = "singularity run {0}/hotmaps.simg {1} {2} {3}".format(
                 self.method_folder, self.in_file, self.output_folder, os.environ['PROCESS_CPUS'])
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
