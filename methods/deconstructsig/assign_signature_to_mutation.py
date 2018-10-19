@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import sys
 import argparse
 import subprocess
 
@@ -66,10 +67,18 @@ if __name__ == "__main__":
     muts.to_csv(os.path.join(out_path, "tmp", "mutations_snv.csv"), sep='\t', index=False)
 
     # RUN DECONSTRUCTSIGN IN R
-
     command = 'cd ' + out_path + ' && Rscript ' + os.path.join(os.path.abspath(os.path.dirname(__file__)), "deconstructSigs.r")+ ' ' + os.path.join(out_path, "tmp", "mutations_snv.csv")
     print(command)
-    subprocess.run(command, shell=True, executable='/bin/bash')
+    r = subprocess.run(command, shell=True, executable='/bin/bash')
+    if r.returncode != 0:
+        print("ERROR: Running R script")
+        sys.exit(r.returncode)
+
+    # Exit WITHOUT error if no signatures_weight.csv exist (that means that all samples have less than 25 mutations)
+    if not os.path.exists(os.path.join(out_path, "signatures_weight.csv")):
+        print("WARNING: Any sample with more than 25 variants.")
+        sys.exit(0)
+
 
     # REMOVE TEMPORAL FILE
 
