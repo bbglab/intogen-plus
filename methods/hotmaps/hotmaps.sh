@@ -10,7 +10,7 @@ CORES=$3
 INPUT_FOLDER=$(dirname "${INPUT_FILE}")
 INPUT_FILENAME=$(basename "${INPUT_FILE}")
 INPUT_TUMOR_TYPE=${INPUT_FILENAME%.in.gz}
-SCRIPTS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/scripts
+SCRIPTS_FOLDER="/hotmaps/scripts"
 TEMP_FOLDER="$OUTPUT_FOLDER/tmp"
 mkdir -p $OUTPUT_FOLDER
 mkdir -p $TEMP_FOLDER
