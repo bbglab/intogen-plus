@@ -287,7 +287,7 @@ def main(opts):
 
     quiet = opts['log_level'] != "DEBUG"
 
-    steps = 100 * opts['cores']
+    steps = 400 * opts['cores']
     chunk_size = int(len(pdb_info) / steps) + 1
     process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"])
 
