@@ -1,6 +1,0 @@
-numpy
-biopython
-pandas
-bgreference
-futures
-tqdm

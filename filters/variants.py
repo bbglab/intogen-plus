@@ -97,7 +97,7 @@ class VariantsFilter(Filter):
         }
 
         # Load coverage regions tree
-        regions_file = os.environ['COVERAGE_REGIONS']
+        regions_file = os.path.join(os.environ['COVERAGE_REGIONS'], 'preprocess' ,'hg19_100bp.coverage.regions.gz')
         coverage_tree = defaultdict(IntervalTree)
         with gzip.open(regions_file, 'rt') as fd:
             reader = csv.reader(fd, delimiter='\t')

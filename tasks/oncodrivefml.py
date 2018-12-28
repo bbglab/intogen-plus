@@ -13,11 +13,11 @@ class OncodriveFmlTask(Task):
 
     KEY = 'oncodrivefml'
 
-    def __init__(self, output_folder, config):
-        super().__init__(output_folder, config)
+    def __init__(self, output_folder):
+        super().__init__(output_folder)
 
         self.name = None
-        self.config = load_configuration(config[OncodriveFmlTask.KEY]['config_file'], override={'settings': {'cores': 2}})
+        self.config = load_configuration(os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'), override={'settings': {'cores': 2}})
         self.elements_file = self.config['elements']
 
         self.in_file = None

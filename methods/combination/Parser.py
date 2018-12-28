@@ -28,7 +28,7 @@ class Parser():
         self.thresholds = thresholds
 
     @staticmethod
-    def read_hugo(path=os.environ['SCHULZE_DATA']):
+    def read_hugo(path=os.path.join(os.environ['INTOGEN_DATASETS'], 'combination')):
         with open(os.path.join(path, "ENSEMBL_HUGO_1807107.pickle"), "rb") as fd:
             return pickle.load(fd)
 

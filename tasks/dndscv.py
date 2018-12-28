@@ -12,8 +12,8 @@ class DndsCvTask(Task):
 
     KEY = 'dndscv'
 
-    def __init__(self, output_folder, config):
-        super().__init__(output_folder, config)
+    def __init__(self, output_folder):
+        super().__init__(output_folder)
         self.name = None
         self.in_fd = None
         self.in_writer = None
@@ -53,7 +53,7 @@ class DndsCvTask(Task):
         if not path.exists(self.out_file):
 
             cmd = "singularity exec {0}/dndscv.img Rscript {0}/run.R {1} {2} {3} {4}".format(
-                os.environ['DNDSCV_DATA'],
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'dndscv'),
                 self.in_file,
                 self.out_file,
                 self.out_file.replace(".out.gz", "_annotmuts.out.gz"),

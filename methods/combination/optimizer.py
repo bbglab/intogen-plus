@@ -25,7 +25,7 @@ gweights = []
 gt_combination = None
 method_optimization = None
 
-PATH_REGIONS = os.path.join(os.environ['SCHULZE_DATA'], '02_cds.regions.gz')
+PATH_REGIONS = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', '02_cds.regions.gz')
 METHODS = [
     'oncodrivefml',
     'oncodriveclustl',

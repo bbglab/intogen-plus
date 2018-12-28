@@ -13,13 +13,13 @@ class VepTask(Task):
 
     KEY = 'vep'
 
-    def __init__(self, output_folder, config):
+    def __init__(self, output_folder):
 
-        super().__init__(output_folder, config)
+        super().__init__(output_folder)
 
         self.name = None
-        self.conda_env = config[VepTask.KEY]['conda_env']
-        self.vep_data = config[VepTask.KEY]['vep_data']
+        self.conda_env = os.environ['CONDA_ENV']
+        self.vep_data = os.path.join(os.environ['INTOGEN_DATASETS'], 'vep')
 
         self.in_fd = None
         self.in_writer = None

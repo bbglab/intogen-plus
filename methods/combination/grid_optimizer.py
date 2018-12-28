@@ -32,7 +32,7 @@ null_dict =  {
             'AREA_RANKING_ABSOLUTE': 0,
             'AREA_RANKING_RELATIVE': 0
         }
-PATH_REGIONS = os.path.join(os.environ['SCHULZE_DATA'], '02_cds.regions.gz')
+PATH_REGIONS = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', '02_cds.regions.gz')
 METHODS = [
     'oncodrivefml',
     'oncodriveclustl',

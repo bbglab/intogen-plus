@@ -13,8 +13,8 @@ class OncodriveClustlTask(Task):
 
     KEY = 'oncodriveclustl'
 
-    def __init__(self, output_folder, config):
-        super().__init__(output_folder, config)
+    def __init__(self, output_folder):
+        super().__init__(output_folder)
 
         self.name = None
 
@@ -61,7 +61,7 @@ class OncodriveClustlTask(Task):
                 self.in_file,
                 self.output_folder,
                 self.name,
-                os.environ.get("ONCODRIVECLUSTL_REGIONS"),
+                os.path.join(os.environ.get("INTOGEN_DATASETS"), 'oncodrivefml', '02_cds.regions.gz'),
                 os.environ.get("PROCESS_CPUS", 4),
                 (5 if 'SKCM' in self.name else 3)
             )

@@ -35,12 +35,6 @@ TASKS = {t.KEY: t for t in [
 ]}
 
 
-CONFIG = {
-    VepTask.KEY: {'conda_env': os.environ['CONDA_ENV'], 'vep_data': os.environ['VEP_DATA']},
-    OncodriveFmlTask.KEY: {'config_file': os.environ['ONCODRIVEFML_CONF']},
-    HotmapsTask.KEY: {'conda_env': 'hotmaps', 'method_folder': os.environ['HOTMAPS_METHOD']},
-}
-
 logger = logging.getLogger('intogen')
 LOG_FILE = 'intogen.log'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -126,7 +120,7 @@ def cli(debug):
 def preprocess(input, output, groupby, cores, tasks):
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
-    tasks = [TASKS[t](output, CONFIG) for t in tasks]
+    tasks = [TASKS[t](output) for t in tasks]
 
     reader = VariantsReader()
     for f in [VariantsFilter]:
@@ -140,7 +134,7 @@ def preprocess(input, output, groupby, cores, tasks):
 @click.option('--output', '-o', required=True, help="Output folder")
 @click.argument('tasks', nargs=-1)
 def read(input, output, tasks):
-    tasks = [TASKS[t](output, CONFIG) for t in tasks]
+    tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
     reader = TSVReader()
     for f in [VepFilter]:
@@ -154,7 +148,7 @@ def read(input, output, tasks):
 @click.argument('task', type=str)
 @click.argument('key', type=str)
 def run(output, task, key):
-    task = TASKS[task](output, CONFIG)
+    task = TASKS[task](output)
     task.init(key)
     task.run()
 

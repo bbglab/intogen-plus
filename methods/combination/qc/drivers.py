@@ -3,8 +3,8 @@ import os
 from collections import defaultdict
 
 
-NEGATIVE_SET = os.path.join(os.environ['SCHULZE_DATA'], 'negative_gene_set.tsv')
-POSITIVE_SET = os.path.join(os.environ['SCHULZE_DATA'], 'CGCMay17_cancer_types_TCGA.tsv')
+NEGATIVE_SET = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', 'negative_gene_set.tsv')
+POSITIVE_SET = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', 'CGCMay17_cancer_types_TCGA.tsv')
 
 
 def get_positive_set():

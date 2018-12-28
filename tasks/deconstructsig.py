@@ -17,9 +17,9 @@ class DeconstructSigTask(Task):
 
     KEY = 'deconstructsig'
 
-    def __init__(self, output_folder, config):
+    def __init__(self, output_folder):
 
-        super().__init__(output_folder, config)
+        super().__init__(output_folder)
 
         self.name = None
 

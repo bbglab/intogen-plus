@@ -48,8 +48,8 @@ class CBaseTask(Task):
         "TTA": "60", "TTC": "61", "TTG": "62", "TTT": "63"
     }
 
-    def __init__(self, output_folder, config):
-        super().__init__(output_folder, config)
+    def __init__(self, output_folder):
+        super().__init__(output_folder)
         self.name = None
         self.in_fd = None
         self.in_writer = None
@@ -117,7 +117,7 @@ class CBaseTask(Task):
                   "zcat {1} > {2}_tmp/input.txt &&" \
                   "cd {2}_tmp && singularity run {0}/cbase.simg {2}_tmp/input.txt {0}/Input 0 &&" \
                   "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
-                os.path.abspath(os.environ['CBASE_DATA']),
+                os.path.abspath(os.path.join(os.environ['INTOGEN_DATASETS'], 'cbase')),
                 os.path.abspath(self.in_file),
                 os.path.abspath(self.out_file))
 

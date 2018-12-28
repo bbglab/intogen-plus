@@ -51,7 +51,7 @@ def output_to_dataframe(ranking, d_results):
     '''
 
     l_info = []
-    cgc = pd.read_csv(os.path.join(os.environ['SCHULZE_DATA'], "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
+    cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination", "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
     cancer_drivers = cgc['Gene Symbol'].unique()
 
     for gene, rk in ranking.items():

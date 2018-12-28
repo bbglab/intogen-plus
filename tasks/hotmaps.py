@@ -13,13 +13,12 @@ class HotmapsTask(Task):
 
     KEY = 'hotmapssignature'
 
-    def __init__(self, output_folder, config):
+    def __init__(self, output_folder):
 
-        super().__init__(output_folder, config)
+        super().__init__(output_folder)
 
         self.name = None
-        self.conda_env = config[self.KEY]['conda_env']
-        self.method_folder = config[self.KEY]['method_folder']
+        self.method_folder = os.path.join(os.environ['INTOGEN_METHODS'], 'hotmaps')
 
         self.in_fd = None
         self.in_writer = None

@@ -13,9 +13,9 @@ class CombinationTask(Task):
 
     KEY = 'combination'
 
-    def __init__(self, output_folder, config):
+    def __init__(self, output_folder):
 
-        super().__init__(output_folder, config)
+        super().__init__(output_folder)
 
         self.name = None
         self.in_fd = None
@@ -41,8 +41,8 @@ class CombinationTask(Task):
         # Run Schulze
         if not path.exists(self.out_file):
             cmd = "bash -c 'export SCHULZE_DATA={0} && {1}/schulze.sh {2} {3}'".format(
-                os.environ['SCHULZE_DATA'],
-                os.environ['SCHULZE_METHOD'],
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'combination'),
+                os.path.join(os.environ['INTOGEN_METHODS'], 'combination'),
                 self.output_folder, self.name)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:

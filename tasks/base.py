@@ -15,7 +15,7 @@ def valid_consequence(consequences):
 
 class Task:
 
-    def __init__(self, output_folder, config):
+    def __init__(self, output_folder):
 
         self.name = None
         self.in_file = None
@@ -24,7 +24,6 @@ class Task:
         self.out_file = None
 
         self.output_folder = output_folder
-        self.config = config
 
 
     def init(self, name):
