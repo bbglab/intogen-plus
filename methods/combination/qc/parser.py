@@ -65,6 +65,7 @@ class Parser:
         if self.symbol is None:
             if self.symbols_mapping is None:
                 self._build_symbols_mapping()
+            self.symbol = "SYMBOL"
             df[self.symbol] = df[self.gene_id].map(lambda x: self.symbols_mapping.get(x, x))
         df.rename(columns={
             self.gene_id: 'GENE_ID', self.symbol: 'SYMBOL', self.pvalue: 'PVALUE', self.qvalue: 'QVALUE'

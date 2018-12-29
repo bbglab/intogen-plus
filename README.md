@@ -1,4 +1,4 @@
-## IntOGen 2017 ##
+## IntOGen ##
 
 # INSTALL
 
@@ -9,9 +9,13 @@
 4. Activate the environment
     # conda activate intogen
 5. Update nextflow
-    # nextflow self-update    
-6. Edit configuration files at config/*.conf
+    # nextflow self-update  
+6. Install dependencies
+    # conda install -c bbglab bgparsers click oncodrivefml bgreference ensembl-vep=88.10
+    # pip install https://bitbucket.org/bbglab/oncodriverole/get/dnds.tar.gz
+7. Edit configuration files at config/*.conf
 
 # USAGE
-nextflow run intogen.nf -profile local --input ./input --output ./output
+cd datasets/test
+nextflow run ../../intogen.nf -profile local --input ./input --output ./output
 

@@ -52,8 +52,8 @@ class DndsCvTask(Task):
 
         if not path.exists(self.out_file):
 
-            cmd = "singularity exec {0}/dndscv.img Rscript {0}/run.R {1} {2} {3} {4}".format(
-                os.path.join(os.environ['INTOGEN_DATASETS'], 'dndscv'),
+            cmd = "singularity run {0}/dndscv.simg {1} {2} {3} {4}".format(
+                os.path.join(os.environ['INTOGEN_METHODS'], 'dndscv'),
                 self.in_file,
                 self.out_file,
                 self.out_file.replace(".out.gz", "_annotmuts.out.gz"),

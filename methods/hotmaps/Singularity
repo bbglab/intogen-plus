@@ -21,6 +21,7 @@ From: alpine:3.8
 
     mkdir ${SINGULARITY_ROOTFS}/datasets
     cp -vr ../../datasets/hotmaps/* ${SINGULARITY_ROOTFS}/datasets/
+    cp -vr ../../datasets/bgdata ${SINGULARITY_ROOTFS}/datasets/
     rm ${SINGULARITY_ROOTFS}/datasets/mupit_database.sql.gz
     chmod -R a+r ${SINGULARITY_ROOTFS}/datasets/
 

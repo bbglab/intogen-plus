@@ -90,7 +90,7 @@ class DeconstructSigTask(Task):
 
         # Run HotMaps Signature
         if not path.exists(self.out_file):
-            cmd = "bash -c 'source ~/.bashrc && source activate intogen_deconstructsig && python {0}/deconstructsig/assign_signature_to_mutation.py -i {1} -o {2}'".format(
+            cmd = "singularity run {0}/deconstructsig/deconstructsig.simg -i {1} -o {2}".format(
                 os.environ['INTOGEN_METHODS'], self.in_file, self.out_file)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:

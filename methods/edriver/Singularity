@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: debian:buster-slim
+
+%runscript
+    exec "/usr/bin/perl" "/edriver/e-Driver.pl" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/edriver
+    cp e-Driver.pl ${SINGULARITY_ROOTFS}/edriver/
+    cp binomial_e-Driver.r ${SINGULARITY_ROOTFS}/edriver/
+    chmod -R a+rx ${SINGULARITY_ROOTFS}/edriver/
+
+%post
+    apt-get update
+    apt-get install -y perl r-base
+    rm -rf /var/lib/apt/lists/*
+
+

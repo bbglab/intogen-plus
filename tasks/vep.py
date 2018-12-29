@@ -18,7 +18,6 @@ class VepTask(Task):
         super().__init__(output_folder)
 
         self.name = None
-        self.conda_env = os.environ['CONDA_ENV']
         self.vep_data = os.path.join(os.environ['INTOGEN_DATASETS'], 'vep')
 
         self.in_fd = None
@@ -60,11 +59,11 @@ class VepTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "bash -c 'source ~/.bashrc && source activate {0} && vep -i <(zcat {1}) -o STDOUT " \
-                  "--assembly GRCh37 --no_stats --cache --offline --symbol --protein --tab --canonical --dir {3} " \
-                  "| grep -v ^## | gzip > {2}'; " \
-                  "mkdir -p vep/logs; mv STDOUT_warnings.txt vep/logs/{4}.log; echo Done;".format(
-                self.conda_env, self.in_file, self.out_file, self.vep_data, self.name)
+            cmd = "bash -c 'vep -i <(zcat {0}) -o STDOUT " \
+                  "--assembly GRCh37 --no_stats --cache --offline --symbol --protein --tab --canonical --dir {2} " \
+                  "| grep -v ^## | gzip > {1}'; " \
+                  "mkdir -p vep/logs; mv STDOUT_warnings.txt vep/logs/{3}.log; echo Done;".format(
+                self.in_file, self.out_file, self.vep_data, self.name)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
                 with open(self.out_file + ".pid", "wt") as fd:
