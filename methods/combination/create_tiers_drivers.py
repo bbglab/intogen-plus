@@ -63,11 +63,20 @@ def rescue_genes(row,list_genes_recovered):
     return 4
 
 
-def set_role(data, distance_threshold=0.05):
+def set_role(data, distance_threshold=0.1):
     """Set the role according to the DNDS output"""
     if data['wmis_cv'] < 1 and data['wnon_cv'] < 1:  # threshold
         return None
-    distance = (data['wmis_cv'] - data['wnon_cv']) / math.sqrt(2)
+    # Check wmis
+    wmis = data['wmis_cv']
+    if wmis >= 1 and data["n_mis"] == 0:
+        wmis = 1
+    # Check wnon
+    wnon = data['wnon_cv']
+    if wnon >= 1 and data["n_non"] == 0:
+        wnon = 1
+
+    distance = (wmis - wnon) / math.sqrt(2)
     if distance_threshold is not None and abs(distance) < distance_threshold:
         return None
     else:
