@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: continuumio/miniconda3:4.5.12
+
+%environment
+    export LC_ALL=C.UTF-8
+
+%runscript
+    exec "/mutrate/pipeline.sh" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/mutrate
+    cp -r * ${SINGULARITY_ROOTFS}/mutrate/
+    chmod -R a+rx ${SINGULARITY_ROOTFS}/mutrate/
+
+%post
+
+    # Load environment
+    export LC_ALL=C.UTF-8
+
+    # Install Python dependencies
+    /opt/conda/bin/conda install -y -c conda-forge python=3.6 numpy=1.15 pandas=0.23 pathos=0.2 tqdm=4.28 dill=0.2 click=7.0 r-essentials=3.5

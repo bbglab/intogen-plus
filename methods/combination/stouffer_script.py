@@ -94,7 +94,7 @@ def load_cgc():
     Loads the CGC set and returns a set of CGC genes
     :return: set of cgc gene names
     '''
-    df_cgc = pd.read_csv("//workspace/projects/intogen_2017/data/latest/CGC_set.tsv",sep="\t")
+    df_cgc = pd.read_csv(os.path.join(os.environ['SCHULZE_DATA'], "CGC_set.tsv"), sep="\t")
     return set(df_cgc["Gene Symbol"].values)
 
 

@@ -8,8 +8,6 @@ from reader import Reader
 import click
 import json
 
-config_file = os.path.join(os.path.dirname(__file__), 'mutrate.conf')
-
 
 def cosmic_sigfit_format(cosmic_exome_scope):
     index = ['Signature {}'.format(i+1) for i in range(30)]
@@ -103,7 +101,7 @@ def prepare_sigfit(annotmuts, gw_triplets, exon_triplets, mut_catalogue_path):
          mutational catalogue in sigfit format
          cosmic signatures into exome scope
     """
-    reader = Reader(config_file)
+    reader = Reader()
     mut_catalogue = create_mut_catalogue(annotmuts)
     mut_catalogue.to_csv(mut_catalogue_path, sep='\t')
     cosmic_signatures = reader.read_cosmic()
@@ -219,7 +217,7 @@ def mutrate():
               help='path for output mutational catalogue',
               type=click.Path())
 def sigfit(annotmuts_path, mut_catalogue_path):
-    reader = Reader(config_file)
+    reader = Reader()
     annotmuts = pd.read_csv(annotmuts_path, sep='\t', dtype={'sampleID': 'object'})
     exon_triplets, genomewide_triplets = tuple(map(reader.read_triplets, ['exon', 'full']))
     prepare_sigfit(annotmuts, genomewide_triplets, exon_triplets, mut_catalogue_path)
@@ -247,7 +245,7 @@ def sigfit(annotmuts_path, mut_catalogue_path):
 def compute_mutrate(annotmuts_path, genemuts_path, mut_catalogue_path, sigfit_exposures_path, cores, output_path):
 
     # instantiate reader
-    reader = Reader(config_file)
+    reader = Reader()
 
     # retrieve annotations
     site_count = reader.read_site_counts()

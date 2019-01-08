@@ -1,7 +1,8 @@
 import gzip
 import dill as pickle
 import pandas as pd
-from config import load_configuration
+
+from os import path
 
 
 class Reader(object):
@@ -11,8 +12,20 @@ class Reader(object):
     It has methods to instantiate inputs from those paths
     """
 
-    def __init__(self, config_file):
-        config = load_configuration(config_file=config_file)
+    def __init__(self):
+        config = {
+            'base': {
+                'site_counts_file': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate', 'site_counts.pickle.gz'),
+                'triplets': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate','tnt_counts_dict.pickle.gz'),
+                'hugo_ensembl': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate','HGNC_ENSEMBL_dict.pickle'),
+                'ensembl_hugo': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate','ENSEMBL_HGNC_dict_70.pickle')
+            },
+            'sigfit': {
+                'cosmic': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate','cosmic_signatures.pickle.gz'),
+                'cosmic_exome': path.join(os.environ['INTOGEN_DATASETS'], 'mutrate','cosmic_exome.tsv')
+            }
+        }
+
         self.site_counts_path = config['base']['site_counts_file']
         self.triplets_path = config['base']['triplets']
         self.hugo_ensembl_path = config['base']['hugo_ensembl']

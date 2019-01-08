@@ -17,16 +17,12 @@ if [ -d "$OUTPUT_FOLDER" ]; then
    exit 0
 fi
 
-
 SCRIPTS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=${SCRIPTS_FOLDER}:${PYTHONPATH}
 
 # STEP1. Prepare files for sigfit to do signature fitting
 echo "## STEP1: Preparing files for sigfit..."
 mkdir -p ${OUTPUT_FOLDER}
-source deactivate
-source activate intogen2017_mutrate_python
-
 if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
                     sigfit -a ${ANNOTMUTS} \
                            -o ${OUTPUT_FOLDER}/mutational_catalogue.tsv; then
@@ -39,8 +35,6 @@ fi
 # STEP2. Run signature fitting with the full catalogue
 echo "## STEP2: Running sigfit..."
 mkdir -p ${OUTPUT_FOLDER}/sigfit_results
-source deactivate
-source activate intogen2017_mutrate_r
 if Rscript --vanilla ${SCRIPTS_FOLDER}/cosmic_exome_fit.r -m ${OUTPUT_FOLDER}/mutational_catalogue.tsv \
                                                           -c ${SCRIPTS_FOLDER}/datasets/cosmic_exome.tsv \
                                                           -i ${ITERATIONS} \
@@ -54,8 +48,6 @@ fi
 # STEP3. Compute mut expectation per bp as {gene : {sample : {context : expectation}}}
 echo "## STEP3: Compute mut expectation per bp as {gene : {sample : {context : expectation}}}"
 mkdir -p ${OUTPUT_FOLDER}/genes
-source deactivate
-source activate intogen2017_mutrate_python
 export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 export OMP_NUM_THREADS=1
@@ -75,8 +67,6 @@ fi
 
 # STEP4. Create MAF with mutation rate
 echo "## STEP4: Adding expected mutation rate to MAF table"
-source deactivate
-source activate intogen2017_mutrate_python
 if python -W ignore ${SCRIPTS_FOLDER}/annotate_expectation.py \
                    --genes_path ${OUTPUT_FOLDER}/genes/ \
                    --maf_path ${ANNOTMUTS} \

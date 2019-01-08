@@ -21,6 +21,7 @@ def generic_open_file(file):
     yield f
     f.close()
 
+
 def mut_key_generator():
 
     subs = ['CA', 'CG', 'CT', 'TA', 'TC', 'TG']

@@ -1,5 +1,0 @@
-
-
-conda create -n intogen2017_mutrate_python python=3.5 numpy pandas pathos tqdm dill bgconfig click
-
-conda create -n intogen2017_mutrate_r r-essentials

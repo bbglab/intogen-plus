@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
-source activate intogen2017
 
-# usage example
-# ./new_schulze.sh ~/projects/intogen-plus/methods/schulze/output/ PCATLAS_WXS_KICH
-
-set -x
-
-# export SCHULZE_DATA='/workspace/projects/intogen_2017/data/latest/schulze/'
-
-# example script arguments
-# OUTPUT=~/projects/intogen-plus/methods/optimization/test_results/
-# RUN_FILENAME=PCATLAS_WXS_KICH
+set -xe
 
 OUTPUT=$1
 RUN_FILENAME=$2
