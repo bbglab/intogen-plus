@@ -59,11 +59,11 @@ class VepTask(Task):
 
         # Run vep
         if not path.exists(self.out_file):
-            cmd = "bash -c 'vep -i <(zcat {0}) -o STDOUT " \
+            cmd = "bash -c 'singularity run {4} -i <(zcat {0}) -o STDOUT " \
                   "--assembly GRCh37 --no_stats --cache --offline --symbol --protein --tab --canonical --dir {2} " \
                   "| grep -v ^## | gzip > {1}'; " \
                   "mkdir -p vep/logs; mv STDOUT_warnings.txt vep/logs/{3}.log; echo Done;".format(
-                self.in_file, self.out_file, self.vep_data, self.name)
+                self.in_file, self.out_file, self.vep_data, self.name, os.path.join(os.environ['INTOGEN_METHODS'], "vep", "vep.simg"))
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
                 with open(self.out_file + ".pid", "wt") as fd:

@@ -1,12 +1,12 @@
 import os
 import csv
+import sys
 import gzip
 import shutil
+import subprocess
 
 from os import path
 from .base import Task
-from oncodrivefml.main import OncodriveFML
-from oncodrivefml.config import load_configuration
 
 
 class OncodriveFmlTask(Task):
@@ -17,9 +17,6 @@ class OncodriveFmlTask(Task):
         super().__init__(output_folder)
 
         self.name = None
-        self.config = load_configuration(os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'), override={'settings': {'cores': 2}})
-        self.elements_file = self.config['elements']
-
         self.in_file = None
         self.in_skip = False
         self.in_fd = None
@@ -60,20 +57,47 @@ class OncodriveFmlTask(Task):
             tmp_folder = self.out_file + ".tmp"
             os.makedirs(tmp_folder, exist_ok=True)
 
-            # Check if whole genome
-            if "_WGS_" in os.path.basename(self.in_file):
-                self.config['signature']['normalize_by_sites'] = 'whole_genome'
+            # config = load_configuration(
+            #     os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'),
+            #     override={'settings': {'cores': 2}})
+            # elements_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions_vep88_grch37.gz')
+            #
+            # # Check if whole genome
+            # if "_WGS_" in os.path.basename(self.in_file):
+            #     self.config['signature']['normalize_by_sites'] = 'whole_genome'
+            # else:
+            #     self.config['signature']['normalize_by_sites'] = 'whole_exome'
+            #
+            # analysis = OncodriveFML(mutations_file=self.in_file,
+            #                         elements_file=elements_file,
+            #                         output_folder=tmp_folder,
+            #                         config=config,
+            #                         blacklist=None,
+            #                         generate_pickle=False)
+            #
+            # analysis.run()
+            # tmp_output_file = analysis.output_file_prefix + ".tsv"
 
-            analysis = OncodriveFML(mutations_file=self.in_file,
-                                    elements_file=self.elements_file,
-                                    output_folder=tmp_folder,
-                                    config=self.config,
-                                    blacklist=None,
-                                    generate_pickle=False)
+            cmd = "singularity run {0}/oncodrivefml.simg -i {1} -e {2} -t coding -s {3} -o {4} -c {5} --cores {6}".format(
+                os.path.join(os.environ['INTOGEN_METHODS'], 'oncodrivefml'),
+                self.in_file,
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'regions_vep88_grch37.gz'),
+                'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes',
+                tmp_folder,
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'),
+                os.environ.get("PROCESS_CPUS", 4)
+            )
 
-            analysis.run()
+            try:
+                o = subprocess.check_output(cmd, shell=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output.decode())
+                sys.exit(e.returncode)
+            print(o.decode())
 
-            with open(analysis.output_file_prefix + ".tsv", "rb") as f_in, gzip.open(self.out_file, "wb") as f_out:
+            tmp_output_file = os.path.join(tmp_folder, "{}-oncodrivefml.tsv".format(os.path.basename(self.in_file).split('.')[0]))
+
+            with open(tmp_output_file, "rb") as f_in, gzip.open(self.out_file, "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
             shutil.rmtree(tmp_folder)
 

@@ -11,8 +11,7 @@
 5. Update nextflow
     # nextflow self-update  
 6. Install dependencies
-    # conda install -c bbglab bgparsers click oncodrivefml bgreference ensembl-vep=88.10
-    # pip install https://bitbucket.org/bbglab/oncodriverole/get/dnds.tar.gz
+    # conda install -c bbglab bgparsers click bgreference
 7. Edit configuration files at config/*.conf
 
 # USAGE

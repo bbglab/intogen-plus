@@ -115,6 +115,7 @@ process OncodriveFML {
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodrivefml', task_file)}" ]
     then
+        export PROCESS_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . oncodrivefml $task_file
     else
         mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
