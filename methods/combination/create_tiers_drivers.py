@@ -1,11 +1,11 @@
 import csv
 import gzip
+import math
 
+import click
+import numpy as np
 import pandas as pd
 
-from oncodriverole.main import classify
-import numpy as np
-import click
 
 def classify_genes_tiers(df,threshold=0.01,column_ranking="RANKING",column_filter = "QVALUE_stouffer_weighted"):
     df.sort_values("RANKING",ascending=False,inplace=True)
@@ -63,6 +63,21 @@ def rescue_genes(row,list_genes_recovered):
     return 4
 
 
+def set_role(data, distance_threshold=0.05):
+    """Set the role according to the DNDS output"""
+    if data['wmis_cv'] < 1 and data['wnon_cv'] < 1:  # threshold
+        return None
+    distance = (data['wmis_cv'] - data['wnon_cv']) / math.sqrt(2)
+    if distance_threshold is not None and abs(distance) < distance_threshold:
+        return None
+    else:
+        if distance > 0:
+            return 'dom'
+        elif distance < 0:
+            return 'rec'
+        else:
+            return None
+
 
 @click.command()
 @click.option('--input',type=click.Path(exists=True),help="File to be parsed",required=True)
@@ -93,9 +108,8 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter,c
         rescued_genes = get_recovered_genes(dfq,column_filter_cgc,0.1)
         dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
-        df_roles = classify(df_tiers)
-        df_tiers_final = pd.merge(left=df_tiers,right=df_roles,how="left")
-        df_tiers_final.to_csv(output_file, sep="\t", index=False, compression="gzip")
+        df_tiers['ROLE'] = df_tiers.apply(set_role, axis=1)
+        df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
     else:
 
         # No results
