@@ -20,6 +20,9 @@ timeline.html*
 .settings/
 .ropeproject
 
+# VSCode
+.vscode
+
 # gEdit temporal files
 *~
 
