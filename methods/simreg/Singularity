@@ -1,0 +1,31 @@
+Bootstrap: docker
+From: debian:buster-slim
+
+%environment
+    export LC_ALL=C.UTF-8
+
+%runscript
+    exec "/usr/local/bin/simreg" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/simreg
+    cp -r src/* ${SINGULARITY_ROOTFS}/simreg/
+    chmod -R a+rx ${SINGULARITY_ROOTFS}/simreg/
+
+%post
+
+    # Load environment
+    export LC_ALL=C.UTF-8
+
+    # Install dependencies
+    apt update
+    apt install -y python3.6 python3-pip python3-configobj python3-numpy python3-scipy python3-pycurl libz-dev python3-statsmodels python3-requests \
+                   python3-pandas python3-matplotlib python3-setuptools python3-click python3-dill python3-tqdm python3-tornado cython3
+
+    # Install OncodriveFML
+    cd /simreg/
+    pip3 install https://bitbucket.org/bgframework/bgpack/get/v0.6.tar.gz
+    python3 /simreg/setup.py install
+
+    # Clean unused things
+    rm -rf /var/lib/apt/lists/*

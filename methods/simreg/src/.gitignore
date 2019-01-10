@@ -1,0 +1,39 @@
+logs
+.ipynb_checkpoints
+testing
+example/output
+
+# Intellij IDEA files
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.classpath
+.project
+.settings/
+.ropeproject
+
+# gEdit temporal files
+*~
+
+# Python bytecode
+*.pyc
+*.egg-info/
+.eggs
+dist/
+
+# Cython compiled code
+build
+*.so
+*.c
+
+*.pickle.gz
+example/cds
+example/cdsOriginal
+
+docs/build
+
+# External users tests
+external_checks

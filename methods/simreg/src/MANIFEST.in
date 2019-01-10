@@ -1,0 +1,5 @@
+# Files to be included in the distribution
+include MANIFEST.in
+include requirements.txt
+include optional-requirements.txt
+global-exclude *.c *.so

@@ -1,0 +1,32 @@
+OncodriveFML is the property of the Universitat Pompeu Fabra (UPF), which hold the copyright thereto.
+Copyright (C) 2016 Universitat Pompeu Fabra.
+
+OncodriveFML is made available to the general public subject to certain conditions described in its license.
+For the avoidance of doubt, you may use the software and any data accessed through UPF software for academic,
+non-commercial and personal use only, and you may not copy, distribute, transmit, duplicate, reduce or alter
+in any way for commercial purposes, or for the purpose of redistribution, without a license from the
+Universitat Pompeu Fabra (UPF). Requests for information regarding a license for commercial use or
+redistribution of OncodriveFML may be sent via e-mail to innovacio@upf.edu.
+
+Third Party Software
+
+The third-party software listed below is downloaded directly from its homepages and, unless otherwise specified,
+is licensed under the licenses described below. The disclaimers and copyright notices provided are based on
+information made available to UPF by the third party licensors listed:
+
+Numpy: http://www.numpy.org/
+Scipy: http://www.scipy.org/
+Pandas: https://github.com/pydata/pandas
+Statmodels: http://statsmodels.sourceforge.net/
+
+All rights in any third-party data and/or any third-party software, including all ownership rights, are reserved
+and remain with the respective third parties. You agree that these third parties may enforce their rights under
+this agreement against you directly in their own name.
+
+
+
+
+
+
+
+
