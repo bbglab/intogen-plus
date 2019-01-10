@@ -972,117 +972,128 @@ for gene in mks_type:
     gene["len"]))
 fout.close()
 
-if mod_C == 1:
-    sys.stderr.write("Fitting model 1...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(2)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(2)]
-    cur_min_res = [0, 0, 1e20]
-    for rep in range(rep_no):
-        p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.)], neg_ln_L, mks_type, 1,
-                                  [(low_b[0], up_b[0]), (low_b[1], up_b[1])], 2)
-        if p_res[2] > 0 and p_res[2] < cur_min_res[2]:
-            cur_min_res = p_res[:]
-    if cur_min_res[2] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_1.txt", "w")
-    fout.write("%e, %e, %f, %i\n" % (cur_min_res[0], cur_min_res[1], cur_min_res[2], mod_C))
-    fout.close()
+repeat = True
+while repeat:
+    try:
+        if mod_C == 1:
+            sys.stderr.write("Fitting model 1...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(2)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(2)]
+            cur_min_res = [0, 0, 1e20]
+            for rep in range(rep_no):
+                p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.)], neg_ln_L, mks_type, 1,
+                                        [(low_b[0], up_b[0]), (low_b[1], up_b[1])], 2)
+                if p_res[2] > 0 and p_res[2] < cur_min_res[2]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[2] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_1.txt", "w")
+            fout.write("%e, %e, %f, %i\n" % (cur_min_res[0], cur_min_res[1], cur_min_res[2], mod_C))
+            fout.close()        
 
-elif mod_C == 2:
-    sys.stderr.write("Fitting model 2...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(2)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(2)]
-    cur_min_res = [0, 0, 1e20]
-    for rep in range(rep_no):
-        p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.)], neg_ln_L, mks_type, 2,
-                                  [(low_b[0], up_b[0]), (low_b[1], up_b[1])], 2)
-        if p_res[2] > 0 and p_res[2] < cur_min_res[2]:
-            cur_min_res = p_res[:]
-    if cur_min_res[2] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_2.txt", "w")
-    fout.write("%e, %e, %f, %i\n" % (cur_min_res[0], cur_min_res[1], cur_min_res[2], mod_C))
-    fout.close()
+        elif mod_C == 2:
+            sys.stderr.write("Fitting model 2...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(2)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(2)]
+            cur_min_res = [0, 0, 1e20]
+            for rep in range(rep_no):
+                p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.)], neg_ln_L, mks_type, 2,
+                                        [(low_b[0], up_b[0]), (low_b[1], up_b[1])], 2)
+                if p_res[2] > 0 and p_res[2] < cur_min_res[2]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[2] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_2.txt", "w")
+            fout.write("%e, %e, %f, %i\n" % (cur_min_res[0], cur_min_res[1], cur_min_res[2], mod_C))
+            fout.close()
 
-elif mod_C == 3:
-    sys.stderr.write("Fitting model 3...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(4)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(4)]
-    cur_min_res = [0, 0, 0, 0, 1e20]
-    for rep in range(rep_no):
-        p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
-                                   random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 3,
-                                  [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], 0.9999)],
-                                  4)
-        if p_res[4] > 0 and p_res[4] < cur_min_res[4]:
-            cur_min_res = p_res[:]
-    if cur_min_res[4] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_3.txt", "w")
-    fout.write("%e, %e, %e, %e, %f, %i\n" % (
-    cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], mod_C))
-    fout.close()
+        elif mod_C == 3:
+            sys.stderr.write("Fitting model 3...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(4)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(4)]
+            cur_min_res = [0, 0, 0, 0, 1e20]
+            for rep in range(rep_no):
+                p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
+                                        random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 3,
+                                        [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], 0.9999)],
+                                        4)
+                if p_res[4] > 0 and p_res[4] < cur_min_res[4]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[4] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_3.txt", "w")
+            fout.write("%e, %e, %e, %e, %f, %i\n" % (
+            cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], mod_C))
+            fout.close()
 
-elif mod_C == 4:
-    sys.stderr.write("Fitting model 4...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(4)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(4)]
-    cur_min_res = [0, 0, 0, 0, 1e20]
-    for rep in range(rep_no):
-        p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
-                                   random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 4,
-                                  [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], 0.9999)],
-                                  4)
-        if p_res[4] > 0 and p_res[4] < cur_min_res[4]:
-            cur_min_res = p_res[:]
-    if cur_min_res[4] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_4.txt", "w")
-    fout.write("%e, %e, %e, %e, %f, %i\n" % (
-    cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], mod_C))
-    fout.close()
+        elif mod_C == 4:
+            sys.stderr.write("Fitting model 4...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(4)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(4)]
+            cur_min_res = [0, 0, 0, 0, 1e20]
+            for rep in range(rep_no):
+                p_res = minimize_neg_ln_L([random.uniform(0.02, 10.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
+                                        random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 4,
+                                        [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], 0.9999)],
+                                        4)
+                if p_res[4] > 0 and p_res[4] < cur_min_res[4]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[4] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_4.txt", "w")
+            fout.write("%e, %e, %e, %e, %f, %i\n" % (
+            cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], mod_C))
+            fout.close()
 
-elif mod_C == 5:
-    sys.stderr.write("Fitting model 5...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(5)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(5)]
-    cur_min_res = [0, 0, 0, 0, 0, 1e20]
-    for rep in range(int(2 * rep_no)):
-        p_res = minimize_neg_ln_L(
-            [random.uniform(0.02, 10.), random.uniform(0.02, 5.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
-             random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 5,
-            [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], up_b[3]), (low_b[4], 0.9999)], 5)
-        if p_res[5] > 0 and p_res[5] < cur_min_res[5]:
-            cur_min_res = p_res[:]
-    if cur_min_res[5] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_5.txt", "w")
-    fout.write("%e, %e, %e, %e, %e, %f, %i\n" % (
-    cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], cur_min_res[5], mod_C))
-    fout.close()
+        elif mod_C == 5:
+            sys.stderr.write("Fitting model 5...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(5)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(5)]
+            cur_min_res = [0, 0, 0, 0, 0, 1e20]
+            for rep in range(int(2 * rep_no)):
+                p_res = minimize_neg_ln_L(
+                    [random.uniform(0.02, 10.), random.uniform(0.02, 5.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
+                    random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 5,
+                    [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], up_b[3]), (low_b[4], 0.9999)], 5)
+                if p_res[5] > 0 and p_res[5] < cur_min_res[5]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[5] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_5.txt", "w")
+            fout.write("%e, %e, %e, %e, %e, %f, %i\n" % (
+            cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], cur_min_res[5], mod_C))
+            fout.close()
 
-elif mod_C == 6:
-    sys.stderr.write("Fitting model 6...\n")
-    low_b = [1e-5 * random.uniform(1., 3.) for i in range(5)]
-    up_b = [50. * random.uniform(1., 2.) for i in range(5)]
-    cur_min_res = [0, 0, 0, 0, 0, 1e20]
-    for rep in range(int(2 * rep_no)):
-        p_res = minimize_neg_ln_L(
-            [random.uniform(0.02, 10.), random.uniform(0.02, 5.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
-             random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 6,
-            [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], up_b[3]), (low_b[4], 0.9999)], 5)
-        if p_res[5] > 0 and p_res[5] < cur_min_res[5]:
-            cur_min_res = p_res[:]
-    if cur_min_res[5] == 1e20:
-        sys.stderr.write("Could not find a converging solution.\n")
-    fout = open("param_estimates_6.txt", "w")
-    fout.write("%e, %e, %e, %e, %e, %f, %i\n" % (
-    cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], cur_min_res[5], mod_C))
-    fout.close()
+        elif mod_C == 6:
+            sys.stderr.write("Fitting model 6...\n")
+            low_b = [1e-5 * random.uniform(1., 3.) for i in range(5)]
+            up_b = [50. * random.uniform(1., 2.) for i in range(5)]
+            cur_min_res = [0, 0, 0, 0, 0, 1e20]
+            for rep in range(int(2 * rep_no)):
+                p_res = minimize_neg_ln_L(
+                    [random.uniform(0.02, 10.), random.uniform(0.02, 5.), random.uniform(0.02, 10.), random.uniform(0.02, 10.),
+                    random.uniform(2e-5, 0.95)], neg_ln_L, mks_type, 6,
+                    [(low_b[0], up_b[0]), (low_b[1], up_b[1]), (low_b[2], up_b[2]), (low_b[3], up_b[3]), (low_b[4], 0.9999)], 5)
+                if p_res[5] > 0 and p_res[5] < cur_min_res[5]:
+                    cur_min_res = p_res[:]
+            if cur_min_res[5] == 1e20:
+                sys.stderr.write("Could not find a converging solution.\n")
+            fout = open("param_estimates_6.txt", "w")
+            fout.write("%e, %e, %e, %e, %e, %f, %i\n" % (
+            cur_min_res[0], cur_min_res[1], cur_min_res[2], cur_min_res[3], cur_min_res[4], cur_min_res[5], mod_C))
+            fout.close()
 
-else:
-    sys.stderr.write("Invalid choice for mod_C: %i.\n" % mod_C)
-    sys.exit()
+        else:
+            sys.stderr.write("Invalid choice for mod_C: %i.\n" % mod_C)
+            sys.exit()
+
+        repeat = False
+    except Exception:
+        if mod_C != 1:
+            mod_C = 1 
+            repeat = True           
+        else:
+            repeat = False
 
 # ************************************************************************************************************
 
