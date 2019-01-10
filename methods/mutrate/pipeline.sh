@@ -17,13 +17,14 @@ if [ -d "$OUTPUT_FOLDER" ]; then
    exit 0
 fi
 
-SCRIPTS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export PYTHONPATH=${SCRIPTS_FOLDER}:${PYTHONPATH}
+#SCRIPTS_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPTS_FOLDER="/mutrate"
+export PYTHONPATH=${SCRIPTS_FOLDER}
 
 # STEP1. Prepare files for sigfit to do signature fitting
 echo "## STEP1: Preparing files for sigfit..."
 mkdir -p ${OUTPUT_FOLDER}
-if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
+if /opt/conda/bin/python3 -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
                     sigfit -a ${ANNOTMUTS} \
                            -o ${OUTPUT_FOLDER}/mutational_catalogue.tsv; then
     echo "STEP1 launched successfully"
@@ -36,7 +37,7 @@ fi
 echo "## STEP2: Running sigfit..."
 mkdir -p ${OUTPUT_FOLDER}/sigfit_results
 if Rscript --vanilla ${SCRIPTS_FOLDER}/cosmic_exome_fit.r -m ${OUTPUT_FOLDER}/mutational_catalogue.tsv \
-                                                          -c ${SCRIPTS_FOLDER}/datasets/cosmic_exome.tsv \
+                                                          -c ${INTOGEN_DATASETS}/mutrate/cosmic_exome.tsv \
                                                           -i ${ITERATIONS} \
                                                           -o ${OUTPUT_FOLDER}/sigfit_results; then
     echo "STEP2 launched successfully"
@@ -51,8 +52,8 @@ mkdir -p ${OUTPUT_FOLDER}/genes
 export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 export OMP_NUM_THREADS=1
-if python -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
-                    compute_mutrate -a ${ANNOTMUTS} \
+if /opt/conda/bin/python3 -W ignore ${SCRIPTS_FOLDER}/mutrate.py \
+                    compute-mutrate -a ${ANNOTMUTS} \
                                     -g ${GENEMUTS} \
                                     -m ${OUTPUT_FOLDER}/mutational_catalogue.tsv \
                                     -e ${OUTPUT_FOLDER}/sigfit_results/mean_exposure.tsv \
@@ -67,7 +68,7 @@ fi
 
 # STEP4. Create MAF with mutation rate
 echo "## STEP4: Adding expected mutation rate to MAF table"
-if python -W ignore ${SCRIPTS_FOLDER}/annotate_expectation.py \
+if /opt/conda/bin/python3 -W ignore ${SCRIPTS_FOLDER}/annotate_expectation.py \
                    --genes_path ${OUTPUT_FOLDER}/genes/ \
                    --maf_path ${ANNOTMUTS} \
                    --dnds_path ${DNDSOUT} \

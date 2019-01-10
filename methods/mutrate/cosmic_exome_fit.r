@@ -1,9 +1,13 @@
 # Fit cosmic signature with exome data using Sigfit R-package
 
 # load libraries
-suppressPackageStartupMessages(library(sigfit))
-suppressWarnings(library(docopt))
-suppressWarnings(library(devtools))
+#suppressPackageStartupMessages(library(sigfit))
+#suppressWarnings(library(docopt))
+#suppressWarnings(library(devtools))
+library(sigfit)
+library(docopt)
+library(devtools)
+
 
 # command line interface (cli)
 doc <- "Usage: cosmic_exome_fit.r [-m <mutations>] [-c <cosmic>] [-i <iterations>] [-o <output>]

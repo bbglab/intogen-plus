@@ -16,6 +16,7 @@ from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
 from tasks.combination import CombinationTask
+from tasks.mutrate import MutrateTask
 
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
@@ -31,7 +32,8 @@ TASKS = {t.KEY: t for t in [
     CombinationTask,
     DndsCvTask,
     EDriverTask,
-    CBaseTask
+    CBaseTask,
+    MutrateTask
 ]}
 
 

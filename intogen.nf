@@ -97,7 +97,32 @@ process DndsCV {
     then
         python $baseDir/intogen4.py run -o . dndscv $task_file
     else
-        mkdir -p ./dndscv && cp ${outputFile(OUTPUT, 'dndscv', task_file)} ./dndscv/
+        mkdir -p ./dndscv && cp ${outputPattern(OUTPUT, 'dndscv', task_file)} ./dndscv/
+    fi
+    """
+}
+
+OUT_DNDSCV
+.filter({x -> !(x.fileName.toString().contains("genemuts") || x.fileName.toString().contains("annotmuts"))})
+.into { OUT_DNDSCV_FOR_COMBINATION; OUT_DNDSCV_FOR_MUTRATE }
+
+process MutRate {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'move'
+
+    input:
+        val task_file from OUT_DNDSCV_FOR_MUTRATE
+
+    output:
+        file "mutrate/*" into OUT_MUTRATE mode flatten
+
+    """
+    if [ ! -f "" ]
+    then
+        export PROCESS_CPUS=$task.cpus
+        python $baseDir/intogen4.py run -o . mutrate $task_file
+    else
+        mkdir -p ./mutrate && cp -r ${outputFile(OUTPUT, 'mutrate', task_file)} ./mutrate/
     fi
     """
 }
@@ -214,7 +239,7 @@ IN_COMBINATION = OUT_ONCODRIVEFML
                     .map{ it[0] }
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
-                    .phase(OUT_DNDSCV){ it -> it.fileName }
+                    .phase(OUT_DNDSCV_FOR_COMBINATION){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_EDRIVER){ it -> it.fileName }
                     .map{ it[0] }
@@ -242,4 +267,8 @@ def outputCombination(output_folder, task_file) {
 
 def outputFile(output_folder, process_folder, task_file) {
     return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '.out.gz')
+}
+
+def outputPattern(output_folder, process_folder, task_file) {
+    return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '*.out.gz')
 }
