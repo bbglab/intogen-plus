@@ -56,28 +56,7 @@ class OncodriveFmlTask(Task):
 
             tmp_folder = self.out_file + ".tmp"
             os.makedirs(tmp_folder, exist_ok=True)
-
-            # config = load_configuration(
-            #     os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'),
-            #     override={'settings': {'cores': 2}})
-            # elements_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions_vep88_grch37.gz')
-            #
-            # # Check if whole genome
-            # if "_WGS_" in os.path.basename(self.in_file):
-            #     self.config['signature']['normalize_by_sites'] = 'whole_genome'
-            # else:
-            #     self.config['signature']['normalize_by_sites'] = 'whole_exome'
-            #
-            # analysis = OncodriveFML(mutations_file=self.in_file,
-            #                         elements_file=elements_file,
-            #                         output_folder=tmp_folder,
-            #                         config=config,
-            #                         blacklist=None,
-            #                         generate_pickle=False)
-            #
-            # analysis.run()
-            # tmp_output_file = analysis.output_file_prefix + ".tsv"
-
+           
             cmd = "singularity run {0}/oncodrivefml.simg -i {1} -e {2} -t coding -s {3} -o {4} -c {5} --cores {6}".format(
                 os.path.join(os.environ['INTOGEN_METHODS'], 'oncodrivefml'),
                 self.in_file,

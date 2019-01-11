@@ -13,10 +13,11 @@ process PreprocessFromInput {
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
+        file "smregions/*.in.gz" into IN_SMREGIONS mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl
+    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
     """
 
 }
@@ -144,6 +145,27 @@ process OncodriveFML {
         python $baseDir/intogen4.py run -o . oncodrivefml $task_file
     else
         mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
+    fi
+    """
+}
+
+process SMRegions {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_SMREGIONS
+
+    output:
+        file "smregions/*.out.gz" into OUT_SMREGIONS mode flatten
+
+    """
+    if [ ! -f "${outputFile(OUTPUT, 'smregions', task_file)}" ]
+    then
+        export PROCESS_CPUS=$task.cpus
+        python $baseDir/intogen4.py run -o . smregions $task_file
+    else
+        mkdir -p ./smregions && cp ${outputFile(OUTPUT, 'smregions', task_file)} ./smregions/
     fi
     """
 }
