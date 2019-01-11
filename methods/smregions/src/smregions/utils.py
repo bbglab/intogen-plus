@@ -1,46 +1,31 @@
-"""
-This module contains some useful methods
-"""
 
 import logging
-from collections import defaultdict
 from datetime import datetime
+
 from ago import human
-from os.path import exists
 
-from simReg import __logger_name__
 
-logger = logging.getLogger(__logger_name__)
+logger = logging.getLogger(__name__)
+
 
 def executor_run(executor):
     """
     Method to call the run method
 
     Args:
-        executor (:class:`~simReg.executors.bymutation.ElementExecutor`):
+        executor (:class:`~smregions.executor.ElementExecutor`):
 
     Returns:
-        :meth:`~simReg.executors.bymutation.ElementExecutor.run`
+        :meth:`~smregions.executor.ElementExecutor.run`
 
     """
     return executor.run()
 
 
-def defaultdict_list():
-    """
-    Shortcut
-
-    Returns:
-        :class:`~collections.defaultdict` of :obj:`list`
-
-    """
-    return defaultdict(list)
-
-
 def loop_logging(iterable, size=None, step=1):
     """
     Loop through an iterable object displaying messages
-    using :func:`~logging.info`
+    using :func:`~logging.info` on the appropiate logger
 
     Args:
         iterable:
@@ -63,7 +48,3 @@ def loop_logging(iterable, size=None, step=1):
         yield value
     logger.info("[%d of %d]", i+1, size)
     logger.debug("Time: %s", human(start_time))
-
-
-def exists_path(path):
-    return False if path is None else exists(path)
