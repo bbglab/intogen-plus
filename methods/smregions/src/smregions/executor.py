@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-from bgvep.readers import BGPack
 
 from smregions import reference
 from smregions.walker import partitions_list
@@ -35,11 +34,7 @@ class ElementExecutor:
         # Configuration parameters
         self.sampling_size = config['sampling']
         self.sampling_chunk = config['sampling_chunk'] * 10**6
-        self.ref_genome = config['reference_genome']
-        self.vep_version = config['vep_version']
         self.seed = seed
-
-        self.missense_only = config['missense']
 
         # Output attributes
         self.result = {}
@@ -60,55 +55,25 @@ class ElementExecutor:
             items_to_simulate_prob = []
             in_reg_counts = {}
 
-            if self.missense_only:
+            for segment in self.segments:
+                for pos, ref_triplet in zip(range(segment['START'], segment['STOP'] + 1),
+                                            reference.generate_triplets(segment['CHROMOSOME'], segment['START'], segment['STOP'])):
 
-                with BGPack(self.ref_genome, self.vep_version) as reader:
+                    if 'N' in ref_triplet:
+                        continue
+                    ref = ref_triplet[1]
 
-                    for segment in self.segments:
-
-                        for row, ref_triplet in zip(reader.get(segment['CHROMOSOME'], segment['START'], segment['STOP']),
-                                                    reference.generate_triplets(segment['CHROMOSOME'], segment['START'], segment['STOP'])):
-
-                            pos, conseqs = row
-
-                            if 'N' in ref_triplet:
-                                continue
-
-                            ref = ref_triplet[1]
-                            for alt, conseq in zip('ACGT', conseqs):
-                                if alt == ref:
-                                    continue
-
-                                alt_triplet = ref_triplet[0] + alt + ref_triplet[2]
-
-                                if conseq == 'missense' or conseq == 'missense_variant':
-                                    items_to_simulate.append((pos, alt))
-                                    if self.signature is None:
-                                        items_to_simulate_prob.append(1)
-                                    else:
-                                        items_to_simulate_prob.append(self.signature.get((ref_triplet, alt_triplet), 0.0))
-
-            else:
-
-                for segment in self.segments:
-                    for pos, ref_triplet in zip(range(segment['START'], segment['STOP'] + 1),
-                                                reference.generate_triplets(segment['CHROMOSOME'], segment['START'], segment['STOP'])):
-
-                        if 'N' in ref_triplet:
+                    for alt in'ACGT':
+                        if alt == ref:
                             continue
-                        ref = ref_triplet[1]
 
-                        for alt in'ACGT':
-                            if alt == ref:
-                                continue
+                        alt_triplet = ref_triplet[0] + alt + ref_triplet[2]
+                        items_to_simulate.append((pos, alt))
 
-                            alt_triplet = ref_triplet[0] + alt + ref_triplet[2]
-                            items_to_simulate.append((pos, alt))
-
-                            if self.signature is None:
-                                items_to_simulate_prob.append(1.0)
-                            else:
-                                items_to_simulate_prob.append(self.signature.get((ref_triplet, alt_triplet), 0.0))
+                        if self.signature is None:
+                            items_to_simulate_prob.append(1.0)
+                        else:
+                            items_to_simulate_prob.append(self.signature.get((ref_triplet, alt_triplet), 0.0))
 
             if sum(items_to_simulate_prob) == 0:
                 logger.warning('Probability of simulation equal to 0 in {}'.format(self.name))

@@ -3,14 +3,6 @@
 # Must exist as bgdata package (bgdata datasets genomereference hg19)
 reference_genome = 'hg19'
 
-# VEP version
-# Is only required if using only missense mutations in the simulation
-# BgVep package must support the combination of reference genome & VEP version
-vep_version = '88'
-
-# Simulate only missense mutations, or all kinds of mutations
-missense = True
-
 # Minimum number of mutations in the element to analyze it
 muts_min = 3
 

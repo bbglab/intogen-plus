@@ -4,7 +4,6 @@ bgconfig
 bglogs
 bgparsers
 bgreference
-bgvep
 click
 intervaltree
 matplotlib
