@@ -37,7 +37,7 @@ class MutrateTask(Task):
             genemuts = self.in_file.replace(".out.gz", "_genemuts.out.gz")
             dndsout = self.in_file
             iterations = 1000
-            cores = os.environ.get('PROCESS_CPUS', 4)
+            cores = os.environ.get('INTOGEN_CPUS', 4)
 
             cmd = "singularity run {0} {1} {2} {3} {4} {5} {6}".format(
                 os.path.join(os.environ['INTOGEN_METHODS'], 'mutrate', 'mutrate.simg'),

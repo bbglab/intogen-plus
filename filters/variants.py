@@ -8,6 +8,7 @@ from bgreference import hg19
 from .base import Filter
 from collections import Counter, defaultdict
 from intervaltree import IntervalTree
+from pyliftover import LiftOver
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class VariantsFilter(Filter):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.liftover = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19ToHg38.over.chain.gz'))
 
     @staticmethod
     def __none_to_string(value):
@@ -119,6 +121,7 @@ class VariantsFilter(Filter):
         count_indel = 0
         count_mismatch = 0
         count_duplicated = 0
+        count_no_liftover = 0
 
         # Read variants
         signature = {}
@@ -178,6 +181,15 @@ class VariantsFilter(Filter):
             elif v['ALT_TYPE'] == 'indel':
                 count_indel += 1
 
+            # Add liftover columns
+            hg38_position = self.liftover.convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
+            if hg38_position is None or len(hg38_position) != 1:
+                count_no_liftover += 1
+                continue
+            
+            v['POSITION_HG19'] = v['POSITION']
+            v['POSITION_HG38'] = hg38_position[0][1]
+
             yield v
 
         self.stats[group_key]['signature'] = signature
@@ -196,7 +208,8 @@ class VariantsFilter(Filter):
             'snp': count_snp,
             'indel': count_indel,
             'mismatch': count_mismatch,
-            'duplicated': count_duplicated
+            'duplicated': count_duplicated,
+            'noliftover': count_no_liftover
         }
 
         self.stats[group_key]['signature'] = signature

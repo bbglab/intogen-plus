@@ -62,7 +62,7 @@ class OncodriveClustlTask(Task):
                 self.output_folder,
                 self.name,
                 os.path.join(os.environ.get("INTOGEN_DATASETS"), 'oncodrivefml', '02_cds.regions.gz'),
-                os.environ.get("PROCESS_CPUS", 4),
+                os.environ.get("INTOGEN_CPUS", 4),
                 (5 if 'SKCM' in self.name else 3),
                 os.path.join(os.environ['INTOGEN_METHODS'], 'oncodriveclustl')
             )

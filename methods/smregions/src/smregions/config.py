@@ -29,7 +29,7 @@ def load(config_file, override=None):
     config_template = os.path.join(os.path.dirname(__file__), "smregions.conf.template")
 
     try:
-        return BGConfig(config_template, config_file=config_file, use_env_vars=False, override_values=override, unrepr=True)
+        return BGConfig(config_template, config_file=config_file, use_env_vars=True, override_values=override, unrepr=False)
     except ValueError as e:
         logging.getLogger(__name__).error(e)
         sys.exit(-1)

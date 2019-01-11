@@ -120,7 +120,7 @@ process MutRate {
     """
     if [ ! -f "" ]
     then
-        export PROCESS_CPUS=$task.cpus
+        export INTOGEN_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . mutrate $task_file
     else
         mkdir -p ./mutrate && cp -r ${outputFile(OUTPUT, 'mutrate', task_file)} ./mutrate/
@@ -141,7 +141,7 @@ process OncodriveFML {
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodrivefml', task_file)}" ]
     then
-        export PROCESS_CPUS=$task.cpus
+        export INTOGEN_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . oncodrivefml $task_file
     else
         mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
@@ -162,7 +162,7 @@ process SMRegions {
     """
     if [ ! -f "${outputFile(OUTPUT, 'smregions', task_file)}" ]
     then
-        export PROCESS_CPUS=$task.cpus
+        export INTOGEN_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . smregions $task_file
     else
         mkdir -p ./smregions && cp ${outputFile(OUTPUT, 'smregions', task_file)} ./smregions/
@@ -184,7 +184,7 @@ process OncodriveClustl {
     """
     if [ ! -f "${outputFile(OUTPUT, 'oncodriveclustl', task_file)}" ]
     then
-        export PROCESS_CPUS=$task.cpus
+        export INTOGEN_CPUS=$task.cpus
         export VEP_OUTPUT=$OUTPUT
         python $baseDir/intogen4.py run -o . oncodriveclustl $task_file
     else
@@ -207,7 +207,7 @@ process HotmapsSignature {
     """
     if [ ! -f "${outputFile(OUTPUT, 'hotmapssignature', task_file)}" ]
     then
-        export PROCESS_CPUS=$task.cpus
+        export INTOGEN_CPUS=$task.cpus
         python $baseDir/intogen4.py run -o . hotmapssignature $task_file
     else
         mkdir -p ./hotmapssignature && cp ${outputFile(OUTPUT, 'hotmapssignature', task_file)} ./hotmapssignature/

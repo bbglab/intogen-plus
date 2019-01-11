@@ -64,7 +64,7 @@ class OncodriveFmlTask(Task):
                 'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes',
                 tmp_folder,
                 os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf'),
-                os.environ.get("PROCESS_CPUS", 4)
+                os.environ.get("INTOGEN_CPUS", 4)
             )
 
             try:

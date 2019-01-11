@@ -104,7 +104,7 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--debug', is_flag=True, help='Enable debugging')
 @click.version_option()
-def cli(debug):
+def cli(debug=False):
     if debug:
         fmt = logging.Formatter('%(asctime)s %(message)s', datefmt='%H:%M:%S')
         fh = logging.FileHandler(LOG_FILE, 'w')

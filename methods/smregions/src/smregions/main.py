@@ -42,7 +42,7 @@ def main(mutations_file, elements_file, regions_file, signature_file, output_fol
 @click.option('-r', '--regions', 'regions_file', type=click.Path(exists=True), metavar='REGIONS_FILE', help='Genomic regions of interest', required=True)
 @click.option('-s', '--signature', 'signature_file', type=click.Path(exists=True), metavar='SIGNATURE_FILE', help='Signature file. Default equial probabilities', default=None)
 @click.option('-o', '--output', 'output_folder', type=click.Path(), metavar='OUTPUT_FOLDER', help="Output folder. Default to regions file name without extensions.", default=None)
-@click.option('-c', '--configuration', 'config_file', default=None, type=click.Path(exists=True), metavar='CONFIG_FILE', help="Configuration file. Default to 'smregions.conf' in the current folder if exists or to ~/.bbglab/smregions.conf if not.")
+@click.option('-c', '--configuration', 'config_file', default=None, type=click.Path(exists=True), metavar='CONFIG_FILE', help="Configuration file. Default to 'smregions.conf' in the current folder if exists or to ~/.config/bbglab/smregions.conf if not.")
 @click.option('--debug', help="Show more progress details", is_flag=True)
 @click.version_option(version=__version__)
 def cmdline(mutations_file, elements_file, regions_file, signature_file, output_folder, config_file, debug):
