@@ -6,7 +6,6 @@ bgparsers
 bgreference
 click
 intervaltree
-matplotlib
 numpy
 pandas
 statsmodels

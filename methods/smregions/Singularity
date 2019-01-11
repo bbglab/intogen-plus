@@ -19,8 +19,8 @@ From: debian:buster-slim
 
     # Install dependencies
     apt update
-    apt install -y python3.6 python3-pip python3-configobj python3-numpy python3-scipy python3-pycurl libz-dev python3-statsmodels python3-requests \
-                   python3-pandas python3-matplotlib python3-setuptools python3-click python3-dill python3-tqdm python3-tornado cython3
+    apt install -y python3-pip python3-configobj python3-numpy python3-scipy python3-pycurl libz-dev python3-statsmodels python3-requests \
+                   python3-pandas python3-setuptools python3-click python3-intervaltree python3-tqdm python3-appdirs python3-dill
 
     # Install SMRegions
     cd /smregions/
