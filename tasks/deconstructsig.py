@@ -32,7 +32,7 @@ class DeconstructSigTask(Task):
         self.output_folder = path.join(output_folder, self.KEY)
         os.makedirs(self.output_folder, exist_ok=True)
 
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
             self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
 
     def input_start(self):

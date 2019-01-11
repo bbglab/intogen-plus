@@ -185,10 +185,10 @@ class VariantsFilter(Filter):
             hg38_position = self.liftover.convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
             if hg38_position is None or len(hg38_position) != 1:
                 count_no_liftover += 1
-                continue
+                continue            
             
             v['POSITION_HG19'] = v['POSITION']
-            v['POSITION_HG38'] = hg38_position[0][1]
+            v['POSITION_HG38'] = hg38_position[0][1] + 1
 
             yield v
 

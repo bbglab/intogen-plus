@@ -55,13 +55,13 @@ class SmregionsTask(Task):
         # Run SMRegions
         if not path.exists(self.out_file):
             
-            cmd = "singularity run {0} -i {1} -e {2} -o {3} -r {4} -c {5}".format(
+            cmd = "singularity run {0} -m {1} -e {2} -r {3} -o {4} -c {5}".format(
                 os.path.join(os.environ['INTOGEN_METHODS'], 'smregions', 'smregions.simg'),
                 self.in_file,
-                os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', '02_cds.regions.gz'),
-                self.out_file,
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'hg19.cds.regions.gz'),
                 os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'regions_pfam.tsv.gz'),
-                os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'hg19.conf')
+                self.out_file,                
+                os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'smregions.conf')
             )
 
             try:

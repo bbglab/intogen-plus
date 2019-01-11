@@ -15,10 +15,10 @@ class VepFilter(Filter):
     def __init__(self, parent):
         super().__init__(parent)
 
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
             self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
 
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'selected_ensembl_proteins.tsv')) as fd:
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
             self.genes = set([r[1] for r in csv.reader(fd, delimiter='\t')])
 
     def run(self, group_key, group_data):

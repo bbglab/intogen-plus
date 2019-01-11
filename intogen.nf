@@ -2,6 +2,7 @@
 
 INPUT = file(params.input)
 OUTPUT = file(params.output)
+INTOGEN_SCRIPT = "python $baseDir/intogen4.py"
 
 
 process PreprocessFromInput {
@@ -17,7 +18,7 @@ process PreprocessFromInput {
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    python $baseDir/intogen4.py preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
+    $INTOGEN_SCRIPT preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
     """
 
 }
@@ -35,7 +36,7 @@ process Vep {
     """
     if [ ! -f "${outputFile(OUTPUT, 'vep', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o . vep $task_file
+        $INTOGEN_SCRIPT run -o . vep $task_file
     else
         mkdir -p ./vep && cp ${outputFile(OUTPUT, 'vep', task_file)} ./vep/
     fi
@@ -58,7 +59,7 @@ process PreprocessFromVep {
         file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    python $baseDir/intogen4.py read -i $task_file -o . hotmapssignature edriver cbase deconstructsig
+    $INTOGEN_SCRIPT read -i $task_file -o . hotmapssignature edriver cbase deconstructsig
     """
 }
 
@@ -75,7 +76,7 @@ process DeconstructSig {
     """
     if [ ! -f "${outputFile(OUTPUT, 'deconstructsig', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o . deconstructsig $task_file
+        $INTOGEN_SCRIPT run -o . deconstructsig $task_file
     else
         mkdir -p ./deconstructsig && cp -r ${outputFile(OUTPUT, 'deconstructsig', task_file)} ./deconstructsig/
     fi
@@ -96,7 +97,7 @@ process DndsCV {
     """
     if [ ! -f "${outputFile(OUTPUT, 'dndscv', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o . dndscv $task_file
+        $INTOGEN_SCRIPT run -o . dndscv $task_file
     else
         mkdir -p ./dndscv && cp ${outputPattern(OUTPUT, 'dndscv', task_file)} ./dndscv/
     fi
@@ -121,7 +122,7 @@ process MutRate {
     if [ ! -f "" ]
     then
         export INTOGEN_CPUS=$task.cpus
-        python $baseDir/intogen4.py run -o . mutrate $task_file
+        $INTOGEN_SCRIPT run -o . mutrate $task_file
     else
         mkdir -p ./mutrate && cp -r ${outputFile(OUTPUT, 'mutrate', task_file)} ./mutrate/
     fi
@@ -142,7 +143,7 @@ process OncodriveFML {
     if [ ! -f "${outputFile(OUTPUT, 'oncodrivefml', task_file)}" ]
     then
         export INTOGEN_CPUS=$task.cpus
-        python $baseDir/intogen4.py run -o . oncodrivefml $task_file
+        $INTOGEN_SCRIPT run -o . oncodrivefml $task_file
     else
         mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
     fi
@@ -163,7 +164,8 @@ process SMRegions {
     if [ ! -f "${outputFile(OUTPUT, 'smregions', task_file)}" ]
     then
         export INTOGEN_CPUS=$task.cpus
-        python $baseDir/intogen4.py run -o . smregions $task_file
+        export INTOGEN_GENOME_REFERENCE=hg19
+        $INTOGEN_SCRIPT run -o . smregions $task_file
     else
         mkdir -p ./smregions && cp ${outputFile(OUTPUT, 'smregions', task_file)} ./smregions/
     fi
@@ -186,7 +188,7 @@ process OncodriveClustl {
     then
         export INTOGEN_CPUS=$task.cpus
         export VEP_OUTPUT=$OUTPUT
-        python $baseDir/intogen4.py run -o . oncodriveclustl $task_file
+        $INTOGEN_SCRIPT run -o . oncodriveclustl $task_file
     else
         mkdir -p ./oncodriveclustl && cp ${outputFile(OUTPUT, 'oncodriveclustl', task_file)} ./oncodriveclustl/
     fi
@@ -208,7 +210,7 @@ process HotmapsSignature {
     if [ ! -f "${outputFile(OUTPUT, 'hotmapssignature', task_file)}" ]
     then
         export INTOGEN_CPUS=$task.cpus
-        python $baseDir/intogen4.py run -o . hotmapssignature $task_file
+        $INTOGEN_SCRIPT run -o . hotmapssignature $task_file
     else
         mkdir -p ./hotmapssignature && cp ${outputFile(OUTPUT, 'hotmapssignature', task_file)} ./hotmapssignature/
     fi
@@ -228,7 +230,7 @@ process EDriver {
     """
     if [ ! -f "${outputFile(OUTPUT, 'edriver', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o . edriver $task_file
+        $INTOGEN_SCRIPT run -o . edriver $task_file
     else
         mkdir -p ./edriver && cp ${outputFile(OUTPUT, 'edriver', task_file)} ./edriver/
     fi
@@ -248,7 +250,7 @@ process CBase {
     """
     if [ ! -f "${outputFile(OUTPUT, 'cbase', task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o . cbase $task_file
+        $INTOGEN_SCRIPT run -o . cbase $task_file
     else
         mkdir -p ./cbase && cp ${outputFile(OUTPUT, 'cbase', task_file)} ./cbase/
     fi
@@ -277,7 +279,7 @@ process Combination {
     """
     if [ ! -f "${outputCombination(OUTPUT, task_file)}" ]
     then
-        python $baseDir/intogen4.py run -o $OUTPUT combination $task_file
+        $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
     fi
     """
 }
