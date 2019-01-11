@@ -10,20 +10,16 @@ import click
 
 class Parser():
 
-    methods = ["hotmapssignature","oncodrivefml","dndscv","edriver","cbase","oncodriveclustl"] # "oncodriveclust","oncodriveomega","mutsigcv",
+    methods = ["hotmapssignature","oncodrivefml","dndscv","cbase","oncodriveclustl"]
     column_keys = {
         "hotmapssignature":     ["GENE",        "q-value",      "Min p-value"],
         "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
         "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
-        "edriver":              ["SYMBOL",      "QVALUE",       "PVALUE"],
         "cbase":                ["gene",        "q_pos",    "p_pos"],
         "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"]
-        # "oncodriveclust":       ["SYMBOL",      "QVALUE",       "PVALUE"],
-        # "mutsigcv": ["gene","q", "p"],
-        # "oncodriveomega": ["SYMBOL","q_value", "p_value"],
     }
 
-    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"edriver":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
+    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
@@ -73,16 +69,13 @@ class Parser():
         d = {}
         pvalues = defaultdict(dict)
         for method in self.methods:
-            if method != "edriver":
-                path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
-            else:
-                path = os.path.join(self.path, method, "{}.genes.out.gz".format(cancer))
-
+            path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
+            
             if os.path.exists(path):
                 df = pd.read_csv(path, sep="\t")
 
                 if df.shape[0]>0:
-                    if method == "oncodriveomega" or method == "oncodriveclust" or method == "edriver":
+                    if method == "oncodriveclust":
                         # Include the Hugo_Symbol
                         df["SYMBOL"] = df.apply(lambda row: str(d_hugo[row["GENE"]]) if row["GENE"] in d_hugo else "-" ,axis=1 )
 

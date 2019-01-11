@@ -10,7 +10,6 @@ from concurrent.futures import ProcessPoolExecutor
 from tasks.cbase import CBaseTask
 from tasks.deconstructsig import DeconstructSigTask
 from tasks.dndscv import DndsCvTask
-from tasks.edriver import EDriverTask
 from tasks.oncodriveclustl import OncodriveClustlTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.hotmaps import HotmapsTask
@@ -32,7 +31,6 @@ TASKS = {t.KEY: t for t in [
     DeconstructSigTask,
     CombinationTask,
     DndsCvTask,
-    EDriverTask,
     CBaseTask,
     MutrateTask,
     SmregionsTask

@@ -18,8 +18,8 @@ from evaluation.Evaluation_Enrichment import Evaluation_Enrichment
 gavaliable_methods = None
 gdiscarded_methods = None
 
-order_methods_ranking = ["oncodriveclustl_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","edriver_r","cbase_r"]
-order_methods_threshold = ["oncodriveclustl_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","edriver_t","cbase_t"]
+order_methods_ranking = ["oncodriveclustl_r", "dndscv_r","oncodrivefml_r", "hotmapssignature_r","cbase_r"]
+order_methods_threshold = ["oncodriveclustl_t", "dndscv_t","oncodrivefml_t", "hotmapssignature_t","cbase_t"]
 order_methods = []
 gweights = []
 gt_combination = None
@@ -38,7 +38,6 @@ METHODS = [
     'oncodriveclustl',
     'dndscv',
     'hotmapssignature',
-    'edriver',
     'cbase']
 
 
@@ -99,10 +98,7 @@ class Filter:
         """
         results = {}
         for method in self.methods:
-            if method != "edriver":
-                input_file = os.path.join(input_run, method, '{}.out.gz'.format(tumor))
-            else:
-                input_file = os.path.join(input_run, method, '{}.genes.out.gz'.format(tumor))
+            input_file = os.path.join(input_run, method, '{}.out.gz'.format(tumor))            
             res = self.statistic_outputs(input_file, tumor, method)
 
             if res is not None:
@@ -232,7 +228,7 @@ def grid_optimize(func, low_quality=set()):
 
     These are the constraints that must be in place:
     constraint 1: sum w_i = 1
-    constraint 2: w_clust + w_hotmaps + w_edriver <= 0.5
+    constraint 2: w_clust + w_hotmaps <= 0.5
     constraint 3: w_dndscv + w_cbase <= 0.5
     constraint 4: w_fml <= 0.5
     constraint 5*: w_i <= 0.05 for all w_i may not apply if some w_i is discarded
@@ -242,14 +238,13 @@ def grid_optimize(func, low_quality=set()):
     "dndscv_r": w[1],
     "oncodrivefml_r": w[2],
     "hotmapssignature_r": w[3],
-    "edriver_r": w[4],
     "cbase_r": w[5]
 
     """
     optimum = {'Objective_Function': 0, 'oncodriveclustl_r': None, 'dndscv_r': None, 'oncodrivefml_r': None,
-               'hotmapssignature_r': None, 'edriver_r': None, 'cbase_r': None}
+               'hotmapssignature_r': None, 'cbase_r': None}
 
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'cbase_r']
     low_quality_index = None
     if len(low_quality) > 0:
         low_quality_index = [methods_list.index(v) for v in low_quality]
@@ -274,7 +269,6 @@ def grid_optimize(func, low_quality=set()):
                                     optimum['dndscv_r'] = w[1]
                                     optimum['oncodrivefml_r'] = w[2]
                                     optimum['hotmapssignature_r'] = w[3]
-                                    optimum['edriver_r'] = w[4]
                                     optimum['cbase_r'] = w[5]
     return optimum
 
@@ -285,14 +279,14 @@ def create_scipy_constraints(low_quality=set()):
     """
 
     # constraints of the optimization problem
-    # methods=["oncodriveclustl_r", "dndscv_r", "oncodrivefml_r", "hotmapssignature_r", "edriver_r", "cbase"]
+    # methods=["oncodriveclustl_r", "dndscv_r", "oncodrivefml_r", "hotmapssignature_r", "cbase"]
     # constraint 1: sum weights = 1
     # constraint 2: for each weight, weight >= 0.05
-    # constraint 3: clust + hotmaps+edriver <= 0.5
+    # constraint 3: clust + hotmaps <= 0.5
     # constraint 4: dndscv <= 0.5
     # constraint 5: fml <= 0.5
 
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'cbase_r']
     cons = [{'type': 'eq', 'fun': simplex_bound},
             {'type': 'ineq', 'fun': clustering_bound},
             {'type': 'ineq', 'fun': recurrence_bound},
@@ -307,7 +301,7 @@ def create_scipy_constraints(low_quality=set()):
 
 
 def satisfy_constraints(w, low_quality=set()):
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'cbase_r']
     satisfy = True
     for i, v in enumerate(methods_list):
         if v in low_quality:
@@ -386,7 +380,6 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
                        "dndscv_r": w[1],
                        "oncodrivefml_r": w[2],
                        "hotmapssignature_r": w[3],
-                       "edriver_r": w[4],
                        "cbase_r": w[5]})
     else:
         def func(w):
@@ -394,9 +387,8 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
                        "dndscv_r": w[1],
                        "oncodrivefml_t": w[2],
                        "hotmapssignature_t": w[3],
-                       "edriver_t": w[4],
                        "cbase_t": w[5]})
-    all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'cbase_r']
     # best solution in 1/20 resolution grid, augmented with basin-hopping/SLSQP optimization
     grid_optimum = grid_optimize(func, low_quality=discarded)  # get optimum candidate in the grid
     w = np.array([grid_optimum[k] for k in all_methods])
@@ -419,7 +411,7 @@ def skip_optimizer(input_rankings, method_reject, moutput, cancer):
 
     global gavaliable_methods
 
-    gavaliable_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'edriver_r', 'cbase_r']
+    gavaliable_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmapssignature_r', 'cbase_r']
 
     # Remove methods that do not reach the quality metrics
     if not (method_reject is None):

@@ -2,7 +2,7 @@
 
 INPUT = file(params.input)
 OUTPUT = file(params.output)
-INTOGEN_SCRIPT = "python $baseDir/intogen4.py"
+INTOGEN_SCRIPT = "python $baseDir/intogen.py"
 
 
 process PreprocessFromInput {
@@ -53,13 +53,12 @@ process PreprocessFromVep {
 
     output:
         file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
-        file "edriver/*.in.gz" into IN_EDRIVER mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
         file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    $INTOGEN_SCRIPT read -i $task_file -o . hotmapssignature edriver cbase deconstructsig
+    $INTOGEN_SCRIPT read -i $task_file -o . hotmapssignature cbase deconstructsig
     """
 }
 
@@ -217,26 +216,6 @@ process HotmapsSignature {
     """
 }
 
-process EDriver {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    input:
-        val task_file from IN_EDRIVER
-
-    output:
-        file "edriver/*.out.gz" into OUT_EDRIVER mode flatten
-
-    """
-    if [ ! -f "${outputFile(OUTPUT, 'edriver', task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o . edriver $task_file
-    else
-        mkdir -p ./edriver && cp ${outputFile(OUTPUT, 'edriver', task_file)} ./edriver/
-    fi
-    """
-}
-
 process CBase {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
@@ -264,8 +243,6 @@ IN_COMBINATION = OUT_ONCODRIVEFML
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_DNDSCV_FOR_COMBINATION){ it -> it.fileName }
-                    .map{ it[0] }
-                    .phase(OUT_EDRIVER){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_CBASE){ it -> it.fileName }
                     .map{ it[0] }
