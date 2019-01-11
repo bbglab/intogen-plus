@@ -22,7 +22,7 @@ from smregions.utils import executor_run, loop_logging
 logger = logging.getLogger(__name__)
 
 
-class SMDeg(object):
+class SMRegions(object):
     """
 
     Args:
@@ -36,7 +36,7 @@ class SMDeg(object):
     """
 
     def __init__(self, mutations_file, elements_file, regions_of_interest_file, signature_file, output_folder, config):
-        logger.debug('Using SMDeg version %s', __version__)
+        logger.debug('Using SMRegions version %s', __version__)
 
         # Required parameters
         self.mutations_file = file_exists_or_die(mutations_file)
@@ -101,7 +101,7 @@ class SMDeg(object):
         # Run the executors
         with Pool(self.cores) as pool:
             results = {}
-            logger.info("Computing SMDeg")
+            logger.info("Computing SMRegions")
             map_func = map if self.avoid_parallel else pool.imap
             for executor in loop_logging(map_func(executor_run, element_executors), size=len(element_executors), step=6*self.cores):
                 results[executor.name] = executor.result
