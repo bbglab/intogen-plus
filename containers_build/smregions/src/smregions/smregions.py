@@ -35,7 +35,7 @@ class SMRegions(object):
 
     """
 
-    def __init__(self, mutations_file, elements_file, regions_of_interest_file, signature_file, output_folder, config):
+    def __init__(self, mutations_file, elements_file, regions_of_interest_file, signature_file, output_file, config):
         logger.debug('Using SMRegions version %s', __version__)
 
         # Required parameters
@@ -58,9 +58,8 @@ class SMRegions(object):
         logger.debug('Using %s cores', self.cores)
 
         # Optional parameters
-        self.output_folder = output_folder
-        self.output_file_prefix = join(self.output_folder, file_name(self.mutations_file) + '-smregions')
-        logger.debug('Output: %s', self.output_folder)
+        self.output_file = output_file
+        logger.debug('Output: %s', self.output_file)
 
         self.avoid_parallel = False
 
@@ -143,17 +142,15 @@ class SMRegions(object):
 
         # Sort and store results
         logger.info("Storing results")
-        if not exists(self.output_folder):
-            os.makedirs(self.output_folder, exist_ok=True)
         df_results = pd.DataFrame(list_results,
                                   columns=["REGION", "HUGO_SYMBOL", "TOTAL_MUTS_GENE", "OBSERVED_REGION", "MEAN_SIMULATED",
                                            "U", "P_VALUE"])
-        results_file = self.output_file_prefix + ".tsv"
+        
         # Correct the p-value
         p = df_results["P_VALUE"].values
         mask = np.isfinite(p)
         pval_corrected = np.full(p.shape, np.nan)
         pval_corrected[mask] = mt.multipletests(p[mask], method='fdr_bh')[1]
         df_results["Q_VALUE"] = pval_corrected
-        df_results.to_csv(results_file, sep="\t", index=False)
+        df_results.to_csv(self.output_file, sep="\t", index=False, compression="gzip")
         logger.info("Done")

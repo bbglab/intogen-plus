@@ -15,21 +15,16 @@ from smregions.smregions import SMRegions
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def main(mutations_file, elements_file, regions_file, signature_file, output_folder, config_file):
+def main(mutations_file, elements_file, regions_file, signature_file, output_file, config_file):
 
-    output_folder = config.file_name(elements_file) if output_folder is None else output_folder
-    output_file = path.join(output_folder, config.file_name(mutations_file) + '-smregions.tsv')
     # Skip if done
     if path.exists(output_file):
         bglogs.warning("Already calculated at '{}'".format(output_file))
         return
-    else:
-        if not path.exists(output_folder):
-            os.makedirs(output_folder, exist_ok=True)
-
+    
     configuration = config.load(config_file)
 
-    analysis = SMRegions(mutations_file, elements_file, regions_file, signature_file, output_folder, configuration)
+    analysis = SMRegions(mutations_file, elements_file, regions_file, signature_file, output_file, configuration)
 
     bglogs.info('Running analysis')
     # Run the analysis
