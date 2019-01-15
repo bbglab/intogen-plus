@@ -8,5 +8,6 @@
 
 # TEST USAGE
 cd test/pipeline
+source 
 ./run.sh
 

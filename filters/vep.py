@@ -15,11 +15,12 @@ class VepFilter(Filter):
     def __init__(self, parent):
         super().__init__(parent)
 
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
-            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
+        # Load selected transcripts
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'ensembl_canonical_transcripts.tsv')) as fd:
+            self.transcripts = set([r[1] for r in csv.reader(fd, delimiter='\t')])
 
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
-            self.genes = set([r[1] for r in csv.reader(fd, delimiter='\t')])
+        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'ensembl_canonical_transcripts.tsv')) as fd:
+            self.genes = set([r[0] for r in csv.reader(fd, delimiter='\t')])
 
     def run(self, group_key, group_data):
 
@@ -47,9 +48,9 @@ class VepFilter(Filter):
                 count_skip_consequence += 1
                 continue
 
-            if v['ENSP'] not in self.proteins:
+            if v['Feature'] not in self.transcripts:
                 if v['Gene'] in self.genes:
-                    # Selected gene without matching protein id
+                    # Selected gene without matching transcript id
                     skip_genes.add(v['Gene'])
 
                 continue

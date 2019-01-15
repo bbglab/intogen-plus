@@ -5,8 +5,8 @@ import gzip
 import subprocess
 
 from os import path
-from .base import Task, valid_consequence
-from bgreference import hg19
+from .base import Task, valid_consequence, run_command
+from bgreference import refseq
 
 
 class CBaseTask(Task):
@@ -48,88 +48,46 @@ class CBaseTask(Task):
         "TTA": "60", "TTC": "61", "TTG": "62", "TTT": "63"
     }
 
-    def __init__(self, output_folder):
-        super().__init__(output_folder)
-        self.name = None
-        self.in_fd = None
-        self.in_writer = None
-        self.in_file = None
-        self.in_skip = False
-        self.out_file = None
-        self.output_folder = path.join(output_folder, self.KEY)
-        os.makedirs(self.output_folder, exist_ok=True)
-
-
-        with open(os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'selected_ensembl_proteins.tsv')) as fd:
-            self.proteins = set([r[2] for r in csv.reader(fd, delimiter='\t')])
-
-    def input_start(self):
-
-        if not self.in_skip:
-            self.in_fd = gzip.open(self.in_file, 'wt')
-            self.in_writer = csv.writer(self.in_fd, delimiter='\t')
-            self.in_writer.writerow(["Gene", "mut_eff", "mut_nuc", "context"])
+    INPUT_HEADER = ["Gene", "mut_eff", "mut_nuc", "context"]
 
     def input_write(self, _, value):
+        if value['Feature'] in self.transcripts:
 
-        if not self.in_skip:
+            consequence = value['Consequence'].split(',')[0]
+            mut_eff = self.VEP_TO_CBASE.get(consequence, None)
 
-            if value['ENSP'] in self.proteins:
+            # Skip other consequences
+            if mut_eff is None:
+                return
 
-                consequence = value['Consequence'].split(',')[0]
-                mut_eff = self.VEP_TO_CBASE.get(consequence, None)
+            _, _, _, mut_nuc = value['#Uploaded_variation'].split('__')
 
-                # Skip other consequences
-                if mut_eff is None:
-                    return
+            if mut_nuc not in "ACGT":
+                return
 
-                _, _, _, mut_nuc = value['#Uploaded_variation'].split('__')
+            chromosome, position = value['Location'].split(':')
+            gene = value['SYMBOL']
 
-                if mut_nuc not in "ACGT":
-                    return
+            ref = refseq(os.environ['INTOGEN_GENOME'], chromosome, int(position) - 1, size=3).upper()
+            context = self.CONTEXT.get(ref, None)
+            if context is None:
+                return
 
-                chromosome, position = value['Location'].split(':')
-                gene = value['SYMBOL']
-
-                ref = hg19(chromosome, int(position) - 1, size=3).upper()
-                context = self.CONTEXT.get(ref, None)
-                if context is None:
-                    return
-
-                self.in_writer.writerow([
-                    gene,
-                    mut_eff,
-                    mut_nuc,
-                    context
-                ])
-
-    def input_end(self):
-        if not self.in_skip:
-            self.in_fd.close()
-            self.in_writer = None
-            self.in_fd = None
+            self.write_row([
+                gene,
+                mut_eff,
+                mut_nuc,
+                context
+            ])
 
     def run(self):
+    
+        run_command(f"""
+            mkdir -p {self.out_file}_tmp && \
+            zcat {self.in_file} > {self.out_file}_tmp/input.txt && \
+            cd {self.out_file}_tmp && \
+            {self.cmdline} {self.out_file}_tmp/input.txt {self.datasets} 0 && \
+            tail -n+2 {self.out_file}_tmp/q_values_output.txt | gzip > {self.out_file}
+        """)
 
-        if not path.exists(self.out_file):
-
-            cmd = "mkdir -p {2}_tmp &&" \
-                  "zcat {1} > {2}_tmp/input.txt &&" \
-                  "cd {2}_tmp && singularity run {3} {2}_tmp/input.txt {0}/Input 0 &&" \
-                  "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
-                os.path.abspath(os.path.join(os.environ['INTOGEN_DATASETS'], 'cbase')),
-                os.path.abspath(self.in_file),
-                os.path.abspath(self.out_file),
-                os.path.abspath(os.path.join(os.environ['INTOGEN_CONTAINERS'], 'cbase.simg'))
-            )
-
-            try:
-                o = subprocess.check_output(cmd, shell=True)
-            except subprocess.CalledProcessError as e:
-                print(e.output.decode())
-                sys.exit(e.returncode)
-
-            print(o.decode())
-
-        return self.out_file
 

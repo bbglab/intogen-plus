@@ -1,12 +1,8 @@
-import json
 import os
 import logging
 import click
 
-from functools import partial
-from bgparsers import selector
-from concurrent.futures import ProcessPoolExecutor
-
+from tasks.base import prepare_task, prepare_tasks
 from tasks.cbase import CBaseTask
 from tasks.deconstructsig import DeconstructSigTask
 from tasks.dndscv import DndsCvTask
@@ -17,10 +13,11 @@ from tasks.vep import VepTask
 from tasks.combination import CombinationTask
 from tasks.mutrate import MutrateTask
 from tasks.smregions import SmregionsTask
-
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
 from filters.vep import VepFilter
+from bgparsers import selector
+
 
 
 TASKS = {t.KEY: t for t in [
@@ -39,67 +36,9 @@ TASKS = {t.KEY: t for t in [
 
 logger = logging.getLogger('intogen')
 LOG_FILE = 'intogen.log'
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def prepare_task(reader, tasks, item):
-    position, (group_key, group_data) = item
-
-    # Initialize task name
-    [t.init(group_key) for t in tasks]
-
-    # Input start
-    [t.input_start() for t in tasks]
-
-    # Input write
-    for i, mut in enumerate(reader.run(group_key, group_data)):
-        id = "I{:010d}".format(i)
-        for t in tasks:
-            t.input_write(id, mut)
-
-    # Input close
-    [t.input_end() for t in tasks]
-
-    # Check errors and remove inputs
-    errors = [e for e in reader.stats.get(group_key, {}).keys() if e.startswith("error_")]
-    if len(errors) > 0:
-        for t in tasks:
-            if os.path.exists(t.in_file):
-                os.unlink(t.in_file)
-
-    return [(t.KEY, group_key) for t in tasks], reader.stats
-
-
-def prepare_tasks(output, groups, reader, tasks, cores=None):
-    func = partial(prepare_task, reader, tasks)
-
-    all_tasks = []
-    if cores > 1:
-        with ProcessPoolExecutor(cores) as executor:
-            for tasks, stats in executor.map(func, enumerate(groups)):
-                all_tasks += tasks
-                reader.stats.update(stats)
-    else:
-        for tasks in map(func, enumerate(groups)):
-            all_tasks += tasks
-
-    # Store filters stats
-    stats_file = os.path.join(output, "filters", "{}.json".format(reader.KEY))
-    os.makedirs(os.path.dirname(stats_file), exist_ok=True)
-
-    while reader.parent is not None:
-        try:
-            with open(stats_file, "wt") as fd:
-                json.dump(reader.stats, fd, indent=4, sort_keys=True)
-        except TypeError as e:
-            logger.error(e)
-
-        reader = reader.parent
-
-    return all_tasks
-
-
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('--debug', is_flag=True, help='Enable debugging')
 @click.version_option()
 def cli(debug=False):
@@ -113,13 +52,13 @@ def cli(debug=False):
         logger.debug('Debug mode enabled')
 
 
-@click.command(short_help='Create tasks input files')
+@click.command(short_help='Create tasks input files from VARIANTS datasets')
 @click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
 @click.option('--output', '-o', required=True, help="Output folder")
 @click.option('--groupby', '-g', default="DATASET", type=str, help="Input data group by field")
 @click.option('--cores', default=os.cpu_count(), type=int, help="Maximum groups to process in parallel")
 @click.argument('tasks', nargs=-1)
-def preprocess(input, output, groupby, cores, tasks):
+def readvariants(input, output, groupby, cores, tasks):
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
     tasks = [TASKS[t](output) for t in tasks]
@@ -131,11 +70,11 @@ def preprocess(input, output, groupby, cores, tasks):
     prepare_tasks(output, groups, reader, tasks, cores=cores)
 
 
-@click.command(short_help='Create tasks input files')
+@click.command(short_help='Create tasks input files from VEP output')
 @click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
 @click.option('--output', '-o', required=True, help="Output folder")
 @click.argument('tasks', nargs=-1)
-def read(input, output, tasks):
+def readvep(input, output, tasks):
     tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
     reader = TSVReader()
@@ -155,8 +94,8 @@ def run(output, task, key):
     task.run()
 
 
-cli.add_command(preprocess)
-cli.add_command(read)
+cli.add_command(readvariants)
+cli.add_command(readvep)
 cli.add_command(run)
 
 

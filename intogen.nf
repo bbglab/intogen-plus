@@ -18,7 +18,7 @@ process PreprocessFromInput {
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    $INTOGEN_SCRIPT preprocess --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
+    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
     """
 
 }
@@ -58,7 +58,7 @@ process PreprocessFromVep {
         file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    $INTOGEN_SCRIPT read -i $task_file -o . hotmapssignature cbase deconstructsig
+    $INTOGEN_SCRIPT readvep -i $task_file -o . hotmapssignature cbase deconstructsig
     """
 }
 
@@ -92,6 +92,8 @@ process DndsCV {
 
     output:
         file "dndscv/*.out.gz" into OUT_DNDSCV mode flatten
+        file "dndscv/*.annotmuts.gz" into ANNOTMUTS_DNDSCV mode flatten
+        file "dndscv/*.genemuts.gz" into GENEMUTS_DNDSCV mode flatten
 
     """
     if [ ! -f "${outputFile(OUTPUT, 'dndscv', task_file)}" ]
@@ -103,9 +105,7 @@ process DndsCV {
     """
 }
 
-OUT_DNDSCV
-.filter({x -> !(x.fileName.toString().contains("genemuts") || x.fileName.toString().contains("annotmuts"))})
-.into { OUT_DNDSCV_FOR_COMBINATION; OUT_DNDSCV_FOR_MUTRATE }
+OUT_DNDSCV.into { OUT_DNDSCV_FOR_COMBINATION; OUT_DNDSCV_FOR_MUTRATE }
 
 process MutRate {
     tag { task_file.fileName }
@@ -271,5 +271,5 @@ def outputFile(output_folder, process_folder, task_file) {
 }
 
 def outputPattern(output_folder, process_folder, task_file) {
-    return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '*.out.gz')
+    return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '*.gz')
 }

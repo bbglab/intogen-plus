@@ -5,75 +5,29 @@ import gzip
 import subprocess
 
 from os import path
-from .base import Task
+from .base import Task, run_command
 
 
 class DndsCvTask(Task):
 
-    KEY = 'dndscv'
-
-    def __init__(self, output_folder):
-        super().__init__(output_folder)
-        self.name = None
-        self.in_fd = None
-        self.in_writer = None
-        self.in_file = None
-        self.in_skip = False
-        self.out_file = None
-        self.output_folder = path.join(output_folder, self.KEY)
-        os.makedirs(self.output_folder, exist_ok=True)
-
-    def input_start(self):
-
-        if not self.in_skip:
-            self.in_fd = gzip.open(self.in_file, 'wt')
-            self.in_writer = csv.writer(self.in_fd, delimiter='\t')
-            self.in_writer.writerow(["sampleID", "chr", "pos", "ref", "mut"])
+    KEY = 'dndscv'    
+    INPUT_HEADER = ["sampleID", "chr", "pos", "ref", "mut"]
 
     def input_write(self, _, value):
-
-        if not self.in_skip:
-
-            self.in_writer.writerow([
-                value['SAMPLE'],
-                value['CHROMOSOME'],
-                value['POSITION'],
-                value['REF'],
-                value['ALT']
-            ])
-
-    def input_end(self):
-        if not self.in_skip:
-            self.in_fd.close()
-            self.in_writer = None
-            self.in_fd = None
+        self.write_row([
+            value['SAMPLE'],
+            value['CHROMOSOME'],
+            value['POSITION'],
+            value['REF'],
+            value['ALT']
+        ])
 
     def run(self):
 
-        if not path.exists(self.out_file):
+        out_annotmuts = self.out_file.replace(".out.gz", ".annotmuts.gz")
+        out_genemuts = self.out_file.replace(".out.gz", ".genemuts.gz")
 
-            cmd = "singularity run {0} {1} {2} {3} {4}".format(
-                os.path.join(os.environ['INTOGEN_CONTAINERS'], 'dndscv.simg'),
-                self.in_file,
-                self.out_file,
-                self.out_file.replace(".out.gz", "_annotmuts.out.gz"),
-                self.out_file.replace(".out.gz", "_genemuts.out.gz")
-            )
+        run_command(f"{self.cmdline} {self.in_file} {self.out_file} {out_annotmuts} {out_genemuts}")
 
-            try:
-                o = subprocess.check_output(cmd, shell=True)
-            except subprocess.CalledProcessError as e:
-                print(e.output.decode())
-                sys.exit(e.returncode)
+        
 
-            print(o.decode())
-
-        return self.out_file
-
-    def clean(self):
-
-        if path.exists(self.out_file):
-            os.unlink(self.out_file)
-
-        if path.exists(self.in_file):
-            os.unlink(self.in_file)
