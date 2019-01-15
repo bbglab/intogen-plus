@@ -1,5 +1,5 @@
 output/
 work/
 .nextflow*
-.timeline*
-.trace*
+timeline*
+trace*
