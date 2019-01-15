@@ -1,0 +1,5 @@
+output/
+work/
+.nextflow*
+.timeline*
+.trace*

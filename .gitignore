@@ -1,12 +1,7 @@
-envs/
-pkgs/
-input/
-output/
+# Ignore datasets and containers
 datasets/
-work/
-.nextflow*
-trace.txt*
-timeline.html*
+containers/
+*.simg
 
 # Intellij IDEA files
 .idea
@@ -30,5 +25,3 @@ timeline.html*
 *.pyc
 *.egg-info/
 dist/
-
-*.simg

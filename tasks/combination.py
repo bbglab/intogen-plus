@@ -40,7 +40,7 @@ class CombinationTask(Task):
         if not path.exists(self.out_file):
             cmd = "bash -c 'export SCHULZE_DATA={0} && singularity run {1} {2} {3}'".format(
                 os.path.join(os.environ['INTOGEN_DATASETS'], 'combination'),
-                os.path.join(os.environ['INTOGEN_METHODS'], 'combination', 'combination.simg'),
+                os.path.join(os.environ['INTOGEN_CONTAINERS'], 'combination.simg'),
                 self.output_folder, self.name)
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:

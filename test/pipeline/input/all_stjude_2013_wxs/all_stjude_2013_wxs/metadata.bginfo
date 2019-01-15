@@ -1,0 +1,14 @@
+pattern = "*/data_mutations_extended.txt"
+recursive = False
+
+
+[annotations]
+PLATFORM=WXS
+CANCER=ALL
+
+DONOR = "('mapping', 'SAMPLE', 'mapping_samples_selected.txt', 'SAMPLE_ID', 'PATIENT_ID')"
+DATASET = "('dirname', '(.*)', lambda v: 'PEDCBIOP_{{PLATFORM}}_{}'.format(v.upper()))"
+
+[excludes]
+DONOR = ""
+

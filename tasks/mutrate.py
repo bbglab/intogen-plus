@@ -40,7 +40,7 @@ class MutrateTask(Task):
             cores = os.environ.get('INTOGEN_CPUS', 4)
 
             cmd = "singularity run {0} {1} {2} {3} {4} {5} {6}".format(
-                os.path.join(os.environ['INTOGEN_METHODS'], 'mutrate', 'mutrate.simg'),
+                os.path.join(os.environ['INTOGEN_CONTAINERS'], 'mutrate.simg'),
                 annotmuts,
                 genemuts,
                 dndsout,

@@ -115,12 +115,12 @@ class CBaseTask(Task):
 
             cmd = "mkdir -p {2}_tmp &&" \
                   "zcat {1} > {2}_tmp/input.txt &&" \
-                  "cd {2}_tmp && singularity run {3}/cbase.simg {2}_tmp/input.txt {0}/Input 0 &&" \
+                  "cd {2}_tmp && singularity run {3} {2}_tmp/input.txt {0}/Input 0 &&" \
                   "tail -n+2 {2}_tmp/q_values_output.txt | gzip > {2}".format(
                 os.path.abspath(os.path.join(os.environ['INTOGEN_DATASETS'], 'cbase')),
                 os.path.abspath(self.in_file),
                 os.path.abspath(self.out_file),
-                os.path.abspath(os.path.join(os.environ['INTOGEN_METHODS'], 'cbase'))
+                os.path.abspath(os.path.join(os.environ['INTOGEN_CONTAINERS'], 'cbase.simg'))
             )
 
             try:

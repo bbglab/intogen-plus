@@ -57,8 +57,8 @@ class OncodriveFmlTask(Task):
             tmp_folder = self.out_file + ".tmp"
             os.makedirs(tmp_folder, exist_ok=True)
            
-            cmd = "singularity run {0}/oncodrivefml.simg -i {1} -e {2} -t coding -s {3} -o {4} -c {5} --cores {6}".format(
-                os.path.join(os.environ['INTOGEN_METHODS'], 'oncodrivefml'),
+            cmd = "singularity run {0} -i {1} -e {2} -t coding -s {3} -o {4} -c {5} --cores {6}".format(
+                os.path.join(os.environ['INTOGEN_CONTAINERS'], 'oncodrivefml.simg'),
                 self.in_file,
                 os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'regions_vep88_grch37.gz'),
                 'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes',

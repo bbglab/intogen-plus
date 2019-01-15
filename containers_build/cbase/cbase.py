@@ -922,59 +922,59 @@ elif 12000 <= l <= 65000:
 else:
     mod_C = 6
 
-#	(2)	Import trinucleotides and codons for each gene.
-codons_by_gene = import_codons_by_gene("%s/codons_by_gene.txt.gz" % filepath)
-sys.stderr.write("Derive expected counts for %i genes.\n" % len(codons_by_gene))
-
-#	(3)	Build array with neutral background mutations for construction of neutral mutation matrix.
-neutral_mutations = [mut for mut in mutations if ["missense", "nonsense", "coding-synon", "utr-3", "utr-5"].count(
-    mut["muttype"]) and cancer_genes.count(mut["gene"]) == 0 and essential_genes.count(mut["gene"]) == 0]
-sys.stderr.write(
-    "Total number of coding mutations used for generation of mutation matrix, exluding likely selected genes: %i.\n" % len(
-        neutral_mutations))
-neutral_muts_by_context = [[mut["context"], bases.index(mut["mutbase"])] for mut in neutral_mutations]
-
-#	(4)	Derive expected and observed mutation counts for all three categories per gene.
-res = export_expected_observed_mks_per_gene(codons_by_gene, mutations, neutral_muts_by_context, nuc_context_occs,
-                                            c_mode)
-
-sys.stderr.write("Finished data preparation.\n")
-
-# ************************************************************************************************************
-
-sys.stderr.write("Running parameter_estimation.\n")
-
-mks_type = []
-for gene in res:
-    mks_type.append({"gene": gene[0], "exp": [float(gene[1]), float(gene[2]), float(gene[3])],
-                     "obs": [float(gene[4]), float(gene[5]), float(gene[6])], "len": int(gene[7])})
-mks_type = sorted(mks_type, key=lambda arg: arg["gene"])
-
-sys.stderr.write("Running ML routine %i times.\n" % rep_no)
-if mod_C == 0:
-    sys.stderr.write("Model selection from all six.\n")
-else:
-    sys.stderr.write("lam_s ~ %s.\n" % mod_choice_short[mod_C])
-sys.stderr.write("%i genes in total.\n" % len(mks_type))
-mks_type = [mks for mks in mks_type if (
-            len(mks["gene"]) > 2 and mks["gene"][:2] == "OR" and ['0', '1', '2', '3', '4', '5', '6', '7', '8',
-                                                                  '9'].count(mks["gene"][2])) == 0]
-sys.stderr.write("Filtered out OR genes, leaving %i genes.\n" % len(mks_type))
-mks_type = [gene for gene in mks_type if zero_genes.count(gene["gene"]) == 0]
-sys.stderr.write(
-    "Filtered out genes with M+K+S=0 in TumorPortal pan-cancer analysis, leaving %i genes.\n" % len(mks_type))
-
-fout = open("output_data_preparation.txt", "w")
-# Output format: [gene, lm, lk, ls, mobs, kobs, sobs, Lgene]
-for gene in mks_type:
-    fout.write("%s\t%f\t%f\t%f\t%i\t%i\t%i\t%i\n" % (
-    gene["gene"], gene["exp"][0], gene["exp"][1], gene["exp"][2], gene["obs"][0], gene["obs"][1], gene["obs"][2],
-    gene["len"]))
-fout.close()
-
 repeat = True
 while repeat:
     try:
+        #	(2)	Import trinucleotides and codons for each gene.
+        codons_by_gene = import_codons_by_gene("%s/codons_by_gene.txt.gz" % filepath)
+        sys.stderr.write("Derive expected counts for %i genes.\n" % len(codons_by_gene))
+
+        #	(3)	Build array with neutral background mutations for construction of neutral mutation matrix.
+        neutral_mutations = [mut for mut in mutations if ["missense", "nonsense", "coding-synon", "utr-3", "utr-5"].count(
+            mut["muttype"]) and cancer_genes.count(mut["gene"]) == 0 and essential_genes.count(mut["gene"]) == 0]
+        sys.stderr.write(
+            "Total number of coding mutations used for generation of mutation matrix, exluding likely selected genes: %i.\n" % len(
+                neutral_mutations))
+        neutral_muts_by_context = [[mut["context"], bases.index(mut["mutbase"])] for mut in neutral_mutations]
+
+        #	(4)	Derive expected and observed mutation counts for all three categories per gene.
+        res = export_expected_observed_mks_per_gene(codons_by_gene, mutations, neutral_muts_by_context, nuc_context_occs,
+                                                    c_mode)
+
+        sys.stderr.write("Finished data preparation.\n")
+
+        # ************************************************************************************************************
+
+        sys.stderr.write("Running parameter_estimation.\n")
+
+        mks_type = []
+        for gene in res:
+            mks_type.append({"gene": gene[0], "exp": [float(gene[1]), float(gene[2]), float(gene[3])],
+                            "obs": [float(gene[4]), float(gene[5]), float(gene[6])], "len": int(gene[7])})
+        mks_type = sorted(mks_type, key=lambda arg: arg["gene"])
+
+        sys.stderr.write("Running ML routine %i times.\n" % rep_no)
+        if mod_C == 0:
+            sys.stderr.write("Model selection from all six.\n")
+        else:
+            sys.stderr.write("lam_s ~ %s.\n" % mod_choice_short[mod_C])
+        sys.stderr.write("%i genes in total.\n" % len(mks_type))
+        mks_type = [mks for mks in mks_type if (
+                    len(mks["gene"]) > 2 and mks["gene"][:2] == "OR" and ['0', '1', '2', '3', '4', '5', '6', '7', '8',
+                                                                        '9'].count(mks["gene"][2])) == 0]
+        sys.stderr.write("Filtered out OR genes, leaving %i genes.\n" % len(mks_type))
+        mks_type = [gene for gene in mks_type if zero_genes.count(gene["gene"]) == 0]
+        sys.stderr.write(
+            "Filtered out genes with M+K+S=0 in TumorPortal pan-cancer analysis, leaving %i genes.\n" % len(mks_type))
+
+        fout = open("output_data_preparation.txt", "w")
+        # Output format: [gene, lm, lk, ls, mobs, kobs, sobs, Lgene]
+        for gene in mks_type:
+            fout.write("%s\t%f\t%f\t%f\t%i\t%i\t%i\t%i\n" % (
+            gene["gene"], gene["exp"][0], gene["exp"][1], gene["exp"][2], gene["obs"][0], gene["obs"][1], gene["obs"][2],
+            gene["len"]))
+        fout.close()
+
         if mod_C == 1:
             sys.stderr.write("Fitting model 1...\n")
             low_b = [1e-5 * random.uniform(1., 3.) for i in range(2)]
@@ -1087,41 +1087,42 @@ while repeat:
             sys.stderr.write("Invalid choice for mod_C: %i.\n" % mod_C)
             sys.exit()
 
+        # ************************************************************************************************************
+
+        sys.stderr.write("Running p_values.\n")
+
+        params = cur_min_res[:-1]
+
+        sys.stderr.write("simulation_runs\t= %i\n" % (run_no))
+        sys.stderr.write("Computing simulated p-values.\n")
+        pvals_sim = compute_p_values(params, mks_type, [mod_C, 1, run_no])
+        sys.stderr.write("Computing real p-values.\n")
+        pvals_obs = compute_p_values(params, mks_type, [mod_C, 0, 1])
+        # [gene["gene"], m_pneg, k_pneg, m_ppos, k_ppos, pofx_given_s(0, sobs, L, ratm), pofx_given_s(0, sobs, L, ratk)]
+
+        #	Negative selection analysis
+        # phi_sim = compute_phi_sim(pvals_sim, 1, 2)
+        # gene_phi_obs = compute_phi_obs(pvals_obs, 1, 2)
+        # q_neg_adj = FDR_discrete(phi_sim, gene_phi_obs, 0.02, 0.000001)
+
+        #	Positive selection analysis
+        phi_sim = compute_phi_sim(pvals_sim, 3, 4)
+        gene_phi_obs = compute_phi_obs(pvals_obs, 3, 4)
+        q_pos_adj = FDR_discrete(phi_sim, gene_phi_obs, 0.02, 0.000001)
+
+        # q_neg_sorted = sorted(q_neg_adj, key=lambda arg: arg["gene"])
+        q_pos_sorted = sorted(q_pos_adj, key=lambda arg: arg["gene"])
+        pvals = [val["p_phi"] for val in q_pos_sorted]
+        qvals = multipletests(pvals, method='fdr_bh')[1]
+
         repeat = False
     except Exception:
         if mod_C != 1:
+            sys.stderr.write("Error using model %i trying with model 1\n" % mod_C)
             mod_C = 1 
             repeat = True           
         else:
             repeat = False
-
-# ************************************************************************************************************
-
-sys.stderr.write("Running p_values.\n")
-
-params = cur_min_res[:-1]
-
-sys.stderr.write("simulation_runs\t= %i\n" % (run_no))
-sys.stderr.write("Computing simulated p-values.\n")
-pvals_sim = compute_p_values(params, mks_type, [mod_C, 1, run_no])
-sys.stderr.write("Computing real p-values.\n")
-pvals_obs = compute_p_values(params, mks_type, [mod_C, 0, 1])
-# [gene["gene"], m_pneg, k_pneg, m_ppos, k_ppos, pofx_given_s(0, sobs, L, ratm), pofx_given_s(0, sobs, L, ratk)]
-
-#	Negative selection analysis
-# phi_sim = compute_phi_sim(pvals_sim, 1, 2)
-# gene_phi_obs = compute_phi_obs(pvals_obs, 1, 2)
-# q_neg_adj = FDR_discrete(phi_sim, gene_phi_obs, 0.02, 0.000001)
-
-#	Positive selection analysis
-phi_sim = compute_phi_sim(pvals_sim, 3, 4)
-gene_phi_obs = compute_phi_obs(pvals_obs, 3, 4)
-q_pos_adj = FDR_discrete(phi_sim, gene_phi_obs, 0.02, 0.000001)
-
-# q_neg_sorted = sorted(q_neg_adj, key=lambda arg: arg["gene"])
-q_pos_sorted = sorted(q_pos_adj, key=lambda arg: arg["gene"])
-pvals = [val["p_phi"] for val in q_pos_sorted]
-qvals = multipletests(pvals, method='fdr_bh')[1]
 
 fout = open("q_values_output.txt", "w")
 fout.write("%s\t%s\n" % (mod_choice[mod_C], params))

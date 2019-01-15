@@ -18,8 +18,7 @@ class HotmapsTask(Task):
         super().__init__(output_folder)
 
         self.name = None
-        self.method_folder = os.path.join(os.environ['INTOGEN_METHODS'], 'hotmaps')
-
+        
         self.in_fd = None
         self.in_writer = None
         self.in_file = None
@@ -82,8 +81,8 @@ class HotmapsTask(Task):
 
         # Run HotMaps Signature
         if not path.exists(self.out_file):
-            cmd = "singularity run {0}/hotmaps.simg {1} {2} {3}".format(
-                self.method_folder, self.in_file, self.output_folder, os.environ['INTOGEN_CPUS'])
+            cmd = "singularity run {0} {1} {2} {3}".format(
+                os.path.join(os.environ['INTOGEN_CONTAINERS'], 'hotmaps.simg'), self.in_file, self.output_folder, os.environ['INTOGEN_CPUS'])
 
             with subprocess.Popen(cmd, shell=True, stdin=sys.stdin, stderr=sys.stderr) as p:
                 with open(self.out_file + ".pid", "wt") as fd:
