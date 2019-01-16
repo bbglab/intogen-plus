@@ -17,7 +17,7 @@ class DndsCvTask(Task):
         self.write_row([
             value['SAMPLE'],
             value['CHROMOSOME'],
-            value['POSITION'],
+            value['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
             value['REF'],
             value['ALT']
         ])

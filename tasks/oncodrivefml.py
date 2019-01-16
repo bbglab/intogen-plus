@@ -32,10 +32,9 @@ class OncodriveFmlTask(Task):
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         seq = 'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes'
-        config_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'oncodrivefml', 'oncodrivefml.conf')
         
         # Run OncodriveFML
-        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} -c {config_file} --cores {cores}")
+        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores} --debug")
 
         # Compress output file
         tmp_output_file = os.path.join(tmp_folder, "{}-oncodrivefml.tsv".format(os.path.basename(self.in_file).split('.')[0]))

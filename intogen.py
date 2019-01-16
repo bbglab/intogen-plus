@@ -1,6 +1,10 @@
 import os
 import logging
 import click
+import shutil
+
+from glob import glob
+from bgparsers import selector
 
 from tasks.base import prepare_task, prepare_tasks
 from tasks.cbase import CBaseTask
@@ -16,8 +20,6 @@ from tasks.smregions import SmregionsTask
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
 from filters.vep import VepFilter
-from bgparsers import selector
-
 
 
 TASKS = {t.KEY: t for t in [
@@ -85,10 +87,30 @@ def readvep(input, output, tasks):
 
 
 @click.command(short_help='Run a task')
+@click.option('--cores', '-c', default=1, type=int, help="Cores to use in parallel")
 @click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
 @click.argument('task', type=str)
 @click.argument('key', type=str)
-def run(output, task, key):
+def run(cores, output, task, key):
+
+    # Check if it is a Nextflow job
+    if 'NXF_CLI' in os.environ:
+
+        # Check if there are already output results
+        output_files = [f for f in glob(os.path.join(output, task, f"{key}*")) if not f.endswith(".in.gz")]
+        output = os.getcwd()
+        if len(output_files) > 0:            
+            # If there are outputs reuse them instead of computing
+            output_folder = os.path.join(output, task)
+            os.makedirs(output_folder, exist_ok=True)
+            for f in output_files:
+                shutil.copyfile(f, os.path.join(output_folder, os.path.basename(f)))
+
+            return
+
+    # Set cores
+    os.environ['INTOGEN_CPUS'] = str(cores)
+
     task = TASKS[task](output)
     task.init(key)
     task.run()

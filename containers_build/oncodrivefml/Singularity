@@ -3,9 +3,15 @@ From: debian:buster-slim
 
 %environment
     export LC_ALL=C.UTF-8
+    export BBGLAB_HOME=/oncodrivefml
 
 %runscript
     exec "/usr/local/bin/oncodrivefml" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/oncodrivefml
+    cp oncodrivefml_v2.conf ${SINGULARITY_ROOTFS}/oncodrivefml/
+    chmod -R a+rx ${SINGULARITY_ROOTFS}/oncodrivefml/
 
 %post
 

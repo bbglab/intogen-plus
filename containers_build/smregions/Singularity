@@ -3,6 +3,7 @@ From: debian:buster-slim
 
 %environment
     export LC_ALL=C.UTF-8
+    export BBGLAB_HOME=/smregions
 
 %runscript
     exec "/usr/local/bin/smregions" "$@"
@@ -10,6 +11,7 @@ From: debian:buster-slim
 %setup
     mkdir ${SINGULARITY_ROOTFS}/smregions
     cp -r src/* ${SINGULARITY_ROOTFS}/smregions/
+    cp smregions.conf ${SINGULARITY_ROOTFS}/smregions/
     chmod -R a+rx ${SINGULARITY_ROOTFS}/smregions/
 
 %post

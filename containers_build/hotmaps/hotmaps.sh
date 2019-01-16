@@ -6,6 +6,13 @@ INPUT_FILE=$1
 OUTPUT_FOLDER=$2
 CORES=$3
 
+# Enviroment variables
+HYPERMUT=1000
+DATASETS_FOLDER=$INTOGEN_DATASETS/hotmaps
+DATASETS_PDB_FILE="fully_described_pdb_info.txt"
+export HOTMAPS_DB=$DATASETS_FOLDER/mupit_database.db
+export HOTMAPS_PDB_FOLDER=$DATASETS_FOLDER/pdb
+    
 # Preprocess
 INPUT_FOLDER=$(dirname "${INPUT_FILE}")
 INPUT_FILENAME=$(basename "${INPUT_FILE}")

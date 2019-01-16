@@ -1,10 +1,6 @@
 Bootstrap: docker
 From: debian:buster-slim
 
-%environment
-    INTOGEN_DATASETS=/datasets
-    export INTOGEN_DATASETS
-
 %runscript
     exec "/usr/bin/python3" "/deconstructsig/assign_signature_to_mutation.py" "$@"
 
@@ -14,15 +10,12 @@ From: debian:buster-slim
     cp deconstructSigs.r ${SINGULARITY_ROOTFS}/deconstructsig/
     chmod -R a+rx ${SINGULARITY_ROOTFS}/deconstructsig/
 
-    mkdir ${SINGULARITY_ROOTFS}/datasets
-    cp -vr ../../datasets/deconstructsig ${SINGULARITY_ROOTFS}/datasets/
-    chmod -R a+rx ${SINGULARITY_ROOTFS}/datasets/
-
 %post
     apt-get update
     apt-get install -y python3-pandas r-bioc-bsgenome r-cran-gplots
     rm -rf /var/lib/apt/lists/*
     echo "install.packages(\"BiocManager\", repos=\"https://cran.r-project.org\")" | R --no-save
     echo "BiocManager::install(\"BSgenome.Hsapiens.UCSC.hg19\")" | R --no-save
+    echo "BiocManager::install(\"BSgenome.Hsapiens.UCSC.hg38\")" | R --no-save
     echo "install.packages(\"deconstructSigs\", repos=\"https://cran.r-project.org\")" | R --no-save
 

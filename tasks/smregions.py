@@ -16,7 +16,7 @@ class SmregionsTask(Task):
     def input_write(self, identifier, mut):
         self.write_row([
             mut['CHROMOSOME'],
-            mut['POSITION'],
+            mut['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
             mut['REF'],
             mut['ALT'],
             mut['SAMPLE'],
@@ -27,8 +27,7 @@ class SmregionsTask(Task):
     def run(self):
 
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
-        config_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'smregions.conf')
         interes_regions = os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'regions_pfam.tsv.gz')
     
-        run_command(f"{self.cmdline} -m {self.in_file} -e {cds_regions} -r {interes_regions} -o {self.out_file} -c {config_file}")
+        run_command(f"{self.cmdline} -m {self.in_file} -e {cds_regions} -r {interes_regions} -o {self.out_file}")
 

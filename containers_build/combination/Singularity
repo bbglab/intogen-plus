@@ -9,7 +9,7 @@ From: continuumio/miniconda3:4.5.12
 
 %setup
     mkdir ${SINGULARITY_ROOTFS}/combination
-    cp -r * ${SINGULARITY_ROOTFS}/combination/
+    cp -r src/* ${SINGULARITY_ROOTFS}/combination/
     chmod -R a+rx ${SINGULARITY_ROOTFS}/combination/
 
 %post

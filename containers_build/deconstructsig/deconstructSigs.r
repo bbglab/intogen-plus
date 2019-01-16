@@ -12,6 +12,16 @@ colnames(x) <- c("chr", "pos", "ref", "alt", "Sample")
 x$chr <- as.factor(x$chr)
 head(x)
 
+# Select genome reference
+bsg = NULL
+if (Sys.getenv("INTOGEN_GENOME") == "hg38") {
+    bsg = BSgenome.Hsapiens.UCSC.hg38::Hsapiens
+}
+
+if (Sys.getenv("INTOGEN_GENOME") == "hg19") {
+    bsg = BSgenome.Hsapiens.UCSC.hg19::Hsapiens
+}
+
 # Convert to deconstructSigs input
 # this step generates the matrix suitable for the program
 sigs.input <- mut.to.sigs.input(mut.ref = x, 
@@ -19,7 +29,8 @@ sigs.input <- mut.to.sigs.input(mut.ref = x,
                                 chr = "chr", 
                                 pos = "pos", 
                                 ref = "ref", 
-                                alt = "alt")
+                                alt = "alt",
+                                bsg = bsg)
 # now we run deconstructSigs for each sample in our input list
 flag = 0
 for (sample in unique(x$Sample))

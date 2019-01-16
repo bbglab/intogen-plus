@@ -39,7 +39,7 @@ from concurrent.futures import ProcessPoolExecutor as Pool
 import logging
 import numpy as np
 
-from bgreference import hg19
+from bgreference import refseq
 
 
 # Configure the colorlog module
@@ -127,7 +127,7 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
                 )
                 continue
             try:
-                seq_ = hg19(
+                seq_ = refseq(os.environ['INTOGEN_GENOME'],
                     chromosome=region.chromosome, start=start - offset + 1, size=(end - start)
                 )
             except Exception:
@@ -265,7 +265,7 @@ def compute_signature(mutations_file):
             alt = line["Tumor_Seq_Allele2"]
             if len(ref)!=1 or len(alt)!=1 or ref not in "ACGT" or alt not in "ACGT":
                 continue
-            signature_ref = hg19(chromosome, position - offset, size=3).upper()
+            signature_ref = refseq(os.environ['INTOGEN_GENOME'], chromosome, position - offset, size=3).upper()
             signature_alt = ''.join([ref[0], alt, ref[-1]])
             signatures['counts'][(signature_ref, signature_alt)] += 1
             count += 1

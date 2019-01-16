@@ -147,10 +147,14 @@ class SMRegions(object):
                                            "U", "P_VALUE"])
         
         # Correct the p-value
-        p = df_results["P_VALUE"].values
-        mask = np.isfinite(p)
-        pval_corrected = np.full(p.shape, np.nan)
-        pval_corrected[mask] = mt.multipletests(p[mask], method='fdr_bh')[1]
-        df_results["Q_VALUE"] = pval_corrected
+        if len(df_results) > 0:
+            p = df_results["P_VALUE"].values
+            mask = np.isfinite(p)
+            pval_corrected = np.full(p.shape, np.nan)
+            pval_corrected[mask] = mt.multipletests(p[mask], method='fdr_bh')[1]
+            df_results["Q_VALUE"] = pval_corrected
+        else:
+            df_results["Q_VALUE"] = df_results["P_VALUE"]
+
         df_results.to_csv(self.output_file, sep="\t", index=False, compression="gzip")
         logger.info("Done")

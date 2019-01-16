@@ -6,6 +6,7 @@ import signal
 import subprocess
 
 from os import path
+from pyliftover import LiftOver
 from .base import Task, valid_consequence, run_command
 
 
@@ -14,6 +15,15 @@ class HotmapsTask(Task):
     KEY = 'hotmapssignature'
     INPUT_HEADER = ["Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele", 
                     "Tumor_Seq_Allele2", "Tumor_Sample_Barcode", "Variant_Classification", "Transcript_ID", "HGVSp_Short"]
+
+    LIFTOVER = None
+
+    def input_start(self):
+        super().input_start()
+
+        genome = os.environ['INTOGEN_GENOME'].lower()
+        if genome != "hg19":
+            self.LIFTOVER = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', '{}ToHg19.over.chain.gz'.format(genome)))
 
     def input_write(self, _, value):
 
@@ -28,7 +38,14 @@ class HotmapsTask(Task):
                 except:
                     hgv = "."
             else:
-                hgv = "."
+                hgv = "." 
+
+            if self.LIFTOVER:
+                strand = '-' if value['STRAND'] == '-1' else '+'
+                hg19_position = self.LIFTOVER.convert_coordinate("chr{}".format(chromosome), int(position) - 1, strand)
+                if hg19_position is None or len(hg19_position) != 1:
+                    return      
+                position = str(hg19_position[0][1] + 1)
 
             self.write_row([
                 value['SYMBOL'],

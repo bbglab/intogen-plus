@@ -34,12 +34,7 @@ process Vep {
         file "vep/*.out.gz" into OUT_VEP mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'vep', task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o . vep $task_file
-    else
-        mkdir -p ./vep && cp ${outputFile(OUTPUT, 'vep', task_file)} ./vep/
-    fi
+    $INTOGEN_SCRIPT run -o $OUTPUT vep $task_file
     """
 }
 
@@ -73,14 +68,8 @@ process DeconstructSig {
         file "deconstructsig/*.out.gz" into OUT_DECONSTRUCTSIG
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'deconstructsig', task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o . deconstructsig $task_file
-    else
-        mkdir -p ./deconstructsig && cp -r ${outputFile(OUTPUT, 'deconstructsig', task_file)} ./deconstructsig/
-    fi
+    $INTOGEN_SCRIPT run -o $OUTPUT deconstructsig $task_file
     """
-
 }
 
 process DndsCV {
@@ -96,12 +85,7 @@ process DndsCV {
         file "dndscv/*.genemuts.gz" into GENEMUTS_DNDSCV mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'dndscv', task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o . dndscv $task_file
-    else
-        mkdir -p ./dndscv && cp ${outputPattern(OUTPUT, 'dndscv', task_file)} ./dndscv/
-    fi
+    $INTOGEN_SCRIPT run -o $OUTPUT dndscv $task_file
     """
 }
 
@@ -118,13 +102,7 @@ process MutRate {
         file "mutrate/*" into OUT_MUTRATE mode flatten
 
     """
-    if [ ! -f "" ]
-    then
-        export INTOGEN_CPUS=$task.cpus
-        $INTOGEN_SCRIPT run -o . mutrate $task_file
-    else
-        mkdir -p ./mutrate && cp -r ${outputFile(OUTPUT, 'mutrate', task_file)} ./mutrate/
-    fi
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutrate $task_file
     """
 }
 
@@ -139,13 +117,7 @@ process OncodriveFML {
         file "oncodrivefml/*.out.gz" into OUT_ONCODRIVEFML mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'oncodrivefml', task_file)}" ]
-    then
-        export INTOGEN_CPUS=$task.cpus
-        $INTOGEN_SCRIPT run -o . oncodrivefml $task_file
-    else
-        mkdir -p ./oncodrivefml && cp ${outputFile(OUTPUT, 'oncodrivefml', task_file)} ./oncodrivefml/
-    fi
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodrivefml $task_file
     """
 }
 
@@ -160,14 +132,7 @@ process SMRegions {
         file "smregions/*.out.gz" into OUT_SMREGIONS mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'smregions', task_file)}" ]
-    then
-        export INTOGEN_CPUS=$task.cpus
-        export INTOGEN_GENOME_REFERENCE=hg19
-        $INTOGEN_SCRIPT run -o . smregions $task_file
-    else
-        mkdir -p ./smregions && cp ${outputFile(OUTPUT, 'smregions', task_file)} ./smregions/
-    fi
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT smregions $task_file
     """
 }
 
@@ -183,14 +148,7 @@ process OncodriveClustl {
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'oncodriveclustl', task_file)}" ]
-    then
-        export INTOGEN_CPUS=$task.cpus
-        export VEP_OUTPUT=$OUTPUT
-        $INTOGEN_SCRIPT run -o . oncodriveclustl $task_file
-    else
-        mkdir -p ./oncodriveclustl && cp ${outputFile(OUTPUT, 'oncodriveclustl', task_file)} ./oncodriveclustl/
-    fi
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodriveclustl $task_file
     """
 }
 
@@ -206,13 +164,7 @@ process HotmapsSignature {
         file "hotmapssignature/*.out.gz" into OUT_HOTMAPS mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'hotmapssignature', task_file)}" ]
-    then
-        export INTOGEN_CPUS=$task.cpus
-        $INTOGEN_SCRIPT run -o . hotmapssignature $task_file
-    else
-        mkdir -p ./hotmapssignature && cp ${outputFile(OUTPUT, 'hotmapssignature', task_file)} ./hotmapssignature/
-    fi
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT hotmapssignature $task_file
     """
 }
 
@@ -227,12 +179,7 @@ process CBase {
         file "cbase/*.out.gz" into OUT_CBASE mode flatten
 
     """
-    if [ ! -f "${outputFile(OUTPUT, 'cbase', task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o . cbase $task_file
-    else
-        mkdir -p ./cbase && cp ${outputFile(OUTPUT, 'cbase', task_file)} ./cbase/
-    fi
+    $INTOGEN_SCRIPT run -o $OUTPUT cbase $task_file
     """
 }
 
@@ -249,27 +196,15 @@ IN_COMBINATION = OUT_ONCODRIVEFML
 
 process Combination {
     tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'move'
 
     input:
         val task_file from IN_COMBINATION
 
+    output:
+        file "combination/*.out.gz"
+
     """
-    if [ ! -f "${outputCombination(OUTPUT, task_file)}" ]
-    then
-        $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
-    fi
+    $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
     """
-}
-
-
-def outputCombination(output_folder, task_file) {
-    return output_folder.toString() + '/combination/' + task_file.fileName.toString().replace('.out.gz', '.05.out.gz')
-}
-
-def outputFile(output_folder, process_folder, task_file) {
-    return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '.out.gz')
-}
-
-def outputPattern(output_folder, process_folder, task_file) {
-    return output_folder.toString() + '/' + process_folder + '/' + task_file.fileName.toString().replace('.in.gz', '*.gz')
 }
