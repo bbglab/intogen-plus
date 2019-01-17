@@ -61,6 +61,10 @@ def cli(debug=False):
 @click.option('--cores', default=os.cpu_count(), type=int, help="Maximum groups to process in parallel")
 @click.argument('tasks', nargs=-1)
 def readvariants(input, output, groupby, cores, tasks):
+
+    if 'NXF_CLI' in os.environ:
+        output = os.getcwd()
+
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
     tasks = [TASKS[t](output) for t in tasks]
@@ -77,6 +81,10 @@ def readvariants(input, output, groupby, cores, tasks):
 @click.option('--output', '-o', required=True, help="Output folder")
 @click.argument('tasks', nargs=-1)
 def readvep(input, output, tasks):
+    
+    if 'NXF_CLI' in os.environ:
+        output = os.getcwd()
+
     tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
     reader = TSVReader()
@@ -97,7 +105,9 @@ def run(cores, output, task, key):
     if 'NXF_CLI' in os.environ:
 
         # Check if there are already output results
-        output_files = [f for f in glob(os.path.join(output, task, f"{key}*")) if not f.endswith(".in.gz")]
+        output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
+        output_files = [f for f in glob(output_pattern) if not f.endswith(".in.gz")]
+        
         output = os.getcwd()
         if len(output_files) > 0:            
             # If there are outputs reuse them instead of computing

@@ -1,6 +1,9 @@
 Bootstrap: docker
 From: alpine:3.8
 
+%environment
+    export LC_ALL=C.UTF-8
+    
 %runscript
     exec "/bin/sh" "/hotmaps/hotmaps.sh" "$@"
 
@@ -12,4 +15,4 @@ From: alpine:3.8
 
 %post
     apk add --no-cache python-dev py-pip py-curl zlib-dev make ncurses-dev g++
-    pip --no-cache-dir install pandas tqdm futures bgreference biopython
+    pip --no-cache-dir install pandas tqdm futures bgreference biopython pyliftover

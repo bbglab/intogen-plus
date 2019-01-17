@@ -1,6 +1,9 @@
+import os
 import sys
 import pandas as pd
 import numpy as np
+
+from pyliftover import LiftOver
 
 
 def find_hotspots_gene_cancer(file_hotspots_gene):
@@ -80,6 +83,30 @@ def main(file_hotspots_gene, f_info_density, f_output, f_output_clusters):
 
 
     df_hotspots_all.to_csv(f_output, sep="\t", index=False, compression="gzip")
+    
+    genome = os.environ.get('INTOGEN_GENOME', 'hg19')
+    if genome != 'hg19':        
+        # Liftover clusters        
+        lo = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19To{}.over.chain.gz'.format(genome.capitalize())))
+        clusters = []
+        for r in df_density_aa.to_dict(orient='records'):
+            positions = [int(p.strip()) for p in r['genomic position'].split(",")]
+            positions_lo = []
+            for p in positions:
+                rlo = lo.convert_coordinate(r['chromosome'], p - 1)
+                if rlo is None or len(rlo) != 1:
+                    continue
+                positions_lo.append(rlo[0][1] + 1)
+
+            if len(positions) != len(positions_lo):
+                print("Skiping cluster due to liftover {}".format(r))
+                continue
+            r['genomic positions'] = ",".join([str(p) for p in positions_lo])
+            r['genomic positions hg19'] = ",".join([str(p) for p in positions])
+            clusters.append(r)
+        
+        df_density_aa = pd.DataFrame.from_dict(clusters)
+    
     df_density_aa.to_csv(f_output_clusters, sep="\t", index=False, compression="gzip")
 
 

@@ -2,9 +2,9 @@
 
 set -e
 
-export INTOGEN_VEP="vep92"
-export INTOGEN_GENOME="hg38"
-export INTOGEN_RELEASE="develop"
+export INTOGEN_GENOME=$1 "hg38"
+export INTOGEN_VEP=$2 "vep92"
+export INTOGEN_RELEASE=$3 "develop"
 
 mkdir -p ../containers/${INTOGEN_RELEASE}
 

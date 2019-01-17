@@ -18,7 +18,7 @@ process PreprocessFromInput {
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o . vep oncodrivefml dndscv oncodriveclustl smregions
+    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl smregions
     """
 
 }
@@ -47,13 +47,13 @@ process PreprocessFromVep {
         val task_file from OUT_VEP
 
     output:
-        file "hotmapssignature/*.in.gz" into IN_HOTMAPS mode flatten
+        file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
         file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    $INTOGEN_SCRIPT readvep -i $task_file -o . hotmapssignature cbase deconstructsig
+    $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase deconstructsig
     """
 }
 
@@ -89,14 +89,15 @@ process DndsCV {
     """
 }
 
-OUT_DNDSCV.into { OUT_DNDSCV_FOR_COMBINATION; OUT_DNDSCV_FOR_MUTRATE }
+// Duplicate this stream
+OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02 }
 
 process MutRate {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'move'
 
     input:
-        val task_file from OUT_DNDSCV_FOR_MUTRATE
+        val task_file from OUT_DNDSCV_01
 
     output:
         file "mutrate/*" into OUT_MUTRATE mode flatten
@@ -153,7 +154,7 @@ process OncodriveClustl {
 }
 
 
-process HotmapsSignature {
+process Hotmaps {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
@@ -161,10 +162,12 @@ process HotmapsSignature {
         val task_file from IN_HOTMAPS
 
     output:
-        file "hotmapssignature/*.out.gz" into OUT_HOTMAPS mode flatten
+        file "hotmaps/*.out.gz" into OUT_HOTMAPS mode flatten
+        file "hotmaps/*.clusters.gz" into CLUSTERS_HOTMAPS mode flatten
+        file "hotmaps/*.tmp" optional true into TMP_OUTPUTS mode flatten
 
     """
-    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT hotmapssignature $task_file
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT hotmaps $task_file
     """
 }
 
@@ -184,15 +187,19 @@ process CBase {
 }
 
 
+// Combination stream
 IN_COMBINATION = OUT_ONCODRIVEFML
                     .phase(OUT_ONCODRIVECLUSTL){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
-                    .phase(OUT_DNDSCV_FOR_COMBINATION){ it -> it.fileName }
+                    .phase(OUT_DNDSCV_02){ it -> it.fileName }
+                    .map{ it[0] }
+                    .phase(OUT_SMREGIONS){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_CBASE){ it -> it.fileName }
                     .map{ it[0] }
+
 
 process Combination {
     tag { task_file.fileName }

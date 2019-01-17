@@ -1,8 +1,0 @@
-type_of_cancer: all
-cancer_study_identifier: all_stjude_2013
-name: Hypodiploid Acute Lymphoid Leukemia (St Jude, Nat Genet 2013)
-short_name: ALL (St. Jude)
-description: Exome sequencing of 44 ALL samples.
-citation: Holmfeldt et al. Nat Genet 2013
-pmid: 23334668
-groups: PUBLIC

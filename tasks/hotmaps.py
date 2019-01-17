@@ -12,7 +12,7 @@ from .base import Task, valid_consequence, run_command
 
 class HotmapsTask(Task):
 
-    KEY = 'hotmapssignature'
+    KEY = 'hotmaps'
     INPUT_HEADER = ["Hugo_Symbol", "Chromosome", "Start_Position", "End_Position", "Reference_Allele", 
                     "Tumor_Seq_Allele2", "Tumor_Sample_Barcode", "Variant_Classification", "Transcript_ID", "HGVSp_Short"]
 
@@ -61,9 +61,6 @@ class HotmapsTask(Task):
             ])
 
     def run(self):
-
-        run_command( "singularity run {0} {1} {2} {3}".format(
-            os.path.join(os.environ['INTOGEN_CONTAINERS'], 'hotmaps.simg'), self.in_file, self.output_folder, os.environ['INTOGEN_CPUS'])
-        )
+        run_command( f"{self.cmdline} {self.in_file} {self.output_folder}")
 
         

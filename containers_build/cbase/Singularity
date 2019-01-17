@@ -1,6 +1,9 @@
 Bootstrap: docker
 From: debian:buster-slim
 
+%environment
+    export LC_ALL=C.UTF-8
+
 %runscript
     exec "/usr/bin/python" "/cbase/cbase.py" "$@"
 

@@ -10,16 +10,16 @@ import click
 
 class Parser():
 
-    methods = ["hotmapssignature","oncodrivefml","dndscv","cbase","oncodriveclustl"]
+    methods = ["hotmaps","oncodrivefml","dndscv","cbase","oncodriveclustl"]
     column_keys = {
-        "hotmapssignature":     ["GENE",        "q-value",      "Min p-value"],
+        "hotmaps":     ["GENE",        "q-value",      "Min p-value"],
         "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
         "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
         "cbase":                ["gene",        "q_pos",    "p_pos"],
         "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"]
     }
 
-    def __init__(self, path, thresholds={"hotmapssignature":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
+    def __init__(self, path, thresholds={"hotmaps":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
         self.path = path
         self.thresholds = thresholds
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     pickle.dump( d_results_r, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_ranking_simulated.pickle", "wb" ) )
     d_results_t = p.create_dictionary_outputs(type_selection="threshold")
     pickle.dump( d_results_t, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold_simulated.pickle", "wb" ) )
-    p = Parser("/projects_bg/bg/shared/projects/intogen/intogen4/runs/simulated_20170621/",thresholds ={"hotmapssignature":1.0,"oncodrivefml":1.0,"mutsigcv":1.0,"oncodriveomega":1.0,"oncodriveclust":1.0})
+    p = Parser("/projects_bg/bg/shared/projects/intogen/intogen4/runs/simulated_20170621/",thresholds ={"hotmaps":1.0,"oncodrivefml":1.0,"mutsigcv":1.0,"oncodriveomega":1.0,"oncodriveclust":1.0})
     d_results_total = p.create_dictionary_outputs(type_selection="threshold")
     pickle.dump( d_results_total, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_all_simulated.pickle", "wb" ) )
     '''

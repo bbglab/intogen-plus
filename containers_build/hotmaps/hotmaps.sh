@@ -4,7 +4,7 @@ set -x
 # Script arguments
 INPUT_FILE=$1
 OUTPUT_FOLDER=$2
-CORES=$3
+CORES=$INTOGEN_CPUS
 
 # Enviroment variables
 HYPERMUT=1000
@@ -18,7 +18,7 @@ INPUT_FOLDER=$(dirname "${INPUT_FILE}")
 INPUT_FILENAME=$(basename "${INPUT_FILE}")
 INPUT_TUMOR_TYPE=${INPUT_FILENAME%.in.gz}
 SCRIPTS_FOLDER="/hotmaps/scripts"
-TEMP_FOLDER="$OUTPUT_FOLDER/tmp"
+TEMP_FOLDER="$OUTPUT_FOLDER/${INPUT_TUMOR_TYPE}.tmp"
 mkdir -p $OUTPUT_FOLDER
 mkdir -p $TEMP_FOLDER
 
@@ -119,6 +119,6 @@ fi
 ## STEP10. Output parser
 if [ ! -f "$OUTPUT_FOLDER/$INPUT_TUMOR_TYPE.out.gz" ]
 then
-    python ${SCRIPTS_FOLDER}/postprocess.py ${TEMP_FOLDER}/hotspot_gene_${INPUT_FILENAME} ${TEMP_FOLDER}/mtco_${INPUT_FILENAME} ${OUTPUT_FOLDER}/${INPUT_TUMOR_TYPE}.out.gz $OUTPUT_FOLDER/${INPUT_TUMOR_TYPE}_clusters.out.gz
+    python ${SCRIPTS_FOLDER}/postprocess.py ${TEMP_FOLDER}/hotspot_gene_${INPUT_FILENAME} ${TEMP_FOLDER}/mtco_${INPUT_FILENAME} ${OUTPUT_FOLDER}/${INPUT_TUMOR_TYPE}.out.gz $OUTPUT_FOLDER/${INPUT_TUMOR_TYPE}.clusters.gz
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
