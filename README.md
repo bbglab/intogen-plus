@@ -6,20 +6,38 @@
 2. Install singularity
 3. Install nextflow  (You can use `conda install nextflow`)
 
-# Download and build datasets
-All the datasets will be build at `datasets` folder. If you want to use a different folder create a symbolic link before running this script.
+# Download or build datasets
+
+All the required datasets will be stored at `datasets` folder,  if you want to use a different folder you must create a symbolic link before running this script. 
+
+You can download all the required datasets using this command:
+
+```bash
+./download_datasets.sh hg38 vep92 stable
+```
+
+Or alternatively you can build all the datasets from the original sources. Note that this process can take a very long time and it might be broken if the original sources had changed.
 
 ```bash
 cd datasets_build
-./build_all_datasets.sh hg38 vep92 develop
+./build_datasets.sh hg38 vep92 develop
 ```
 
-# Build singularity images
-All the singularity images will be build at `containers` folder. If you want to use a different folder create a symbolic link before running this script.
+# Download or build singularity images
+
+All the images will be stored at `containers` folder, if you want to use a different folder you must create a symbolic link before running this script. 
+
+You can download all the singularity images using this command:
+
+```bash
+./download_containers.sh hg38 vep92 stable
+```
+
+Or alternatively you can build all the singularity images yourself. 
 
 ```bash
 cd containers_build
-./build_all_containers.sh hg38 vep92 develop
+./build_containers.sh hg38 vep92 develop
 ```
 
 # Test the pipeline
