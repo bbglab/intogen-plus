@@ -102,7 +102,7 @@ def readvep(input, output, tasks):
 def run(cores, output, task, key):
 
     # Check if it is a Nextflow job
-    if 'NXF_CLI' in os.environ:
+    if task != "combination" and 'NXF_CLI' in os.environ:
 
         # Check if there are already output results
         output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
@@ -114,8 +114,9 @@ def run(cores, output, task, key):
             output_folder = os.path.join(output, task)
             os.makedirs(output_folder, exist_ok=True)
             for f in output_files:
-                shutil.copyfile(f, os.path.join(output_folder, os.path.basename(f)))
-
+                copy = shutil.copytree if os.path.isdir(f) else shutil.copyfile
+                copy(f, os.path.join(output_folder, os.path.basename(f)))
+                
             return
 
     # Set cores

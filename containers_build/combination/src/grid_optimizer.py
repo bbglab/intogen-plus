@@ -245,7 +245,7 @@ def grid_optimize(func, low_quality=set()):
 
     """
     optimum = {'Objective_Function': 0, 'oncodriveclustl': None, 'dndscv': None, 'oncodrivefml': None,
-               'hotmaps': None, 'cbase': None, "simregions":None}
+               'hotmaps': None, 'cbase': None, "smregions":None}
 
     methods_list = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps','smregions', 'cbase']
     low_quality_index = None
@@ -272,7 +272,7 @@ def grid_optimize(func, low_quality=set()):
                                     optimum['dndscv'] = w[1]
                                     optimum['oncodrivefml'] = w[2]
                                     optimum['hotmaps'] = w[3]
-                                    optimum['simregions'] = w[4]
+                                    optimum['smregions'] = w[4]
                                     optimum['cbase'] = w[5]
     return optimum
 
@@ -339,7 +339,7 @@ def optimize_with_seed(func, w0, low_quality=set()):
 
 
 
-def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed, t_combination):
+def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed):
     '''
 
     :param cancer:
@@ -348,7 +348,6 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     :param moutput:
     :param percentage_cgc:
     :param seed:
-    :param t_combination:
     :return:
     '''
 
@@ -356,7 +355,7 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     if seed == 'T':
         np.random.seed(1)
     # Select order methods
-    gt_combination = t_combination
+    gt_combination = "RANKING"
     order_methods = order_methods_ranking
     with gzip.open(input_rankings, "rb") as fd:
         d_results_methodsr = pickle.load(fd)
@@ -369,9 +368,9 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     # Remove methods that do not reach the quality metrics
     if not (method_reject is None):
         discarded = set()
-        discarded.add(method_reject + "_r")
+        discarded.add(method_reject)
     else:
-        discarded = set(["{}_r".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
+        discarded = set(["{}".format(m) for m in Filter(input_run=moutput, tumor=cancer).filters()])
     # Include discarded from command line
     if len(discarded) > 0:
         print("[QC] {} discarded {}".format(cancer, discarded))
@@ -385,13 +384,13 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     # Instantiate the enrichment objective function
     objective_function = Evaluation_Enrichment(percentage_cgc)
     f = partial(calculate_objective_function, d_results_methodsr, objective_function=objective_function)
-    if t_combination == "RANKING":
+    if gt_combination == "RANKING":
         def func(w):
             return -f({"oncodriveclustl": w[0],
                        "dndscv": w[1],
                        "oncodrivefml": w[2],
                        "hotmaps": w[3],
-                       "simregions": w[4],
+                       "smregions": w[4],
                        "cbase": w[5]})
 
     all_methods = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps', 'smregions', 'cbase']
@@ -468,12 +467,10 @@ def skip_optimizer(input_rankings, method_reject, moutput, cancer):
               type=str,
               help="Whether a seed for random generation should be defined. Default T=True. [T=True,F=False]",
               required=True)
-
-
-def run_optimizer( foutput, input_rankings, t_combination, percentage_cgc, moutput, cancer, seed, method_reject):
+def run_optimizer( foutput, input_rankings, percentage_cgc, moutput, cancer, seed, method_reject):
 
     if float(percentage_cgc) > 0.0:
-        out_df = full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed, t_combination)
+        out_df = full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed)
     else:
         out_df = skip_optimizer(input_rankings,method_reject,moutput,cancer)
     # write to table

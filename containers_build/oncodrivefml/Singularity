@@ -4,6 +4,7 @@ From: debian:buster-slim
 %environment
     export LC_ALL=C.UTF-8
     export BBGLAB_HOME=/oncodrivefml
+    export BGDATA_OFFLINE=TRUE
 
 %runscript
     exec "/usr/local/bin/oncodrivefml" "$@"

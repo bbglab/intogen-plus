@@ -208,9 +208,6 @@ process Combination {
     input:
         val task_file from IN_COMBINATION
 
-    output:
-        file "combination/*.out.gz"
-
     """
     $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
     """

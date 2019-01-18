@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pandas as pd
 import pickle
-import Utils
 import random
 
 class Evaluation_Enrichment:
@@ -180,22 +179,5 @@ class Evaluation_Enrichment:
                 l_results.append([cancer,method,dict_results[cancer][method]])
 
         return pd.DataFrame(l_results,columns=["Cancer_Type","Method","Weighted_AUC"])
-
-if __name__ == "__main__":
-
-
-    #Example all areas
-    cgc = Evaluation_Enrichment.load_cgc()
-    #d_results_methodsr= pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_ranking.pickle", "rb" ) )
-    d_results_methodst= pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold.pickle", "rb" ) )
-    #d_results_cranking = pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/ranking_combination_default.pickle", "rb" ) )
-    d_results_cthreshold = pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_default.pickle", "rb" ) )
-    #d_results_cranking_optimized = pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/ranking_combination_optimized.pickle", "rb" ) )
-    d_results_cthreshold_optimized = pickle.load( open( "/workspace/projects/intogen/intogen4/scripts/data/threshold_combination_optimized.pickle", "rb" ) )
-    #d_results = Utils.join_dictionaries([d_results_methodsr,d_results_methodst,  d_results_cranking,d_results_cthreshold,d_results_cranking_optimized,d_results_cthreshold_optimized])
-    d_results_t = Utils.join_dictionaries([d_results_methodst,  d_results_cthreshold,d_results_cthreshold_optimized])
-    e = Evaluation_Enrichment()
-    dict_auc = e.calculate_area_cancer(d_results_t,type_method="absolute")
-    Evaluation_Enrichment.get_report_area(dict_auc).to_csv("/workspace/projects/intogen/intogen4/scripts/data/results/reports/weighted_area/summary_auc_threshold_relative.csv",sep="\t",index=False)
 
 

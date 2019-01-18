@@ -18,11 +18,10 @@ column_keys = {
     }
 
 def parse_optimized_weights(path_weights):
-    cap = lambda a: a[:-2]
     df = pd.read_csv(path_weights, sep='\t', compression="gzip")
     del df['Objective_Function']
     dict_weight = df.to_dict()
-    return {cap(k): v[0] for k, v in dict_weight.items()}
+    return {k: v[0] for k, v in dict_weight.items()}
 
 
 def retrieve_ranking(df, path_ranking):
@@ -212,7 +211,6 @@ def add_significant_bidders(df):
 @click.option('--path_weights', type=click.Path(), help="Path to dataframe with weights", required=True)
 @click.option('--path_fml', type=click.Path(), help="Path to OncodriveFML results folder", required=True)
 @click.option('--path_dndscv', type=click.Path(), help="Path to dndsCV results folder", required=True)
-
 def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml,path_dndscv):
 
     df = pd.read_csv(input_path, sep='\t', compression="gzip")

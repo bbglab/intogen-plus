@@ -22,7 +22,6 @@ def classify_genes_tiers(df,threshold=0.01,column_filter = "QVALUE_stouffer_weig
         if row[column_filter] > threshold:
             threshold_accepted= row["RANKING"] - 1
             break
-
     for index, row in df.iterrows():
         if row["RANKING"] <= threshold_accepted:
             d_class[row["SYMBOL"]] = 1
@@ -69,13 +68,12 @@ def set_role(data, distance_threshold=0.1):
         return None
     # Check wmis
     wmis = data['wmis_cv']
-    if wmis >= 1 and data["n_mis"] == 0:
-        wmis = 1
+    #TODO if wmis >= 1 and data["n_mis"] == 0:
+    #    wmis = 1
     # Check wnon
     wnon = data['wnon_cv']
-    if wnon >= 1 and data["n_non"] == 0:
-        wnon = 1
-
+    #TODO if wnon >= 1 and data["n_non"] == 0:
+    #    wnon = 1
     distance = (wmis - wnon) / math.sqrt(2)
     if distance_threshold is not None and abs(distance) < distance_threshold:
         return None
@@ -127,7 +125,6 @@ def run_create_tiers(input, output_file, threshold, name_method, column_filter,c
 
 
 if __name__ == '__main__':
-
     run_create_tiers()
 
 

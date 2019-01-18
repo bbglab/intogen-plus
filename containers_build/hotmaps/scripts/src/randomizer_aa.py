@@ -265,7 +265,7 @@ def compute_signature(mutations_file):
             alt = line["Tumor_Seq_Allele2"]
             if len(ref)!=1 or len(alt)!=1 or ref not in "ACGT" or alt not in "ACGT":
                 continue
-            signature_ref = refseq(os.environ['INTOGEN_GENOME'], chromosome, position - offset, size=3).upper()
+            signature_ref = refseq('hg19', chromosome, position - offset, size=3).upper()
             signature_alt = ''.join([ref[0], alt, ref[-1]])
             signatures['counts'][(signature_ref, signature_alt)] += 1
             count += 1
