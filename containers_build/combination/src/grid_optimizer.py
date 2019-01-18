@@ -5,8 +5,6 @@ import pickle
 import numpy as np
 import pandas as pd
 import itertools
-from tqdm import tqdm
-from scipy.optimize import minimize
 from scipy.optimize import basinhopping
 from functools import partial
 from qc.drivers import CGC_GENES_PER_TUMOR, NEGATIVE_GENES_PER_TUMOR
@@ -18,8 +16,7 @@ from evaluation.Evaluation_Enrichment import Evaluation_Enrichment
 gavaliable_methods = None
 gdiscarded_methods = None
 
-order_methods_ranking = ["oncodriveclustl_r", "dndscv_r","oncodrivefml_r", "hotmaps_r","cbase_r"]
-order_methods_threshold = ["oncodriveclustl_t", "dndscv_t","oncodrivefml_t", "hotmaps_t","cbase_t"]
+order_methods_ranking = ["oncodriveclustl", "dndscv","oncodrivefml", "hotmaps","smregions","cbase"]
 order_methods = []
 gweights = []
 gt_combination = None
@@ -38,16 +35,22 @@ METHODS = [
     'oncodriveclustl',
     'dndscv',
     'hotmaps',
-    'cbase']
-
+    'cbase',
+    'smregions']
 
 def get_tissue(name):
+    '''
+
+    :param name:
+    :return:
+    '''
     for t in NEGATIVE_GENES_PER_TUMOR.keys():
         if "_{}_".format(t) in name or name.endswith("_{}".format(t)):
             return t
     return None
 
 class Filter:
+
     def __init__(self, input_run, tumor):
         self.methods = METHODS
         self.data = self.create_table(input_run, tumor)
@@ -116,7 +119,6 @@ class Filter:
         :return: borders
         """
         q75, q25 = tuple(map(lambda x: np.percentile(data, x), [75, 25]))
-        # q75, q25 = np.percentile(data, [75, 25])
         iqr = q75 - q25
         outliers_down = max([0, q25 - (iqr * 1.5)])
         outliers_up = q75 + (iqr * 1.5)
@@ -228,23 +230,24 @@ def grid_optimize(func, low_quality=set()):
 
     These are the constraints that must be in place:
     constraint 1: sum w_i = 1
-    constraint 2: w_clust + w_hotmaps <= 0.5
+    constraint 2: w_clust + w_hotmaps +w_smregions <= 0.5
     constraint 3: w_dndscv + w_cbase <= 0.5
     constraint 4: w_fml <= 0.5
     constraint 5*: w_i <= 0.05 for all w_i may not apply if some w_i is discarded
 
     The common order of methods is this one:
-    "oncodriveclustl_r": w[0],
-    "dndscv_r": w[1],
-    "oncodrivefml_r": w[2],
-    "hotmaps_r": w[3],
-    "cbase_r": w[5]
+    "oncodriveclustl": w[0],
+    "dndscv": w[1],
+    "oncodrivefml": w[2],
+    "hotmaps": w[3],
+    "smregions": w[4],
+    "cbase": w[5]
 
     """
-    optimum = {'Objective_Function': 0, 'oncodriveclustl_r': None, 'dndscv_r': None, 'oncodrivefml_r': None,
-               'hotmaps_r': None, 'cbase_r': None}
+    optimum = {'Objective_Function': 0, 'oncodriveclustl': None, 'dndscv': None, 'oncodrivefml': None,
+               'hotmaps': None, 'cbase': None, "simregions":None}
 
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmaps_r', 'cbase_r']
+    methods_list = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps','smregions', 'cbase']
     low_quality_index = None
     if len(low_quality) > 0:
         low_quality_index = [methods_list.index(v) for v in low_quality]
@@ -265,11 +268,12 @@ def grid_optimize(func, low_quality=set()):
                                 f = func(w)
                                 if optimum['Objective_Function'] > f:
                                     optimum['Objective_Function'] = f
-                                    optimum['oncodriveclustl_r'] = w[0]
-                                    optimum['dndscv_r'] = w[1]
-                                    optimum['oncodrivefml_r'] = w[2]
-                                    optimum['hotmaps_r'] = w[3]
-                                    optimum['cbase_r'] = w[5]
+                                    optimum['oncodriveclustl'] = w[0]
+                                    optimum['dndscv'] = w[1]
+                                    optimum['oncodrivefml'] = w[2]
+                                    optimum['hotmaps'] = w[3]
+                                    optimum['simregions'] = w[4]
+                                    optimum['cbase'] = w[5]
     return optimum
 
 
@@ -282,11 +286,11 @@ def create_scipy_constraints(low_quality=set()):
     # methods=["oncodriveclustl_r", "dndscv_r", "oncodrivefml_r", "hotmaps_r", "cbase"]
     # constraint 1: sum weights = 1
     # constraint 2: for each weight, weight >= 0.05
-    # constraint 3: clust + hotmaps <= 0.5
+    # constraint 3: clust + hotmaps + e_driver <= 0.5
     # constraint 4: dndscv <= 0.5
     # constraint 5: fml <= 0.5
 
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmaps_r', 'cbase_r']
+    methods_list = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps', 'smregions', 'cbase']
     cons = [{'type': 'eq', 'fun': simplex_bound},
             {'type': 'ineq', 'fun': clustering_bound},
             {'type': 'ineq', 'fun': recurrence_bound},
@@ -301,7 +305,7 @@ def create_scipy_constraints(low_quality=set()):
 
 
 def satisfy_constraints(w, low_quality=set()):
-    methods_list = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmaps_r', 'cbase_r']
+    methods_list = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps', 'smregions', 'cbase']
     satisfy = True
     for i, v in enumerate(methods_list):
         if v in low_quality:
@@ -336,17 +340,24 @@ def optimize_with_seed(func, w0, low_quality=set()):
 
 
 def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed, t_combination):
+    '''
+
+    :param cancer:
+    :param input_rankings:
+    :param method_reject:
+    :param moutput:
+    :param percentage_cgc:
+    :param seed:
+    :param t_combination:
+    :return:
+    '''
 
     global gavaliable_methods, order_methods, gt_combination
     if seed == 'T':
         np.random.seed(1)
     # Select order methods
     gt_combination = t_combination
-    if t_combination == "RANKING":
-        order_methods = order_methods_ranking
-    else:
-        order_methods = order_methods_threshold
-    print(input_rankings)
+    order_methods = order_methods_ranking
     with gzip.open(input_rankings, "rb") as fd:
         d_results_methodsr = pickle.load(fd)
     print(d_results_methodsr.keys())
@@ -376,19 +387,14 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     f = partial(calculate_objective_function, d_results_methodsr, objective_function=objective_function)
     if t_combination == "RANKING":
         def func(w):
-            return -f({"oncodriveclustl_r": w[0],
-                       "dndscv_r": w[1],
-                       "oncodrivefml_r": w[2],
-                       "hotmaps_r": w[3],
-                       "cbase_r": w[5]})
-    else:
-        def func(w):
-            return -f({"oncodriveclustl_t": w[0],
-                       "dndscv_r": w[1],
-                       "oncodrivefml_t": w[2],
-                       "hotmaps_t": w[3],
-                       "cbase_t": w[5]})
-    all_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmaps_r', 'cbase_r']
+            return -f({"oncodriveclustl": w[0],
+                       "dndscv": w[1],
+                       "oncodrivefml": w[2],
+                       "hotmaps": w[3],
+                       "simregions": w[4],
+                       "cbase": w[5]})
+
+    all_methods = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps', 'smregions', 'cbase']
     # best solution in 1/20 resolution grid, augmented with basin-hopping/SLSQP optimization
     grid_optimum = grid_optimize(func, low_quality=discarded)  # get optimum candidate in the grid
     w = np.array([grid_optimum[k] for k in all_methods])
@@ -411,7 +417,7 @@ def skip_optimizer(input_rankings, method_reject, moutput, cancer):
 
     global gavaliable_methods
 
-    gavaliable_methods = ['oncodriveclustl_r', 'dndscv_r', 'oncodrivefml_r', 'hotmaps_r', 'cbase_r']
+    gavaliable_methods = ['oncodriveclustl', 'dndscv', 'oncodrivefml', 'hotmaps', 'smregions', 'cbase']
 
     # Remove methods that do not reach the quality metrics
     if not (method_reject is None):
@@ -442,10 +448,6 @@ def skip_optimizer(input_rankings, method_reject, moutput, cancer):
 @click.option('--input_rankings',
               type=click.Path(exists=True),
               help="Dictionary with the ranking of the methods",
-              required=True)
-@click.option('--t_combination',
-              default="RANKING",
-              help='Type of combination, ranking or threshold. Default: "RANKING"',
               required=True)
 @click.option('--percentage_cgc',
               default=1.0,

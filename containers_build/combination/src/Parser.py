@@ -10,23 +10,20 @@ import click
 
 class Parser():
 
-    methods = ["hotmaps","oncodrivefml","dndscv","cbase","oncodriveclustl"]
+    methods = ["hotmaps","oncodrivefml","dndscv","cbase","oncodriveclustl","smregions"]
     column_keys = {
         "hotmaps":     ["GENE",        "q-value",      "Min p-value"],
         "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
         "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
         "cbase":                ["gene",        "q_pos",    "p_pos"],
-        "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"]
+        "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"],
+        "smregions": ["HUGO_SYMBOL", "Q_VALUE", "P_VALUE"]
+
     }
 
-    def __init__(self, path, thresholds={"hotmaps":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1} ):
+    def __init__(self, path, thresholds={"hotmaps":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1,"smregions":0.1} ):
         self.path = path
         self.thresholds = thresholds
-
-    @staticmethod
-    def read_hugo(path=os.path.join(os.environ['INTOGEN_DATASETS'], 'combination')):
-        with open(os.path.join(path, "ENSEMBL_HUGO_1807107.pickle"), "rb") as fd:
-            return pickle.load(fd)
 
     @staticmethod
     def create_dict_rankings(genes,rankings):
@@ -55,16 +52,14 @@ class Parser():
         df_query["Ranking"] = l_rankings
         return df_query
 
-    def create_dictionary_outputs(self, type_selection="threshold", number_top=40, strict=True, cancer=None):
+    def create_dictionary_outputs(self, number_top=40, strict=True, cancer=None):
         '''
 
-        :param type_selection: Type of selection of the genes  [threshold,ranking] (default: threshold).
         :param number_top: Number of top selected ranking genes. (default: top 40).
         :param strict: Whether the number_top is strict or relative to the ranking. (default: strict)
+        :param cancer: cancer type
         :return: a dictionary with the the structure {"Cancer":{"Method":{"Gene1":1,"Gene2":2}}
         '''
-        d_hugo = Parser.read_hugo()
-        suffix = type_selection[0]
 
         d = {}
         pvalues = defaultdict(dict)
@@ -75,16 +70,11 @@ class Parser():
                 df = pd.read_csv(path, sep="\t")
 
                 if df.shape[0]>0:
-                    if method == "oncodriveclust":
-                        # Include the Hugo_Symbol
-                        df["SYMBOL"] = df.apply(lambda row: str(d_hugo[row["GENE"]]) if row["GENE"] in d_hugo else "-" ,axis=1 )
 
                     for i, r in df.iterrows():
                         try:
                             pvalues[r[self.column_keys[method][0]]][method] = (r[self.column_keys[method][2]],r[self.column_keys[method][1]])
                         except KeyError as e:
-                            print(path)
-                            print(r)
                             raise e
 
                     df = df[self.column_keys[method]].drop_duplicates()
@@ -92,22 +82,17 @@ class Parser():
                     genes_c = self.column_keys[method][0] # gene name column name
                     df.sort_values(q_value_c,inplace=True)
                     df = self.set_ranking_genes(df,q_value_c)
-                    if type_selection=="threshold": # Select genes below the threshold
-                        df = df[df[q_value_c]<=self.thresholds[method]].copy()
-
-
-                    else: # Select the ranking genes. In case there is a tie, returns the top 40 + the tied ones.
-                        if strict == False:
-                            df = df[(df["Ranking"]<number_top)&(df[q_value_c]<1.0)].copy()
-                        else:
-                            df.sort_values(q_value_c,inplace=True)
-                            df = df[(df[q_value_c]<1.0)].head(number_top).copy()#strict
-
+                    if not strict: # include the top40 genes allowing draws
+                        df = df[(df["Ranking"]<number_top)&(df[q_value_c]<1.0)].copy()
+                    else: # do not allow draws
+                        df.sort_values(q_value_c,inplace=True)
+                        df = df[(df[q_value_c]<1.0)].head(number_top).copy()
                     genes = df[genes_c].values
                     rankings = df["Ranking"].values
-                    d[method+"_"+suffix] = Parser.create_dict_rankings(genes,rankings)
+                    d[method] = Parser.create_dict_rankings(genes,rankings)
 
         return d, pvalues
+
     @staticmethod
     def get_value(dict_values, key, position=0):
 
@@ -121,11 +106,10 @@ class Parser():
 @click.option('--input',type=click.Path(exists=True),help="Input data directory", required=True)
 @click.option('--cancer', type=str, required=True)
 @click.option('--output', type=click.Path(),help="Output file", required=True)
-@click.option('--selection', help="[ranking,threshold]", default="ranking")
-def run_parser(input, cancer, output, selection):
+def run_parser(input, cancer, output):
 
     p = Parser(input)
-    d_outr, pvalues = p.create_dictionary_outputs(type_selection=selection, cancer=cancer)
+    d_outr, pvalues = p.create_dictionary_outputs(cancer=cancer)
     with gzip.open("{}".format(output), "wb") as fd:
         pickle.dump(d_outr, fd)
     print (d_outr)
@@ -139,27 +123,4 @@ def run_parser(input, cancer, output, selection):
 
 if __name__ == "__main__":
     run_parser()
-    '''
-    INTOGEN RUN
-
-    p = Parser("/projects_bg/bg/shared/projects/intogen/intogen4/runs/intogen4_20170614/")
-    d_outr = p.create_dictionary_outputs(type_selection="ranking")
-    pickle.dump( d_outr, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_ranking.pickle", "wb" ) )
-    d_outt = p.create_dictionary_outputs(type_selection="threshold")
-    pickle.dump( d_outt, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold.pickle", "wb" ) )
-    '''
-
-    '''
-    SIMULATED
-
-    p = Parser("/projects_bg/bg/shared/projects/intogen/intogen4/runs/simulated_20170621/")
-    d_results_r = p.create_dictionary_outputs(type_selection="ranking")
-    pickle.dump( d_results_r, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_ranking_simulated.pickle", "wb" ) )
-    d_results_t = p.create_dictionary_outputs(type_selection="threshold")
-    pickle.dump( d_results_t, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_threshold_simulated.pickle", "wb" ) )
-    p = Parser("/projects_bg/bg/shared/projects/intogen/intogen4/runs/simulated_20170621/",thresholds ={"hotmaps":1.0,"oncodrivefml":1.0,"mutsigcv":1.0,"oncodriveomega":1.0,"oncodriveclust":1.0})
-    d_results_total = p.create_dictionary_outputs(type_selection="threshold")
-    pickle.dump( d_results_total, open( "/workspace/projects/intogen/intogen4/scripts/data/dict_parsed_methods_all_simulated.pickle", "wb" ) )
-    '''
-
 

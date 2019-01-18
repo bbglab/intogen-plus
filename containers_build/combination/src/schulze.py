@@ -1,12 +1,73 @@
 import gzip
 import pickle
-
-import summary
 import pandas as pd
 import click
-
 from schulze_election import combination_ranking
+import numpy as np
 
+def get_voters(gene, d):
+    """
+    Args:
+        gene: str: gene symbol
+        d: dict mapping method into dict mapping gene into rank
+    Returns:
+        methods: list of methods betting on symbol
+        best_methods: highest bidding methods
+        best_rank: best rank among voting methods
+        ranks: list of ranks from those methods betting on symbol
+    """
+
+    d_rank = {}
+    for method in d.keys():
+        if gene in d[method]:
+            d_rank[method] = d[method][gene]
+        else:
+            continue
+    methods = list(d_rank.keys())
+    if len(methods)==0:
+        print (gene)
+    sorted_methods = sorted(d_rank.items(), key=lambda x: (x[1], x[0]))
+
+    try:
+        best_rank = sorted_methods[0][1]
+        best_methods = [k for k, v in sorted_methods if v == best_rank]
+        ranks = list(d_rank.values())
+
+    except:
+        best_rank = None
+        best_methods = None
+        ranks = None
+    return methods, best_methods, best_rank, ranks
+
+
+def output_to_dataframe(ranking, d_results):
+    '''
+    Args:
+        ranking: ranking dict: dict mapping candidates to ranks
+        d_results: dict mapping methods to a ranking dict
+    Returns:
+        dataframe encoding summary information
+    '''
+
+    l_info = []
+    cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination", "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
+    cancer_drivers = cgc['Gene Symbol'].unique()
+
+    for gene, rk in ranking.items():
+        methods, best_methods, best_rank, ranks = get_voters(gene, d_results)
+        try:
+            median_rank = np.median(ranks)
+            best_rank = min(ranks)
+        except:
+            median_rank = None
+            best_rank = None
+        l_info.append(
+            [gene, rk, (gene in cancer_drivers), median_rank, best_rank, len(methods),
+             ",".join(best_methods), ",".join(methods)])
+
+    df_info = pd.DataFrame(l_info, columns=["SYMBOL", "RANKING", "CGC", "Median_Ranking", "Best_Ranking",
+                                            "Total_Bidders", "Highest_Bidder", "All_Bidders"])
+    return df_info
 
 class Ballot(object):
     """
@@ -105,7 +166,7 @@ def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict,
 
     print(dict_optimal_weights)
     ranking1 = combination_ranking(d_results, dict_optimal_weights)
-    df = summary.output_to_dataframe(ranking1, d_results)
+    df = output_to_dataframe(ranking1, d_results)
     if borda:
         d, d_scores = get_ranking_borda(d_results)
         df["RANKING_BORDA"] = df.apply(lambda row: apply_ranking_borda(d, row), axis=1)
@@ -238,7 +299,7 @@ def run_schulze(input_data, optimize_weights, report_output, dict_output, type_r
 
     elif type_run == "default":
         run_default_weights(d_results, report_output, dict_output)
-        return  # TODO
+        return  # To do
 
 
 if __name__ == '__main__':

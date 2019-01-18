@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 
-def classify_genes_tiers(df,threshold=0.01,column_ranking="RANKING",column_filter = "QVALUE_stouffer_weighted"):
+def classify_genes_tiers(df,threshold=0.01,column_filter = "QVALUE_stouffer_weighted"):
     df.sort_values("RANKING",ascending=False,inplace=True)
     found = False
     threshold_rejected = df.shape[0]
