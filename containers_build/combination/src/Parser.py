@@ -6,24 +6,36 @@ from collections import defaultdict
 import pandas as pd
 import pickle
 import click
+from configobj import ConfigObj
+
+
+
+# Global variables
+CODE_DIR = os.path.join(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.abspath(__file__)
+        )
+    )
+)
+
+configs_file = os.path.join(CODE_DIR,'src', 'config', 'intogen_qc.cfg')
+configs = ConfigObj(configs_file)
 
 
 class Parser():
 
-    methods = ["hotmaps","oncodrivefml","dndscv","cbase","oncodriveclustl","smregions"]
-    column_keys = {
-        "hotmaps":     ["GENE",        "q-value",      "Min p-value"],
-        "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
-        "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
-        "cbase":                ["gene",        "q_pos",    "p_pos"],
-        "oncodriveclustl":      ["SYMBOL",         "Q_ANALYTICAL",       "P_ANALYTICAL"],
-        "smregions": ["HUGO_SYMBOL", "Q_VALUE", "P_VALUE"]
-
-    }
-
-    def __init__(self, path, thresholds={"hotmaps":0.1,"oncodrivefml":0.1,"dndscv":0.1,"cbase":0.1,"oncodriveclustl":0.1,"smregions":0.1} ):
+    def __init__(self, path):
+        '''
+        Constructor of the class parser, need to the path of the method to be
+        :param path:
+        '''
         self.path = path
-        self.thresholds = thresholds
+        self.methods = configs["methods"].keys() # reads them in order
+        self.column_keys = {}
+        for method in self.methods:
+            self.column_keys[method] = [configs["methods"][method]["GENE_ID"], configs["methods"][method]["P_VALUE"], configs["methods"][method]["Q_VALUE"]]
+
 
     @staticmethod
     def create_dict_rankings(genes,rankings):
@@ -73,12 +85,12 @@ class Parser():
 
                     for i, r in df.iterrows():
                         try:
-                            pvalues[r[self.column_keys[method][0]]][method] = (r[self.column_keys[method][2]],r[self.column_keys[method][1]])
+                            pvalues[r[self.column_keys[method][0]]][method] = (r[self.column_keys[method][1]],r[self.column_keys[method][2]])
                         except KeyError as e:
                             raise e
 
                     df = df[self.column_keys[method]].drop_duplicates()
-                    q_value_c = self.column_keys[method][1] # Q-value column name
+                    q_value_c = self.column_keys[method][2] # Q-value column name
                     genes_c = self.column_keys[method][0] # gene name column name
                     df.sort_values(q_value_c,inplace=True)
                     df = self.set_ranking_genes(df,q_value_c)
