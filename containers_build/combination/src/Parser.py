@@ -36,14 +36,6 @@ class Parser():
         for method in self.methods:
             self.column_keys[method] = [configs["methods"][method]["GENE_ID"], configs["methods"][method]["PVALUE"], configs["methods"][method]["QVALUE"]]
 
-
-    @staticmethod
-    def create_dict_rankings(genes,rankings):
-        d_out = {}
-        for i in range(len(genes)):
-            d_out[genes[i]] = rankings[i]
-        return d_out
-
     def set_ranking_genes(self, df_query,q_column):
         '''
         Include a column with the ranking of each gene depending of the q_value. It allows that different genes with the same q-value are ranked in the same position
@@ -64,7 +56,7 @@ class Parser():
         df_query["Ranking"] = l_rankings
         return df_query
 
-    def create_dictionary_outputs(self, number_top=40, strict=True, cancer=None):
+    def create_dictionary_outputs(self, number_top=40, strict=True, cohort=None):
         '''
 
         :param number_top: Number of top selected ranking genes. (default: top 40).
@@ -75,9 +67,10 @@ class Parser():
 
         d = {}
         pvalues = defaultdict(dict)
+
         for method in self.methods:
-            path = os.path.join(self.path, method, "{}.out.gz".format(cancer))
-            
+            path = os.path.join(self.path, method, "{}.out.gz".format(cohort))
+            print (path)
             if os.path.exists(path):
                 df = pd.read_csv(path, sep="\t")
 
@@ -90,13 +83,13 @@ class Parser():
                             raise e
 
                     df = df[self.column_keys[method]].drop_duplicates()
-                    q_value_c = self.column_keys[method][2] # Q-value column name
-                    genes_c = self.column_keys[method][0] # gene name column name
+                    q_value_c = self.column_keys[method][2]  # Q-value column name
+                    genes_c = self.column_keys[method][0]    # gene name column name
                     df.sort_values(q_value_c,inplace=True)
                     df = self.set_ranking_genes(df,q_value_c)
-                    if not strict: # include the top40 genes allowing draws
-                        df = df[(df["Ranking"]<number_top)&(df[q_value_c]<1.0)].copy()
-                    else: # do not allow draws
+                    if not strict:  # include the top40 genes allowing draws
+                        df = df[(df["Ranking"]<number_top) & (df[q_value_c]<1.0)].copy()
+                    else:  # do not allow draws
                         df.sort_values(q_value_c,inplace=True)
                         df = df[(df[q_value_c]<1.0)].head(number_top).copy()
                     genes = df[genes_c].values
@@ -113,22 +106,29 @@ class Parser():
         else:
             return None
 
+    @staticmethod
+    def create_dict_rankings(genes,rankings):
+        d_out = {}
+        for i in range(len(genes)):
+            d_out[genes[i]] = rankings[i]
+        return d_out
+
 
 @click.command()
-@click.option('--input',type=click.Path(exists=True),help="Input data directory", required=True)
-@click.option('--cancer', type=str, required=True)
+@click.option('--input_dir',type=click.Path(exists=True),help="Input data directory", required=True)
+@click.option('--cohort', type=str,help="Name of the cohort to be read", required=True)
 @click.option('--output', type=click.Path(),help="Output file", required=True)
-def run_parser(input, cancer, output):
+def run_parser(input_dir, cohort, output):
 
-    p = Parser(input)
-    d_outr, pvalues = p.create_dictionary_outputs(cancer=cancer)
+    p = Parser(input_dir)
+    d_outr, pvalues = p.create_dictionary_outputs(cohort=cohort)
+
     with gzip.open("{}".format(output), "wb") as fd:
         pickle.dump(d_outr, fd)
-    print (d_outr)
+
     with gzip.open("{}b".format(output), "wt") as fd:
         writer = csv.writer(fd, delimiter='\t')
         writer.writerow(['SYMBOL'] + ["PVALUE_{}".format(h) for h in p.methods]+["QVALUE_{}".format(h) for h in p.methods])
-
         for gene, values in pvalues.items():
             writer.writerow([gene] + [Parser.get_value(values,m,0) for m in p.methods] + [Parser.get_value(values,m,1) for m in p.methods] )
 
