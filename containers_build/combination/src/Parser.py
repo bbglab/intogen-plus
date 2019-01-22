@@ -27,14 +27,14 @@ class Parser():
 
     def __init__(self, path):
         '''
-        Constructor of the class parser, need to the path of the method to be
+        Constructor of the class parser, need to the path of the parent directory to be loop
         :param path:
         '''
         self.path = path
         self.methods = configs["methods"].keys() # reads them in order
         self.column_keys = {}
         for method in self.methods:
-            self.column_keys[method] = [configs["methods"][method]["GENE_ID"], configs["methods"][method]["P_VALUE"], configs["methods"][method]["Q_VALUE"]]
+            self.column_keys[method] = [configs["methods"][method]["GENE_ID"], configs["methods"][method]["PVALUE"], configs["methods"][method]["QVALUE"]]
 
 
     @staticmethod
