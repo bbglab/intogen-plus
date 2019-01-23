@@ -117,7 +117,7 @@ def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
     headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"] # ,"n_mis","n_non"
 
-    if ranking_limit: # not None
+    if ranking_limit:
         # Compute tiers
         dfq = df_f[df_f["RANKING"] < ranking_limit].copy() # select those positions before the limit
         dfq = dfq[np.isfinite(dfq[column_filter])].copy() # with finite q-value
