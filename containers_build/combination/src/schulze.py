@@ -6,6 +6,7 @@ import click
 from schulze_election import combination_ranking
 import numpy as np
 
+
 def get_voters(gene, d):
     """
     Args:
@@ -26,14 +27,12 @@ def get_voters(gene, d):
             continue
     methods = list(d_rank.keys())
     if len(methods)==0:
-        print (gene)
+        print(gene)
     sorted_methods = sorted(d_rank.items(), key=lambda x: (x[1], x[0]))
-
     try:
         best_rank = sorted_methods[0][1]
         best_methods = [k for k, v in sorted_methods if v == best_rank]
         ranks = list(d_rank.values())
-
     except:
         best_rank = None
         best_methods = None
@@ -42,13 +41,13 @@ def get_voters(gene, d):
 
 
 def output_to_dataframe(ranking, d_results):
-    '''
+    """
     Args:
         ranking: ranking dict: dict mapping candidates to ranks
         d_results: dict mapping methods to a ranking dict
     Returns:
         dataframe encoding summary information
-    '''
+    """
 
     l_info = []
     cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination", "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
@@ -63,12 +62,22 @@ def output_to_dataframe(ranking, d_results):
             median_rank = None
             best_rank = None
         l_info.append(
-            [gene, rk, (gene in cancer_drivers), median_rank, best_rank, len(methods),
-             ",".join(best_methods), ",".join(methods)])
+            [
+                gene,
+                rk,
+                (gene in cancer_drivers),
+                median_rank,
+                best_rank,
+                len(methods),
+                ",".join(best_methods),
+                ",".join(methods)
+            ]
+        )
 
     df_info = pd.DataFrame(l_info, columns=["SYMBOL", "RANKING", "CGC", "Median_Ranking", "Best_Ranking",
                                             "Total_Bidders", "Highest_Bidder", "All_Bidders"])
     return df_info
+
 
 class Ballot(object):
     """
@@ -100,14 +109,11 @@ class Ballot(object):
 
 def chunkizate(l, n_chunks):
     """
-
     Args:
         l: list
         n_chunks: int: number of chunks
-
     Returns:
         chunk_list = list of lists
-
     """
     n = len(l)
     q = n // n_chunks
@@ -144,9 +150,9 @@ def strongest_paths_by_chunk(all_candidates, spath, chunk):
     return spath
 
 
-def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict, borda=False):
+def optimal_ranking(optimized_pickles, d_results, output_file, output_dict, borda=False):
     """
-    Generate the optmized ranking by the weights calculated by the opmitzer
+    Generate the optimized ranking by the weights calculated by the optimizer
     :param optimized_pickles: path of the outputs of the optimizer
     :param d_results: dictionary of results of the individual methods
     :param output_dir: directory of the output of the reports of individual cohorts
@@ -162,12 +168,12 @@ def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict,
     for method in d_results:
 
         if method in df.columns.values:
-
-            dict_optimal_weights[method] =  df[method].values[0]
+            dict_optimal_weights[method] = df[method].values[0]
 
     print(dict_optimal_weights)
     ranking1 = combination_ranking(d_results, dict_optimal_weights)
     df = output_to_dataframe(ranking1, d_results)
+
     if borda:
         d, d_scores = get_ranking_borda(d_results)
         df["RANKING_BORDA"] = df.apply(lambda row: apply_ranking_borda(d, row), axis=1)
@@ -178,37 +184,38 @@ def read_optimized_dicts(optimized_pickles, d_results, output_file, output_dict,
     with gzip.open(output_dict, "wb") as fd:
         pickle.dump(ranking1, fd)
 
-def apply_ranking_borda(d,row):
-    '''
 
+def apply_ranking_borda(d, row):
+    """
     :param d: dictionary of rankings
     :param row: the row of the dataframe
     :return: the ranking of the symbol
-    '''
+    """
 
     if row["SYMBOL"] in d:
         return d[row["SYMBOL"]]
     else:
         return np.nan
 
-def get_ranking_borda(d_results):
-    '''
 
+def get_ranking_borda(d_results):
+    """
     :param d_results: Dictionary of rankings  for each individual method
     :return: dictionary of combined rankings using Borda
-    '''
+    """
     d_scores = {}
     d_len = {}
+
     # Create a dictionary of number of total elements per method
     for method in d_results.keys():
-        #d_len[method]= len(d_results[method].keys()) # This is not fair, it penalizes methods with lower number of candidate genes
-        d_len[method] = 40 # Number of genes fetch to create the pool of candidate genes
+        d_len[method] = 40  # Number of genes fetch to create the pool of candidate genes
+
     # Now for each gene, sum the score for that gene
     for method in d_results.keys():
         for gene in d_results[method].keys():
             if not(gene in d_scores):
                 d_scores[gene] = 0
-            d_scores[gene] += d_len[method] - (d_results[method][gene]+1)
+            d_scores[gene] += d_len[method] - (d_results[method][gene] + 1)
 
     # Sort dictionary by values, the higher the better
     s_data = sorted(d_scores.items(), key=lambda item: item[1],reverse=True)
@@ -221,86 +228,21 @@ def get_ranking_borda(d_results):
         count = 0
         result[key] = rank
 
-
     return result, d_scores
 
 
-
-def run_default_weights(d_results, output_dir, output_dict):
-    '''
-    Generate the optmized ranking by the weights calculated by the opmitzer
-    :param dir_optimized_pickles: path of the outputs of the optimizer
-    :param d_results: dictionary of results of the individual methods
-    :param output_dir: directory of the output of the reports of individual cohorts
-    :param output_dict: location of the output directory
-    :param output_report: location of the output report
-    :return: None
-    '''
-
-    num_methods = float(len(d_results.keys()))
-    dict_optimal_weights = {}
-
-    for method in d_results:
-        dict_optimal_weights[method] =  1.0 / num_methods
-
-    print(dict_optimal_weights)
-    ranking1 = combination_ranking(d_results, dict_optimal_weights)
-
-    df = summary.output_to_dataframe(ranking1, d_results)
-    df.sort_values("RANKING").to_csv(output_dir, sep="\t", index=False, compression="gzip")
-
-    with gzip.open( output_dict, "wb") as fd:
-        pickle.dump(ranking1, fd)
-
-
-def read_optimized_dicts_cv(dir_optimized_pickles, d_results, output_dir, output_dict):
-    """
-    Generate the optmized ranking by the weights calculated by the opmitzer
-    :param dir_optimized_pickles: path of the outputs of the optimizer
-    :param d_results: dictionary of results of the individual methods
-    :param output_dir: directory of the output of the reports of individual cohorts
-    :param output_dict: location of the output directory
-    :param output_report: location of the output report
-    :return: None
-    """
-
-    df = pd.read_csv(dir_optimized_pickles, sep="\t")
-    df.sort_values("Objective_Function",inplace=True)
-    dict_optimal_weights = {}
-    for method in d_results:
-        if method in df.columns.values:
-            dict_optimal_weights[method] = df[method].values[0]
-
-    print(dict_optimal_weights)
-    ranking1 = combination_ranking(d_results, dict_optimal_weights)
-    df = summary.output_to_dataframe(ranking1, d_results)
-    df.sort_values("RANKING").to_csv(output_dir, sep="\t", index=False, compression="gzip")
-
-    with gzip.open(output_dict, "wb") as fd:
-        pickle.dump(ranking1, fd)
-
-
 @click.command()
-@click.option('--input_data',type=click.Path(exists=True),help="Dictionary with the ranking of the individual methods", required=True)
+@click.option('--input_data', type=click.Path(exists=True), help="Dict of ranking of individual methods", required=True)
 @click.option('--optimize_weights', type=click.Path(), help="Optimize weights file")
 @click.option('--report_output', type=click.Path(), help="Output reports file",required=True)
 @click.option('--dict_output', type=click.Path(),help="Output dictionary file", required=True)
-@click.option('--type_run',help="Type of run. Optimization of the weights or default wegihts. [default,optimization,cross_validation]", required=True, default="optimization")
-@click.option('--borda',help="Whether to include borda ranking in the output. Default False.", required=False, default=False)
-def run_schulze(input_data, optimize_weights, report_output, dict_output, type_run, borda):
+@click.option('--borda', help="Whether to include borda ranks in output. Default False.", required=False, default=False)
+def run_schulze(input_data, optimize_weights, report_output, dict_output, borda):
 
     with gzip.open(input_data, "rb") as fd:
         d_results = pickle.load(fd)
 
-    if type_run == "optimization":
-        read_optimized_dicts(optimize_weights, d_results, report_output, dict_output, borda)
-
-    elif type_run == "cross_validation":
-        read_optimized_dicts_cv(optimize_weights, d_results, report_output, dict_output)
-
-    elif type_run == "default":
-        run_default_weights(d_results, report_output, dict_output)
-        return  # To do
+    optimal_ranking(optimize_weights, d_results, report_output, dict_output, borda)
 
 
 if __name__ == '__main__':

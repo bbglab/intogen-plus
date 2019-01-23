@@ -8,7 +8,6 @@ import itertools
 from scipy.optimize import basinhopping
 from functools import partial
 
-from qc.drivers import CGC_GENES_PER_TUMOR, NEGATIVE_GENES_PER_TUMOR
 from qc.deviations import Deviation
 from qc.parser import Parser
 from schulze_election import combination_ranking
@@ -32,17 +31,6 @@ METHODS = configs["methods"].keys() # reads them in order
 gavaliable_methods = None
 
 PATH_REGIONS = os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'cds.regions.gz')
-
-
-def get_tissue(name):
-    """
-    :param name:
-    :return:
-    """
-    for t in NEGATIVE_GENES_PER_TUMOR.keys():
-        if "_{}_".format(t) in name or name.endswith("_{}".format(t)):
-            return t
-    return None
 
 
 class Filter:
