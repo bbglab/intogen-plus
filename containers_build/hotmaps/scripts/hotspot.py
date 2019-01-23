@@ -314,8 +314,8 @@ def main(opts):
         with tqdm(total=len(pdb_info), desc="Computing PDB structures".rjust(40)) as pb:
 
             # Multiprocess pool
-            #pool = Pool(opts['cores'])
-            map_method = map # pool.imap_unordered
+            pool = Pool(opts['cores'])
+            map_method = pool.imap_unordered
             for result, done in map_method(process_task, utils.chunkizator(pdb_info.items(), size=chunk_size)):
                 pb.update(done)
                 writer.writerows(result)
