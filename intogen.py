@@ -108,7 +108,7 @@ def run(cores, output, task, key):
         output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
         output_files = [f for f in glob(output_pattern) if not f.endswith(".in.gz")]
         
-        output = os.getcwd()
+        output = "."
         if len(output_files) > 0:            
             # If there are outputs reuse them instead of computing
             output_folder = os.path.join(output, task)
