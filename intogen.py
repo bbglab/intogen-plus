@@ -63,7 +63,7 @@ def cli(debug=False):
 def readvariants(input, output, groupby, cores, tasks):
 
     if 'NXF_CLI' in os.environ:
-        output = os.getcwd()
+        output = "."
 
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
@@ -83,7 +83,7 @@ def readvariants(input, output, groupby, cores, tasks):
 def readvep(input, output, tasks):
     
     if 'NXF_CLI' in os.environ:
-        output = os.getcwd()
+        output = "."
 
     tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
