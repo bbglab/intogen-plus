@@ -26,7 +26,7 @@ CODE_DIR = os.path.join(
 
 configs_file = os.path.join(CODE_DIR, 'src', 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
-METHODS = configs["methods"].keys() # reads them in order
+METHODS = configs["methods"].keys()  # reads them in order
 
 gavaliable_methods = None
 
