@@ -9,13 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Global variables
-CODE_DIR = os.path.join(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.abspath(__file__)
-        )
-    )
-)
+CODE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 configs_file = os.path.join(CODE_DIR, 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
 

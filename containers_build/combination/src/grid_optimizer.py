@@ -16,15 +16,8 @@ from evaluation.Evaluation_Enrichment import Evaluation_Enrichment
 from configobj import ConfigObj
 
 # Global variables
-CODE_DIR = os.path.join(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.abspath(__file__)
-        )
-    )
-)
-
-configs_file = os.path.join(CODE_DIR, 'src', 'config', 'intogen_qc.cfg')
+CODE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+configs_file = os.path.join(CODE_DIR, 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
 METHODS = configs["methods"].keys()  # reads them in order
 
