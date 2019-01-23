@@ -62,8 +62,8 @@ def cli(debug=False):
 @click.argument('tasks', nargs=-1)
 def readvariants(input, output, groupby, cores, tasks):
 
-    #if 'NXF_CLI' in os.environ:
-    output = "."
+    if 'NXF_CLI' in os.environ:
+        output = "."
 
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
@@ -82,8 +82,8 @@ def readvariants(input, output, groupby, cores, tasks):
 @click.argument('tasks', nargs=-1)
 def readvep(input, output, tasks):
     
-    #if 'NXF_CLI' in os.environ:
-    output = "."
+    if 'NXF_CLI' in os.environ:
+        output = "."
 
     tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
@@ -118,8 +118,6 @@ def run(cores, output, task, key):
                 copy(f, os.path.join(output_folder, os.path.basename(f)))
                 
             return
-
-    output = "."
 
     # Set cores
     os.environ['INTOGEN_CPUS'] = str(cores)
