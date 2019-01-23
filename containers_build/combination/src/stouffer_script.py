@@ -5,19 +5,29 @@ import pandas as pd
 import numpy as np
 from scipy.stats import combine_pvalues, uniform
 from statsmodels.stats.multitest import multipletests
+from configobj import ConfigObj
 
 
-DEFAULT_METHODS = ["oncodriveclustl", "dndscv","oncodrivefml", "hotmaps","smregions","cbase"]
-column_keys = {
-        "hotmaps":     ["GENE",        "q-value",      "Min p-value"],
-        "oncodrivefml":         ["SYMBOL",      "Q_VALUE",      "P_VALUE"],
-        "dndscv":               ["gene_name",   "qallsubs_cv",  "pallsubs_cv"],
-        "cbase":                ["gene",        "q_phi_pos",    "p_phi_pos"],
-        "smregions": ["HUGO_SYMBOL", "Q_VALUE", "P_VALUE"],
-        "oncodriveclustl":      ["SYM",         "E_QVAL",       "E_PVAL"]
-    }
+# Global variables
+CODE_DIR = os.path.join(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.abspath(__file__)
+        )
+    )
+)
+
+configs_file = os.path.join(CODE_DIR,'src', 'config', 'intogen_qc.cfg')
+configs = ConfigObj(configs_file)
+
+
 
 def parse_optimized_weights(path_weights):
+    '''
+    Parse the dataframe with the weights
+    :param path_weights:
+    :return: a dictionary with the weights of each method
+    '''
     df = pd.read_csv(path_weights, sep='\t', compression="gzip")
     del df['Objective_Function']
     dict_weight = df.to_dict()
@@ -25,65 +35,64 @@ def parse_optimized_weights(path_weights):
 
 
 def retrieve_ranking(df, path_ranking):
-    """
-    df: dataframe with p-values per method
-    tumor_type: str
-    """
+    '''
+    Retrieve the ranking of the genes
+    :param df: dataframe of input
+    :param path_ranking: path of the ranked genes
+    :return:
+    '''
 
-    ranking_dict = pd.read_csv(path_ranking,
+    df_ranked = pd.read_csv(path_ranking,
                        sep='\t',
                        usecols=['SYMBOL', 'RANKING', 'Median_Ranking', 'Total_Bidders', 'All_Bidders'],
                        low_memory=False,
                                compression="gzip"
                        )
     cols = ['SYMBOL']
-    return pd.merge(left=df, right=ranking_dict, left_on=cols, right_on=cols, how="left")
-
+    return pd.merge(left=df, right=df_ranked, left_on=cols, right_on=cols, how="left")
 
 def stouffer_w(pvals, weights=None):
+    '''
+    Compute the weighted stouffer p-value
+    :param pvals:
+    :param weights:
+    :return:
+    '''
 
     return combine_pvalues(pvals, method='stouffer', weights=weights)[1]
 
-
-def impute(pvals):
-    """
-    impute array-like instance with uniform [0,1] distribution
-    """
-
-    mask1 = np.isnan(pvals)
-    mask2 = (pvals == 1)
-    mask = mask1 | mask2
-    pvals[mask] = uniform.rvs(size=len(pvals[mask]))
-    return pvals
-
-
 def trim_nans(pvals):
-    """
-    provides reduced list of pvalues removing nans
-    """
-
+    '''
+    exclude nans for the trimming
+    :param pvals:
+    :return:
+    '''
     nan_mask = np.isnan(pvals) # used to exclude nan p-values from combination
     anti_one_mask = pvals[pvals < 1.] # used to exclude p-values 1.0 from combination
     mask = ~nan_mask & anti_one_mask
     return pvals[mask], mask
 
-
 def truncate(pvals, threshold=1e-16):
-
+    '''
+    Truncate p-values to a minimum value of threshold
+    :param pvals:
+    :param threshold:
+    :return:
+    '''
     mask = (pvals < threshold)
     pvals[mask] = threshold
     return pvals
 
-
 def trimmed_stouffer_w(pvals, weights):
-    """
-    conducts stouffer_w where pvals and weights are clean from nans
-    """
-
+    '''
+    Conducts stouffer_w where pvals and weights are clean from nans
+    :param pvals:
+    :param weights:
+    :return:
+    '''
     reduced_pvals, mask = trim_nans(pvals)
     reduced_weights = weights[mask]
     return stouffer_w(truncate(reduced_pvals), weights=reduced_weights)
-
 
 def load_cgc():
     '''
@@ -93,25 +102,22 @@ def load_cgc():
     df_cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination", "CGC_set.tsv"), sep="\t")
     return set(df_cgc["Gene Symbol"].values)
 
-
-def combine_pvals(df, path_weights):
+def combine_pvals(df, path_weights, methods):
     '''
-
+    Create the combined p-values of stouffer for all genes and another independent for only CGC genes
     :param df: df with raw pvalues
     :param path_weights: path to the weights
     :return:
     '''
-
     weight_dict = parse_optimized_weights(path_weights)
-    weights = np.abs(np.array([weight_dict[m] for m in DEFAULT_METHODS]))
-
-    func = lambda x: trimmed_stouffer_w(x, weights)
+    weights = np.abs(np.array([weight_dict[m] for m in methods]))
+    func = lambda x: trimmed_stouffer_w(x, weights) # lambda function to trimm p-values
     # Get the stouffer pvalues
-    df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in DEFAULT_METHODS]].apply(func, axis=1)
+    df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in methods]].apply(func, axis=1)
     # Filter out nan p-values for fdr correction
     df_non_nan = df[np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
     df_non_nan['QVALUE_' + 'stouffer_w'] = multipletests(df_non_nan['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
-    # Perform cgc correction
+    # Perform CGC correction
     cgc_set = load_cgc()
     df_cgc = df_non_nan[df_non_nan["SYMBOL"].isin(cgc_set)].copy()
     pvalues_cgc = df_cgc['PVALUE_' + 'stouffer_w'].values
@@ -127,7 +133,7 @@ def combine_pvals(df, path_weights):
 
 def partial_correction(df, fml_data):
     '''
-
+    Perform a multipletest correction of the p-values discarding those nan p-values from oncodrivefml
     :param df:
     :param fml_data:
     :return:
@@ -140,7 +146,7 @@ def partial_correction(df, fml_data):
     if len(a[mask]) == 0:
         raise RuntimeError("No data after filtering NaN OncodriveFML q-values")
 
-    c[mask] = multipletests(a[mask], method='fdr_bh')[1]
+    c[mask] = multipletests(a[mask], method='fdr_bh')[1] # perform multiple test for those genes with at least two mutated samples
     dh['QVALUE_' + 'stouffer_w'] = c
     del dh['Q_VALUE']
     return dh
@@ -153,27 +159,23 @@ def include_excess(df,path_dndscv):
     :return:
     '''
     dnds_data = pd.read_csv(path_dndscv, sep='\t', compression="gzip")
-    columns = ['gene_name', 'wmis_cv',"wnon_cv","wspl_cv"]
+    columns = ['gene_name', 'wmis_cv',"wnon_cv","wspl_cv",'n_mis','n_non']
     if "wind_cv" in dnds_data.columns.values:
         columns = columns + ["wind_cv"]
     dh = pd.merge(left=df, right=dnds_data[columns], left_on=['SYMBOL'], right_on=['gene_name'], how="left")
     return dh
 
-def combine_from_tumor(df, path_to_output, path_fml):
+def filter_out_lowly_mutated(df,path_fml):
     '''
-
-    :param df:
-    :param path_to_output:
-    :param path_fml:
-    :return:
+    Perform FDR correction of p-values for genes with at least two mutated samples.
+    :param df: input dataframe with the p-values
+    :param path_fml: path of FML, include information of mutated samples
+    :return: input dataframe with a corrected p-value for samples with at least two mutated samples. nan otherwise.
     '''
 
     fml_data = pd.read_csv(path_fml, sep='\t', compression="gzip")
     dh = partial_correction(df, fml_data)
-    column_order = ["SYMBOL","PVALUE_cbase","PVALUE_dndscv","QVALUE_dndscv","PVALUE_smregions","QVALUE_smregions","PVALUE_hotmaps","QVALUE_hotmaps","PVALUE_oncodriveclustl","QVALUE_oncodriveclustl","PVALUE_oncodrivefml","QVALUE_oncodrivefml","PVALUE_stouffer_w","QVALUE_stouffer_w","QVALUE_CGC_stouffer_w","All_Bidders","Significant_Bidders","Median_Ranking","RANKING","Total_Bidders","wmis_cv","wnon_cv","wspl_cv","SAMPLES","MUTS","MUTS_RECURRENCE"]
-    if "wind_cv" in dh.columns.values:
-        column_order.append("wind_cv")
-    dh[column_order].to_csv(path_to_output, sep='\t', index=False, compression="gzip")
+    return dh
 
 
 def select_significant_bidders(row,QVALUE_threshold=0.1):
@@ -188,7 +190,6 @@ def select_significant_bidders(row,QVALUE_threshold=0.1):
         for bidder in bidders:
 
             method_name = bidder.split("_")[0]
-
             name_key = "QVALUE_"+method_name
             if row[name_key] <= QVALUE_threshold:
                 methods.append(method_name)
@@ -204,6 +205,15 @@ def add_significant_bidders(df):
     df["Significant_Bidders"] = df.apply(lambda row: select_significant_bidders(row),axis=1)
     return df
 
+def read_config_data():
+    '''
+    Read config data of methods and their fileds
+    :return:
+    '''
+    column_keys = {}
+    methods = configs["methods"].keys()  # reads them in order
+    return methods
+
 @click.command()
 @click.option('--input_path', type=click.Path(exists=True), help="Path to input dataframe with SYMBOL and p-value for each method", required=True)
 @click.option('--output_path', type=click.Path(), help="Path to output dataframe", required=True)
@@ -212,13 +222,31 @@ def add_significant_bidders(df):
 @click.option('--path_fml', type=click.Path(), help="Path to OncodriveFML results folder", required=True)
 @click.option('--path_dndscv', type=click.Path(), help="Path to dndsCV results folder", required=True)
 def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml,path_dndscv):
-
+    # Read config data
+    methods = read_config_data()
+    # Read data
     df = pd.read_csv(input_path, sep='\t', compression="gzip")
+    # Map with the ranking
     dg = retrieve_ranking(df, path_rankings)
-    dh = combine_pvals(dg, path_weights)
+    # Combine the pvalue
+    dh = combine_pvals(dg, path_weights, methods)
+    # Include the excess
     di = include_excess(dh, path_dndscv)
-    dg = add_significant_bidders(di)
-    combine_from_tumor(dg, output_path, path_fml)
+    # Add significant bidders
+    dj = add_significant_bidders(di)
+    # Remove q-values for samples with less than two mutated samples
+    dk = filter_out_lowly_mutated(dj, path_fml)
+    # Save it
+    column_order = ["SYMBOL", "PVALUE_cbase", "PVALUE_dndscv", "QVALUE_dndscv", "PVALUE_smregions",
+                    "QVALUE_smregions", "PVALUE_hotmaps", "QVALUE_hotmaps", "PVALUE_oncodriveclustl"
+        , "QVALUE_oncodriveclustl", "PVALUE_oncodrivefml", "QVALUE_oncodrivefml", "PVALUE_stouffer_w",
+                    "QVALUE_stouffer_w", "QVALUE_CGC_stouffer_w", "All_Bidders", "Significant_Bidders",
+                    "Median_Ranking",
+                    "RANKING", "Total_Bidders", "wmis_cv", "wnon_cv", "wspl_cv", "SAMPLES", "MUTS", "MUTS_RECURRENCE",
+                    "n_mis", "n_non"]
+    if "wind_cv" in dh.columns.values:
+        column_order.append("wind_cv")
+    dk[column_order].to_csv(output_path, sep='\t', index=False, compression="gzip")
 
 
 if __name__ == '__main__':

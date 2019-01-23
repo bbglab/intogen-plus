@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 if [ -z "${INTOGEN_RELEASE}" ]
 then

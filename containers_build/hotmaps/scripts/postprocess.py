@@ -101,8 +101,8 @@ def main(file_hotspots_gene, f_info_density, f_output, f_output_clusters):
             if len(positions) != len(positions_lo):
                 print("Skiping cluster due to liftover {}".format(r))
                 continue
-            r['genomic positions'] = ",".join([str(p) for p in positions_lo])
-            r['genomic positions hg19'] = ",".join([str(p) for p in positions])
+            r['genomic position'] = ",".join([str(p) for p in positions_lo])
+            r['genomic position hg19'] = ",".join([str(p) for p in positions])
             clusters.append(r)
         
         df_density_aa = pd.DataFrame.from_dict(clusters)

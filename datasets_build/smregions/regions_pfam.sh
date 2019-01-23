@@ -7,6 +7,7 @@ then
       echo "ERROR: Define the INTOGEN_RELEASE variable"
       exit -1
 fi
+INTOGEN_DATASETS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"
 
 # Biomart release 92
 BIOMART_URL="http://apr2018.archive.ensembl.org/biomart/martservice"
@@ -30,10 +31,22 @@ BIOMART_QUERY='''
 '''
 BIOMART_QUERY_ENCODED=$(python3 -c "from urllib.parse import quote_plus; print(quote_plus('''${BIOMART_QUERY}'''.replace('\n', '')))")
 
-PFAM_BIOMART_FILE="../../datasets/${INTOGEN_RELEASE}/smregions/pfam_biomart.tsv"
+PFAM_BIOMART_FILE="${INTOGEN_DATASETS}/smregions/pfam_biomart.tsv"
+if [ ! -f "${PFAM_BIOMART_FILE}" ] 
+then
+    echo "Query biomart"
+	mkdir -p ${INTOGEN_DATASETS}/smregions
+	curl -s ${BIOMART_URL}?query=${BIOMART_QUERY_ENCODED} | grep -f <(cut -f2 ${INTOGEN_DATASETS}/shared/ensembl_canonical_transcripts.tsv) | awk -F'\t' '($5!=""){print($0)}' > ${PFAM_BIOMART_FILE}
+fi 
 
-mkdir -p ../../datasets/${INTOGEN_RELEASE}/smregions
-curl -s ${BIOMART_URL}?query=${BIOMART_QUERY_ENCODED} | grep -f <(cut -f2 ../../datasets/${INTOGEN_RELEASE}/shared/ensembl_canonical_transcripts.tsv) | awk -F'\t' '($5!=""){print($0)}' > ${PFAM_BIOMART_FILE}
+
+REGIONS_PFAM_FILE="${INTOGEN_DATASETS}/smregions/regions_pfam.tsv.gz"
+if [ ! -f "${REGIONS_PFAM_FILE}" ]
+then
+    echo "Map to genomic positions"
+	cat ${PFAM_BIOMART_FILE} | awk '{system("./panno.sh "$2" "$5" "$3" "$4)}' | grep -v "^\." | gzip > ${REGIONS_PFAM_FILE}
+fi
+
 
 
 

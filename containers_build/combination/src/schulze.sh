@@ -12,7 +12,7 @@ export PYTHONPATH=$SCRIPTS_FOLDER:$PYTHONPATH
 
 # STEP1. Read the output of intogen
 echo "## STEP1"
-python $SCRIPTS_FOLDER/Parser.py --input $OUTPUT/../ --cancer $RUN_FILENAME --output $OUTPUT/tmp/$RUN_FILENAME.step1
+python $SCRIPTS_FOLDER/Parser.py --input_dir $OUTPUT/../ --cohort $RUN_FILENAME --output $OUTPUT/tmp/$RUN_FILENAME.step1
 
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi

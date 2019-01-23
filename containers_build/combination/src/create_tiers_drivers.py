@@ -7,12 +7,21 @@ import numpy as np
 import pandas as pd
 
 
-def classify_genes_tiers(df,threshold=0.01,column_filter = "QVALUE_stouffer_weighted"):
+def classify_genes_tiers(df, threshold=0.01, column_filter="QVALUE_stouffer_w"):
+    '''
+    Split the input dataframe into several classes according to their ranking and their p-value
+    :param df: input dataframe to be classified
+    :param threshold: threshold for the tier 1
+    :param column_filter: name of the column to be filtered
+    :return: a dictionary whose keys are gene symbols and values are the tiers
+    '''
+
     df.sort_values("RANKING",ascending=False,inplace=True)
-    found = False
+
     threshold_rejected = df.shape[0]
     threshold_accepted = 1
     d_class = {}
+
     for index, row in df.iterrows():
         if row[column_filter] <= threshold:
             threshold_rejected = row["RANKING"] + 1
@@ -22,6 +31,7 @@ def classify_genes_tiers(df,threshold=0.01,column_filter = "QVALUE_stouffer_weig
         if row[column_filter] > threshold:
             threshold_accepted= row["RANKING"] - 1
             break
+
     for index, row in df.iterrows():
         if row["RANKING"] <= threshold_accepted:
             d_class[row["SYMBOL"]] = 1
@@ -29,8 +39,6 @@ def classify_genes_tiers(df,threshold=0.01,column_filter = "QVALUE_stouffer_weig
             d_class[row["SYMBOL"]] = 4
         elif row["RANKING"] < threshold_rejected and row[column_filter] <= threshold:
             d_class[row["SYMBOL"]] = 3
-        elif row["RANKING"] < threshold_rejected and row[column_filter] > threshold:
-            d_class[row["SYMBOL"]] = 4
         else:
             d_class[row["SYMBOL"]] = 4
     return d_class
@@ -44,8 +52,8 @@ def get_recovered_genes(df,column,threshold):
     :param threshold: the limit threshold
     :return: the symbol ID of the genes below the threshold
     '''
-    l = set(df[df[column]<threshold]["SYMBOL"].values)
-    return l
+    list_genes_recovered = set(df[df[column]<threshold]["SYMBOL"].values)
+    return list_genes_recovered
 
 
 def rescue_genes(row,list_genes_recovered):
@@ -63,17 +71,24 @@ def rescue_genes(row,list_genes_recovered):
 
 
 def set_role(data, distance_threshold=0.1):
-    """Set the role according to the DNDS output"""
+    '''
+
+    :param data: Given a row with a value of w_mis, w_non and n_mis, n_non defines the role based on the distance to the diagonal
+    :param distance_threshold: twilight zone
+    :return: the role ['dom','rec'] or None
+    '''
+
     if data['wmis_cv'] < 1 and data['wnon_cv'] < 1:  # threshold
         return None
-    # Check wmis
     wmis = data['wmis_cv']
-    #TODO if wmis >= 1 and data["n_mis"] == 0:
-    #    wmis = 1
-    # Check wnon
     wnon = data['wnon_cv']
-    #TODO if wnon >= 1 and data["n_non"] == 0:
-    #    wnon = 1
+
+    # Check wmis
+    if wmis >= 1 and data["n_mis"] == 0:
+        wmis = 1
+    # Check wnon
+    if wnon >= 1 and data["n_non"] == 0:
+        wnon = 1
     distance = (wmis - wnon) / math.sqrt(2)
     if distance_threshold is not None and abs(distance) < distance_threshold:
         return None
@@ -89,36 +104,31 @@ def set_role(data, distance_threshold=0.1):
 @click.command()
 @click.option('--input',type=click.Path(exists=True),help="File to be parsed",required=True)
 @click.option('--output_file', type=click.Path(),required=True)
-@click.option('--threshold', help="Directory of the output reports",required=False,default=0.01,type=float)
-@click.option('--name_method', help="Name of the method in the output dataframe",default="SCHULZE_THRESHOLD_STOUFFER_WEIGHTED")
+@click.option('--threshold', help="Threshold to be used to filter all genes",required=False,default=0.01,type=float)
+@click.option('--threshold_cgc', help="Threshold to be used to filter CGC genes",required=False,default=0.25,type=float)
 @click.option('--column_filter', help="Column to be used by the filtering",default="QVALUE_schulze_weighted")
-@click.option('--column_filter_cgc', help="Column to be used by the rescue of CGC",default="QVALUE_CGC_stouffer_w")
-
-
-def run_create_tiers(input, output_file, threshold, name_method, column_filter,column_filter_cgc):
+@click.option('--column_filter_cgc', help="Column to be used by the rescue of Cancer Gene Census genes",default="QVALUE_CGC_stouffer_w")
+def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter,column_filter_cgc):
 
     df = pd.read_csv(input, sep="\t", compression="gzip")
+    print (df.columns.values)
     df.sort_values(column_filter,inplace=True)
-    df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy()
-
+    df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy() # Select only a portion of likely candidates, make the ranking faster
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
+    headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"] # ,"n_mis","n_non"
 
-    headers = ["SYMBOL", "METHOD_NAME","TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"]
     if ranking_limit:
-
         # Compute tiers
-        dfq = df_f[df_f["RANKING"] < ranking_limit].copy()
-        dfq = dfq[np.isfinite(dfq[column_filter])].copy()
-        d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold)
+        dfq = df_f[df_f["RANKING"] < ranking_limit].copy() # select those positions before the limit
+        dfq = dfq[np.isfinite(dfq[column_filter])].copy() # with finite q-value
+        d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold) # perform the classification
         dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
-        dfq["METHOD_NAME"] = name_method
-        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,0.1)
+        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold_cgc) # perform the rescue of cgc genes
         dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
         df_tiers['ROLE'] = df_tiers.apply(set_role, axis=1)
         df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
     else:
-
         # No results
         with gzip.open(output_file, 'wt') as fd:
             csv.writer(fd, delimiter='\t').writerow(headers)
