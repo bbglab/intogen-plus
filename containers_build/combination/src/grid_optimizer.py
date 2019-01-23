@@ -55,7 +55,7 @@ class Filter:
             return None
 
         qc = Deviation(df=df, description=parser.name)
-        areas = qc.calculate_areas()
+        areas = qc.calculate_areas(up_to=40)
 
         result = {
             'AREA_RANKING_ABSOLUTE': areas['absolute'],
@@ -120,7 +120,7 @@ class Filter:
         return self.filter_by(by='AREA_RANKING_ABSOLUTE') & self.filter_by(by='AREA_RANKING_RELATIVE')
 
 
-def calculate_objective_function(d_ranking, weights, objective_function, objective_method="Combination_Ranking"):
+def calculate_objective_function(d_ranking, objective_function, weights, objective_method="Combination_Ranking"):
     """
     Given a distribution of weights returns the value of the objective function
     (default: enrichment, combination_ranking)
@@ -134,7 +134,6 @@ def calculate_objective_function(d_ranking, weights, objective_function, objecti
 
     :return float of the current value of the objective function for the input weights.
     """
-
     ranking = combination_ranking(d_ranking, weights)
     d_f = {objective_method: dict(ranking)}
     d_area = objective_function.calculate_area(d_f, type_method="absolute")
@@ -200,7 +199,8 @@ def grid_optimize(func, low_quality=set()):
 
     """
 
-    optimum = {k: None for k in METHODS}.update({'Objective_Function': 0})
+    optimum = {k: None for k in METHODS}
+    optimum.update({'Objective_Function': 0})
     low_quality_index = None
     if len(low_quality) > 0:
         low_quality_index = [METHODS.index(v) for v in low_quality]
@@ -329,7 +329,7 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     for method in METHODS:
         if method not in gavaliable_methods:
             d_results_methodsr[method] = {}
-    print(d_results_methodsr)
+
 
     # Instantiate the enrichment objective function
     objective_function = Evaluation_Enrichment(percentage_cgc)

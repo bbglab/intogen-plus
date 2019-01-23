@@ -236,7 +236,7 @@ def get_ranking_borda(d_results):
 @click.option('--optimize_weights', type=click.Path(), help="Optimize weights file")
 @click.option('--report_output', type=click.Path(), help="Output reports file",required=True)
 @click.option('--dict_output', type=click.Path(),help="Output dictionary file", required=True)
-@click.option('--borda', help="Whether to include borda ranks in output. Default False.", required=False, default=False)
+@click.option('--borda', help="Whether to include borda ranks in output. Default False.", required=False, is_flag=True)
 def run_schulze(input_data, optimize_weights, report_output, dict_output, borda):
 
     with gzip.open(input_data, "rb") as fd:

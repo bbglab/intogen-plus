@@ -106,7 +106,7 @@ def set_role(data, distance_threshold=0.1):
 @click.option('--output_file', type=click.Path(),required=True)
 @click.option('--threshold', help="Threshold to be used to filter all genes",required=False,default=0.01,type=float)
 @click.option('--threshold_cgc', help="Threshold to be used to filter CGC genes",required=False,default=0.25,type=float)
-@click.option('--column_filter', help="Column to be used by the filtering",default="QVALUE_schulze_weighted")
+@click.option('--column_filter', help="Column to be used by the filtering",default="QVALUE_stouffer_w")
 @click.option('--column_filter_cgc', help="Column to be used by the rescue of Cancer Gene Census genes",default="QVALUE_CGC_stouffer_w")
 def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter,column_filter_cgc):
 
@@ -115,7 +115,7 @@ def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter
     df.sort_values(column_filter,inplace=True)
     df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy() # Select only a portion of likely candidates, make the ranking faster
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
-    headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv"] # ,"n_mis","n_non"
+    headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv","n_mis","n_non"] # ,
 
     if ranking_limit:
         # Compute tiers

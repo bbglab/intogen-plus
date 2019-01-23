@@ -44,7 +44,6 @@ def retrieve_ranking(df, path_ranking):
 
     df_ranked = pd.read_csv(path_ranking,
                        sep='\t',
-                       usecols=['SYMBOL', 'RANKING', 'Median_Ranking', 'Total_Bidders', 'All_Bidders'],
                        low_memory=False,
                                compression="gzip"
                        )
@@ -127,7 +126,7 @@ def combine_pvals(df, path_weights, methods):
     df_final_non_nan = pd.merge(left=df_non_nan,right=df_cgc[["SYMBOL","QVALUE_CGC_stouffer_w"]],left_on="SYMBOL",right_on=["SYMBOL"],how="left")
     # Concat the non_nan dataframe with the non-corrected nan-containing dataframe
     df_final_nan = df[~np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
-    df_final = pd.concat([df_final_non_nan,df_final_nan])
+    df_final = pd.concat([df_final_non_nan,df_final_nan],sort=True)
     return df_final
 
 
@@ -221,7 +220,7 @@ def read_config_data():
 @click.option('--path_weights', type=click.Path(), help="Path to dataframe with weights", required=True)
 @click.option('--path_fml', type=click.Path(), help="Path to OncodriveFML results folder", required=True)
 @click.option('--path_dndscv', type=click.Path(), help="Path to dndsCV results folder", required=True)
-def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml,path_dndscv):
+def run_stouffer_script(input_path, output_path, path_rankings, path_weights, path_fml, path_dndscv):
     # Read config data
     methods = read_config_data()
     # Read data
@@ -236,6 +235,7 @@ def run_stouffer_script(input_path, output_path, path_rankings, path_weights, pa
     dj = add_significant_bidders(di)
     # Remove q-values for samples with less than two mutated samples
     dk = filter_out_lowly_mutated(dj, path_fml)
+
     # Save it
     column_order = ["SYMBOL", "PVALUE_cbase", "PVALUE_dndscv", "QVALUE_dndscv", "PVALUE_smregions",
                     "QVALUE_smregions", "PVALUE_hotmaps", "QVALUE_hotmaps", "PVALUE_oncodriveclustl"
@@ -244,8 +244,12 @@ def run_stouffer_script(input_path, output_path, path_rankings, path_weights, pa
                     "Median_Ranking",
                     "RANKING", "Total_Bidders", "wmis_cv", "wnon_cv", "wspl_cv", "SAMPLES", "MUTS", "MUTS_RECURRENCE",
                     "n_mis", "n_non"]
-    if "wind_cv" in dh.columns.values:
+    if "wind_cv" in dg.columns.values:
         column_order.append("wind_cv")
+
+    if "RANKING_BORDA" in dg.columns.values:
+        column_order.append("RANKING_BORDA")
+
     dk[column_order].to_csv(output_path, sep='\t', index=False, compression="gzip")
 
 

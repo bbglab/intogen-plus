@@ -29,22 +29,11 @@ class Parser:
         :return: None
         """
         self.name = method
-        self.symbols_mapping = None
         self.gene_coordinates = gene_coordinates
         self.gene_id = configs['methods'][method]['GENE_ID']
         self.pvalue = configs['methods'][method]['PVALUE']
         self.qvalue = configs['methods'][method]['QVALUE']
-        self.symbol = configs['methods'][method].get('SYMBOL', None)
 
-    def _build_symbols_mapping(self):
-        """Return a dictionary of Ensemble Gene ID: symbol
-        :return: None
-        """
-        self.symbols_mapping = dict()
-        with gzip.open(self.gene_coordinates, 'rb') as fd:
-            for line in fd:
-                line = line.decode().strip().split('\t')
-                self.symbols_mapping[line[4]] = line[-1]
 
     def read(self, input_file):
         """Read an output file. 
@@ -61,13 +50,9 @@ class Parser:
             df = df[np.isfinite(df[self.pvalue])]
         except Exception:
             logger.warning('No finite p-value'.format(input_file))
-            return None
-        if self.symbol is None:
-            if self.symbols_mapping is None:
-                self._build_symbols_mapping()
-            self.symbol = "SYMBOL"
-            df[self.symbol] = df[self.gene_id].map(lambda x: self.symbols_mapping.get(x, x))
+        df = df[[self.gene_id,self.pvalue,self.qvalue]]
         df.rename(columns={
-            self.gene_id: 'GENE_ID', self.symbol: 'SYMBOL', self.pvalue: 'PVALUE', self.qvalue: 'QVALUE'
+            self.gene_id: 'GENE_ID', self.pvalue: 'PVALUE', self.qvalue: 'QVALUE'
         }, inplace=True)
-        return df[['GENE_ID', 'SYMBOL', 'PVALUE', 'QVALUE']]
+
+        return df

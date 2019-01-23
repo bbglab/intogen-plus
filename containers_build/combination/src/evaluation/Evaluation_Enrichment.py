@@ -137,7 +137,7 @@ class Evaluation_Enrichment:
 
         return d_area
 
-    def calculate_area(self, d_results,type_method="absolute"):
+    def calculate_area(self, d_results, type_method="absolute"):
         '''
         :param  d_results: dictionary of results for a given cancer type
 
