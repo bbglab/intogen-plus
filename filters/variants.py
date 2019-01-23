@@ -79,7 +79,7 @@ class VariantsFilter(Filter):
         }
 
         for d in donors:
-            donors[d] = list(donors[d])
+            donors[d] = list(sorted(donors[d]))
 
         self.stats[group_key]['donors'] = {self.__none_to_string(d): s for d, s in donors.items()}
 
