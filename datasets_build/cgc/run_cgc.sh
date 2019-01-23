@@ -1,21 +1,28 @@
 #!/bin/bash
 
-set -e
+set -xe
+
+if [ -z "${INTOGEN_DATASETS}" ]
+then
+      echo "ERROR: Define the INTOGEN_RELEASE variable"
+      exit -1
+fi
+
 
 # define the paths
-path_base="/workspace/projects/intogen_2017/"
-path_data_intogen=$path_base/data/2019_01_18/stats_cohorts.tsv
-path_cgc=$path_base/data/2019_01_21/cgc
-file_cgc=$path_cgc/cancer_gene_census.csv
-dict_mapping_cgc=$path_base/data/latest/mapping_cgc_ttypes.json
-dict_mapping_cgc_intogen=$path_base/data/latest/mapping_cgc_ttypes_intogen.json
-path_output=$path_base/data/latest/
+path_base=$INTOGEN_DATASETS/combination/
+path_cgc=$INTOGEN_DATASETS/combination/cgc/
+path_data_intogen=$path_base/cgc/stats_cohorts.tsv
+file_cgc=$path_base/cgc/cancer_gene_census.csv
+dict_mapping_cgc=$path_base/cgc/mapping_cgc_ttypes.json
+dict_mapping_cgc_intogen=$path_base/cgc/mapping_cgc_ttypes_intogen.json
+
 
 # download the data
 
-echo "python download_cgc.py --download path_cgc"
+echo "python download_cgc.py --download $path_base"
 
-#python download_cgc.py --download $path_cgc
+python download_cgc.py --download $path_base
 
 echo "cgc file store in "$file_cgc
 
@@ -28,4 +35,4 @@ echo "python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_dat
 
 python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_data_intogen \
                     --dict_mapping_cgc $dict_mapping_cgc --dict_mapping_cgc_intogen $dict_mapping_cgc_intogen \
-                    --path_output $path_output --debug
+                    --path_output $path_cgc --debug

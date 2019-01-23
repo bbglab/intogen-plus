@@ -54,7 +54,7 @@ def map_acronyms_into_intogen(acronyms, mapping_cgc_intogen):
     :param cgc_dataset
     :return the new column
     '''
-    print (acronyms)
+
     cancer_types = []
     if str(acronyms) == "nan" or acronyms == "":
         return []
@@ -68,7 +68,6 @@ def map_acronyms_into_intogen(acronyms, mapping_cgc_intogen):
             else: # There are several mappings
                 for ttype in ttypes:
                     if ttype == acronym: # is a leaf node
-                        print (ttype,"ey")
                         cancer_types+= [ttype]
                     else:
                         cancer_types += map_acronyms_into_intogen(ttype,mapping_cgc_intogen)
@@ -90,8 +89,9 @@ def cmdline(path_cgc_original, path_cohorts, dict_mapping_cgc, dict_mapping_cgc_
     intogen_ttypes = []
 
     for index,row in cgc_dataset.iterrows():
-        intogen_ttypes.append([map_acronyms_into_intogen(row["acronym_cgc"],mapping_cgc_intogen)])
-    cgc_dataset["cancer_type"] = ",".join(intogen_ttypes)
+        info = map_acronyms_into_intogen(row["acronym_cgc"],mapping_cgc_intogen)
+        intogen_ttypes.append(",".join(info))
+    cgc_dataset["cancer_type"] = intogen_ttypes
     # Save the output
     os.makedirs(path_output, exist_ok=True)
     output_file = os.path.join(path_output, 'cancer_gene_census_parsed.tsv')
