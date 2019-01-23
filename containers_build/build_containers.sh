@@ -67,3 +67,12 @@ echo "Building ${INTOGEN_VEP}.simg"
 cd vep
 sudo singularity build ../../containers/${INTOGEN_RELEASE}/${INTOGEN_VEP}.simg Singularity.${INTOGEN_VEP}
 cd ..
+
+# Transvar
+echo "Building transvar.simg"
+cd transvar
+sudo singularity build ../../containers/${INTOGEN_RELEASE}/transvar.simg Singularity
+cd ..
+
+sudo chown -R $USER: ../containers/${INTOGEN_RELEASE}/*.simg
+

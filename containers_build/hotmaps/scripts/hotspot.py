@@ -102,11 +102,7 @@ def parse_arguments():
 
 
 def process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db):
-
-    # skip structure if no mutations
-    if not structure_mutations:
-        return None
-
+    
     # get pdb info
     if 'path' not in struct_info:
         return None
@@ -115,6 +111,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
 
     # read in structure
     structure = utils.read_structure(pdb_path, structure_id, quiet=quiet)
+    
     if structure is None:
         return None
 
@@ -138,6 +135,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
     # obtain relevant info from structure
     tmp_info = get_structure_info(structure, mchains, mres, mcount,
                                   struct_chains, ttype_ixs)
+
     (mut_res_centers_of_geometry,
      mut_res_mutation_counts,
      all_res_centers_of_geometry,
@@ -161,6 +159,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
 
         mut_density = mutation_density(t_mut_res_mutation_counts,
                                                      neighbors)
+
         mut_vals = mut_density.values()
         if mut_vals:
             max_obs_dens = max(mut_density.values())
@@ -189,6 +188,8 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
             list_rows.append(row.to_dict())
 
         # generate empirical null distribution
+        #print(structure_id, list_rows, models, struct_info, all_res_centers_of_geometry, total_mutations, opts['num_simulations'], opts['seed'], neighbors, tumour, d_correspondence, opts['stop_criterion'], max_obs_dens)
+
         sim_null_dist = simulation_signatures.generate_null_dist_sig(structure_id, list_rows, models, struct_info,
                                                    all_res_centers_of_geometry,
                                                    total_mutations,
@@ -248,7 +249,12 @@ def connect_mysql():
 
 def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     output = []
+
+    import os
+    import sys
+
     mutations = utils.read_mutations(mut_path)
+
     df_coordinates = simulation_signatures.read_file_coordinates(file_coordinates)
     with open(opts['mutations'] + ".signature", "rb") as fd:
         signatures = pickle.load(fd)
@@ -258,6 +264,9 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     for structure_id, struct_info in pdb_info:
         structure_mutations = mutations.get(structure_id, [])
 
+        if not structure_mutations:
+            continue
+        
         try:
             result = process_structure(structure_id, struct_info, quiet, structure_mutations, df_coordinates, signatures, db)
         except sqlite3.Error:
@@ -305,8 +314,8 @@ def main(opts):
         with tqdm(total=len(pdb_info), desc="Computing PDB structures".rjust(40)) as pb:
 
             # Multiprocess pool
-            pool = Pool(opts['cores'])
-            map_method = pool.imap_unordered
+            #pool = Pool(opts['cores'])
+            map_method = map # pool.imap_unordered
             for result, done in map_method(process_task, utils.chunkizator(pdb_info.items(), size=chunk_size)):
                 pb.update(done)
                 writer.writerows(result)

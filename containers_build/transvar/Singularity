@@ -1,0 +1,25 @@
+Bootstrap: docker
+From: debian:buster-slim
+
+%environment
+    LC_ALL=C.UTF-8
+    TRANSVAR_CFG=/data/transvar.cfg
+    TRANSVAR_DOWNLOAD_DIR=/data
+    export LC_ALL TRANSVAR_CFG TRANSVAR_DOWNLOAD_DIR
+
+%runscript
+    exec "/usr/local/bin/transvar" "$@"
+
+%post
+
+    # Load environment
+    export LC_ALL=C.UTF-8
+
+    # Install dependencies
+    apt update
+    apt install -y python3.6 python3-pip libz-dev samtools tabix 
+    pip3 --no-cache-dir install https://github.com/zwdzwd/transvar/archive/v2.4.3.20181231.tar.gz
+    mkdir /data
+    
+%test
+    transvar --help
