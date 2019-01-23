@@ -77,7 +77,11 @@ class VariantsFilter(Filter):
             'snp_per_sample': snp_per_sample,
             'indel_per_sample': indel_per_sample
         }
-        self.stats[group_key]['donors'] = {self.__none_to_string(d): list(s) for d, s in donors.items()}
+
+        for d in donors:
+            donors[d] = list(donors[d])
+
+        self.stats[group_key]['donors'] = {self.__none_to_string(d): s for d, s in donors.items()}
 
         if len(snp_per_sample) < 1:
             self.stats[group_key]['error_no_samples_with_snp'] = "[{}] Any sample has a SNP variant".format(group_key)
@@ -89,6 +93,13 @@ class VariantsFilter(Filter):
         donors_with_multiple_samples = [d for d, s in donors.items() if len(s) > 1]
         if len(donors_with_multiple_samples) > 0:
             self.stats[group_key]['warning_multiple_samples_per_donor'] = "[{}] {}".format(group_key, donors_with_multiple_samples)
+
+        # We only want to use one sample per donor 
+        # this dictionary contains the samples that we'll skip
+        multiple_donor_samples = []
+        for d in donors_with_multiple_samples:
+            multiple_donor_samples += donors[d][1:]
+        multiple_donor_samples = set(multiple_donor_samples)        
 
         sequence_type = "WGS" if "WGS" in group_key else "WXS"
         cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample, sequence_type=sequence_type)
@@ -105,9 +116,10 @@ class VariantsFilter(Filter):
             reader = csv.reader(fd, delimiter='\t')
             for i, r in enumerate(reader, start=1):
                 coverage_tree[r[0]][int(r[1]):(int(r[2]) + 1)] = i
-
+        
         # Stats counter
         skip_hypermutators = 0
+        skip_multiple_samples_per_donor = 0
         skip_chromosome = 0
         skip_chromosome_names = set()
         skip_coverage = 0
@@ -130,14 +142,19 @@ class VariantsFilter(Filter):
         for v in self.parent.run(group_key, group_data):
             count_before += 1
 
-            # Skip hypermutators
             if v['REF'] == v['ALT']:
                 skip_same_alt += 1
                 continue
 
+            # Skip hypermutators and multiple samples per donor           
             if v['SAMPLE'] in hypermutators:
                 skip_hypermutators += 1
-                continue
+                continue  
+
+            # Skip multiple samples per donor           
+            if v['SAMPLE'] in multiple_donor_samples:
+                skip_multiple_samples_per_donor += 1
+                continue                
 
             if v['CHROMOSOME'] not in self.CHROMOSOMES:
                 skip_chromosome_names.add(v['CHROMOSOME'])
@@ -195,11 +212,12 @@ class VariantsFilter(Filter):
         self.stats[group_key]['signature'] = signature
 
         self.stats[group_key]['skip'] = {
-            'hypermuptators': (skip_hypermutators, None),
+            'hypermutators': (skip_hypermutators, None),
+            'multiple_samples_per_donor': (skip_multiple_samples_per_donor, None),
             'invalid_chromosome': (skip_chromosome, list(skip_chromosome_names)),
             'coverage': (skip_coverage, skip_coverage_positions),
-            'same_alt': skip_same_alt,
-            'n_sequence': skip_n_sequence
+            'same_alt': (skip_same_alt, None),
+            'n_sequence': (skip_n_sequence, None)
         }
 
         self.stats[group_key]['count'] = {
