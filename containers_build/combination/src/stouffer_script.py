@@ -104,19 +104,24 @@ def combine_pvals(df, path_weights, methods):
     weight_dict = parse_optimized_weights(path_weights)
     weights = np.abs(np.array([weight_dict[m] for m in methods]))
     func = lambda x: trimmed_stouffer_w(x, weights) # lambda function to trimm p-values
+
     # Get the stouffer pvalues
     df['PVALUE_' + 'stouffer_w'] = df[['PVALUE_' + m for m in methods]].apply(func, axis=1)
+
     # Filter out nan p-values for fdr correction
     df_non_nan = df[np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
     df_non_nan['QVALUE_' + 'stouffer_w'] = multipletests(df_non_nan['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
+
     # Perform CGC correction
     cgc_set = load_cgc()
     df_cgc = df_non_nan[df_non_nan["SYMBOL"].isin(cgc_set)].copy()
     pvalues_cgc = df_cgc['PVALUE_' + 'stouffer_w'].values
     qvalues_cgc = multipletests(pvalues_cgc, method='fdr_bh')[1]
     df_cgc['QVALUE_CGC_' + 'stouffer_w'] = qvalues_cgc
+
     # Merge with the non_nan dataframe
     df_final_non_nan = pd.merge(left=df_non_nan,right=df_cgc[["SYMBOL","QVALUE_CGC_stouffer_w"]],left_on="SYMBOL",right_on=["SYMBOL"],how="left")
+
     # Concat the non_nan dataframe with the non-corrected nan-containing dataframe
     df_final_nan = df[~np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
     df_final = pd.concat([df_final_non_nan,df_final_nan],sort=True)

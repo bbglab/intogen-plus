@@ -19,7 +19,7 @@ from configobj import ConfigObj
 CODE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 configs_file = os.path.join(CODE_DIR, 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
-METHODS = configs["methods"].keys() # reads them in order
+METHODS = configs["methods"].keys()  # reads them in order
 
 gavaliable_methods = None
 
