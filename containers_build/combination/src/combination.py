@@ -10,18 +10,18 @@ from configobj import ConfigObj
 
 # Global variables
 CODE_DIR = os.path.join(
-        os.path.dirname(
-            os.path.abspath(__file__)
-        )
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
 )
 
 configs_file = os.path.join(CODE_DIR, 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
-METHODS = configs["methods"].keys() # reads them in order
+METHODS = configs["methods"].keys()  # reads them in order
 
 
-def truncate(pvals, epsilon=1e-10):
-    """truncate to prevent arbitrarily low pvals"""
+def trunc(pvals, epsilon=1e-10):
+    """trunc to prevent arbitrarily low pvals"""
 
     mask = (pvals < epsilon)
     pvals[mask] = epsilon
@@ -38,17 +38,14 @@ def impute(pvals):
     return pvals
 
 
-def distance_matrix(df, metric='correlation', drop=False):
+def distance_matrix(df, metric='correlation'):
     """
     df has columns of the form 'PVALUE_<method>'
     returns the matrix of distance between methods
     """
 
     methods_list = METHODS
-    if drop:
-        x = df[['PVALUE_' + m for m in methods_list]].dropna().values
-    else:
-        x = df[['PVALUE_' + m for m in methods_list]].values
+    x = df[['PVALUE_' + m for m in methods_list]].values
     x = impute(x)
     Y = pdist(x.T, metric=metric)
     return squareform(Y, force='no', checks=True)
@@ -73,16 +70,16 @@ def brown(pvalues, var=None):
     return 1 - chi2.cdf(psi / c, 2 * f)
 
 
-def combine_pvals(df, comb):
+def custom_combination(df, comb):
     """
     :param df: summary table with results of all the methods
     :param comb: combination method: 'fisher' or 'brown'
     :return summary table with new combination columns
-    Remark: KIRC data gave good clustering of driver discovery methods
+    Remark: KIRC data returned good clustering of driver discovery methods
     """
 
     pval_cols = list(map(lambda x: '_'.join(['PVALUE', x]), METHODS))
-    D = distance_matrix(df[pval_cols], drop=True)
+    D = distance_matrix(df[pval_cols])
 
     # compute parameters to feed Brown's method
     k = len(pval_cols)
@@ -94,9 +91,10 @@ def combine_pvals(df, comb):
                 cov[i, j] = (3.263 * c) + (0.710 * c ** 2) + (0.027 * c ** 3)
     var = (4 * k) + (2 * np.sum(cov))
 
-    g = globals()
+    g = globals()  # required to get functions by name from the global namespace
+
     df['PVALUE_' + comb] = df[['PVALUE_' + m for m in METHODS]].apply(lambda x: g[comb](impute(x), var=var), axis=1)
-    df['PVALUE_' + comb + '_truncated'] = df[['PVALUE_' + m for m in METHODS]].apply(lambda x: g[comb](truncate(impute(x)), var=var), axis=1)
+    df['PVALUE_trunc_' + comb] = df[['PVALUE_' + m for m in METHODS]].apply(lambda x: g[comb](trunc(impute(x)), var=var), axis=1)
     df['QVALUE_' + comb] = multipletests(df['PVALUE_' + comb].values, method='fdr_bh')[1]
-    df['QVALUE_' + comb + '_truncated'] = multipletests(df['PVALUE_' + comb + '_truncated'].values, method='fdr_bh')[1]
+    df['QVALUE_trunc_' + comb] = multipletests(df['PVALUE_trunc_' + comb].values, method='fdr_bh')[1]
     return df
