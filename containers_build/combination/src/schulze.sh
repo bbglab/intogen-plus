@@ -47,7 +47,9 @@ python $SCRIPTS_FOLDER/stouffer_script.py \
     --path_weights $OUTPUT/tmp/$RUN_FILENAME.step2 \
     --path_fml $OUTPUT/../oncodrivefml/$RUN_FILENAME.out.gz \
     --path_dndscv $OUTPUT/../dndscv/$RUN_FILENAME.out.gz \
-    --output_path $OUTPUT/$RUN_FILENAME.stouffer.out.gz
+    --output_path $OUTPUT/$RUN_FILENAME.stouffer.out.gz \
+    --brown \
+    --fisher
 
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
