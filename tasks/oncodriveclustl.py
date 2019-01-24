@@ -13,8 +13,13 @@ class OncodriveClustlTask(Task):
 
     KEY = 'oncodriveclustl'    
     INPUT_HEADER = ['CHROMOSOME', 'POSITION', 'REF', 'ALT', 'SAMPLE', 'ID']
+    CANCER_TYPE = None
 
     def input_write(self, identifier, mut):
+        
+        if "CANCER" in mut:
+            self.CANCER_TYPE = mut['CANCER']
+
         self.write_row([
             mut['CHROMOSOME'],
             mut['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
@@ -29,7 +34,7 @@ class OncodriveClustlTask(Task):
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         genome = os.environ['INTOGEN_GENOME']
-        kmer = (5 if 'SKCM' in self.name else 3)
+        kmer = 5 if self.CANCER_TYPE == 'SKCM' else 3
 
         run_command(f"""
             {self.cmdline} -i {self.in_file} -o {self.output_folder}/{self.name} -r {cds_regions}  

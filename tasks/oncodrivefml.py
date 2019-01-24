@@ -13,8 +13,10 @@ class OncodriveFmlTask(Task):
 
     KEY = 'oncodrivefml'    
     INPUT_HEADER = ['CHROMOSOME', 'POSITION', 'REF', 'ALT', 'SAMPLE', 'ID']
+    PLATFORM = "WXS"
 
     def input_write(self, identifier, mut):
+        self.PLATFORM = mut['PLATFORM']
         self.write_row([
             mut['CHROMOSOME'],
             mut['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
@@ -22,7 +24,7 @@ class OncodriveFmlTask(Task):
             mut['ALT'],
             mut['SAMPLE'],
             identifier
-        ])
+        ])        
 
     def run(self):
 
@@ -31,7 +33,7 @@ class OncodriveFmlTask(Task):
         os.makedirs(tmp_folder, exist_ok=True)
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
-        seq = 'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes'
+        seq = 'wgs' if self.PLATFORM == "WGS" else 'wes'
         
         # Run OncodriveFML
         run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores}")

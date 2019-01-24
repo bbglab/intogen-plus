@@ -21,6 +21,9 @@ class VariantsFilter(Filter):
     MIN_CUTOFF = {"WXS": 1000, "WGS": 10000}
     CHROMOSOMES = set([str(c) for c in range(1, 23)] + ['X', 'Y'])
 
+    # Platform
+    PLATFORM = {}
+
     def __init__(self, parent):
         super().__init__(parent)
         self.liftover = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19ToHg38.over.chain.gz'))
@@ -47,6 +50,10 @@ class VariantsFilter(Filter):
         indel_per_sample = {}
 
         for m in self.parent.run(group_key, group_data):
+
+            if group_key not in self.PLATFORM:
+                self.PLATFORM[group_key] = m['PLATFORM']
+
             s = m['SAMPLE']
             if m['ALT_TYPE'] == 'snp':
                 snp_per_sample[s] = snp_per_sample.get(s, 0) + 1
@@ -101,7 +108,11 @@ class VariantsFilter(Filter):
             multiple_donor_samples += donors[d][1:]
         multiple_donor_samples = set(multiple_donor_samples)        
 
-        sequence_type = "WGS" if "WGS" in group_key else "WXS"
+        sequence_type = self.PLATFORM.get(group_key, "WXS")
+        if group_key not in self.PLATFORM:
+            self.stats[group_key]['warning_unknown_platform'] = "[{}] There is no PLATFORM annotation, using WXS by default".format(group_key)
+
+
         cutoff, theorical_cutoff, hypermutators = self.hypermutators_cutoff(snp_per_sample, sequence_type=sequence_type)
         self.stats[group_key]['hypermutators'] = {
             'cutoff': cutoff,
@@ -126,15 +137,15 @@ class VariantsFilter(Filter):
         skip_coverage_positions = []
         skip_same_alt = 0
         skip_n_sequence = 0
+        skip_mismatch = 0
+        skip_duplicated = 0
+        skip_no_liftover = 0
 
         count_before = 0
         count_after = 0
         count_snp = 0
         count_indel = 0
-        count_mismatch = 0
-        count_duplicated = 0
-        count_no_liftover = 0
-
+        
         # Read variants
         signature = {}
         variants_by_sample = {}
@@ -171,7 +182,7 @@ class VariantsFilter(Filter):
             var_value = "{}:{}:{}>{}".format(v['CHROMOSOME'], v['POSITION'], v['REF'], v['ALT'])
             if v['SAMPLE'] in variants_by_sample:
                 if var_value in variants_by_sample[v['SAMPLE']]:
-                    count_duplicated += 1
+                    skip_duplicated += 1
                     continue
                 else:
                     variants_by_sample[v['SAMPLE']].add(var_value)
@@ -191,7 +202,7 @@ class VariantsFilter(Filter):
                 ref = hg19(v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
                 alt = ''.join([ref[0], v['ALT'], ref[2]])
                 if ref[1] != v['REF']:
-                    count_mismatch += 1
+                    skip_mismatch += 1
                 signature_key = "{}>{}".format(ref, alt)
                 signature[signature_key] = signature.get(signature_key, 0) + 1
 
@@ -201,7 +212,7 @@ class VariantsFilter(Filter):
             # Add liftover columns
             hg38_position = self.liftover.convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
             if hg38_position is None or len(hg38_position) != 1:
-                count_no_liftover += 1
+                skip_no_liftover += 1
                 continue            
             
             v['POSITION_HG19'] = v['POSITION']
@@ -212,31 +223,31 @@ class VariantsFilter(Filter):
         self.stats[group_key]['signature'] = signature
 
         self.stats[group_key]['skip'] = {
-            'hypermutators': (skip_hypermutators, None),
-            'multiple_samples_per_donor': (skip_multiple_samples_per_donor, None),
+            'hypermutators': skip_hypermutators,
+            'multiple_samples_per_donor': skip_multiple_samples_per_donor,
             'invalid_chromosome': (skip_chromosome, list(skip_chromosome_names)),
             'coverage': (skip_coverage, skip_coverage_positions),
-            'same_alt': (skip_same_alt, None),
-            'n_sequence': (skip_n_sequence, None)
+            'same_alt': skip_same_alt,
+            'n_sequence': skip_n_sequence,
+            'mismatch': skip_mismatch,
+            'duplicated': skip_duplicated,
+            'noliftover': skip_no_liftover
         }
 
         self.stats[group_key]['count'] = {
             'before': count_before,
             'after': count_after,
             'snp': count_snp,
-            'indel': count_indel,
-            'mismatch': count_mismatch,
-            'duplicated': count_duplicated,
-            'noliftover': count_no_liftover
+            'indel': count_indel
         }
 
         self.stats[group_key]['signature'] = signature
 
-        ratio_mismatch = count_mismatch / count_snp
+        ratio_mismatch = skip_mismatch / count_snp
         if ratio_mismatch > 0.1:
-            self.stats[group_key]["error_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(group_key, count_mismatch, count_snp)
+            self.stats[group_key]["error_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(group_key, skip_mismatch, count_snp)
         elif ratio_mismatch > 0.05:
-            self.stats[group_key]["warning_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches.".format(group_key, count_mismatch, count_snp)
+            self.stats[group_key]["warning_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches.".format(group_key, skip_mismatch, count_snp)
 
         if skip_same_alt > 0:
             self.stats[group_key]["warning_same_alternate"] = "[{}] There are {} entries with same reference and alternate".format(group_key, skip_same_alt)
@@ -244,8 +255,8 @@ class VariantsFilter(Filter):
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "[{}] There are no variants after filtering".format(group_key)
 
-        if count_duplicated > 0:
-            self.stats[group_key]["warning_duplicated_variants"] = "[{}] There are {} duplicated variants".format(group_key, count_duplicated)
+        if skip_duplicated > 0:
+            self.stats[group_key]["warning_duplicated_variants"] = "[{}] There are {} duplicated variants".format(group_key, skip_duplicated)
 
         if skip_n_sequence > 0:
             self.stats[group_key]["warning_n_sequence"] = "[{}] There are {} variants with a 'N' in the reference or alternate sequence".format(group_key, skip_n_sequence)
