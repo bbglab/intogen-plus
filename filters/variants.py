@@ -243,7 +243,7 @@ class VariantsFilter(Filter):
 
         self.stats[group_key]['signature'] = signature
 
-        ratio_mismatch = skip_mismatch / count_snp
+        ratio_mismatch = (skip_mismatch / count_snp) if count_snp > 0 else 0
         if ratio_mismatch > 0.1:
             self.stats[group_key]["error_genome_reference_mismatch"] = "[{}] There are {} of {} genome reference mismatches. More than 10%, skipping this dataset.".format(group_key, skip_mismatch, count_snp)
         elif ratio_mismatch > 0.05:
