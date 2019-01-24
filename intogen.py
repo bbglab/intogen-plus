@@ -62,7 +62,7 @@ def cli(debug=False):
 @click.argument('tasks', nargs=-1)
 def readvariants(input, output, groupby, cores, tasks):
 
-    if 'NXF_CLI' in os.environ:
+    if 'INTOGEN_NXF' in os.environ:
         output = "."
 
     groups = selector.groupby(input, by=groupby)
@@ -82,8 +82,8 @@ def readvariants(input, output, groupby, cores, tasks):
 @click.argument('tasks', nargs=-1)
 def readvep(input, output, tasks):
     
-    if 'NXF_CLI' in os.environ:
-        output = "."
+    if 'INTOGEN_NXF' in os.environ:
+        output = os.getcwd()
 
     tasks = [TASKS[t](output) for t in tasks]
     group_key = os.path.basename(input).split('.')[0]
@@ -102,13 +102,13 @@ def readvep(input, output, tasks):
 def run(cores, output, task, key):
 
     # Check if it is a Nextflow job
-    if task != "combination" and 'NXF_CLI' in os.environ:
+    if task != "combination" and 'INTOGEN_NXF' in os.environ:
 
         # Check if there are already output results
         output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
         output_files = [f for f in glob(output_pattern) if not f.endswith(".in.gz")]
         
-        output = "."
+        output = os.getcwd()
         if len(output_files) > 0:            
             # If there are outputs reuse them instead of computing
             output_folder = os.path.join(output, task)

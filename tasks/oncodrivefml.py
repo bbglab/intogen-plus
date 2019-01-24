@@ -34,7 +34,7 @@ class OncodriveFmlTask(Task):
         seq = 'wgs' if "_WGS_" in os.path.basename(self.in_file) else 'wes'
         
         # Run OncodriveFML
-        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores} --debug")
+        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores}")
 
         # Compress output file
         tmp_output_file = os.path.join(tmp_folder, "{}-oncodrivefml.tsv".format(os.path.basename(self.in_file).split('.')[0]))

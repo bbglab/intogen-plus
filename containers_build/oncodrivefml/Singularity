@@ -25,6 +25,7 @@ From: debian:buster-slim
                    python3-statsmodels python3-pandas python3-matplotlib python3-click cython3 python-jinja2
 
     # Install OncodriveFML
+    pip3 --no-cache-dir install https://bitbucket.org/bgframework/bgconfig/get/develop.tar.gz
     pip3 --no-cache-dir install https://bitbucket.org/bbglab/oncodrivefml/get/develop.tar.gz
 
     # Clean unused things
