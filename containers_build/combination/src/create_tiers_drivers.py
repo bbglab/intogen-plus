@@ -71,35 +71,32 @@ def rescue_genes(row,list_genes_recovered):
 
 
 def set_role(data, distance_threshold=0.1):
-    '''
-
-    :param data: Given a row with a value of w_mis, w_non and n_mis, n_non defines the role based on the distance to the diagonal
-    :param distance_threshold: twilight zone
-    :return: the role ['dom','rec'] or None
-    '''
-
+    """Set the role according to the DNDS output"""
     if data['wmis_cv'] < 1 and data['wnon_cv'] < 1:  # threshold
-        return None
-    wmis = data['wmis_cv']
-    wnon = data['wnon_cv']
-
+        return "ambiguous"
     # Check wmis
+    wmis = data['wmis_cv']
     if wmis >= 1 and data["n_mis"] == 0:
         wmis = 1
+
     # Check wnon
+    wnon = data['wnon_cv']
     if wnon >= 1 and data["n_non"] == 0:
         wnon = 1
+    # Those cases with w_non and w_mis <=1 are not informative
+    if wnon <= 1 and wmis <= 1:
+        return "ambiguous"
+
     distance = (wmis - wnon) / math.sqrt(2)
     if distance_threshold is not None and abs(distance) < distance_threshold:
-        return None
+        return "ambiguous"
     else:
         if distance > 0:
-            return 'dom'
+            return 'Act'
         elif distance < 0:
-            return 'rec'
+            return 'LoF'
         else:
-            return None
-
+            return "ambiguous"
 
 @click.command()
 @click.option('--input',type=click.Path(exists=True),help="File to be parsed",required=True)
@@ -111,7 +108,6 @@ def set_role(data, distance_threshold=0.1):
 def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter,column_filter_cgc):
 
     df = pd.read_csv(input, sep="\t", compression="gzip")
-    print (df.columns.values)
     df.sort_values(column_filter,inplace=True)
     df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy() # Select only a portion of likely candidates, make the ranking faster
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
@@ -126,7 +122,7 @@ def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter
         rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold_cgc) # perform the rescue of cgc genes
         dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
         df_tiers = dfq[headers]
-        df_tiers['ROLE'] = df_tiers.apply(set_role, axis=1)
+        df_tiers['ROLE'] = df_tiers.apply(lambda row: set_role(row), axis=1)
         df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
     else:
         # No results
