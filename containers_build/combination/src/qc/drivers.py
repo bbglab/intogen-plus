@@ -1,24 +1,24 @@
 # Import modules
 import os
 from collections import defaultdict
+import pandas as pd
 
 
 NEGATIVE_SET = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', 'negative_gene_set.tsv')
-POSITIVE_SET = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', 'CGCMay17_cancer_types_TCGA.tsv')
+POSITIVE_SET = os.path.join(os.environ['INTOGEN_DATASETS'], 'combination', 'cgc', 'cancer_gene_census_parsed.tsv')
 
 
 def get_positive_set():
     """Get known cancer genes"""
     drivers = defaultdict(set)
-    with open(POSITIVE_SET, 'r') as fd:
-        for line in fd:
-            if line.startswith('Gene'):
-                continue
-            symbol, cancer_types = line.strip().split('\t')
-            cancer_types = cancer_types.split(',')
-            for cancer_type in cancer_types:
-                drivers['PANCANCER'].add(symbol)
-                drivers[cancer_type].add(symbol)
+    df_positives = pd.read_csv(POSITIVE_SET,sep="\t")
+    for index,row in df_positives.iterrows():
+        symbol = row["Gene Symbol"]
+        drivers['PANCANCER'].add(symbol)
+        if str(row["cancer_type"]) == "nan":
+            continue
+        for ttype in row["cancer_type"].split(","):
+            drivers[ttype].add(symbol)
     return drivers
 
 

@@ -91,7 +91,7 @@ def load_cgc():
     Loads the CGC set and returns a set of CGC genes
     :return: set of cgc gene names
     '''
-    df_cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination", "CGC_set.tsv"), sep="\t")
+    df_cgc = pd.read_csv(os.path.join(os.environ['INTOGEN_DATASETS'], "combination",'cgc', "cancer_gene_census_parsed.tsv"), sep="\t")
     return set(df_cgc["Gene Symbol"].values)
 
 def combine_pvals(df, path_weights, methods):

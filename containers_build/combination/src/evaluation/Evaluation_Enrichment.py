@@ -16,7 +16,7 @@ class Evaluation_Enrichment:
 
     @staticmethod
     def load_cgc(percentage=1.0):
-        cgc = pd.read_csv(os.path.join(os.environ["INTOGEN_DATASETS"], "combination", "CGCMay17_cancer_types_TCGA.tsv"), sep="\t")
+        cgc = pd.read_csv(os.path.join(os.environ["INTOGEN_DATASETS"], "combination", 'cgc',"cancer_gene_census_parsed.tsv"), sep="\t")
         cgc = set(cgc["Gene Symbol"].values)
         if percentage < 1.0:
             cgc_f = Evaluation_Enrichment.randomize_subset(cgc,percentage)
