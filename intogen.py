@@ -63,7 +63,7 @@ def cli(debug=False):
 def readvariants(input, output, groupby, cores, tasks):
 
     if 'INTOGEN_NXF' in os.environ:
-        output = "."
+        output = os.getcwd()
 
     groups = selector.groupby(input, by=groupby)
     groups = list(groups)
