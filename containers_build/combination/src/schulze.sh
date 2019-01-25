@@ -35,6 +35,7 @@ python $SCRIPTS_FOLDER/schulze.py \
  --optimize_weights $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --report_output $OUTPUT/tmp/$RUN_FILENAME.step3 \
  --dict_output $OUTPUT/tmp/$RUN_FILENAME.step3b
+ --borda
 
 # Exit on error
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi

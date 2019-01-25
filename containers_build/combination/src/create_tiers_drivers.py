@@ -63,7 +63,7 @@ def rescue_genes(row,list_genes_recovered):
     :param list_genes_recovered:
     :return:
     '''
-    if row["TIER"] <4:
+    if row["TIER"] == 1:
         return row["TIER"]
     if row["SYMBOL"] in list_genes_recovered:
         return 2
@@ -104,7 +104,7 @@ def set_role(data, distance_threshold=0.1):
 @click.option('--threshold', help="Threshold to be used to filter all genes",required=False,default=0.01,type=float)
 @click.option('--threshold_cgc', help="Threshold to be used to filter CGC genes",required=False,default=0.25,type=float)
 @click.option('--column_filter', help="Column to be used by the filtering",default="QVALUE_stouffer_w")
-@click.option('--column_filter_cgc', help="Column to be used by the rescue of Cancer Gene Census genes",default="QVALUE_CGC_stouffer_w")
+@click.option('--column_filter_cgc', help="Column to be used by the rescue of Cancer Gene Census genes",default="QVALUE_stouffer_w")
 def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter,column_filter_cgc):
 
     df = pd.read_csv(input, sep="\t", compression="gzip")
