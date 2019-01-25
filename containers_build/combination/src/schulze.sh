@@ -62,6 +62,7 @@ python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.01 \
     --input $OUTPUT/$RUN_FILENAME.stouffer.out.gz \
     --output_file $OUTPUT/$RUN_FILENAME.01.out.gz
 
+
 # STEP6. Generate the two tiers list at 0.05
 echo "## STEP6"
 python $SCRIPTS_FOLDER/create_tiers_drivers.py --threshold 0.05 \
