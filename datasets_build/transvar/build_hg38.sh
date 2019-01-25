@@ -26,18 +26,20 @@ TRANSVAR="singularity run -B ${TRANSVAR_DATA}:/data ../../containers/${INTOGEN_R
 echo "Indexing fasta file"
 $TRANSVAR index --reference ${GENOME}
 
-# Dowload Ensembl GTF
-ENSEMBL_GTF="Homo_sapiens.${ENSEMBL_REFERENCE}.${ENSEMBL_RELEASE}.gtf.gz"
+echo "Configure genome reference"
+mv ${GENOME}* $TRANSVAR_DATA
+$TRANSVAR config -k reference -v /data/${GENOME} --refversion ${ENSEMBL_REFERENCE}
 
 echo "Downloading ENSEMBL GTF"
+ENSEMBL_GTF="Homo_sapiens.${ENSEMBL_REFERENCE}.${ENSEMBL_RELEASE}.gtf.gz"
 wget "ftp://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/gtf/homo_sapiens/${ENSEMBL_GTF}"
+
+echo "Indexing ENSEMBL"
 $TRANSVAR index --ensembl ${ENSEMBL_GTF}
-mv ${GENOME}* $TRANSVAR_DATA
+
+echo "Configure ENSEMBL"
 mv ${ENSEMBL_GTF}.transvardb* $TRANSVAR_DATA/
 rm ${ENSEMBL_GTF}*
-
-echo "Configure transvar"
-$TRANSVAR config -k reference -v /data/${GENOME} --refversion ${ENSEMBL_REFERENCE}
 $TRANSVAR config -k ensembl -v /data/${ENSEMBL_GTF}.transvardb --refversion ${ENSEMBL_REFERENCE}
 
 

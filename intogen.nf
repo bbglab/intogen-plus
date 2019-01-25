@@ -147,6 +147,7 @@ process OncodriveClustl {
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
+        file "oncodriveclustl/*.clusters.gz" into OUT_ONCODRIVECLUSTL mode flatten
 
     """
     $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodriveclustl $task_file

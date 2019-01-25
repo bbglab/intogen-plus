@@ -9,8 +9,8 @@ END=$4
 INTOGEN_DATASETS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"
 INTOGEN_CONTAINERS="../../containers/${INTOGEN_RELEASE}"
 
-RANGE1=`singularity run -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$START | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
-RANGE2=`singularity run -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$END | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
+RANGE1=`singularity run -c -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$START | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
+RANGE2=`singularity run -c -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$END | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
 
 GENE_TRANSCRIPT_HUGO=`cat ${INTOGEN_DATASETS}/shared/ensembl_canonical_transcripts.tsv | grep $TRANSCRIPT`
 GENE=`echo -e -n "$GENE_TRANSCRIPT_HUGO" | cut -f1`
