@@ -145,9 +145,12 @@ class SMRegions(object):
         df_results = pd.DataFrame(list_results,
                                   columns=["REGION", "HUGO_SYMBOL", "TOTAL_MUTS_GENE", "OBSERVED_REGION", "MEAN_SIMULATED",
                                            "U", "P_VALUE"])
-        
+        if len(df_results) > 0:
+            df_results = df_results[df_results["OBSERVED_REGION"] >= df_results["MEAN_SIMULATED"]]  # Only positive selection
+
         # Correct the p-value
         if len(df_results) > 0:
+
             p = df_results["P_VALUE"].values
             mask = np.isfinite(p)
             pval_corrected = np.full(p.shape, np.nan)
