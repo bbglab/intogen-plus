@@ -34,7 +34,7 @@ python $SCRIPTS_FOLDER/schulze.py \
  --input_data $OUTPUT/tmp/$RUN_FILENAME.step1 \
  --optimize_weights $OUTPUT/tmp/$RUN_FILENAME.step2 \
  --report_output $OUTPUT/tmp/$RUN_FILENAME.step3 \
- --dict_output $OUTPUT/tmp/$RUN_FILENAME.step3b
+ --dict_output $OUTPUT/tmp/$RUN_FILENAME.step3b \
  --borda
 
 # Exit on error
