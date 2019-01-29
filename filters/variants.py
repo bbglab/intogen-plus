@@ -228,7 +228,7 @@ class VariantsFilter(Filter):
                 continue
             
             v['POSITION_HG19'] = v['POSITION']
-            v['POSITION_HG38'] = hg38_position[0][1] + 1
+            v['POSITION_HG38'] = hg38_position
 
             yield v
 
