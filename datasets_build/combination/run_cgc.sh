@@ -12,7 +12,7 @@ fi
 # define the paths
 path_base=$INTOGEN_DATASETS/combination/
 path_cgc=$INTOGEN_DATASETS/combination/cgc/
-path_data_intogen=$path_base/cgc/stats_cohorts.tsv
+path_data_intogen=$INTOGEN_DATASETS/stats_cohorts/stats_cohorts.tsv
 file_cgc=$path_base/cgc/cancer_gene_census.csv
 dict_mapping_cgc=$path_base/cgc/mapping_cgc_ttypes.json
 dict_mapping_cgc_intogen=$path_base/cgc/mapping_cgc_ttypes_intogen.json
