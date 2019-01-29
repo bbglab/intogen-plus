@@ -135,11 +135,7 @@ class SMRegions(object):
                     u,p_value = stats.power_divergence(f_obs=[a, b], f_exp=[c, d], lambda_="log-likelihood")
                     list_results.append([region_name.split(";")[0], region_name.split(";")[1], total_mut,
                                          observed, mean_simulated, u, p_value])
-
-        if results == {}:
-            logger.warning("Empty resutls, possible reason: no mutation from the dataset can be mapped to the provided regions.")
-            sys.exit(0)
-
+        
         # Sort and store results
         logger.info("Storing results")
         df_results = pd.DataFrame(list_results,
@@ -160,4 +156,8 @@ class SMRegions(object):
             df_results["Q_VALUE"] = df_results["P_VALUE"]
 
         df_results.to_csv(self.output_file, sep="\t", index=False, compression="gzip")
-        logger.info("Done")
+
+        if len(df_results) == 0:
+            logger.warning("Empty results, possible reason: no mutation from the dataset can be mapped to the provided regions.")
+        else:
+            logger.info("Done")
