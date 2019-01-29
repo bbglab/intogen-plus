@@ -4,7 +4,7 @@ import gzip
 import logging
 import numpy as np
 
-from bgreference import hg19
+from bgreference import hg19, hg38
 from .base import Filter
 from collections import Counter, defaultdict
 from intervaltree import IntervalTree
@@ -27,6 +27,12 @@ class VariantsFilter(Filter):
     def __init__(self, parent):
         super().__init__(parent)
         self.liftover = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19ToHg38.over.chain.gz'))
+
+        # Compute hg38 chromosomes maximum lenght
+        self.hg38_chr_maxposition = {}
+        for chr in self.CHROMOSOMES:
+            self.hg38_chr_maxposition[chr] = len(hg38(chr, 1, -1))
+
 
     @staticmethod
     def __none_to_string(value):
@@ -213,7 +219,13 @@ class VariantsFilter(Filter):
             hg38_position = self.liftover.convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
             if hg38_position is None or len(hg38_position) != 1:
                 skip_no_liftover += 1
-                continue            
+                continue 
+
+            # Check that the liftover is inside the chromosome
+            hg38_position = hg38_position[0][1] + 1
+            if hg38_position < 1 or hg38_position > self.hg38_chr_maxposition[v['CHROMOSOME']]:
+                skip_no_liftover += 1
+                continue
             
             v['POSITION_HG19'] = v['POSITION']
             v['POSITION_HG38'] = hg38_position[0][1] + 1
