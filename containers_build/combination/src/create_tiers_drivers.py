@@ -67,7 +67,9 @@ def rescue_genes(row,list_genes_recovered):
         return row["TIER"]
     if row["SYMBOL"] in list_genes_recovered:
         return 2
-    return 4
+    return row["TIER"]
+
+
 
 
 def set_role(data, distance_threshold=0.1):
