@@ -36,3 +36,7 @@ echo "python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_dat
 python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_data_intogen \
                     --dict_mapping_cgc $dict_mapping_cgc --dict_mapping_cgc_intogen $dict_mapping_cgc_intogen \
                     --path_output $path_cgc --debug
+
+cp mapping_cgc_ttypes.json $INTOGEN_DATASETS/combination/cgc
+cp mapping_cgc_ttypes_intogen.json $INTOGEN_DATASETS/combination/cgc
+cp negative_gene_set.json $INTOGEN_DATASETS/combination
