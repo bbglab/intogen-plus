@@ -4,7 +4,7 @@ import gzip
 import logging
 import numpy as np
 
-from bgreference import hg19, hg38
+from bgreference import refseq
 from .base import Filter
 from collections import Counter, defaultdict
 from intervaltree import IntervalTree
@@ -21,17 +21,23 @@ class VariantsFilter(Filter):
     MIN_CUTOFF = {"WXS": 1000, "WGS": 10000}
     CHROMOSOMES = set([str(c) for c in range(1, 23)] + ['X', 'Y'])
 
-    # Platform
+    # Annotations
     PLATFORM = {}
+    GENOMEREF = {}
 
+    
     def __init__(self, parent):
         super().__init__(parent)
-        self.liftover = LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19ToHg38.over.chain.gz'))
+        self.liftover = {
+            'hg19': LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg19ToHg38.over.chain.gz')),
+            'hg38': LiftOver(os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess', 'hg38ToHg19.over.chain.gz'))
+        }
 
-        # Compute hg38 chromosomes maximum lenght
-        self.hg38_chr_maxposition = {}
+        # Compute chromosomes maximum lenght
+        self.chr_maxposition = {'hg38': {}, 'hg19': {}}
         for chr in self.CHROMOSOMES:
-            self.hg38_chr_maxposition[chr] = len(hg38(chr, 1, -1))
+            self.chr_maxposition['hg38'][chr] = len(refseq('hg38', chr, 1, -1))
+            self.chr_maxposition['hg19'][chr] = len(refseq('hg19', chr, 1, -1))
 
 
     @staticmethod
@@ -54,11 +60,14 @@ class VariantsFilter(Filter):
         mut_per_sample = {}
         snp_per_sample = {}
         indel_per_sample = {}
-
+        
         for m in self.parent.run(group_key, group_data):
 
-            if group_key not in self.PLATFORM:
-                self.PLATFORM[group_key] = m['PLATFORM']
+            if group_key not in self.PLATFORM and 'PLATFORM' in m:
+                self.PLATFORM[group_key] = m['PLATFORM'].upper()
+
+            if group_key not in self.GENOMEREF and 'GENOMEREF' in m:
+                self.GENOMEREF[group_key] = m['GENOMEREF'].lower()
 
             s = m['SAMPLE']
             if m['ALT_TYPE'] == 'snp':
@@ -126,8 +135,13 @@ class VariantsFilter(Filter):
             'hypermutators': list(hypermutators)
         }
 
+        # This cohort genome reference
+        genome_ref = self.GENOMEREF.get(group_key, "hg19")
+        if group_key not in self.GENOMEREF:
+            self.stats[group_key]['warning_unknown_genomeref'] = "[{}] There is no GENOMEREF annotation, using HG19 by default".format(group_key)
+
         # Load coverage regions tree
-        regions_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess','hg19_100bp.coverage.regions.gz')
+        regions_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'preprocess','{}_100bp.coverage.regions.gz'.format(genome_ref))
         coverage_tree = defaultdict(IntervalTree)
         with gzip.open(regions_file, 'rt') as fd:
             reader = csv.reader(fd, delimiter='\t')
@@ -205,7 +219,7 @@ class VariantsFilter(Filter):
                 count_snp += 1
 
                 # Compute signature and count mismatch
-                ref = hg19(v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
+                ref = refseq(genome_ref, v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
                 alt = ''.join([ref[0], v['ALT'], ref[2]])
                 if ref[1] != v['REF']:
                     skip_mismatch += 1
@@ -216,19 +230,19 @@ class VariantsFilter(Filter):
                 count_indel += 1
 
             # Add liftover columns
-            hg38_position = self.liftover.convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
-            if hg38_position is None or len(hg38_position) != 1:
+            lo_position = self.liftover[genome_ref].convert_coordinate("chr{}".format(v['CHROMOSOME']), v['POSITION'] - 1, v['STRAND'])
+            if lo_position is None or len(lo_position) != 1:
                 skip_no_liftover += 1
                 continue 
 
             # Check that the liftover is inside the chromosome
-            hg38_position = hg38_position[0][1] + 1
-            if hg38_position < 1 or hg38_position > self.hg38_chr_maxposition[v['CHROMOSOME']]:
+            lo_position = lo_position[0][1] + 1
+            if lo_position < 1 or lo_position > self.chr_maxposition[genome_ref][v['CHROMOSOME']]:
                 skip_no_liftover += 1
                 continue
             
-            v['POSITION_HG19'] = v['POSITION']
-            v['POSITION_HG38'] = hg38_position
+            v['POSITION_HG19'] = v['POSITION'] if genome_ref == 'hg19' else lo_position
+            v['POSITION_HG38'] = v['POSITION'] if genome_ref == 'hg38' else lo_position
 
             yield v
 
