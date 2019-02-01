@@ -93,7 +93,7 @@ class VepFilter(Filter):
             self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
 
 
-class NonSynonymous(Filter):
+class NonSynonymousFilter(Filter):
 
     KEY = "vepnonsynonymous"
 
