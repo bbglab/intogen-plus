@@ -14,11 +14,10 @@ process PreprocessFromInput {
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
-        file "smregions/*.in.gz" into IN_SMREGIONS mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
 
     """
-    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl smregions
+    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
     """
 
 }
@@ -54,6 +53,22 @@ process PreprocessFromVep {
 
     """
     $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase deconstructsig
+    """
+}
+
+process PreprocessFromVepNonSynonymous {
+    tag { task_file.fileName }
+
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from OUT_VEP
+
+    output:
+        file "smregions/*.in.gz" into IN_SMREGIONS mode flatten
+
+    """
+    $INTOGEN_SCRIPT readvepnonsynonymous -i $task_file -o $OUTPUT smregions
     """
 }
 

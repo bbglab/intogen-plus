@@ -19,7 +19,7 @@ from tasks.mutrate import MutrateTask
 from tasks.smregions import SmregionsTask
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
-from filters.vep import VepFilter
+from filters.vep import VepFilter, NonSynonymousFilter
 
 
 TASKS = {t.KEY: t for t in [
@@ -89,6 +89,23 @@ def readvep(input, output, tasks):
     group_key = os.path.basename(input).split('.')[0]
     reader = TSVReader()
     for f in [VepFilter]:
+        reader = f(reader)
+
+    prepare_tasks(output, [(group_key, input)], reader, tasks, cores=1)
+
+
+@click.command(short_help='Create tasks input files from VEP output')
+@click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
+@click.option('--output', '-o', required=True, help="Output folder")
+@click.argument('tasks', nargs=-1)
+def readvepnonsynonymous(input, output, tasks):
+    if 'INTOGEN_NXF' in os.environ:
+        output = os.getcwd()
+
+    tasks = [TASKS[t](output) for t in tasks]
+    group_key = os.path.basename(input).split('.')[0]
+    reader = TSVReader()
+    for f in [VepFilter, NonSynonymousFilter]:
         reader = f(reader)
 
     prepare_tasks(output, [(group_key, input)], reader, tasks, cores=1)
