@@ -37,13 +37,16 @@ process Vep {
     """
 }
 
+// Duplicate this stream
+OUT_VEP.into { OUT_VEP_01; OUT_VEP_02 }
+
 process PreprocessFromVep {
     tag { task_file.fileName }
 
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from OUT_VEP
+        val task_file from OUT_VEP_01
 
     output:
         file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
@@ -62,7 +65,7 @@ process PreprocessFromVepNonSynonymous {
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from OUT_VEP
+        val task_file from OUT_VEP_02
 
     output:
         file "smregions/*.in.gz" into IN_SMREGIONS mode flatten
