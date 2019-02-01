@@ -92,3 +92,25 @@ class VepFilter(Filter):
         elif len(chromosomes) < 23:
             self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
 
+
+class NonSynonymousFilter(Filter):
+
+    KEY = "vepnonsynonymous"
+
+    def run(self, group_key, group_data):
+
+        # To store errors and statistics
+        self.stats[group_key] = {}
+
+        self.KEY = "vepnonsynonymous{}{}".format(os.path.sep, group_key)
+
+        synonymous = 0
+
+        for v in self.parent.run(group_key, group_data):
+            if v['Consequence'] == 'synonymous_variant':
+                synonymous += 1
+            else:
+                yield v
+
+        if len(synonymous) > 0:
+            self.stats[group_key]["warning_synonymous_mutations"] = "There are {} synonymous mutations at {}".format(synonymous, group_key)
