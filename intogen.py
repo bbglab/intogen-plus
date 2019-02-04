@@ -146,6 +146,7 @@ def run(cores, output, task, key):
 
 cli.add_command(readvariants)
 cli.add_command(readvep)
+cli.add_command(readvepnonsynonymous)
 cli.add_command(run)
 
 
