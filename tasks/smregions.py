@@ -13,16 +13,21 @@ class SmregionsTask(Task):
     KEY = 'smregions'
     INPUT_HEADER = ['chr',	'pos', 'ref', 'alt', 'sample', 'Cancer_Type', 'id']
 
-    def input_write(self, identifier, mut):
-        self.write_row([
-            mut['CHROMOSOME'],
-            mut['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
-            mut['REF'],
-            mut['ALT'],
-            mut['SAMPLE'],
-            self.name,
-            identifier
-        ])
+    def input_write(self, identifier, value):
+
+        if valid_consequence(value['Consequence']) and value['Feature'] in self.transcripts:
+            _, sample, ref, alt = value['#Uploaded_variation'].split('__')
+            chromosome, position = value['Location'].split(':')
+
+            self.write_row([
+                chromosome,
+                position,
+                ref,
+                alt,
+                sample,
+                self.name,
+                identifier
+            ])
 
     def run(self):
 
