@@ -112,5 +112,5 @@ class NonSynonymousFilter(Filter):
             else:
                 yield v
 
-        if len(synonymous) > 0:
+        if synonymous > 0:
             self.stats[group_key]["warning_synonymous_mutations"] = "There are {} synonymous mutations at {}".format(synonymous, group_key)
