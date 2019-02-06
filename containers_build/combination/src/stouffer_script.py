@@ -164,12 +164,12 @@ def partial_correction(df, fml_data):
     a = dh['PVALUE_' + 'stouffer_w'].values
 
     if len(a[mask]) == 0:
-        print ("No data after filtering NaN OncodriveFML q-values")
-        dh["Q_VALUE"] = np.nan
+        print ("Warning: No data after filtering NaN OncodriveFML q-values")
+        dh['QVALUE_' + 'stouffer_w'] = np.nan
+        del dh['Q_VALUE']
         return dh
     c[mask] = multipletests(a[mask], method='fdr_bh')[1] # perform multiple test for those genes with at least two mutated samples
     dh['QVALUE_' + 'stouffer_w'] = c
-    del dh['Q_VALUE']
     return dh
 
 
