@@ -66,14 +66,12 @@ output_intogen=${path_output}/drivers_intogen.05.tsv
 # Download exact
 
 echo "Downloading ExAC"
-wget ftp://ftp.broadinstitute.org/pub/ExAC_release/release1/functional_gene_constraint/fordist_cleaned_exac_nonTCGA_z_pli_rec_null_data.txt
-wget ftp://ftp.broadinstitute.org/pub/ExAC_release/release1/functional_gene_constraint/README_fordist_cleaned_nonTCGA_z_data_pLI_2016_01_13.txt
+wget https://storage.googleapis.com/gnomad-public/release/2.1/ht/constraint/constraint.txt.bgz
+mv constraint.txt.bgz $INTOGEN_DATASETS/drivers/constraint.txt.gz
 
-mv fordist_cleaned_exac_nonTCGA_z_pli_rec_null_data.txt  $INTOGEN_DATASETS/drivers/
-mv README_fordist_cleaned_nonTCGA_z_data_pLI_2016_01_13.txt $INTOGEN_DATASETS/drivers/
+exit
 
-exact_file=$INTOGEN_DATASETS/drivers/fordist_cleaned_exac_nonTCGA_z_pli_rec_null_data.txt
-
+exact_file=$INTOGEN_DATASETS/drivers/constrains.txt.gz
 
 expression_file_tcga=$INTOGEN_DATASETS/combination/non_expressed_genes_tcga.tsv
 

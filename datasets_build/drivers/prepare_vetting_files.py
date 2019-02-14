@@ -142,10 +142,11 @@ def filter_by_polymorphism(df,file_exact):
     :return:
     '''
     df_exac = pd.read_csv(file_exact,sep="\t")
-    df_exac_filtered = df_exac[["gene", "syn_z", "mis_z", "lof_z", "bp"]].drop_duplicates()
+    df_exac = df_exac[df_exac["canonical"]]
+    df_exac_filtered = df_exac[["gene", "oe_syn", "oe_syn", "oe_mis", "bp"]].drop_duplicates()
     df_final_total = pd.merge(df_exac_filtered, df, left_on=["gene"], right_on=["GENE"],how="right")
     df_final_total.drop(columns=["gene"], inplace=True)
-    df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["syn_z"] < -1 or row["mis_z"] < -1 or row["lof_z"] < -1, axis=1)
+    df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["oe_syn"] > 1.5 or row["oe_mis"] > 1.5 or row["oe_lof"] > 1.5, axis=1)
     return df_final_total
 
 def filter_by_gene_lenght(df,zscore_threshold=5):
@@ -206,7 +207,7 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
     # Add information of cancer type
     df_final_signatures_info = pd.merge(df_final_signatures, df_info_cohort)
     # Filter by expression
-    df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_pcawg,expression_file_tcga)
+    df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_tcga)
     # Filter by Polymorphism
     df_final_signatures_info=filter_by_polymorphism(df_final_signatures_info,exact_germline_mutations)
     # Add filter by Gene Lenght
