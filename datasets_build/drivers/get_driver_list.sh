@@ -74,13 +74,8 @@ mv README_fordist_cleaned_nonTCGA_z_data_pLI_2016_01_13.txt $INTOGEN_DATASETS/dr
 
 exact_file=$INTOGEN_DATASETS/drivers/fordist_cleaned_exac_nonTCGA_z_pli_rec_null_data.txt
 
-echo "Copying the files of expression from TCGA and PCAWG"
 
-cp non_expressed_genes_pcawg.tsv $INTOGEN_DATASETS/drivers/
-cp non_expressed_genes_tcga.tsv $INTOGEN_DATASETS/drivers/
-
-expression_file_tcga=$INTOGEN_DATASETS/drivers/non_expressed_genes_tcga.tsv
-expression_file_pcawg=$INTOGEN_DATASETS/drivers/non_expressed_genes_pcawg.tsv
+expression_file_tcga=$INTOGEN_DATASETS/combination/non_expressed_genes_tcga.tsv
 
 # Prepare the olfactory receptors
 
@@ -96,7 +91,7 @@ echo $exact_file
 if [ ! -f ${output_vetting}  ]; then
 
      python ${path_script_vetting}  -i ${intogen_decons} -w ${hartwig_decons} -s ${stjude_decons}  -c ${info_cohorts} -o ${output_vetting} \
-    -t $expression_file_tcga -p $expression_file_pcawg -e $exact_file -r $or_path
+    -t $expression_file_tcga -e $exact_file -r $or_path
 
 else
     echo "File ${output_vetting} already exists! Skipping preparison of vetting files. If you what to recompute it, remove the output file"
