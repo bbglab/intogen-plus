@@ -224,6 +224,7 @@ class VariantsFilter(Filter):
                 alt = ''.join([ref[0], v['ALT'], ref[2]])
                 if ref[1] != v['REF']:
                     skip_mismatch += 1
+                    continue
                 signature_key = "{}>{}".format(ref, alt)
                 signature[signature_key] = signature.get(signature_key, 0) + 1
 

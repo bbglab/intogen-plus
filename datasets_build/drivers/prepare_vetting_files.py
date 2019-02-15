@@ -111,21 +111,14 @@ def get_ratio_indels(df_combined):
 
     return df_agg
 
-def check_expression(row,d_expression_tcga,d_expression_pc):
-        if "WXS" in row["COHORT"]:
-            if row["cancer_type"] in d_expression_tcga:
+def check_expression(row,d_expression_tcga):
 
-                return (row["GENE"] in d_expression_tcga[row["cancer_type"]])
-            else:
-                return (row["GENE"] in d_expression_tcga["PANCANCER"])
-        elif "WGS" in row["COHORT"]:
-            if row["cancer_type"] in d_expression_pc:
-                return (row["GENE"] in d_expression_pc[row["cancer_type"]])
-            else:
-                return (row["GENE"] in d_expression_pc["PANCANCER"])
+    if row["cancer_type"] in d_expression_tcga:
 
-        else:
-            return False
+        return (row["GENE"] in d_expression_tcga[row["cancer_type"]])
+    else:
+        return (row["GENE"] in d_expression_tcga["PANCANCER"])
+
 
 def filter_by_expression(df, expresison_file_pcawg, expresison_file_tcga):
     '''
@@ -139,12 +132,7 @@ def filter_by_expression(df, expresison_file_pcawg, expresison_file_tcga):
     for index, row in df_expression_tcga.drop_duplicates().iterrows():
         d_expression_tcga[row["Cancer_Type"]] = row["GENES"].split(",")
 
-    df_expression_pcawg = pd.read_csv(expresison_file_pcawg, sep="\t", names=["Cancer_Type", "GENES"])
-    d_expression_pc = {}
-    df_expression_pcawg.dropna(how="any", axis=0, inplace=True)
-    for index, row in df_expression_pcawg.drop_duplicates().iterrows():
-        d_expression_pc[row["Cancer_Type"]] = row["GENES"].split(",")
-    df["Warning_Expression"] = df.apply(lambda row: check_expression(row,d_expression_tcga,d_expression_pc),axis=1)
+    df["Warning_Expression"] = df.apply(lambda row: check_expression(row,d_expression_tcga),axis=1)
     return df
 
 def filter_by_polymorphism(df,file_exact):
@@ -154,10 +142,11 @@ def filter_by_polymorphism(df,file_exact):
     :return:
     '''
     df_exac = pd.read_csv(file_exact,sep="\t")
-    df_exac_filtered = df_exac[["gene", "syn_z", "mis_z", "lof_z", "bp"]].drop_duplicates()
+    df_exac = df_exac[df_exac["canonical"]]
+    df_exac_filtered = df_exac[["gene", "oe_syn", "oe_syn", "oe_mis", "bp"]].drop_duplicates()
     df_final_total = pd.merge(df_exac_filtered, df, left_on=["gene"], right_on=["GENE"],how="right")
     df_final_total.drop(columns=["gene"], inplace=True)
-    df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["syn_z"] < -1 or row["mis_z"] < -1 or row["lof_z"] < -1, axis=1)
+    df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["oe_syn"] > 1.5 or row["oe_mis"] > 1.5 or row["oe_lof"] > 1.5, axis=1)
     return df_final_total
 
 def filter_by_gene_lenght(df,zscore_threshold=5):
@@ -185,7 +174,7 @@ def filter_by_olfactory_receptors(df, of_file):
     df["OR_Warning"] = df.apply(lambda row: True if row["GENE"] in orfs else False,axis=1)
     return df
 
-def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,expression_file_pcawg,exact_germline_mutations,of_file):
+def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exact_germline_mutations,of_file):
 
     l = []
     for input_path in paths:
@@ -218,7 +207,7 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,expr
     # Add information of cancer type
     df_final_signatures_info = pd.merge(df_final_signatures, df_info_cohort)
     # Filter by expression
-    df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_pcawg,expression_file_tcga)
+    df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_tcga)
     # Filter by Polymorphism
     df_final_signatures_info=filter_by_polymorphism(df_final_signatures_info,exact_germline_mutations)
     # Add filter by Gene Lenght
@@ -239,15 +228,14 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,expr
 @click.option('-c', '--info_cohorts', 'info_cohorts', type=click.Path(),  help="Path to info of the cohorts", required=True)
 @click.option('-o', '--output', 'output', type=click.Path(),  help="Path to the output. Formatted in .tsv.gz", required=True)
 @click.option('-t', '--expression_file_tcga', 'exp_tcga', type=click.Path(),  help="Path to non expressed genes form tcga", required=True)
-@click.option('-p', '--expression_file_pcawg', 'exp_pcawg', type=click.Path(),  help="Path to non expressed genes form pcawg", required=True)
 @click.option('-e', '--exact_germline_mutations', 'exact', type=click.Path(),  help="Path to exact germline variants", required=True)
 @click.option('-r', '--olfatory_receptors', 'olfatory_receptors', type=click.Path(),  help="Path to the olfactory receptors", required=True)
-def cmdline(intogen, hartwig, stjude,info_cohorts,output,exp_tcga,exp_pcawg,exact, olfatory_receptors):
+def cmdline(intogen, hartwig, stjude,info_cohorts,output,exp_tcga,exact, olfatory_receptors):
     paths = [intogen,hartwig,stjude]
     # configuration
     pattern = re.compile("\/([A-Z0-9_\-\,]+)\.in\.gz")
     n_muts_gene = 3
-    main(paths,pattern,n_muts_gene,info_cohorts,output,exp_tcga,exp_pcawg,exact,olfatory_receptors)
+    main(paths,pattern,n_muts_gene,info_cohorts,output,exp_tcga,exact,olfatory_receptors)
 
 
 if __name__ == "__main__":
