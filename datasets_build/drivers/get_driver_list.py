@@ -42,7 +42,7 @@ def perform_vetting(df):
 
     l_data = []
     for index, row in df.iterrows():
-        if row["CGC_CANCER_GENE"] or row["CGC_GENE"]:
+        if (row["CGC_CANCER_GENE"] or row["CGC_GENE"]) and not(row["Signature9"] >0.5):
             l = list(row.values)
             l.append("PASS")
             l_data.append(l)
@@ -54,7 +54,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("CGC_SIGNATURE9")
             l_data.append(l)
-        elif row["Samples_3muts"] > 1:
+        elif row["Samples_3muts"] >= 1:
             l = list(row.values)
             l.append("NOCGC_MUTS/SAMPLE")
             l_data.append(l)
