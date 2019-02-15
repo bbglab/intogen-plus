@@ -77,7 +77,7 @@ class VepFilter(Filter):
             'skip_consequence': count_skip_consequence
         }
 
-        self.stats[group_key]['ratio_missense'] = consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0) if 'synonymous_variant' in consequence else None
+        self.stats[group_key]['ratio_missense'] = (consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0)) if 'synonymous_variant' in consequence else None
 
         orphan_genes = skip_genes - process_genes
         if len(orphan_genes) > 0:
@@ -87,10 +87,15 @@ class VepFilter(Filter):
         if count_after == 0:
             self.stats[group_key]["error_no_entries"] = "There is no VEP output"
 
-        if len(chromosomes) < 14:
-            self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
-        elif len(chromosomes) < 23:
+        # if len(chromosomes) < 14:
+        #     self.stats[group_key]["error_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
+        if len(chromosomes) < 23:
             self.stats[group_key]["warning_few_chromosomes_with_mutations"] = "There are only {} chromosomes with mutations at {}".format(len(chromosomes), group_key)
+
+        synonymous_variants = consequence.get('synonymous_variant', 0)
+        if synonymous_variants < 5:
+            plural = True if synonymous_variants > 1 else False
+            self.stats[group_key]["error_few_synonymous_variant"] = "There {} only {} synonymous variant{}".format("are" if plural else "is", synonymous_variants, "s" if plural else "")
 
 
 class NonSynonymousFilter(Filter):

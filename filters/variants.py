@@ -70,6 +70,7 @@ class VariantsFilter(Filter):
                 self.GENOMEREF[group_key] = m['GENOMEREF'].lower()
 
             s = m['SAMPLE']
+
             if m['ALT_TYPE'] == 'snp':
                 snp_per_sample[s] = snp_per_sample.get(s, 0) + 1
 
@@ -247,6 +248,8 @@ class VariantsFilter(Filter):
             yield v
 
         self.stats[group_key]['signature'] = signature
+        signature_count = sum(signature.values())
+        self.stats[group_key]['probabilities'] = {k: v / signature_count for k, v in signature.items()}
 
         self.stats[group_key]['skip'] = {
             'hypermutators': skip_hypermutators,

@@ -7,6 +7,7 @@ PLATFORM = WXS
 CANCER = ACYC
 DONOR = "('mapping', 'SAMPLE', 'mapping_samples_selected.txt', 'SAMPLE_ID', 'PATIENT_ID')"
 DATASET = "('dirname', '(.*)', lambda v: 'CBIOP_{}'.format(v.upper()))"
+ONE_BASED = True
 
 [excludes]
 DONOR = ""

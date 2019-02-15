@@ -40,6 +40,7 @@ def prepare_task(reader, tasks, item):
 
     # Check errors and remove inputs
     errors = [e for e in reader.stats.get(group_key, {}).keys() if e.startswith("error_")]
+
     if len(errors) > 0:
         for t in tasks:
             if os.path.exists(t.in_file):
