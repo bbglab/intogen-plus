@@ -1,5 +1,6 @@
 import os
 import csv
+from collections import defaultdict
 import logging
 
 from .base import Filter
@@ -40,6 +41,10 @@ class VepFilter(Filter):
         skip_genes = set()
         process_genes = set()
 
+        previous_position = None
+        previous_gene = None
+        discarded_genes = defaultdict(set)
+        selected_genes = {}
 
         for v in self.parent.run(group_key, group_data):
             count_before += 1
@@ -52,8 +57,17 @@ class VepFilter(Filter):
                 if v['Gene'] in self.genes:
                     # Selected gene without matching transcript id
                     skip_genes.add(v['Gene'])
-
                 continue
+
+            # Check if this position has been already parsed
+            current_position = v['Location'].split(":")[1]
+            if previous_position == current_position:
+                discarded_genes[v['Location']].add(v['SYMBOL'])
+                selected_genes[v['Location']] = previous_gene
+                continue
+            else:
+                previous_position = current_position
+                previous_gene = v['SYMBOL']
 
             process_genes.add(v['Gene'])
 
@@ -97,6 +111,10 @@ class VepFilter(Filter):
             plural = True if synonymous_variants > 1 else False
             self.stats[group_key]["error_few_synonymous_variant"] = "There {} only {} synonymous variant{}".format("are" if plural else "is", synonymous_variants, "s" if plural else "")
 
+        if len(discarded_genes) > 0:
+            for k, v in discarded_genes.items():
+            msg = ['{} mapped to {}. Discarded {}'.format(k, selected_genes[k], ','.join(v)) for k, v in discarded_genes.items()]
+            self.stats[group_key]['warning_mutations_match_various_genes'] = msg
 
 class NonSynonymousFilter(Filter):
 
