@@ -21,7 +21,7 @@ From: debian:buster-slim
 
     # Install dependencies
     apt update
-    apt install -y python3.6 python3-pip python3-configobj python3-numpy python3-scipy python3-pycurl libz-dev \
+    apt install -y python3 python3-pip python3-configobj python3-numpy python3-scipy python3-pycurl libz-dev \
                    python3-statsmodels python3-pandas python3-matplotlib python3-click cython3 python-jinja2
 
     # Install OncodriveFML
