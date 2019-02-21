@@ -41,10 +41,11 @@ class VepFilter(Filter):
         skip_genes = set()
         process_genes = set()
 
-        previous_position = None
-        previous_gene = None
-        discarded_genes = defaultdict(set)
-        selected_genes = {}
+        # previous_position = None
+        # previous_gene = None
+        # discarded_genes = defaultdict(set)
+        # selected_genes = {}
+        data = defaultdict(list)
 
         for v in self.parent.run(group_key, group_data):
             count_before += 1
@@ -60,14 +61,14 @@ class VepFilter(Filter):
                 continue
 
             # Check if this position has been already parsed
-            current_position = v['Location'].split(":")[1]
-            if previous_position == current_position:
-                discarded_genes[v['Location']].add(v['SYMBOL'])
-                selected_genes[v['Location']] = previous_gene
-                continue
-            else:
-                previous_position = current_position
-                previous_gene = v['SYMBOL']
+            # current_position = v['Location']
+            # if previous_position == current_position:
+            #     discarded_genes[v['Location']].add(v['SYMBOL'])
+            #     selected_genes[v['Location']] = previous_gene
+            #     continue
+            # else:
+            #     previous_position = current_position
+            #     previous_gene = v['SYMBOL']
 
             process_genes.add(v['Gene'])
 
@@ -80,7 +81,18 @@ class VepFilter(Filter):
             consequence[v['Consequence']] = consequence.get(v['Consequence'], 0) + 1
             genes[v['SYMBOL']] = genes.get(v['SYMBOL'], 0) + 1
 
-            yield v
+            # Store all the lines matching a single position to get rid of positions that lie in more than one gene
+            data[v['Location']].append(v)
+
+
+        multiple_matches = {}
+        for k, v in data.items():
+            # If a position (k) lie in more than one gene, the first one in alphabetical order
+            # is selected and the other are discarded
+            if len(v) > 1:
+                multiple_matches[k] = sorted([x['SYMBOL'] for x in v])
+            yield sorted(v, key=lambda x: x['SYMBOL'])[0]
+
 
         self.stats[group_key]['consequence'] = consequence
         self.stats[group_key]['chromosomes'] = chromosomes
@@ -111,10 +123,10 @@ class VepFilter(Filter):
             plural = True if synonymous_variants > 1 else False
             self.stats[group_key]["error_few_synonymous_variant"] = "There {} only {} synonymous variant{}".format("are" if plural else "is", synonymous_variants, "s" if plural else "")
 
-        if len(discarded_genes) > 0:
-            for k, v in discarded_genes.items():
-            msg = ['{} mapped to {}. Discarded {}'.format(k, selected_genes[k], ','.join(v)) for k, v in discarded_genes.items()]
+        if len(multiple_matches) > 0:
+            msg = ['{} mapped to {}. Discarded {}'.format(k, v[0], ','.join(set(v[1:]))) for k, v in multiple_matches.items()]
             self.stats[group_key]['warning_mutations_match_various_genes'] = msg
+
 
 class NonSynonymousFilter(Filter):
 
