@@ -66,7 +66,7 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
     # Store filters stats
     stats_file = os.path.join(output, "filters", "{}.json".format(reader.KEY))
     os.makedirs(os.path.dirname(stats_file), exist_ok=True)
-
+    '''
     # Store signatures
     if reader.KEY == 'variants':
         for k, v in reader.stats.items():
@@ -74,7 +74,7 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
             os.makedirs(os.path.dirname(signature_file), exist_ok=True)
             with gzip.open(signature_file, "wb") as fd:
                 pickle.dump(v['probabilities'], fd)
-
+    '''
     while reader.parent is not None:
         try:
             with open(stats_file, "wt") as fd:
