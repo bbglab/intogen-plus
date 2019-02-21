@@ -15,12 +15,13 @@ process PreprocessFromInput {
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
+        file "signatures/*.pickle.gz" into IN_SIGNATURES
 
     """
     $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
     """
-
 }
+
 
 process Vep {
     tag { task_file.fileName }
@@ -38,11 +39,10 @@ process Vep {
 }
 
 // Duplicate this stream
-OUT_VEP.into { OUT_VEP_01; OUT_VEP_02 }
+OUT_VEP.into { OUT_VEP_01; OUT_VEP_02; }
 
 process PreprocessFromVep {
     tag { task_file.fileName }
-
     publishDir OUTPUT, mode: 'copy'
 
     input:
@@ -231,3 +231,4 @@ process Combination {
     $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
     """
 }
+

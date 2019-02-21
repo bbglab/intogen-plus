@@ -5,6 +5,7 @@ import json
 import gzip
 import subprocess
 import logging
+import pickle
 
 from os import path, makedirs
 from functools import partial
@@ -65,6 +66,14 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
     # Store filters stats
     stats_file = os.path.join(output, "filters", "{}.json".format(reader.KEY))
     os.makedirs(os.path.dirname(stats_file), exist_ok=True)
+
+    # Store signatures
+    if reader.KEY == 'variants':
+        for k, v in reader.stats.items():
+            signature_file = os.path.join(output, "signatures", "{}.pickle.gz".format(k))
+            os.makedirs(os.path.dirname(signature_file), exist_ok=True)
+            with gzip.open(signature_file, "wb") as fd:
+                pickle.dump(v['probabilities'], fd)
 
     while reader.parent is not None:
         try:
