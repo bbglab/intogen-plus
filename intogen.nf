@@ -15,7 +15,7 @@ process PreprocessFromInput {
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
-        file "signatures/*.pickle.gz" into IN_SIGNATURES
+#        file "signatures/*.pickle.gz" into IN_SIGNATURES
 
     """
     $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
