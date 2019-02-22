@@ -72,6 +72,7 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
         for k, v in reader.stats.items():
             signature_file = os.path.join(output, "signatures", "{}.pickle".format(k))
             os.makedirs(os.path.dirname(signature_file), exist_ok=True)
+
             with open(signature_file, "wb") as fd:
                 obj = {
                     'counts': {tuple(k_counts.split('>')): v_counts for k_counts, v_counts in v['signature'].items()},
