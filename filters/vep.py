@@ -41,10 +41,6 @@ class VepFilter(Filter):
         skip_genes = set()
         process_genes = set()
 
-        # previous_position = None
-        # previous_gene = None
-        # discarded_genes = defaultdict(set)
-        # selected_genes = {}
         data = defaultdict(list)
 
         for v in self.parent.run(group_key, group_data):
@@ -59,16 +55,6 @@ class VepFilter(Filter):
                     # Selected gene without matching transcript id
                     skip_genes.add(v['Gene'])
                 continue
-
-            # Check if this position has been already parsed
-            # current_position = v['Location']
-            # if previous_position == current_position:
-            #     discarded_genes[v['Location']].add(v['SYMBOL'])
-            #     selected_genes[v['Location']] = previous_gene
-            #     continue
-            # else:
-            #     previous_position = current_position
-            #     previous_gene = v['SYMBOL']
 
             process_genes.add(v['Gene'])
 

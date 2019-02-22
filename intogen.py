@@ -114,9 +114,10 @@ def readvepnonsynonymous(input, output, tasks):
 @click.command(short_help='Run a task')
 @click.option('--cores', '-c', default=1, type=int, help="Cores to use in parallel")
 @click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
+@click.option('--signatures-file', '-s', default=None, type=click.Path(), help="Precalculated signatures path")
 @click.argument('task', type=str)
 @click.argument('key', type=str)
-def run(cores, output, task, key):
+def run(cores, output, signatures_file, task, key):
 
     # Check if it is a Nextflow job
     if task != "combination" and 'INTOGEN_NXF' in os.environ:
@@ -139,15 +140,35 @@ def run(cores, output, task, key):
     # Set cores
     os.environ['INTOGEN_CPUS'] = str(cores)
 
-    task = TASKS[task](output)
+    task = TASKS[task](output, signatures_file)
     task.init(key)
     task.run()
+
+
+@click.command(short_help='Join all the logs of the PreprocessFromVep step')
+@click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
+@click.argument('task', type=str)
+def join_logs(output, task):
+
+    if 'INTOGEN_NXF' in os.environ:
+        output = os.getcwd()
+
+        import json
+        results = []
+
+        for log in glob(os.path.join(output, '..', '..', '*', '*', 'filters', task, '*.json')):
+            with open(log, "rb") as infile:
+                results.append(json.load(infile))
+
+        with open(os.path.join(output, '..', '..', '..', 'filters', "{}.json".format(task)), "wb") as outfile:
+            json.dump(results, outfile)
 
 
 cli.add_command(readvariants)
 cli.add_command(readvep)
 cli.add_command(readvepnonsynonymous)
 cli.add_command(run)
+cli.add_command(join_logs)
 
 
 if __name__ == "__main__":

@@ -70,10 +70,14 @@ def prepare_tasks(output, groups, reader, tasks, cores=None):
     # Store signatures
     if reader.KEY == 'variants':
         for k, v in reader.stats.items():
-            signature_file = os.path.join(output, "signatures", "{}.pickle.gz".format(k))
+            signature_file = os.path.join(output, "signatures", "{}.pickle".format(k))
             os.makedirs(os.path.dirname(signature_file), exist_ok=True)
-            with gzip.open(signature_file, "wb") as fd:
-                pickle.dump(v['probabilities'], fd)
+            with open(signature_file, "wb") as fd:
+                obj = {
+                    'counts': {tuple(k_counts.split('>')): v_counts for k_counts, v_counts in v['signature'].items()},
+                    'probabilities': {tuple(k_counts.split('>')): v_counts for k_counts, v_counts in v['probabilities'].items()}
+                }
+                pickle.dump(obj, fd)
 
     while reader.parent is not None:
         try:
@@ -107,13 +111,14 @@ class Task:
     KEY = None
     INPUT_HEADER = None
 
-    def __init__(self, output_folder):
+    def __init__(self, output_folder, signatures_file=None):
 
         self.name = None
         self.in_fd = None
         self.in_file = None
         self.process = None
         self.out_file = None
+        self.signatures_file = signatures_file
 
         self.output_folder = path.join(output_folder, self.KEY)
         makedirs(self.output_folder, exist_ok=True)

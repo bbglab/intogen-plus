@@ -1,6 +1,7 @@
 import os
 import csv
 import gzip
+import itertools
 import logging
 import numpy as np
 
@@ -85,6 +86,29 @@ class VariantsFilter(Filter):
 
         return indel_per_sample, mut_per_sample, snp_per_sample, donors
 
+    @staticmethod
+    def generate_kmers(kmer):
+        """Create a dictionary with all the possible kmers (trinucleotides or pentanucleotides) and alternates
+
+        Args:
+            kmer (int): kmer nucleotides to calculate the signature (3 or 5)
+
+        Returns:
+            dict: keys are 'ref kmer --> alt kmer', values are 0
+        """
+        half_kmer = kmer // 2
+        nucleotides = 'ACTG'
+        results = set()
+
+        for permutation in itertools.product(nucleotides, repeat=kmer):
+            kmer_nucleotide = ''.join(permutation)
+            for alt in set(nucleotides).difference(kmer_nucleotide[half_kmer]):
+                results.add(
+                    (kmer_nucleotide, ''.join([kmer_nucleotide[0:half_kmer], alt, kmer_nucleotide[half_kmer + 1:]]))
+                )
+
+        return {'>'.join(key): 0 for key in results}
+
     def run(self, group_key, group_data):
 
         group_key = 'None' if group_key is None else group_key
@@ -168,7 +192,7 @@ class VariantsFilter(Filter):
         count_indel = 0
         
         # Read variants
-        signature = {}
+        signature = self.generate_kmers(3)
         variants_by_sample = {}
 
         for v in self.parent.run(group_key, group_data):

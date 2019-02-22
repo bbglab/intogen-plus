@@ -15,7 +15,7 @@ process PreprocessFromInput {
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
-        file "signatures/*.pickle.gz" into IN_SIGNATURES
+        file "signatures/*.pickle" into IN_SIGNATURES
 
     """
     $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
@@ -162,13 +162,14 @@ process OncodriveClustl {
 
     input:
         val task_file from IN_ONCODRIVECLUSTL
+        val sign_file from IN_SIGNATURES
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
         file "oncodriveclustl/*.clusters.gz" into CLUSTERS_ONCODRIVECLUSTL mode flatten
 
     """
-    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodriveclustl $task_file
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT -s $sign_file oncodriveclustl $task_file
     """
 }
 
