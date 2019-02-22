@@ -2,9 +2,12 @@ import csv
 import gzip
 import json
 from collections import defaultdict
+from itertools import product
+import pickle
 
 import bglogs
 import click
+import numpy as np
 from bgreference import refseq
 from bgvep.readers import BGPack
 
@@ -69,6 +72,12 @@ def save_counts(counts, file):
     bglogs.info('Saved to {}'.format(file))
 
 
+def pickle_counts(counts, file):
+    with gzip.open(file, 'wb') as fd:
+        pickle.dump(counts, fd)
+    bglogs.info('Saved to {}'.format(file))
+
+
 def load_regions(file):
     with open_(file) as fd:
         for row in csv.DictReader(fd, delimiter='\t',
@@ -81,10 +90,36 @@ def load_regions(file):
             yield gene, chr_, start, stop
 
 
+def context_generator():
+    subs = list(filter(lambda x: x[0] != x[1], map(lambda x: ''.join(x), product(list('ACGT'), repeat=2))))
+    for s in sorted(subs):
+        for f in sorted(product(list('ACGT'), repeat=2)):
+            yield f[0] + s[0] + f[1] + '>' + s[1]
+
+
+def compress(d):
+    genes = sorted(d.keys())
+    contexts = list(context_generator())
+    csqn_types = ['synonymous_variant', 'missense_variant', 'stop_gained_variant',
+                  'splice_acceptor_variant', 'splice_donor_variant']
+    count_matrix = np.zeros((len(genes), len(contexts), len(csqn_types)))
+
+    for i, gene in enumerate(genes):
+        for j, context in enumerate(contexts):
+            csqn_count = d[gene].get(context, {})
+            for k, csqn_type in enumerate(csqn_types):
+                count_matrix[i, j, k] = csqn_count.get(csqn_type, 0)
+
+    compressed = {'genes': genes, 'contexts': contexts, 'csqn_types': csqn_types, 'matrix': count_matrix}
+
+    return compressed
+
+
 def run(regions_file, triplets_file, conseq_file, genome, vep):
     gene_triplets, gene_consq = compute(load_regions(regions_file), genome, vep)
     save_counts(gene_triplets, triplets_file)
-    save_counts(gene_consq, conseq_file)
+    gene_consq = compress(gene_consq)
+    pickle_counts(gene_consq, conseq_file)
 
 
 @click.command()
