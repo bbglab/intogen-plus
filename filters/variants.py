@@ -274,7 +274,10 @@ class VariantsFilter(Filter):
 
         self.stats[group_key]['signature'] = signature
         signature_count = sum(signature.values())
-        self.stats[group_key]['probabilities'] = {k: v / signature_count for k, v in signature.items()}
+        if signature_count > 0:
+            self.stats[group_key]['probabilities'] = {k: v / signature_count for k, v in signature.items()}
+        else:
+            self.stats[group_key]['probabilities'] = signature
 
         self.stats[group_key]['skip'] = {
             'hypermutators': skip_hypermutators,
