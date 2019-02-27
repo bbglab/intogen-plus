@@ -89,7 +89,13 @@ class VepFilter(Filter):
             'skip_consequence': count_skip_consequence
         }
 
-        self.stats[group_key]['ratio_missense'] = (consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0)) if 'synonymous_variant' in consequence else None
+        ratio_missense = (consequence.get('missense_variant', 0) / consequence.get('synonymous_variant', 0)) if 'synonymous_variant' in consequence else None
+
+        self.stats[group_key]['ratio_missense'] = ratio_missense
+        if ratio_missense is None:
+            self.stats[group_key]['error_ratio_missense'] = "There are no synonymous variants"
+        elif ratio_missense > 10:
+            self.stats[group_key]['error_ratio_missense'] = "The ratio of missense / synonymous variants is too high"
 
         orphan_genes = skip_genes - process_genes
         if len(orphan_genes) > 0:
