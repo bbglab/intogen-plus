@@ -127,7 +127,10 @@ def combine_pvals(df, path_weights, methods):
     # Filter out nan p-values for fdr correction
     df = df[np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
     df_nan = df[~np.isfinite(df['PVALUE_' + 'stouffer_w'])].copy()
-    df['QVALUE_' + 'stouffer_w'] = multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
+    if df[np.isfinite(df['PVALUE_' + 'stouffer_w'])].shape[0] >0:
+        df['QVALUE_' + 'stouffer_w'] = multipletests(df['PVALUE_' + 'stouffer_w'].values, method='fdr_bh')[1]
+    else:
+        df['QVALUE_' + 'stouffer_w'] = np.nan
 
     # Custom pvalue combination: Empirical Brown's Method -- including truncated method
     df = custom_combination(df, 'brown')
