@@ -117,19 +117,24 @@ def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter
 
     if ranking_limit:
         # Compute tiers
+
         dfq = df_f[df_f["RANKING"] < ranking_limit].copy() # select those positions before the limit
+
         dfq = dfq[np.isfinite(dfq[column_filter])].copy() # with finite q-value
-        d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold) # perform the classification
-        dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
-        rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold_cgc) # perform the rescue of cgc genes
-        dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
-        df_tiers = dfq[headers]
-        df_tiers['ROLE'] = df_tiers.apply(lambda row: set_role(row), axis=1)
-        df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
-    else:
-        # No results
-        with gzip.open(output_file, 'wt') as fd:
-            csv.writer(fd, delimiter='\t').writerow(headers)
+        if dfq.shape[0] > 0:
+
+            d_class_3tiers = classify_genes_tiers(dfq,column_filter=column_filter,threshold=threshold) # perform the classification
+            dfq["TIER"] = dfq.apply(lambda row: d_class_3tiers[row["SYMBOL"]],axis=1)
+            rescued_genes = get_recovered_genes(dfq,column_filter_cgc,threshold_cgc) # perform the rescue of cgc genes
+            dfq["TIER"] = dfq.apply(lambda row: rescue_genes(row,rescued_genes),axis=1)
+            df_tiers = dfq[headers]
+            df_tiers['ROLE'] = df_tiers.apply(lambda row: set_role(row), axis=1)
+            df_tiers.to_csv(output_file, sep="\t", index=False, compression="gzip")
+            return
+
+    # No results
+    with gzip.open(output_file, 'wt') as fd:
+        csv.writer(fd, delimiter='\t').writerow(headers)
 
 
 if __name__ == '__main__':
