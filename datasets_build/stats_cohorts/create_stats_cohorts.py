@@ -12,7 +12,7 @@ d_legend = {"THYM":"Thymic","MGCT":"Male germ","LY":"Lymphoma","THCA":"Thyroid",
            "OS":"Osteosarcoma","RCH":"Renal chromophobe","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal","CLL":"CLL","NB":"Neuroblastoma","UVM":"Uveal Melanoma","PAIS":"Pancreas neuroendocrine",
            "PIA":"Pilocityc astrocytoma","ACC":"Adrenal cortex carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","Renal papillary cell":"RPC","MM":"Multiple Myeloma",
            "PANCREAS":"Pancreas adeno","ST":"Stomach adeno","RPC":"Renal papillary cell", "CSCC":"Cutaneous Squamous","RB":"RetinoBlastoma","HGG":"High-Grade Glioma","EPD":"Ependymoma","CPC":"Choroid Plexus Carcinoma",
-           "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis"
+           "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor"
           }
 
 def select_ttype(row,d_names):
@@ -36,6 +36,8 @@ def select_ttype(row,d_names):
     elif "PEDCBIOP" in row["source"]:
         return d_names[row["COHORT"].split("_")[2]]
     elif "ST_JUDE" in row["source"]:
+        return d_names[row["COHORT"].split("_")[2]]
+    elif "TARGET" in row["source"]:
         return d_names[row["COHORT"].split("_")[2]]
     else:
         return np.nan

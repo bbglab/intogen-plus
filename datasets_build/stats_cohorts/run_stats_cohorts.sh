@@ -4,7 +4,7 @@ set -xe
 
 if [ -z "${INTOGEN_DATASETS}" ]
 then
-      echo "ERROR: Define the INTOGEN_RELEASE variable"
+      echo "ERROR: Define the INTOGEN_DATASETS variable"
       exit -1
 fi
 
