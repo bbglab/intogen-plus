@@ -83,12 +83,15 @@ process DeconstructSig {
         val task_file from IN_DECONSTRUCTSIG
 
     output:
-        file "deconstructsig/*.out.gz" into OUT_DECONSTRUCTSIG
+        file "deconstructsig/*.out.gz" into OUT_DECONSTRUCTSIG mode flatten
 
     """
     $INTOGEN_SCRIPT run -o $OUTPUT deconstructsig $task_file
     """
 }
+
+// Duplicate this stream
+OUT_DECONSTRUCTSIG.into { OUT_DECONSTRUCTSIG_01; OUT_DECONSTRUCTSIG_02 }
 
 process DndsCV {
     tag { task_file.fileName }
@@ -116,12 +119,13 @@ process MutRate {
 
     input:
         val task_file from OUT_DNDSCV_01
+        val weight_file from OUT_DECONSTRUCTSIG_01
 
     output:
         file "mutrate/*" into OUT_MUTRATE mode flatten
 
     """
-    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutrate $task_file
+    $INTOGEN_SCRIPT run -c $task.cpus -w $weight_file -o $OUTPUT mutrate $task_file
     """
 }
 

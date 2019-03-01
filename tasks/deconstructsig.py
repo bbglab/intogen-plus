@@ -1,13 +1,8 @@
 import os
-import sys
-import csv
-import gzip
-import signal
-import subprocess
 
-from os import path
 from .base import Task, valid_consequence, run_command
 from bgreference import refseq
+
 
 PYRIMIDINES = {'C', 'T'}
 BASE_COMPLEMENT = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
@@ -55,6 +50,4 @@ class DeconstructSigTask(Task):
             ])
 
     def run(self):
-        run_command(f"{self.cmdline} -i {self.in_file} -o {self.out_file}")
-
-        
+        run_command(f"{self.cmdline} --input_file {self.in_file} --weights {self.out_file} --build {os.environ['INTOGEN_GENOME']}")

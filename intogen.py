@@ -115,9 +115,10 @@ def readvepnonsynonymous(input, output, tasks):
 @click.option('--cores', '-c', default=1, type=int, help="Cores to use in parallel")
 @click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
 @click.option('--signatures-file', '-s', default=None, type=click.Path(), help="Precalculated signatures path")
+@click.option('--weight-file', '-w', default=None, type=click.Path(), help="Precalculated weight path")
 @click.argument('task', type=str)
 @click.argument('key', type=str)
-def run(cores, output, signatures_file, task, key):
+def run(cores, output, signatures_file, weight_file, task, key):
 
     # Check if it is a Nextflow job
     if task != "combination" and 'INTOGEN_NXF' in os.environ:
@@ -140,7 +141,7 @@ def run(cores, output, signatures_file, task, key):
     # Set cores
     os.environ['INTOGEN_CPUS'] = str(cores)
 
-    task = TASKS[task](output, signatures_file)
+    task = TASKS[task](output, signatures_file, weight_file)
     task.init(key)
     task.run()
 
