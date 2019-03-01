@@ -4,8 +4,8 @@ args = commandArgs(TRUE)
 muts = read.table(gzfile(args[1]), sep = '\t', header = TRUE)
 
 writeOutput = 0
-result = tryCatch({
-    dndscv(muts, refdb=file.path(Sys.getenv("INTOGEN_DATASETS"), "dndscv", "RefCDS.rda"))
+tryCatch({
+    result <- dndscv(muts, refdb=file.path(Sys.getenv("INTOGEN_DATASETS"), "dndscv", "RefCDS.rda"))
     writeOutput <- 1
 }, error=function(e) {
     message('dndsCV raised an error')
