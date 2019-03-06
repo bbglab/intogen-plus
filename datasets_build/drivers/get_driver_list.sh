@@ -28,9 +28,9 @@ fi
 
 # Base paths
 
-base_intogen=/workspace/projects/intogen_2017/runs/20180903/
-base_hartwig=/workspace/projects/hartwig/intogen/runs/20180529_20180903/
-base_stjude=/workspace/projects/stjude/intogen/runs/20180919/
+base_intogen=/workspace/projects/intogen_2017/runs/20190220/
+base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190220/
+base_stjude=/workspace/projects/stjude/intogen/runs/20190220/
 
 # deconstruct for vetting
 
@@ -67,11 +67,11 @@ output_intogen=${path_output}/drivers_intogen.05.tsv
 
 echo "Downloading ExAC"
 wget https://storage.googleapis.com/gnomad-public/release/2.1/ht/constraint/constraint.txt.bgz
-mv constraint.txt.bgz $INTOGEN_DATASETS/drivers/constraint.txt.gz
+cp constraint.txt.bgz $INTOGEN_DATASETS/drivers/constraint.txt.gz
 
-exit
 
-exact_file=$INTOGEN_DATASETS/drivers/constrains.txt.gz
+
+exact_file=$INTOGEN_DATASETS/drivers/constraint.txt.gz
 
 expression_file_tcga=$INTOGEN_DATASETS/combination/non_expressed_genes_tcga.tsv
 

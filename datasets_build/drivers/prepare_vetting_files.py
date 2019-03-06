@@ -68,18 +68,17 @@ def analysis_signatures_gene(file_sigs,df,cohort):
         df_sigs.fillna(0.0, inplace=True)
         # get the signature with the highest contribution for a particular sample
         df_sigs["signature_max"] = df_sigs.apply(
-            lambda row: row.index[list(row.values).index(np.nanmax(row.values[2:]))], axis=1)
-        df_combined = pd.merge(df, df_sigs[["Mutation_type", "signature_max", "Sample"]],
-                               left_on=["SAMPLE", "MUTATION_TYPE"], right_on=["Sample", "Mutation_type"],
+            lambda row: row.index[list(row.values).index(np.nanmax(row.values[1:-2]))], axis=1)
+        df_combined = pd.merge(df, df_sigs[["signature_max", "sample_id"]],
+                               left_on=["SAMPLE"], right_on=["sample_id"],
                                how="left")
         df_combined["signature_max"].fillna("", inplace=True)
-        df_combined.drop(columns=["Mutation_type", "Sample"], inplace=True)
+        df_combined.drop(columns=["sample_id"], inplace=True)
     else:
         df_combined = df.copy()
         df_combined["signature_max"] = ""
     df_combined["TYPE_MUT"] = df_combined.apply(lambda row: assign_type_mut(row["MUTATION_TYPE"]), axis=1)
     # Assign % of signatures per gene
-
     df_genes = df_combined[df_combined["TYPE_MUT"] == "SNP"].groupby("GENE", as_index=False).agg(
         {"signature_max": count_percentage_signature, "POSITION": "count"}).sort_values("POSITION",
                                                                                         ascending=False)
@@ -120,7 +119,7 @@ def check_expression(row,d_expression_tcga):
         return (row["GENE"] in d_expression_tcga["PANCANCER"])
 
 
-def filter_by_expression(df, expresison_file_pcawg, expresison_file_tcga):
+def filter_by_expression(df, expresison_file_tcga):
     '''
     Filter dataframe df by expression of genes
     :param df:
@@ -143,25 +142,22 @@ def filter_by_polymorphism(df,file_exact):
     '''
     df_exac = pd.read_csv(file_exact,sep="\t")
     df_exac = df_exac[df_exac["canonical"]]
-    df_exac_filtered = df_exac[["gene", "oe_syn", "oe_syn", "oe_mis", "bp"]].drop_duplicates()
+    df_exac_filtered = df_exac[["gene", "oe_syn", "oe_lof", "oe_mis"]].drop_duplicates()
     df_final_total = pd.merge(df_exac_filtered, df, left_on=["gene"], right_on=["GENE"],how="right")
     df_final_total.drop(columns=["gene"], inplace=True)
+    df_final_total[["oe_syn","oe_mis","oe_lof"]].fillna(0.0,inplace=True)
+    print (df_final_total)
     df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["oe_syn"] > 1.5 or row["oe_mis"] > 1.5 or row["oe_lof"] > 1.5, axis=1)
     return df_final_total
-
+'''
 def filter_by_gene_lenght(df,zscore_threshold=5):
-    '''
 
-    :param df:
-    :param zscore_threshold:
-    :return:
-    '''
     mean = np.nanmean(df["bp"].values)
     std = np.nanstd(df["bp"].values)
     df["Z-score length"] = df.apply(lambda row: (row["bp"] - mean) / std, axis=1)
     df["Warning_size"] = df.apply(lambda row: row["Z-score length"] > zscore_threshold, axis=1)
     return df
-
+'''
 def filter_by_olfactory_receptors(df, of_file):
     '''
     Check whether is an olfactory receptor
@@ -187,7 +183,7 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
             # 1. Samples with more than 2 mutations in a gene are likely an artifact
             genes_warning_samples = get_warning_muts_sample(df,n_muts_gene)
             # 2. Analysis of signatures
-            file_sigs = os.path.join(input_path, cohort + ".out.gz", "mutation_sign_prob.tsv")
+            file_sigs = os.path.join(input_path, cohort + ".out.gz")
             df_genes,df_combined=analysis_signatures_gene(file_sigs,df,cohort)
             # 3. Ratio Ratio indels SNP
             df_agg = get_ratio_indels(df_combined)
@@ -211,7 +207,6 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
     # Filter by Polymorphism
     df_final_signatures_info=filter_by_polymorphism(df_final_signatures_info,exact_germline_mutations)
     # Add filter by Gene Lenght
-    df_final_signatures_info = filter_by_gene_lenght(df_final_signatures_info)
     # Add filter by olfactory receptors
     df_final_signatures_info = filter_by_olfactory_receptors(df_final_signatures_info,of_file)
     # Add filter by known artifacts

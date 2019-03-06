@@ -82,6 +82,40 @@ def set_consensous_role(row):
 
 
 
+@click.command()
+@click.option('--path_cgi_moa',help= 'path to the MoA dataset from cgi', type=click.Path(),required=True)
+@click.option('--path_drivers',help= 'path to the drivers from intOGen', type=click.Path(),required=True)
+@click.option('--path_run_dndscv',help= 'path to the pan cancer run of dndscv', type=click.Path(),required=True)
+@click.option('--path_output',help= 'output path', type=click.Path(),required=True)
+@click.option('--threshold',help= 'threshold to be used to make the classification. Default 0.1.',required=False,default=0.1)
+def cmdline(path_cgi_moa, path_drivers, path_run_dndscv, path_output, threshold):
+
+    threshold = threshold
+    # read drivers
+    df_drivers = pd.read_csv(path_drivers, sep="\t")
+    drivers = set(df_drivers["SYMBOL"].values)
+    df_with_excess_role = pd.read_csv(path_run_dndscv, sep="\t", compression="gzip")
+    df_drivers_role = df_with_excess_role[df_with_excess_role["gene_name"].isin(drivers)]
+    df_drivers_role = add_excess(df_drivers_role.copy())
+    df_drivers_role["ROLE_INTOGEN"] = df_drivers_role.apply(lambda row: set_role(row, distance_threshold=threshold),
+                                                            axis=1)
+    # read mode of action
+    df_moa = pd.read_csv(path_cgi_moa, sep="\t")
+    df_moa.rename(columns={"gene_MoA": "ROLE_CGI"}, inplace=True)
+    # Combine both roles
+    df_combined_role = pd.merge(df_drivers_role[["gene_name", "ROLE_INTOGEN"]], df_moa, how="left",
+                                left_on=["gene_name"], right_on=["gene"])
+    df_combined_role.drop("gene",axis=1,inplace=True)
+    df_combined_role.fillna("Unknown", inplace=True)
+    df_combined_role["COMBINED_ROLE"] = df_combined_role.apply(lambda row: set_consensous_role(row), axis=1)
+    # Save it
+    df_combined_role.to_csv(path_output,sep="\t",index=False)
+
+if __name__ == "__main__":
+    cmdline()
+
+
+
 
 
 
