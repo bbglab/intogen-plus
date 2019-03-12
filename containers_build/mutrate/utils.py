@@ -112,7 +112,10 @@ def normalize_profile(profile, triplets):
         all_pairs = iter([''.join(l) for l in product({'A', 'C', 'G', 'T'}, repeat=2)])
         for p in all_pairs:
             tnt = p[0] + b + p[1]
-            abundance[tnt] = triplets[tnt] + triplets[reverse_complement(tnt)]
+            try:
+                abundance[tnt] = triplets[tnt] + triplets[reverse_complement(tnt)]
+            except KeyError as err:
+                abundance[tnt] = 1
     cond_prob = defaultdict(float)
     for mut_type in mut_key_generator():
         ref_tnt = mut_type[1][0] + mut_type[0][0] + mut_type[1][1]
