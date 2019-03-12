@@ -15,7 +15,7 @@ import click
 def two_methods(vals):
     output = []
     for val in vals:
-        if val is np.nan:
+        if val is np.nan or str(val) == "nan":
             output.append(False)
             continue
         # Its a string
@@ -33,7 +33,8 @@ def two_methods(vals):
 
 
 def get_cancer_genes(row):
-    if row["CGC_GENE"] == "YES" and (not row["cancer_type"] is np.nan) and  str(row["cancer_type"]) in str(row["cancer_type_intogen"]):
+
+    if row["CGC_GENE"] and (not row["cancer_type"] is np.nan) and str(row["cancer_type"]) in str(row["cancer_type_intogen"]):
         return True
     else:
         return False
@@ -48,35 +49,24 @@ def perform_vetting(df):
             l_data.append(l)
         elif row["Warning_Expression"]:
             l = list(row.values)
-            l.append("CGC_EXPRESSION")
+            l.append("Warning expression")
             l_data.append(l)
         elif row["Signature9"] > 0.5:
             l = list(row.values)
-            l.append("CGC_SIGNATURE9")
+            l.append("Warning Signature9")
             l_data.append(l)
         elif row["Samples_3muts"] >= 1:
             l = list(row.values)
-            l.append("NOCGC_MUTS/SAMPLE")
+            l.append("Include samples with more then 3 mutations")
             l_data.append(l)
-        elif row["Warning_Germline"] and row["Warning_size"]:
+        elif row["SNP"] < 5 and row["Warning_Germline"]: # Less than 5 samples mutated and warning of germline
             l = list(row.values)
-            l.append("NOCGC_GERMLINE/SIZE")
+            l.append("Germline Warning")
             l_data.append(l)
-        elif row["Significant_Bidders"] is np.nan and row["Warning_Germline"]:
-            l = list(row.values)
-            l.append("NOCGC_NOBIDDERS")
-            l_data.append(l)
-
-        elif row["Significant_Bidders"] is np.nan and row["Warning_size"]:
-            l = list(row.values)
-            l.append("NOCGC_NOBIDDERS")
-            l_data.append(l)
-
         elif row["OR_Warning"]:
             l = list(row.values)
             l.append("Olfactory Receptor")
             l_data.append(l)
-
         elif row["Warning_Artifact"]:
             l = list(row.values)
             l.append("Known False Positive")
@@ -138,12 +128,11 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
     df_drivers_vetting = pd.merge(df_driver_cgc, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
-         "Warning_size", "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
+        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
     df_drivers_vetting["Warning_Expression"].fillna(False, inplace=True)
     df_drivers_vetting["Warning_Germline"].fillna(False, inplace=True)
     df_drivers_vetting["OR_Warning"].fillna(False, inplace=True)
     df_drivers_vetting["Warning_Artifact"].fillna(False, inplace=True)
-    df_drivers_vetting["Warning_size"].fillna(False, inplace=True)
     df_drivers_vetting["Signature9"].fillna(0.0, inplace=True)
     df_drivers_vetting["Signature10"].fillna(0.0, inplace=True)
     df_drivers_vetting["Samples_3muts"].fillna(0.0, inplace=True)

@@ -4,7 +4,7 @@ set -xe
 
 if [ -z "${INTOGEN_DATASETS}" ]
 then
-      echo "ERROR: Define the INTOGEN_RELEASE variable"
+      echo "ERROR: Define the INTOGEN_DATASETS variable"
       exit -1
 fi
 
@@ -15,7 +15,7 @@ path_output=$path_base/drivers_role.tsv
 # Datasets
 path_base_intogen=/workspace/projects/intogen_2017/
 path_cgi=$path_base/gene_MoA.tsv
-path_intogen_drivers=$path_base_intogen/analyses/2018_12_12/vetted_drivers05.tsv
+path_intogen_drivers=$INTOGEN_DATASETS/drivers/vetted_drivers05.tsv
 dnds_input_path=/workspace/projects/ubiquitins/run_tcga_pan/intogen_runs/20181105/dndscv/PCATLAS_WXS_PAN.out.gz
 
 
