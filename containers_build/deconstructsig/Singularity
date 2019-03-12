@@ -11,7 +11,6 @@ From: debian:buster-slim
     mkdir ${SINGULARITY_ROOTFS}/deconstructsig
     cp run_deconstruct.py ${SINGULARITY_ROOTFS}/deconstructsig/
     cp deconstructSigs.r ${SINGULARITY_ROOTFS}/deconstructsig/
-    cp output_pass_drivers_01.csv ${SINGULARITY_ROOTFS}/deconstructsig/
     chmod -R a+rx ${SINGULARITY_ROOTFS}/deconstructsig/
 
 %post
