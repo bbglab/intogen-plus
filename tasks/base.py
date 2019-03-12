@@ -113,7 +113,7 @@ class Task:
     KEY = None
     INPUT_HEADER = None
 
-    def __init__(self, output_folder, weight_file=None, signatures_file=None):
+    def __init__(self, output_folder, output_project=None, output_work=None, signatures_file=None):
 
         self.name = None
         self.in_fd = None
@@ -121,7 +121,8 @@ class Task:
         self.process = None
         self.out_file = None
         self.signatures_file = signatures_file
-        self.weight_file = weight_file
+        self.output_project = output_project
+        self.output_work = output_work
 
         self.output_folder = path.join(output_folder, self.KEY)
         makedirs(self.output_folder, exist_ok=True)
