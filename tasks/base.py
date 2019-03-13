@@ -113,14 +113,14 @@ class Task:
     KEY = None
     INPUT_HEADER = None
 
-    def __init__(self, output_folder, output_project=None, output_work=None, signatures_file=None):
+    def __init__(self, output_folder, output_project=None, output_work=None):
 
         self.name = None
         self.in_fd = None
         self.in_file = None
         self.process = None
         self.out_file = None
-        self.signatures_file = signatures_file
+        self.signatures_file = None
         self.output_project = output_project
         self.output_work = output_work
 
@@ -170,6 +170,9 @@ class Task:
 
         self.process = None
         self.out_file = path.join(self.output_folder, "{}.out.gz".format(self.name))
+
+        if self.output_project is not None:
+            self.signatures_file = os.path.join(self.output_project, 'signatures', f'{self.name}.pickle')
 
     def __repr__(self):
         return "{} '{}'".format(self.KEY, self.name)

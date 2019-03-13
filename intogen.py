@@ -114,11 +114,13 @@ def readvepnonsynonymous(input, output, tasks):
 @click.command(short_help='Run a task')
 @click.option('--cores', '-c', default=1, type=int, help="Cores to use in parallel")
 @click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
-@click.option('--signatures-file', '-s', default=None, type=click.Path(), help="Precalculated signatures path")
-@click.option('--weight-file', '-w', default=None, type=click.Path(), help="Precalculated weight path")
+# @click.option('--signatures-file', '-s', default=None, type=click.Path(), help="Precalculated signatures path")
 @click.argument('task', type=str)
 @click.argument('key', type=str)
-def run(cores, output, signatures_file, weight_file, task, key):
+def run(cores, output, task, key):
+
+    output_project = output
+    output_work = os.getcwd()
 
     # Check if it is a Nextflow job
     if task != "combination" and 'INTOGEN_NXF' in os.environ:
@@ -126,11 +128,11 @@ def run(cores, output, signatures_file, weight_file, task, key):
         # Check if there are already output results
         output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
         output_files = [f for f in glob(output_pattern) if not f.endswith(".in.gz")]
-        
-        output = os.getcwd()
-        if len(output_files) > 0:            
+
+        output = output_work
+        if len(output_files) > 0:
             # If there are outputs reuse them instead of computing
-            output_folder = os.path.join(output, task)
+            output_folder = os.path.join(output_work, task)
             os.makedirs(output_folder, exist_ok=True)
             for f in output_files:
                 copy = shutil.copytree if os.path.isdir(f) else shutil.copyfile
@@ -141,35 +143,19 @@ def run(cores, output, signatures_file, weight_file, task, key):
     # Set cores
     os.environ['INTOGEN_CPUS'] = str(cores)
 
-    task = TASKS[task](output, signatures_file, weight_file)
+    task = TASKS[task](
+        output_folder=output,
+        output_project=output_project,
+        output_work=output_work,
+    )
     task.init(key)
     task.run()
-
-
-@click.command(short_help='Join all the logs of the PreprocessFromVep step')
-@click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
-@click.argument('task', type=str)
-def join_logs(output, task):
-
-    if 'INTOGEN_NXF' in os.environ:
-        output = os.getcwd()
-
-        import json
-        results = []
-
-        for log in glob(os.path.join(output, '..', '..', '*', '*', 'filters', task, '*.json')):
-            with open(log, "rb") as infile:
-                results.append(json.load(infile))
-
-        with open(os.path.join(output, '..', '..', '..', 'filters', "{}.json".format(task)), "wb") as outfile:
-            json.dump(results, outfile)
 
 
 cli.add_command(readvariants)
 cli.add_command(readvep)
 cli.add_command(readvepnonsynonymous)
 cli.add_command(run)
-cli.add_command(join_logs)
 
 
 if __name__ == "__main__":

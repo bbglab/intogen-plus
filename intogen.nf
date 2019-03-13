@@ -90,9 +90,6 @@ process DeconstructSig {
     """
 }
 
-// Duplicate this stream
-OUT_DECONSTRUCTSIG.into { OUT_DECONSTRUCTSIG_01; OUT_DECONSTRUCTSIG_02 }
-
 process DndsCV {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
@@ -111,21 +108,26 @@ process DndsCV {
 }
 
 // Duplicate this stream
-OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02 }
+OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02; }
+
+// Combination stream
+IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName }.map{ it[0] }
+
 
 process MutRate {
     tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'move'
+    publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from OUT_DNDSCV_01
-        val weight_file from OUT_DECONSTRUCTSIG_01
+        val task_file from IN_MUTRATE
+        // val task_file from OUT_DNDSCV_01  // IN_MUTRATE
+        // val deconstructsig_file from OUT_DECONSTRUCTSIG
 
     output:
         file "mutrate/*" into OUT_MUTRATE mode flatten
 
     """
-    $INTOGEN_SCRIPT run -c $task.cpus -w $weight_file -o $OUTPUT mutrate $task_file
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutrate $task_file
     """
 }
 
@@ -166,14 +168,14 @@ process OncodriveClustl {
 
     input:
         val task_file from IN_ONCODRIVECLUSTL
-        val sign_file from IN_SIGNATURES
+        // val sign_file from IN_SIGNATURES
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
         file "oncodriveclustl/*.clusters.gz" into CLUSTERS_ONCODRIVECLUSTL mode flatten
 
     """
-    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT -s $sign_file oncodriveclustl $task_file
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodriveclustl $task_file
     """
 }
 
