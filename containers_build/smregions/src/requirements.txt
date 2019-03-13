@@ -2,9 +2,9 @@ ago
 bgcache
 bgconfig
 bglogs
-bgparsers
+bgparsers>=0.9
 bgreference
-bgsignature
+bgsignature>=0.2
 click
 intervaltree
 numpy

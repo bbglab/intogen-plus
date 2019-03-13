@@ -56,8 +56,8 @@ class ElementExecutor:
             in_reg_counts = {}
 
             for segment in self.segments:
-                for pos, ref_triplet in zip(range(segment['START'], segment['STOP'] + 1),
-                                            reference.generate_triplets(segment['CHROMOSOME'], segment['START'], segment['STOP'])):
+                for pos, ref_triplet in zip(range(segment['START'], segment['END'] + 1),
+                                            reference.generate_triplets(segment['CHROMOSOME'], segment['START'], segment['END'])):
 
                     if 'N' in ref_triplet:
                         continue
