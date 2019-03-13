@@ -67,13 +67,12 @@ class ElementExecutor:
                         if alt == ref:
                             continue
 
-                        alt_triplet = ref_triplet[0] + alt + ref_triplet[2]
                         items_to_simulate.append((pos, alt))
 
                         if self.signature is None:
                             items_to_simulate_prob.append(1.0)
                         else:
-                            items_to_simulate_prob.append(self.signature.get((ref_triplet, alt_triplet), 0.0))
+                            items_to_simulate_prob.append(self.signature.get(ref_triplet + '>' + alt, 0.0))
 
             if sum(items_to_simulate_prob) == 0:
                 logger.warning('Probability of simulation equal to 0 in {}'.format(self.name))

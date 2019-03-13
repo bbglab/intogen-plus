@@ -4,6 +4,7 @@ bgconfig
 bglogs
 bgparsers
 bgreference
+bgsignature
 click
 intervaltree
 numpy
