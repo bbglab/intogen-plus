@@ -17,6 +17,7 @@ from tasks.vep import VepTask
 from tasks.combination import CombinationTask
 from tasks.mutrate import MutrateTask
 from tasks.smregions import SmregionsTask
+from tasks.signatures import SignatureTask
 from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
 from filters.vep import VepFilter, NonSynonymousFilter
@@ -32,7 +33,8 @@ TASKS = {t.KEY: t for t in [
     DndsCvTask,
     CBaseTask,
     MutrateTask,
-    SmregionsTask
+    SmregionsTask,
+    SignatureTask
 ]}
 
 
@@ -74,6 +76,27 @@ def readvariants(input, output, groupby, cores, tasks):
         reader = f(reader)
 
     prepare_tasks(output, groups, reader, tasks, cores=cores)
+
+
+@click.command(short_help='Create tasks input files from VARIANTS datasets')
+@click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
+@click.option('--output', '-o', required=True, help="Output folder")
+@click.option('--cores', default=os.cpu_count(), type=int, help="Maximum groups to process in parallel")
+@click.argument('tasks', nargs=-1)
+def calculate_signature(input, output, groupby, cores, tasks):
+
+    if 'INTOGEN_NXF' in os.environ:
+        output = os.getcwd()
+
+    # groups = selector.groupby(input, by=groupby)
+    # groups = list(groups)
+    # tasks = [TASKS[t](output) for t in tasks]
+    #
+    # reader = VariantsReader()
+    # for f in [VariantsFilter]:
+    #     reader = f(reader)
+    #
+    # prepare_tasks(output, groups, reader, tasks, cores=cores)
 
 
 @click.command(short_help='Create tasks input files from VEP output')

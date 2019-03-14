@@ -34,6 +34,7 @@ class OncodriveFmlTask(Task):
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         seq = 'wgs' if self.PLATFORM == "WGS" else 'wes'
+        signatures = '' if self.signatures_file is None else f'-sign {self.signatures_file}'
         
         # Run OncodriveFML
         run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores}")

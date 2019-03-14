@@ -37,6 +37,12 @@ class OncodriveClustlTask(Task):
         kmer = 5 if self.CANCER_TYPE == 'SKCM' else 3
         signatures = '' if self.signatures_file is None else f'-sign {self.signatures_file}'
 
+        # FIXME: disable the signature argument
+        signatures = ''
+
+        if kmer != 3:
+            signatures = ''
+
         run_command(f"""
             {self.cmdline} -i {self.in_file} -o {self.output_folder}/{self.name} -r {cds_regions}  
             -c {cores} -g {genome} -sim region_restricted -n 10000 -kmer {kmer} {signatures} --concatenate && 

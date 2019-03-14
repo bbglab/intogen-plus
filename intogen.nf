@@ -15,13 +15,30 @@ process PreprocessFromInput {
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
-        file "signatures/*.pickle" into IN_SIGNATURES mode flatten
+        file "signatures/*" into IN_SIGNATURES mode flatten
 
     """
     $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
     """
 }
 
+process Signature {
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_SIGNATURES
+
+    output:
+        file "signature/*.json" into OUT_SIGNATURE mode flatten
+
+    """
+    $INTOGEN_SCRIPT calculate_signature -i $task_file -o $OUTPUT signature
+    """
+}
+
+// Duplicate this stream
+OUT_SIGNATURE.into { OUT_SIGNATURE_01; OUT_SIGNATURE_02; ;OUT_SIGNATURE_03; OUT_SIGNATURE_04}
 
 process Vep {
     tag { task_file.fileName }
@@ -113,30 +130,30 @@ OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02; }
 // Combination stream
 IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName }.map{ it[0] }
 
-
 process MutRate {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
         val task_file from IN_MUTRATE
-        // val task_file from OUT_DNDSCV_01  // IN_MUTRATE
-        // val deconstructsig_file from OUT_DECONSTRUCTSIG
 
     output:
-        file "mutrate/*" into OUT_MUTRATE mode flatten
+        file "mutrate/*.tar.gz" into OUT_MUTRATE mode flatten
 
     """
     $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutrate $task_file
     """
 }
 
+// Combination stream
+IN_ONCODRIVEFML_PHASED = IN_ONCODRIVEFML.phase(OUT_SIGNATURE_01){ it -> it.fileName }.map{ it[0] }
+
 process OncodriveFML {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_ONCODRIVEFML
+        val task_file from IN_ONCODRIVEFML_PHASED
 
     output:
         file "oncodrivefml/*.out.gz" into OUT_ONCODRIVEFML mode flatten
@@ -146,12 +163,15 @@ process OncodriveFML {
     """
 }
 
+// Combination stream
+IN_SMREGIONS_PHASED = IN_SMREGIONS.phase(OUT_SIGNATURE_02){ it -> it.fileName }.map{ it[0] }
+
 process SMRegions {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_SMREGIONS
+        val task_file from IN_SMREGIONS_PHASED
 
     output:
         file "smregions/*.out.gz" into OUT_SMREGIONS mode flatten
@@ -161,14 +181,15 @@ process SMRegions {
     """
 }
 
+// Combination stream
+IN_ONCODRIVECLUSTL_PHASED = IN_ONCODRIVECLUSTL.phase(OUT_SIGNATURE_03){ it -> it.fileName }.map{ it[0] }
 
 process OncodriveClustl {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_ONCODRIVECLUSTL
-        // val sign_file from IN_SIGNATURES
+        val task_file from IN_ONCODRIVECLUSTL_PHASED
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
@@ -179,13 +200,15 @@ process OncodriveClustl {
     """
 }
 
+// Combination stream
+IN_HOTMAPS_PHASED = IN_HOTMAPS.phase(OUT_SIGNATURE_04){ it -> it.fileName }.map{ it[0] }
 
 process Hotmaps {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_HOTMAPS
+        val task_file from IN_HOTMAPS_PHASED
 
     output:
         file "hotmaps/*.out.gz" into OUT_HOTMAPS mode flatten
