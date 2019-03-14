@@ -248,8 +248,14 @@ def compute_mutrate(annotmuts, genemuts, weights, cores, output):
     with Pool(cores) as pool:
         for a in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
             # option 1: dump to separate json files, one per each gene
-            with open(os.path.join(output, '{0}.out.json'.format(next(iter(a.keys())))), 'wt') as f_output:
-                json.dump(a, f_output)
+            # with gzip.open(os.path.join(output, '{0}.out.json.gz'.format(next(iter(a.keys())))), 'wt') as f_output:
+            #     json.dump(a, f_output)
+            d = {}
+            for gene, samples in a.items():
+                for key, value in samples.items():
+                    d[key] = np.array(value, dtype=np.float32)
+            output_file = os.path.join(output, '{0}.npz'.format(next(iter(a.keys()))))
+            np.savez_compressed(output_file, **{gene: d})
 
 
 if __name__ == '__main__':
