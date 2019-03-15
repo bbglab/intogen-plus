@@ -26,7 +26,7 @@ From: debian:buster-slim
 
     # Install OncodriveFML
     pip3 --no-cache-dir install https://bitbucket.org/bgframework/bgconfig/get/develop.tar.gz
-    pip3 --no-cache-dir install https://bitbucket.org/bbglab/oncodrivefml/get/develop.tar.gz
+    pip3 --no-cache-dir install https://bitbucket.org/bbglab/oncodrivefml/get/intogen.tar.gz
 
     # Clean unused things
     apt remove -y python3-pip
