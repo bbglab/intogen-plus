@@ -11,6 +11,7 @@ From: debian:buster-slim
     mkdir ${SINGULARITY_ROOTFS}/mutrate
     cp signature_assignment.py ${SINGULARITY_ROOTFS}/mutrate/
     cp compute_mutrate.py ${SINGULARITY_ROOTFS}/mutrate/
+    cp utils.py ${SINGULARITY_ROOTFS}/mutrate/
     cp run.sh ${SINGULARITY_ROOTFS}/mutrate/
     chmod -R a+rx ${SINGULARITY_ROOTFS}/mutrate/
 
