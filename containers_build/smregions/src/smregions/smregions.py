@@ -4,11 +4,10 @@ Contains the command line parsing and the main class of the method
 
 import io
 import os
-import sys
 import logging
-from os.path import join, exists
 from multiprocessing.pool import Pool
 
+import bgsignature
 import numpy as np
 import pandas as pd
 import statsmodels.stats.multitest as mt
@@ -85,7 +84,7 @@ class SMRegions(object):
             signature = None
         else:
             logger.debug('Loading signature')
-            signature = pd.read_pickle(self.signature_file)['probabilities']
+            signature = bgsignature.file.load(self.signature_file)
 
         # Create one executor per element
         element_executors = [ElementExecutor(element_id, muts, elements[element_id],

@@ -89,7 +89,7 @@ def build_regions_tree(regions):
 
         for r in allr:
             tree = regions_tree.get(r['CHROMOSOME'], IntervalTree())
-            tree[r['START']:(r['STOP']+1)] = (r['ELEMENT'], r['SEGMENT'])
+            tree[r['START']:(r['END']+1)] = r['ELEMENT']
             regions_tree[r['CHROMOSOME']] = tree
 
     logger.info("[%d of %d]", i+1, len(regions))
@@ -98,7 +98,7 @@ def build_regions_tree(regions):
 
 @bgcache
 def load_elements_tree(elements_file):
-    elements = readers.elements(elements_file)
+    elements = readers.elements_dict(elements_file, required=['CHROMOSOME', 'START', 'END', 'ELEMENT'])
     return build_regions_tree(elements)
 
 
@@ -124,7 +124,7 @@ def load_and_map_variants(variants_file, elements_file, regions_of_interest_file
     """
     # Load elements file
     logger.info('Loading elements file')
-    elements = readers.elements(elements_file)
+    elements = readers.elements_dict(elements_file, required=['CHROMOSOME', 'START', 'END', 'ELEMENT', 'SYMBOL'])
 
     # If the input file is a pickle file do nothing
     if variants_file.endswith(".pickle.gz"):
@@ -155,7 +155,7 @@ def load_and_map_variants(variants_file, elements_file, regions_of_interest_file
         intervals = elements_tree[r['CHROMOSOME']][r['POSITION']]
 
         for interval in intervals:
-            element, segment = interval.data
+            element = interval.data
             variants_dict[element].append(r)
 
     if i > show_small_progress_at:
@@ -174,10 +174,10 @@ def load_and_map_variants(variants_file, elements_file, regions_of_interest_file
             intervals = elements_tree[r['CHROMOSOME']][r['START']]
 
             if len(intervals) == 0:
-                logger.warning('Region %s-%s (%s-%s) cannot be mapped' % (r['CHROMOSOME'], r['ELEMENT'], r['START'], r['STOP']))
+                logger.warning('Region %s-%s (%s-%s) cannot be mapped' % (r['CHROMOSOME'], r['ELEMENT'], r['START'], r['END']))
             else:
                 for interval in intervals:
-                    element, segment = interval.data
-                    regions_of_interest[element].addi(r['START'], r['STOP'], r['ELEMENT']+";"+r['SYMBOL'])
+                    element = interval.data
+                    regions_of_interest[element].addi(r['START'], r['END'], r['ELEMENT']+";"+r['SYMBOL'])
 
     return variants_dict, elements, regions_of_interest
