@@ -164,7 +164,7 @@ def load_and_map_variants(variants_file, elements_file, regions_of_interest_file
     regions_of_interest = defaultdict(IntervalTree)
     logger.info("Mapping regions of interest")
 
-    reg_of_interest = readers.elements(regions_of_interest_file)
+    reg_of_interest = readers.elements_dict(regions_of_interest_file)
 
     for name, data in reg_of_interest.items():
         for r in data:
