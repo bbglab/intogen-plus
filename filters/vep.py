@@ -67,18 +67,19 @@ class VepFilter(Filter):
             consequence[v['Consequence']] = consequence.get(v['Consequence'], 0) + 1
             genes[v['SYMBOL']] = genes.get(v['SYMBOL'], 0) + 1
 
-            # Store all the lines matching a single position to get rid of positions that lie in more than one gene
-            data[v['Location']].append(v)
-
+            # Store all the lines matching a single position in a given patient
+            # to get rid of positions that lie in more than one gene
+            sample = v['#Uploaded_variation'].split('__')[1]
+            data[(v['Location'], sample)].append(v)
 
         multiple_matches = {}
         for k, v in data.items():
-            # If a position (k) lie in more than one gene, the first one in alphabetical order
-            # is selected and the other are discarded
+            # If a (position , sample) (k) lie in more than one gene,
+            # the first one in alphabetical order is selected and the
+            # other are discarded
             if len(v) > 1:
                 multiple_matches[k] = sorted([x['SYMBOL'] for x in v])
             yield sorted(v, key=lambda x: x['SYMBOL'])[0]
-
 
         self.stats[group_key]['consequence'] = consequence
         self.stats[group_key]['chromosomes'] = chromosomes
@@ -116,7 +117,7 @@ class VepFilter(Filter):
             self.stats[group_key]["error_few_synonymous_variant"] = "There {} only {} synonymous variant{}".format("are" if plural else "is", synonymous_variants, "s" if plural else "")
 
         if len(multiple_matches) > 0:
-            msg = ['{} mapped to {}. Discarded {}'.format(k, v[0], ','.join(set(v[1:]))) for k, v in multiple_matches.items()]
+            msg = ['{} in {} mapped to {}. Discarded {}'.format(k[0], k[1], v[0], ','.join(set(v[1:]))) for k, v in multiple_matches.items()]
             self.stats[group_key]['warning_mutations_match_various_genes'] = msg
 
 
