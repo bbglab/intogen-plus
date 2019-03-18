@@ -29,20 +29,10 @@ class OncodriveFmlTask(Task):
     def run(self):
 
         # Input parameters
-        tmp_folder = self.out_file + ".tmp"
-        os.makedirs(tmp_folder, exist_ok=True)
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         seq = 'wgs' if self.PLATFORM == "WGS" else 'wes'
-        signatures = '' if self.signatures_file is None else f'-sign {self.signatures_file}'
+        signatures = '' if self.signatures_file is None else f'--signature {self.signatures_file}'
         
         # Run OncodriveFML
-        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {tmp_folder} --cores {cores}")
-
-        # Compress output file
-        tmp_output_file = os.path.join(tmp_folder, "{}-oncodrivefml.tsv".format(os.path.basename(self.in_file).split('.')[0]))
-        with open(tmp_output_file, "rb") as f_in, gzip.open(self.out_file, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
-        shutil.rmtree(tmp_folder)
-
-        
+        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {self.out_file} {signatures} --cores {cores}")
