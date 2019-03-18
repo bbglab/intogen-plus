@@ -14,11 +14,11 @@ process PreprocessFromInput {
         file "oncodrivefml/*.in.gz" into IN_ONCODRIVEFML mode flatten
         file "oncodriveclustl/*.in.gz" into IN_ONCODRIVECLUSTL mode flatten
         file "dndscv/*.in.gz" into IN_DNDSCV mode flatten
+        file "signature/*.in.gz" into IN_SIGNATURES mode flatten
         file "filters/*.json" into FILTERS_VARIANTS
-        file "signatures/*" into IN_SIGNATURES mode flatten
 
     """
-    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl
+    $INTOGEN_SCRIPT readvariants --cores $task.cpus -i $INPUT -o $OUTPUT vep oncodrivefml dndscv oncodriveclustl signature
     """
 }
 
@@ -33,7 +33,7 @@ process Signature {
         file "signature/*.json" into OUT_SIGNATURE mode flatten
 
     """
-    $INTOGEN_SCRIPT calculate_signature -i $task_file -o $OUTPUT signature
+    $INTOGEN_SCRIPT calculatesignature --cores $task.cpus -o $OUTPUT signature $task_file
     """
 }
 

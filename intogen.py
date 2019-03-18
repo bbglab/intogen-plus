@@ -78,25 +78,37 @@ def readvariants(input, output, groupby, cores, tasks):
     prepare_tasks(output, groups, reader, tasks, cores=cores)
 
 
-@click.command(short_help='Create tasks input files from VARIANTS datasets')
-@click.option('--input', '-i', required=True, help="Input file or folder", type=click.Path())
-@click.option('--output', '-o', required=True, help="Output folder")
-@click.option('--cores', default=os.cpu_count(), type=int, help="Maximum groups to process in parallel")
-@click.argument('tasks', nargs=-1)
-def calculate_signature(input, output, groupby, cores, tasks):
+@click.command(short_help='Create tasks input files from SIGNATURE datasets')
+@click.option('--output', '-o', default="output", required=True, type=click.Path(), help="Output folder")
+@click.option('--cores', default=1, type=int, help="Maximum groups to process in parallel")
+@click.argument('task', type=str)
+@click.argument('key', type=str)
+def calculatesignature(output, cores, task, key):
+
+    output_project = output
+    output_work = os.getcwd()
 
     if 'INTOGEN_NXF' in os.environ:
         output = os.getcwd()
 
-    # groups = selector.groupby(input, by=groupby)
-    # groups = list(groups)
+    # Set cores
+    os.environ['INTOGEN_CPUS'] = str(cores)
+
+    task = TASKS[task](
+        output_folder=output,
+        output_project=output_project,
+        output_work=output_work,
+    )
+    task.init(key)
+    task.run()
+
     # tasks = [TASKS[t](output) for t in tasks]
+    # group_key = os.path.basename(input).split('.')[0]
+    # reader = TSVReader()
+    # # for f in [VepFilter]:
+    # #     reader = f(reader)
     #
-    # reader = VariantsReader()
-    # for f in [VariantsFilter]:
-    #     reader = f(reader)
-    #
-    # prepare_tasks(output, groups, reader, tasks, cores=cores)
+    # prepare_tasks(output, [(group_key, input)], reader, tasks, cores=cores)
 
 
 @click.command(short_help='Create tasks input files from VEP output')
@@ -137,7 +149,6 @@ def readvepnonsynonymous(input, output, tasks):
 @click.command(short_help='Run a task')
 @click.option('--cores', '-c', default=1, type=int, help="Cores to use in parallel")
 @click.option('--output', '-o', default="output", type=click.Path(), help="Output folder")
-# @click.option('--signatures-file', '-s', default=None, type=click.Path(), help="Precalculated signatures path")
 @click.argument('task', type=str)
 @click.argument('key', type=str)
 def run(cores, output, task, key):
@@ -176,6 +187,7 @@ def run(cores, output, task, key):
 
 
 cli.add_command(readvariants)
+cli.add_command(calculatesignature)
 cli.add_command(readvep)
 cli.add_command(readvepnonsynonymous)
 cli.add_command(run)
