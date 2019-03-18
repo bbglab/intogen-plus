@@ -40,11 +40,14 @@ then
 fi 
 
 
-REGIONS_PFAM_FILE="${INTOGEN_DATASETS}/smregions/regions_pfam.tsv.gz"
+REGIONS_PFAM_FILE="${INTOGEN_DATASETS}/smregions/regions_pfam.tsv"
+
 if [ ! -f "${REGIONS_PFAM_FILE}" ]
 then
     echo "Map to genomic positions"
-	cat ${PFAM_BIOMART_FILE} | awk '{system("./panno.sh "$2" "$5" "$3" "$4)}' | grep -v "^\." | gzip > ${REGIONS_PFAM_FILE}
+    echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT_ID\tSEGMENT\tSYMBOL" > ${REGIONS_PFAM_FILE}
+	cat ${PFAM_BIOMART_FILE} | awk '{system("./panno.sh "$2" "$5" "$3" "$4)}' | grep -v "^\." >> ${REGIONS_PFAM_FILE}
+	gzip ${PFAM_BIOMART_FILE}
 fi
 
 
