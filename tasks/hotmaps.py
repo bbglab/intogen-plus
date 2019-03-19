@@ -61,6 +61,10 @@ class HotmapsTask(Task):
             ])
 
     def run(self):
-        run_command( f"{self.cmdline} {self.in_file} {self.output_folder}")
+        signatures = 'None' if self.signatures_file is None else {self.signatures_file}
+
+        run_command(
+            f"{self.cmdline} {self.in_file} {self.output_folder} {signatures}"
+        )
 
         
