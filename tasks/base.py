@@ -158,7 +158,7 @@ class Task:
         self.out_file = path.join(self.output_folder, "{}.out.gz".format(self.name))
 
         if self.output_project is not None:
-            self.signatures_file = os.path.join(self.output_project, 'signatures', f'{self.name}.json')
+            self.signatures_file = os.path.join(self.output_project, 'signature', f'{self.name}.json')
 
     def __repr__(self):
         return "{} '{}'".format(self.KEY, self.name)

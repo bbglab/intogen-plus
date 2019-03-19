@@ -38,7 +38,7 @@ process Signature {
 }
 
 // Duplicate this stream
-OUT_SIGNATURE.into { OUT_SIGNATURE_01; OUT_SIGNATURE_02; ;OUT_SIGNATURE_03; OUT_SIGNATURE_04}
+OUT_SIGNATURE.into { OUT_SIGNATURE_01; OUT_SIGNATURE_02; OUT_SIGNATURE_03; OUT_SIGNATURE_04; }
 
 process Vep {
     tag { task_file.fileName }
@@ -146,7 +146,7 @@ process MutRate {
 }
 
 // Combination stream
-IN_ONCODRIVEFML_PHASED = IN_ONCODRIVEFML.phase(OUT_SIGNATURE_01){ it -> it.fileName }.map{ it[0] }
+IN_ONCODRIVEFML_PHASED = IN_ONCODRIVEFML.phase(OUT_SIGNATURE_01){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
 
 process OncodriveFML {
     tag { task_file.fileName }
@@ -164,7 +164,7 @@ process OncodriveFML {
 }
 
 // Combination stream
-IN_SMREGIONS_PHASED = IN_SMREGIONS.phase(OUT_SIGNATURE_02){ it -> it.fileName }.map{ it[0] }
+IN_SMREGIONS_PHASED = IN_SMREGIONS.phase(OUT_SIGNATURE_02){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
 
 process SMRegions {
     tag { task_file.fileName }
@@ -182,14 +182,14 @@ process SMRegions {
 }
 
 // Combination stream
-IN_ONCODRIVECLUSTL_PHASED = IN_ONCODRIVECLUSTL.phase(OUT_SIGNATURE_03){ it -> it.fileName }.map{ it[0] }
+IN_ONCODRIVECLUSTL_PHASED = IN_ONCODRIVECLUSTL.phase(OUT_SIGNATURE_03){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
 
 process OncodriveClustl {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_ONCODRIVECLUSTL_PHASED
+        val task_file from IN_ONCODRIVECLUSTL
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
@@ -201,14 +201,14 @@ process OncodriveClustl {
 }
 
 // Combination stream
-IN_HOTMAPS_PHASED = IN_HOTMAPS.phase(OUT_SIGNATURE_04){ it -> it.fileName }.map{ it[0] }
+IN_HOTMAPS_PHASED = IN_HOTMAPS.phase(OUT_SIGNATURE_04){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
 
 process Hotmaps {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_HOTMAPS_PHASED
+        val task_file from IN_HOTMAPS
 
     output:
         file "hotmaps/*.out.gz" into OUT_HOTMAPS mode flatten
