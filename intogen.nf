@@ -189,7 +189,7 @@ process OncodriveClustl {
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_ONCODRIVECLUSTL
+        val task_file from IN_ONCODRIVECLUSTL_PHASED
 
     output:
         file "oncodriveclustl/*.out.gz" into OUT_ONCODRIVECLUSTL mode flatten
@@ -208,7 +208,7 @@ process Hotmaps {
     publishDir OUTPUT, mode: 'copy'
 
     input:
-        val task_file from IN_HOTMAPS
+        val task_file from IN_HOTMAPS_PHASED
 
     output:
         file "hotmaps/*.out.gz" into OUT_HOTMAPS mode flatten
