@@ -16,6 +16,8 @@ class SignatureTask(Task):
     PLATFORM = "WXS"
 
     def input_write(self, identifier, mut):
+
+        self.PLATFORM = mut['PLATFORM']
         self.write_row([
             mut['CHROMOSOME'],
             mut['POSITION_{}'.format(os.environ['INTOGEN_GENOME'].upper())],
