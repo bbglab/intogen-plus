@@ -33,6 +33,9 @@ class SmregionsTask(Task):
 
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         interes_regions = os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'regions_pfam.tsv.gz')
-    
-        run_command(f"{self.cmdline} -m {self.in_file} -e {cds_regions} -r {interes_regions} -o {self.out_file}")
+        signatures = '' if self.signatures_file is None else f'-s {self.signatures_file}'
+
+        run_command(
+            f"{self.cmdline} -m {self.in_file} -e {cds_regions} -r {interes_regions} {signatures} -o {self.out_file}"
+        )
 
