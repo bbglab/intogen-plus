@@ -36,6 +36,6 @@ class VepTask(Task):
         
         run_command(f"""
             {cmdline} -i {self.in_file} -o STDOUT --assembly {assembly} --no_stats --cache --offline --symbol --protein --tab --canonical --dir {self.datasets} | grep -v ^## | gzip > {self.out_file}; 
-            mkdir -p vep/logs; mv STDOUT_warnings.txt vep/logs/{self.name}.log; 
+            mkdir -p vep/logs; touch STDOUT_warnings.txt; mv STDOUT_warnings.txt vep/logs/{self.name}.log; 
         """)
 
