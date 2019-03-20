@@ -29,6 +29,7 @@ Example of use as imported module:
 import argparse
 import os
 import pickle
+import json
 import gzip
 import csv
 from collections import defaultdict, namedtuple
@@ -233,18 +234,25 @@ def randomize(_, num_mutations, p_normalized, changes):
     return simulated_mutations
 
 
-def load_signature(input_file):
+def load_signature(input_file, load_format):
     """Load precalculated signatures
 
     :param input_file: path, file with the signature probabilities
+    :param load_format: str, pickle or json
     :return: dictionary of signatures
     """
     if os.path.splitext(input_file)[1] == 'gz':
         fx = gzip.open
     else:
         fx = open
-    with fx(input_file, 'rb') as fd:
-        signatures = pickle.load(fd)
+    if load_format == 'pickle':
+        with fx(input_file, 'rb') as fd:
+            signatures = pickle.load(fd)
+    elif load_format == 'json':
+        with fx(input_file, 'r') as fd:
+            signatures = json.load(fd)
+    else:
+        return None
     return signatures
 
 

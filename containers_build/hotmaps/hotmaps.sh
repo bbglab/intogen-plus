@@ -4,6 +4,7 @@ set -x
 # Script arguments
 INPUT_FILE=$1
 OUTPUT_FOLDER=$2
+SIGNATURE_FILE=$3
 CORES=$INTOGEN_CPUS
 
 # Enviroment variables
@@ -88,6 +89,7 @@ then
         -o $TEMP_FOLDER/hotspot_$INPUT_FILENAME \
         -e $TEMP_FOLDER/$INPUT_FILENAME.err --log=stdout \
         -gc $DATASETS_FOLDER/coordinates.txt.gz \
+        -S $SIGNATURE_FILE \
         --maf $MAF_FILE
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi

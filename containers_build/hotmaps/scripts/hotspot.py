@@ -33,6 +33,9 @@ def parse_arguments():
     parser.add_argument('-a', '--annotation',
                         type=str, required=True,
                         help='Annotations about PDB')
+    parser.add_argument('-S', '--signatures',
+                        type=str, default=False,
+                        help='Precomputed signatures. If not present, signatures will be computed.')
     parser.add_argument('-n', '--num-simulations',
                         default=10000,
                         type=int,
@@ -65,7 +68,7 @@ def parse_arguments():
     parser.add_argument('-e', '--error-pdb',
                         type=str, default=None,
                         help='File containing structures that have badly formated pdb files')
-    
+
     parser.add_argument('-o', '--output',
                         default='output.txt',
                         type=str,
@@ -247,7 +250,7 @@ def connect_mysql():
     return db
 
 
-def process_structures(quiet, mut_path, file_coordinates, pdb_info):
+def process_structures(quiet, mut_path, file_coordinates, signatures, pdb_info):
     output = []
 
     import os
@@ -256,8 +259,8 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
     mutations = utils.read_mutations(mut_path)
 
     df_coordinates = simulation_signatures.read_file_coordinates(file_coordinates)
-    with open(opts['mutations'] + ".signature", "rb") as fd:
-        signatures = pickle.load(fd)
+    # with open(opts['mutations'] + ".signature", "rb") as fd:
+    #     signatures = pickle.load(fd)
 
     db = connect_mysql()
 
@@ -284,21 +287,35 @@ def process_structures(quiet, mut_path, file_coordinates, pdb_info):
 
 def main(opts):
     """Currently, performs analysis for the given genes. It attempts to use
-    any available PDB sturctures. It then loops through each protein chain
+    any available PDB structures. It then loops through each protein chain
     and tumor type.
     """
     pdb_info = utils.read_pdb_info(opts['annotation'])
 
     logger.info("Compute signature")
-    signatures = randomizer_aa.compute_signature(opts["maf"])
-    with open(opts['mutations'] + ".signature", 'wb') as fd:
-        pickle.dump(signatures, fd)
+    if (opts['signatures'] is False) or (opts['signatures'] == 'None'):
+        signatures = randomizer_aa.compute_signature(opts["maf"])
+    else:
+        signatures = randomizer_aa.load_signature(
+            input_file=opts['signatures'],
+            load_format='json'
+        )
+        _signatures = {}
+
+        for key, value in signatures.items():
+            ref, alt = key.split('>')
+            key = (ref, ref[0] + alt + ref[-1])
+            _signatures[key] = value
+        signatures = _signatures
+
+    # with open(opts['mutations'] + ".signature", 'wb') as fd:
+    #     pickle.dump(signatures, fd)
 
     quiet = opts['log_level'] != "DEBUG"
 
     steps = 400 * opts['cores']
     chunk_size = int(len(pdb_info) / steps) + 1
-    process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"])
+    process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"], signatures)
 
     header = [[
         'Structure', 'Tumor Type', 'Model', 'Chain', 'Mutation Residues',
