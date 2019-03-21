@@ -292,20 +292,21 @@ def main(opts):
     """
     pdb_info = utils.read_pdb_info(opts['annotation'])
 
-    logger.info("Compute signature")
     if (opts['signatures'] is False) or (opts['signatures'] == 'None'):
+        logger.info("Computing signature")
         signatures = randomizer_aa.compute_signature(opts["maf"])
     else:
+        logger.info("Loading signature")
         signatures = randomizer_aa.load_signature(
             input_file=opts['signatures'],
             load_format='json'
         )
-        _signatures = {}
+        _signatures = {'probabilities': {}}
 
         for key, value in signatures.items():
             ref, alt = key.split('>')
             key = (ref, ref[0] + alt + ref[-1])
-            _signatures[key] = value
+            _signatures['probabilities'][key] = value
         signatures = _signatures
 
     # with open(opts['mutations'] + ".signature", 'wb') as fd:
