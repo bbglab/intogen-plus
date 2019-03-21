@@ -66,19 +66,22 @@ def analysis_signatures_gene(file_sigs,df,cohort):
     if os.path.exists(file_sigs):
         df_sigs = pd.read_csv(file_sigs, sep="\t")
         df_sigs.fillna(0.0, inplace=True)
+        if 'Unnamed: 0' in df_sigs.columns.values:
+            df_sigs.drop(["Unnamed: 0"],axis=1,inplace=True)
         # get the signature with the highest contribution for a particular sample
         df_sigs["signature_max"] = df_sigs.apply(
-            lambda row: row.index[list(row.values).index(np.nanmax(row.values[1:-2]))], axis=1)
-        df_combined = pd.merge(df, df_sigs[["signature_max", "sample_id"]],
-                               left_on=["SAMPLE"], right_on=["sample_id"],
+            lambda row: row.index[list(row.values).index(np.nanmax(row.values[2:]))], axis=1)
+        df_combined = pd.merge(df, df_sigs[["Mutation_type", "signature_max", "Sample"]],
+                               left_on=["SAMPLE", "MUTATION_TYPE"], right_on=["Sample", "Mutation_type"],
                                how="left")
         df_combined["signature_max"].fillna("", inplace=True)
-        df_combined.drop(columns=["sample_id"], inplace=True)
+        df_combined.drop(columns=["Mutation_type", "Sample"], inplace=True)
     else:
         df_combined = df.copy()
         df_combined["signature_max"] = ""
     df_combined["TYPE_MUT"] = df_combined.apply(lambda row: assign_type_mut(row["MUTATION_TYPE"]), axis=1)
     # Assign % of signatures per gene
+
     df_genes = df_combined[df_combined["TYPE_MUT"] == "SNP"].groupby("GENE", as_index=False).agg(
         {"signature_max": count_percentage_signature, "POSITION": "count"}).sort_values("POSITION",
                                                                                         ascending=False)
@@ -86,7 +89,7 @@ def analysis_signatures_gene(file_sigs,df,cohort):
     df_genes["Signature9"] = df_genes.apply(lambda row: row["signature_max"][0], axis=1)
     df_genes["Signature10"] = df_genes.apply(lambda row: row["signature_max"][1], axis=1)
     df_genes.drop(columns=["POSITION", "signature_max"], inplace=True)
-    return df_genes,df_combined
+    return df_genes, df_combined
 
 
 def get_ratio_indels(df_combined):
@@ -146,7 +149,6 @@ def filter_by_polymorphism(df,file_exact):
     df_final_total = pd.merge(df_exac_filtered, df, left_on=["gene"], right_on=["GENE"],how="right")
     df_final_total.drop(columns=["gene"], inplace=True)
     df_final_total[["oe_syn","oe_mis","oe_lof"]].fillna(0.0,inplace=True)
-    print (df_final_total)
     df_final_total["Warning_Germline"] = df_final_total.apply(lambda row: row["oe_syn"] > 1.5 or row["oe_mis"] > 1.5 or row["oe_lof"] > 1.5, axis=1)
     return df_final_total
 '''
@@ -178,13 +180,11 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
             df = pd.read_csv(filein, sep="\t")
             m = re.search(pattern, filein)
             cohort = m.group(1)
-            if "PANEL" in cohort: # This is not intended for panels is just to vett large projects
-                continue
             # 1. Samples with more than 2 mutations in a gene are likely an artifact
             genes_warning_samples = get_warning_muts_sample(df,n_muts_gene)
             # 2. Analysis of signatures
-            file_sigs = os.path.join(input_path, cohort + ".out.gz")
-            df_genes,df_combined=analysis_signatures_gene(file_sigs,df,cohort)
+            file_sigs = os.path.join(input_path, cohort + ".signature_likelihood")
+            df_genes, df_combined= analysis_signatures_gene(file_sigs,df,cohort)
             # 3. Ratio Ratio indels SNP
             df_agg = get_ratio_indels(df_combined)
             df_agg["COHORT"] = cohort
