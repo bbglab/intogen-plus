@@ -157,8 +157,7 @@ def run(cores, output, task, key):
     output_work = os.getcwd()
 
     # Check if it is a Nextflow job
-    # if task != "combination" and 'INTOGEN_NXF' in os.environ:
-    if 'INTOGEN_NXF' in os.environ:
+    if task != "combination" and 'INTOGEN_NXF' in os.environ:
 
         # Check if there are already output results
         output_pattern = os.path.join(output, task, os.path.basename(key).replace(".in.gz", "*"))
