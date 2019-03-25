@@ -29,7 +29,7 @@ fi
 # Base paths
 
 base_intogen=/workspace/projects/intogen_2017/runs/20190220/
-base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190220/
+base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190305/
 base_stjude=/workspace/projects/stjude/intogen/runs/20190220/
 
 # deconstruct for vetting
