@@ -32,10 +32,11 @@ class SignatureTask(Task):
             prefix = 'wg'
         else:
             prefix = 'cds'
+        region_file = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', f'{prefix}.regions.gz')
         normalize_file = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', f'{prefix}.counts.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         output = os.path.splitext(os.path.splitext(self.out_file)[0])[0]
 
         run_command(f'''
-            {self.cmdline} {self.in_file} {normalize_file} {cores} {output}.json
+            {self.cmdline} {self.in_file} {region_file} {normalize_file} {cores} {output}.json
         ''')
