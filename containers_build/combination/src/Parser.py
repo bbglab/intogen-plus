@@ -71,7 +71,14 @@ class Parser():
 
                     for i, r in df.iterrows():
                         try:
-                            pvalues[r[self.column_keys[method][0]]][method] = (r[self.column_keys[method][1]],r[self.column_keys[method][2]])
+                            gene_column = r[self.column_keys[method][0]]
+                            pvalue_column = self.column_keys[method][1]
+                            qvalue_column = self.column_keys[method][2]
+                            if gene_column in pvalues and method in pvalues[gene_column]: # its a repeated entry, select the one with the lowest pvalue
+                                if pvalues[gene_column][method][0] > r[pvalue_column]:
+                                    pvalues[gene_column][method] = (r[pvalue_column],r[qvalue_column])
+                            else:
+                                pvalues[gene_column][method] = (r[pvalue_column], r[qvalue_column])
                         except KeyError as e:
                             raise e
 
