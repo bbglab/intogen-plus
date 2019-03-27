@@ -35,10 +35,7 @@ class OncodriveClustlTask(Task):
         cores = os.environ.get("INTOGEN_CPUS", 4)
         genome = os.environ['INTOGEN_GENOME']
         kmer = 5 if self.CANCER_TYPE == 'SKCM' else 3
-        signatures = '' if self.signatures_file is None else f'-sign {self.signatures_file}'
-
-        # FIXME: disable the signature argument
-        signatures = ''
+        signatures = '' if self.signatures_file is None else f'-sig {self.signatures_file}'
 
         if kmer != 3:
             signatures = ''
