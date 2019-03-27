@@ -22,7 +22,7 @@ From: debian:buster-slim
     pip3 install bgsignature
 
     # Install OncodriveCLUSTL
-    pip3 --no-cache-dir install git+https://bitbucket.org/bbglab/oncodriveclustl.git@signature
+    pip3 --no-cache-dir install git+https://bitbucket.org/bbglab/oncodriveclustl.git@master
 
     # Clean unused things
     apt remove -y python3-pip git
