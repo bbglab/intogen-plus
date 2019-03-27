@@ -42,7 +42,7 @@ class OncodriveClustlTask(Task):
 
         run_command(f"""
             {self.cmdline} -i {self.in_file} -o {self.output_folder}/{self.name} -r {cds_regions}  
-            -c {cores} -g {genome} -sim region_restricted -n 10000 -kmer {kmer} {signatures} --concatenate && 
+            -c {cores} -g {genome} -sim region_restricted -n 1000 -kmer {kmer} {signatures} --concatenate && 
             (cat {self.output_folder}/{self.name}/elements_results.txt | gzip > {self.out_file}) && 
             (cat {self.output_folder}/{self.name}/clusters_results.tsv | gzip > {self.output_folder}/{self.name}.clusters.gz) &&  
             (cat {self.output_folder}/{self.name}/oncohortdrive_results.out | gzip > {self.output_folder}/{self.name}.oncohortdrive.gz) 
