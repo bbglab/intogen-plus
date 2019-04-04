@@ -28,9 +28,9 @@ fi
 
 # Base paths
 
-base_intogen=/workspace/projects/intogen_2017/runs/20190220/
-base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190220/
-base_stjude=/workspace/projects/stjude/intogen/runs/20190220/
+base_intogen=/workspace/projects/intogen_2017/runs/20190325/
+base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190325/
+base_stjude=/workspace/projects/stjude/intogen/runs/20190325/
 
 # clustl for vetting
 
@@ -41,7 +41,7 @@ stjude_clustl=${base_stjude}/oncodriveclustl/*.clusters.gz
 path_intogen_clustl=$INTOGEN_DATASETS/boostDM/oncodriveclustl/
 
 if [ ! -d ${path_intogen_clustl}  ]; then
-    mkdir path_intogen_clustl
+    mkdir $path_intogen_clustl
 fi
 
 ln -s $intogen_clustl $path_intogen_clustl

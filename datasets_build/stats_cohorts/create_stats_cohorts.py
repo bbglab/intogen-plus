@@ -4,16 +4,7 @@ import click
 import json
 import bglogs
 
-d_legend = {"THYM":"Thymic","MGCT":"Male germ","LY":"Lymphoma","THCA":"Thyroid","MESO":"Mesothelioma","Stomach":"Stomach adeno","HC":"Hepatic Cancer","HNSC":"Head and neck",
-          "UCEC":"Uterine Endometroid","CH":"Cholangiocarcinoma","PAAD":"Pancreas Adeno","RCCC":"Renal Clear Cell","BLCA":"Bladder","OV":"Ovary","ESCA":"Esophagous",
-           "LUNG":"Lung","PRAD":"Prostate Adeno","BRCA":"Breast Adeno","COREAD":"Colorectañ","UCS":"Uterine Carcinosarcoma","AML":"AML","EWS":"Ewing's Sarcoma",
-           "ALL":"ALL","CLL":"CLL","CESC":"Cervix Squamous","LGG":"Lower grade glioma","GBM":"Glioblastoma","MDPS":"Myelodisplasic Proliferative","SG":"Salivary Glands","NHLY":"Non-Hodking lymphoma",
-           "SCLC":"Small-Cell Lung","CM":"Cutaneous Melanoma","MDS":"Myelodisplasic","LEIS":"Leiomyosarcoma","LUSC":"Lung squamous","DLBCL":"B-Cell lymphoma","LUAD":"Lung Adeno","MB":"Medulloblastoma",
-           "OS":"Osteosarcoma","RCH":"Renal chromophobe","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal","CLL":"CLL","NB":"Neuroblastoma","UVM":"Uveal Melanoma","PAIS":"Pancreas neuroendocrine",
-           "PIA":"Pilocityc astrocytoma","ACC":"Adrenal cortex carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","Renal papillary cell":"RPC","MM":"Multiple Myeloma",
-           "PANCREAS":"Pancreas adeno","ST":"Stomach adeno","RPC":"Renal papillary cell", "CSCC":"Cutaneous Squamous","RB":"RetinoBlastoma","HGG":"High-Grade Glioma","EPD":"Ependymoma","CPC":"Choroid Plexus Carcinoma",
-           "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor"
-          }
+
 
 def select_ttype(row,d_names):
     '''
@@ -120,9 +111,18 @@ def read_data(path_harwig,path_intogen,path_stjude,dict_ttypes):
     df_intogen = read_intogen(path_intogen,d_names)
     # Concat all information
     df_final = pd.concat([df_intogen, df_harwig, df_stjude], sort=True)
+
     # Include the name of the tumor type
+    with open("dictionary_labels.json",'r') as f:
+        d_legend = json.load(f)
     df_final["legend"] = df_final.apply(
         lambda row: d_legend[row["cancer_type"]] if row["cancer_type"] in d_legend else row["cancer_type"],
+        axis=1)
+    # Include the long name of tumor type
+    with open("dictionary_long_names.json",'r') as f:
+        d_name_web = json.load(f)
+    df_final["web_name"] = df_final.apply(
+        lambda row: d_name_web[row["cancer_type"]] if row["cancer_type"] in d_name_web else row["cancer_type"],
         axis=1)
     return df_final
 

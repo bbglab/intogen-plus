@@ -59,7 +59,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Include samples with more then 3 mutations")
             l_data.append(l)
-        elif row["SNP"] < 5 and row["Warning_Germline"]: # Less than 5 samples mutated and warning of germline
+        elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"]: # Less than 5 samples mutated and warning of germline
             l = list(row.values)
             l.append("Germline Warning")
             l_data.append(l)

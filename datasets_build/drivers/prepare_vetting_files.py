@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 
-artifacts=['HMCN1', 'TTN', 'OBSCN', 'GPR98', "RYR2","RYR3"]
+artifacts=['HMCN1', 'TTN', 'OBSCN', 'GPR98', "RYR2","RYR3", "RYR1", "NEB"]
 
 def count_percentage_signature(grp):
     signatures_hypermutators = ["Signature.9", "Signature.10"]
