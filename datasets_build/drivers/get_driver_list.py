@@ -52,11 +52,11 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Warning expression")
             l_data.append(l)
-        elif ((row["Signature9"] > 0.5) and (row["cancer_type"] in germ_center)):
+        elif ((row["Signature9"] >= 0.5) and (row["cancer_type"] in germ_center)):
             l = list(row.values)
             l.append("Warning Signature9")
             l_data.append(l)
-        elif row["Warning_num_cohorts"] and row["TIER"]=="3":
+        elif row["Warning_num_cohorts"] and row["TIER"]==3:
             l = list(row.values)
             l.append("Warning single cohort")
             l_data.append(l)
