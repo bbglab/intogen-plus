@@ -136,7 +136,7 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
     df_drivers_vetting = pd.merge(df_driver_cgc, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
-        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
+        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact","Warning_num_cohorts"]].drop_duplicates(), how="left")
     df_drivers_vetting["Warning_Expression"].fillna(False, inplace=True)
     df_drivers_vetting["Warning_Germline"].fillna(False, inplace=True)
     df_drivers_vetting["OR_Warning"].fillna(False, inplace=True)
