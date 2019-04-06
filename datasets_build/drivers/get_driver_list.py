@@ -131,7 +131,7 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df_driver_cgc["MUTS/SAMPLE"] = df_driver_cgc.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
     # Include the number of cohorts per gene
     # Add warning of number of cohorts per gene
-    df_counts = df_driver_cgc.groupby("GENE",as_index=False).agg({"COHORT":"count"})
+    df_counts = df_driver_cgc.groupby("SYMBOL",as_index=False).agg({"COHORT":"count"})
     df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
     df_driver_cgc=df_driver_cgc.merge(df_counts)
     df_driver_cgc["Warning_num_cohorts"] = df_driver_cgc.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
