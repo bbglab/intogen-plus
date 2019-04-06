@@ -86,7 +86,7 @@ cp olfactory_receptors.tsv $or_path
 echo "Preparing vetting DataFrame. This might take a while..."
 echo $exact_file
 
-if [  -f ${output_vetting}  ]; then
+if [ ! -f ${output_vetting}  ]; then
 
      python ${path_script_vetting}  -i ${intogen_decons} -w ${hartwig_decons} -s ${stjude_decons}  -c ${info_cohorts} -o ${output_vetting} \
     -t $expression_file_tcga -e $exact_file -r $or_path
