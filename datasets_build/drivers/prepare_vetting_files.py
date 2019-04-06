@@ -8,9 +8,10 @@ import glob
 import re
 import pandas as pd
 import numpy as np
+import json
 
 
-artifacts=['HMCN1', 'TTN', 'OBSCN', 'GPR98', "RYR2","RYR3", "RYR1", "NEB"]
+
 
 def count_percentage_signature(grp):
     signatures_hypermutators = ["Signature.9", "Signature.10"]
@@ -202,6 +203,11 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
     df_info_cohort = pd.read_csv(info_cohorts, sep="\t")
     # Add information of cancer type
     df_final_signatures_info = pd.merge(df_final_signatures, df_info_cohort)
+    df_counts = df_final_signatures_info.groupby("SYMBOL", as_index=False).agg({"COHORT": "count"})
+    df_counts.rename(columns={"COHORT": "num_cohorts"}, inplace=True)
+    df_final_signatures_info = df_final_signatures_info.merge(df_counts)
+    df_final_signatures_info["Warning_num_cohorts"] = df_final_signatures_info.apply(
+        lambda row: True if row["num_cohorts"] == 1 else False, axis=1)
     # Filter by expression
     df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_tcga)
     # Filter by Polymorphism
@@ -210,7 +216,14 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
     # Add filter by olfactory receptors
     df_final_signatures_info = filter_by_olfactory_receptors(df_final_signatures_info,of_file)
     # Add filter by known artifacts
-    df_final_signatures_info["Warning_Artifact"] = df_final_signatures_info.apply(lambda row: row["GENE"] in artifacts,axis=1)
+    with open("artifacts.json") as f:
+        artifacts = json.load(f)
+    df_final_signatures_info["Warning_Artifact"] = df_final_signatures_info.apply(lambda row: row["GENE"] in artifacts["suspects"],axis=1)
+    # Add warning of number of cohorts per gene
+    df_counts = df_final_signatures_info.groupby("SYMBOL",as_index=False).agg({"COHORT":"count"})
+    df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
+    df_final_signatures_info=df_final_signatures_info.merge(df_counts)
+    df_final_signatures_info["Warning_num_cohorts"] = df_final_signatures_info.apply(lambda row:True if row["num_cohorts"] == 1 else False,axis=1)
     # Save it
     df_final_signatures_info.to_csv(output,sep="\t",index=False,compression="gzip")
 

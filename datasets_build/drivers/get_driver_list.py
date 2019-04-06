@@ -42,22 +42,27 @@ def get_cancer_genes(row):
 def perform_vetting(df):
 
     l_data = []
+    germ_center = ["AML","LY","CLL","MDS","DLBCL","NHLY"]
     for index, row in df.iterrows():
-        if (row["CGC_CANCER_GENE"] or row["CGC_GENE"]) and not(row["Signature9"] >0.5):
-            l = list(row.values)
-            l.append("PASS")
-            l_data.append(l)
-        elif row["Warning_Expression"]:
+#        if (row["CGC_CANCER_GENE"] or row["CGC_GENE"]) and ((row["Signature9"] <= 0.5) and (row["cancer_type"] in germ_center)) and not(row["Warning_Expression"]):
+#            l = list(row.values)
+#            l.append("PASS")
+#            l_data.append(l)
+        if row["Warning_Expression"]:
             l = list(row.values)
             l.append("Warning expression")
             l_data.append(l)
-        elif row["Signature9"] > 0.5:
+        elif ((row["Signature9"] > 0.5) and (row["cancer_type"] in germ_center)):
             l = list(row.values)
             l.append("Warning Signature9")
             l_data.append(l)
+        elif row["Warning_num_cohorts"] and row["TIER"]=="3":
+            l = list(row.values)
+            l.append("Warning single cohort")
+            l_data.append(l)
         elif row["Samples_3muts"] >= 1:
             l = list(row.values)
-            l.append("Include samples with more then 3 mutations")
+            l.append("Samples with more than 3 mutations")
             l_data.append(l)
         elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"]: # Less than 5 samples mutated and warning of germline
             l = list(row.values)
@@ -69,7 +74,7 @@ def perform_vetting(df):
             l_data.append(l)
         elif row["Warning_Artifact"]:
             l = list(row.values)
-            l.append("Known False Positive")
+            l.append("Lack of literature evidence")
             l_data.append(l)
 
         else:
@@ -103,7 +108,10 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df_info.rename(columns={"MUTATIONS": "MUTATIONS_COHORT", "SAMPLES": "SAMPLES_COHORT"}, inplace=True)
     df = df_final.merge(df_info, how="left", left_on="COHORT", right_on="COHORT")
     # Select Tier 1 and Tier 2 genes with more than two mutations and more than two samples mutated
-    df_tier12 = df[((df["TIER"]==1)|((df["TIER"]==2)))&(df["SAMPLES"]>2)&(df["MUTS"]>2)]
+    #df_tier12 = df[(((df["TIER"] == 1) & (two_methods((df["Significant_Bidders"])))) | ((df["TIER"] == 2) & (two_methods(df["Significant_Bidders"])))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
+    #df_tier12 = df[( ((df["TIER"]==1)&(~pd.isnull((df["Significant_Bidders"]))))|((df["TIER"]==2)&(~pd.isnull(df["Significant_Bidders"]))))&(df["SAMPLES"]>2)&(df["MUTS"]>2)]
+    #df_tier12 = df[(((df["TIER"] == 1) &(~pd.isnull(df["Significant_Bidders"]))) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
+    df_tier12 = df[(((df["TIER"] == 1)) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
     df_tier12["gene_driver_statement"] = "tier1_tier2"
     # Select Tier 3 with at least two Significant Bidders
     df_tier3_signals = df[(df["TIER"] == 3) & ((two_methods(df["Significant_Bidders"]))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
