@@ -129,14 +129,19 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df_driver_cgc.drop(["Gene Symbol", "cancer_type_intogen"], inplace=True, axis=1)
     # Include average number of mutations per sample
     df_driver_cgc["MUTS/SAMPLE"] = df_driver_cgc.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
-
+    # Include the number of cohorts per gene
+    # Add warning of number of cohorts per gene
+    df_counts = df_driver_cgc.groupby("GENE",as_index=False).agg({"COHORT":"count"})
+    df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
+    df_driver_cgc=df_driver_cgc.merge(df_counts)
+    df_driver_cgc["Warning_num_cohorts"] = df_driver_cgc.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
     # Perform the vetting
     df_vetting = pd.read_csv(vetting_file, sep="\t",
                              compression="gzip")
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
     df_drivers_vetting = pd.merge(df_driver_cgc, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
-        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact","Warning_num_cohorts"]].drop_duplicates(), how="left")
+        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
     df_drivers_vetting["Warning_Expression"].fillna(False, inplace=True)
     df_drivers_vetting["Warning_Germline"].fillna(False, inplace=True)
     df_drivers_vetting["OR_Warning"].fillna(False, inplace=True)
