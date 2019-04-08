@@ -113,7 +113,7 @@ def run_create_tiers(input, output_file, threshold, threshold_cgc, column_filter
     df.sort_values(column_filter,inplace=True)
     df_f = df[~np.isnan(df[column_filter])&(df[column_filter]<0.5)].copy() # Select only a portion of likely candidates, make the ranking faster
     ranking_limit = df_f.sort_values("RANKING",ascending=False).head(1)["RANKING"].values[0] if len(df_f) > 1 else None
-    headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv","n_mis","n_non"] # ,
+    headers = ["SYMBOL", "TIER","All_Bidders","Significant_Bidders", column_filter, column_filter_cgc, "RANKING","MUTS","SAMPLES",'wmis_cv',"wnon_cv","wspl_cv","n_mis","n_non"] # ,
 
     if ranking_limit:
         # Compute tiers

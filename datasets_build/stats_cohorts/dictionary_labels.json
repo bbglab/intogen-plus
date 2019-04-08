@@ -5,6 +5,8 @@
            "SCLC":"Small-Cell Lung","CM":"Cutaneous Melanoma","MDS":"Myelodisplasic","LEIS":"Leiomyosarcoma","LUSC":"Lung squamous","DLBCL":"B-Cell lymphoma","LUAD":"Lung adeno","MB":"Medulloblastoma",
            "OS":"Osteosarcoma","RCH":"Renal chromophobe","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal","CLL":"CLL","NB":"Neuroblastoma","UVM":"Uveal Melanoma","PAIS":"Pancreas neuroendocrine",
            "PIA":"Pilocityc astrocytoma","ACC":"Adrenal cortex carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell","MM":"Multiple Myeloma",
-           "PANCREAS":"Pancreas cancer","ST":"Stomach adeno","RPC":"Renal papillary cell", "CSCC":"Cutaneous squamous","RB":"RetinoBlastoma","HGG":"High-Grade Glioma","EPD":"Ependymoma","CPC":"Choroid Plexus Carcinoma",
-           "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor"
+           "PANCREAS":"Pancreas cancer","ST":"Stomach adeno","RPC":"Renal papillary cell", "CSCC":"Cutaneous squamous","RB":"RetinoBlastoma","HGG":"High-Grade Glioma","EPD":"Ependymoma","CPC":"Choroid Plexus Carcinoma","KIDNEY":"Kidney cancer",
+             "R":"Kidney cancer",
+           "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor", "SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer",
+            "ANGS":"Angiosarcoma"
           }

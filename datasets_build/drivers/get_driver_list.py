@@ -3,6 +3,7 @@ Compute the driver list from the output of intogen and the vetting information
 '''
 
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import glob
 import json
 import os
@@ -44,10 +45,6 @@ def perform_vetting(df):
     l_data = []
     germ_center = ["AML","LY","CLL","MDS","DLBCL","NHLY"]
     for index, row in df.iterrows():
-#        if (row["CGC_CANCER_GENE"] or row["CGC_GENE"]) and ((row["Signature9"] <= 0.5) and (row["cancer_type"] in germ_center)) and not(row["Warning_Expression"]):
-#            l = list(row.values)
-#            l.append("PASS")
-#            l_data.append(l)
         if row["Warning_Expression"]:
             l = list(row.values)
             l.append("Warning expression")
@@ -86,6 +83,17 @@ def perform_vetting(df):
     df_filtered = pd.DataFrame(l_data, columns=columns)
     return df_filtered
 
+def get_drivers(row):
+
+
+    if row["TIER"] <= 3 and row["CGC_GENE"]:     # Tier 1 and tier 2 if cgc no bidders needed
+        return True
+    elif (len(str(row["Significant_Bidders"]).split(",")) > 1) and row["TIER"] <= 3 :     # Tier 1 if not cgc one bidder, #len(str(row["Significant_Bidders"]).split(",")) > 1str(row["Significant_Bidders"]) != "nan"
+        return True
+    else:
+        return False
+
+
 
 def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     l_data = []
@@ -102,45 +110,33 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     cgc["CGC_GENE"] = True
     cgc.rename(columns={"cancer_type":"cancer_type_intogen"},inplace=True)
     # Read the data
-    df_final = pd.concat(l_data)
+    df_final = pd.concat(l_data,sort=True)
     # Load information of the data
     df_info = pd.read_csv(info_cohorts,sep="\t")
     df_info.rename(columns={"MUTATIONS": "MUTATIONS_COHORT", "SAMPLES": "SAMPLES_COHORT"}, inplace=True)
     df = df_final.merge(df_info, how="left", left_on="COHORT", right_on="COHORT")
-    # Select Tier 1 and Tier 2 genes with more than two mutations and more than two samples mutated
-    #df_tier12 = df[(((df["TIER"] == 1) & (two_methods((df["Significant_Bidders"])))) | ((df["TIER"] == 2) & (two_methods(df["Significant_Bidders"])))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
-    #df_tier12 = df[(((df["TIER"] == 1) & (two_methods((df["Significant_Bidders"])))) | ((df["TIER"] == 2) & (~pd.isnull(df["Significant_Bidders"])))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
-    #df_tier12 = df[( ((df["TIER"]==1)&(~pd.isnull((df["Significant_Bidders"]))))|((df["TIER"]==2)&(~pd.isnull(df["Significant_Bidders"]))))&(df["SAMPLES"]>2)&(df["MUTS"]>2)]
-    #df_tier12 = df[(((df["TIER"] == 1) &(~pd.isnull(df["Significant_Bidders"]))) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
-    df_tier12 = df[(((df["TIER"] == 1)) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
-    df_tier12["gene_driver_statement"] = "tier1_tier2"
-    # Select Tier 3 with at least two Significant Bidders
-    df_tier3_signals = df[(df["TIER"] == 3) & ((two_methods(df["Significant_Bidders"]))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
-    df_tier3_signals["gene_driver_statement"] = "tier3_multiple_signals"
-    # Combined both cases
-    df_drivers = pd.concat([df_tier12, df_tier3_signals])
+    df = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen"]], left_on="SYMBOL",
+             right_on="Gene Symbol", how="left")
+    df["CGC_GENE"].fillna(False, inplace=True)
+    df["driver"] = df.apply(lambda row: get_drivers(row),axis=1)
+    df_drivers = df[df["driver"]]
     print ("Number of drivers pre-vetting:" + str(len(df_drivers["SYMBOL"].unique())))
-
-
     # Include cgc
-    df_driver_cgc = pd.merge(df_drivers, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen"]], left_on="SYMBOL",
-                           right_on="Gene Symbol", how="left")
-    df_driver_cgc["CGC_GENE"].fillna(False, inplace=True)
-    df_driver_cgc["CGC_CANCER_GENE"] = df_driver_cgc.apply(lambda row: get_cancer_genes(row), axis=1)
-    df_driver_cgc.drop(["Gene Symbol", "cancer_type_intogen"], inplace=True, axis=1)
+    df_drivers["CGC_CANCER_GENE"] = df_drivers.apply(lambda row: get_cancer_genes(row), axis=1)
+    df_drivers.drop(["Gene Symbol", "cancer_type_intogen"], inplace=True, axis=1)
     # Include average number of mutations per sample
-    df_driver_cgc["MUTS/SAMPLE"] = df_driver_cgc.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
+    df_drivers["MUTS/SAMPLE"] = df_drivers.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
     # Include the number of cohorts per gene
     # Add warning of number of cohorts per gene
-    df_counts = df_driver_cgc.groupby("SYMBOL",as_index=False).agg({"COHORT":"count"})
+    df_counts = df_drivers.groupby("SYMBOL",as_index=False).agg({"COHORT":"count"})
     df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
-    df_driver_cgc=df_driver_cgc.merge(df_counts)
-    df_driver_cgc["Warning_num_cohorts"] = df_driver_cgc.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
+    df_drivers=df_drivers.merge(df_counts)
+    df_drivers["Warning_num_cohorts"] = df_drivers.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
     # Perform the vetting
     df_vetting = pd.read_csv(vetting_file, sep="\t",
                              compression="gzip")
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
-    df_drivers_vetting = pd.merge(df_driver_cgc, df_vetting[
+    df_drivers_vetting = pd.merge(df_drivers, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
         "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
     df_drivers_vetting["Warning_Expression"].fillna(False, inplace=True)
