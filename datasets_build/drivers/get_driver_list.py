@@ -56,11 +56,11 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Warning Signature9")
             l_data.append(l)
-        elif row["Warning_num_cohorts"] and not(row["CGC_GENE"]):
+        elif row["Warning_num_cohorts"] and not(row["CGC_GENE"]) and (row["Warning_Artifact"]):
             l = list(row.values)
-            l.append("Warning single cohort")
+            l.append("Warning single cohort and lack evidence")
             l_data.append(l)
-        elif row["Samples_3muts"] >= 1:
+        elif row["Samples_3muts"] >= 1 and not(row["CGC_GENE"]):
             l = list(row.values)
             l.append("Samples with more than 3 mutations")
             l_data.append(l)
@@ -109,6 +109,7 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     df = df_final.merge(df_info, how="left", left_on="COHORT", right_on="COHORT")
     # Select Tier 1 and Tier 2 genes with more than two mutations and more than two samples mutated
     #df_tier12 = df[(((df["TIER"] == 1) & (two_methods((df["Significant_Bidders"])))) | ((df["TIER"] == 2) & (two_methods(df["Significant_Bidders"])))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
+    #df_tier12 = df[(((df["TIER"] == 1) & (two_methods((df["Significant_Bidders"])))) | ((df["TIER"] == 2) & (~pd.isnull(df["Significant_Bidders"])))) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
     #df_tier12 = df[( ((df["TIER"]==1)&(~pd.isnull((df["Significant_Bidders"]))))|((df["TIER"]==2)&(~pd.isnull(df["Significant_Bidders"]))))&(df["SAMPLES"]>2)&(df["MUTS"]>2)]
     #df_tier12 = df[(((df["TIER"] == 1) &(~pd.isnull(df["Significant_Bidders"]))) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
     df_tier12 = df[(((df["TIER"] == 1)) | (df["TIER"] == 2)) & (df["SAMPLES"] > 2) & (df["MUTS"] > 2)]
