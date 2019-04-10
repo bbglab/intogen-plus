@@ -198,6 +198,9 @@ class VariantsFilter(Filter):
         for v in self.parent.run(group_key, group_data):
             count_before += 1
 
+            # Force the strand to be positive
+            v['STRAND'] = '+'
+
             if v['REF'] == v['ALT']:
                 skip_same_alt += 1
                 continue
