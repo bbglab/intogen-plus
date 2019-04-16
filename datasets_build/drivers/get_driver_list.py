@@ -41,7 +41,8 @@ def get_cancer_genes(row):
         return False
 
 def perform_vetting(df):
-
+    with open("artifacts.json") as f:
+        artifacts = json.load(f)
     l_data = []
     germ_center = ["AML","LY","CLL","MDS","DLBCL","NHLY"]
     for index, row in df.iterrows():
@@ -69,7 +70,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Olfactory Receptor")
             l_data.append(l)
-        elif row["Warning_Artifact"]:
+        elif row["Warning_Artifact"] or row["SYMBOL"] in artifacts["suspects"]:
             l = list(row.values)
             l.append("Lack of literature evidence")
             l_data.append(l)
@@ -135,9 +136,11 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
     df_drivers=df_drivers.merge(df_counts)
     df_drivers["Warning_num_cohorts"] = df_drivers.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
+
     # Perform the vetting
     df_vetting = pd.read_csv(vetting_file, sep="\t",
                              compression="gzip")
+
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
     df_drivers_vetting = pd.merge(df_drivers, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
