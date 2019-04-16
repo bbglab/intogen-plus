@@ -43,8 +43,12 @@ def read_stjude(path_stjude):
                              names=["ORIGINAL_NAME", "NAME", "cancer_type"])
     df_samples_stjude = pd.read_csv(os.path.join(path_stjude, "count_samples.txt"), names=["SAMPLES", "NAME"],
                                     sep=" ")
+
     df_vars_stjude = pd.read_csv(os.path.join(path_stjude, "count_variants.txt"), names=["NAME", "MUTATIONS"],
                                  sep="\t")
+    df_info_stjude = pd.read_csv(os.path.join(path_stjude, "info_datasets.csv"),
+                                 sep="\t")
+
     df_data_stjude = df_samples_stjude.merge(df_vars_stjude)
     df_data_stjude = df_data_stjude.merge(df_st_jude[["NAME", "cancer_type"]].drop_duplicates())
 
@@ -55,6 +59,7 @@ def read_stjude(path_stjude):
     df_data_stjude["TYPE"] = df_data_stjude.apply(lambda row: dict_ttypes_stjude[row["COHORT"].split("_")[0]], axis=1)
     df_data_stjude["AGE"] = "Pediatric"
     df_data_stjude["TREATED"] = df_data_stjude.apply(lambda row: "Treated" if "R_" in row["COHORT"] or "M_" in row["COHORT"] else "Untreated", axis=1)
+    df_data_stjude=df_data_stjude.merge(df_info_stjude)
     df_data_stjude.drop(columns=["NAME"], inplace=True)
     return df_data_stjude
 
@@ -66,6 +71,7 @@ def read_hartwig(path_hartwig,d_names):
     '''
     df_samples_hartwig = pd.read_csv(os.path.join(path_hartwig, "count_samples.txt"), names=["SAMPLES", "NAME"], sep=" ")
     df_vars_hartiwg = pd.read_csv(os.path.join(path_hartwig, "count_variants.txt"), names=["NAME", "MUTATIONS"], sep="\t")
+    df_info_hartiwg = pd.read_csv(os.path.join(path_hartwig, "info_datasets.csv"),sep="\t")
     df_data_hartwig = df_samples_hartwig.merge(df_vars_hartiwg)
     df_data_hartwig["source"] = "HARTWIG"
     df_data_hartwig["PLATFORM"] = "WGS"
@@ -76,6 +82,7 @@ def read_hartwig(path_hartwig,d_names):
     df_data_hartwig["AGE"] = "Adult"
     df_data_hartwig["TREATED"] = "Treated"
     df_data_hartwig.drop(columns=["NAME"], inplace=True)
+    df_data_hartwig = df_data_hartwig.merge(df_info_hartiwg)
     return df_data_hartwig
 
 def read_intogen(path_intogen,d_names):
@@ -93,8 +100,7 @@ def read_intogen(path_intogen,d_names):
     df_data_intogen["source"] = df_data_intogen.apply(lambda row: row['COHORT'].split('_')[0], axis=1)
     path_info_extra = os.path.join(path_intogen, "info_datasets.csv")
     df_info_extra = pd.read_csv(path_info_extra, sep="\t")
-    df_data_intogen = df_data_intogen.merge(
-    df_info_extra[["COHORT", "PLATFORM", "TYPE", "AGE", "TREATED"]].drop_duplicates(), how="left")
+    df_data_intogen = df_data_intogen.merge(df_info_extra.drop_duplicates())
     df_data_intogen["cancer_type"] = df_data_intogen.apply(lambda row: select_ttype(row,d_names), axis=1)
     return df_data_intogen
 

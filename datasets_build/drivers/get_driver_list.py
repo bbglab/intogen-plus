@@ -93,9 +93,12 @@ def get_drivers(row):
     else:
         return False
 
+def concat(grp):
+    set_ttypes = set(grp)
+    return ",".join(list(set_ttypes))
 
 
-def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
+def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file):
     l_data = []
     for path in paths:
         for file_data in glob.glob(os.path.join(path, "*." + threshold + ".out.gz")):
@@ -153,8 +156,12 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     # Save only those non-vetted
     df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"].to_csv(os.path.join(dir_out,"vetted_drivers"+threshold+".tsv"), sep="\t",index=False)
     print ("Number of drivers after-vetting:" + str(len(df_drivers_vetting_info[df_drivers_vetting_info["FILTER"]=="PASS"]["SYMBOL"].unique())))
-
-
+    # Create a unique file of drivers
+    drivers=df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"]["SYMBOL"].unique()
+    # Add the ensembl gene id
+    df_ensembl = pd.read_csv(ensembl_file, sep="\t", index_col=False, usecols=[0,1,2,10], names=["ENSEMBL_GENE","SYMBOL","ENSEMBL_PROTEIN","ENSEMBL_TRANSCRIPT"], header=None) # ENSG00000160752	FDPS	ENSP00000349078	1	155312255	155312395	340	480	1260	1	ENST00000356657
+    df_drivers_unique= df_ensembl[df_ensembl["SYMBOL"].isin(drivers)].drop_duplicates()
+    df_drivers_unique.to_csv(os.path.join(dir_out,"unique_drivers"+threshold+".tsv"), sep="\t",index=False)
 
 
 @click.command()
@@ -165,10 +172,12 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
 @click.option('-o', '--output', 'output', type=click.Path(),  help="Path to the output folder.", required=True)
 @click.option('-t', '--threshold', 'threshold',  help="Threshold of the output files, 05 or 01. Default 05", default="05")
 @click.option('-g', '--cgc_path', 'cgc_path', type=click.Path(),  help="Path to the CGC information data")
+@click.option('-n', '--ensembl_file', 'ensembl_file', type=click.Path(),  help="Path to the canonical trancript information file",default="/workspace/projects/intogen_2017/pipeline/datasets/hg38_vep92_develop/shared/cds_biomart.tsv")
 @click.option('-v', '--vetting', 'vetting_file', type=click.Path(),  help="Path to the vetting file")
-def cmdline(intogen, hartwig, stjude, info_cohorts, output, threshold, cgc_path, vetting_file):
+
+def cmdline(intogen, hartwig, stjude, info_cohorts, output, threshold, cgc_path, vetting_file,ensembl_file):
     paths = [intogen,hartwig,stjude]
-    main(paths,info_cohorts,output,threshold,cgc_path,vetting_file)
+    main(paths,info_cohorts,output,threshold,cgc_path,vetting_file,ensembl_file)
 
 
 
