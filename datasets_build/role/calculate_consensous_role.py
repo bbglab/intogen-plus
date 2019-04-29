@@ -110,6 +110,10 @@ def cmdline(path_cgi_moa, path_drivers, path_run_dndscv, path_output, threshold)
     df_combined_role["COMBINED_ROLE"] = df_combined_role.apply(lambda row: set_consensous_role(row), axis=1)
     # Save it
     df_combined_role.to_csv(path_output,sep="\t",index=False)
+    # Update drivers
+    df_combined_role.rename(columns={"gene_name":"SYMBOL"},inplace=True)
+    df_drivers = df_drivers.merge(df_combined_role[["SYMBOL","COMBINED_ROLE"]].drop_duplicates())
+    df_drivers.to_csv(path_drivers,sep="\t",index=False)
 
 if __name__ == "__main__":
     cmdline()
