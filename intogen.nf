@@ -128,7 +128,8 @@ process DndsCV {
 OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02; }
 
 // Combination stream
-IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName }.map{ it[0] }
+// IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName }.map{ it[0] }
+IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
 
 process MutRate {
     tag { task_file.fileName }
