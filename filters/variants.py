@@ -172,7 +172,17 @@ class VariantsFilter(Filter):
             reader = csv.reader(fd, delimiter='\t')
             for i, r in enumerate(reader, start=1):
                 coverage_tree[r[0]][int(r[1]):(int(r[2]) + 1)] = i
-        
+
+        # Load Somatic Pon file
+        somatic_pon_file = os.path.join(
+            os.environ['INTOGEN_DATASETS'], 'shared', 'somatic_pon_count_filtered.tsv.gz'
+        )
+        somatic_pon = set()
+        with gzip.open(somatic_pon_file, 'rt') as fd:
+            for line in fd:
+                line = line.strip().split('\t')
+                somatic_pon.add(line)
+
         # Stats counter
         skip_hypermutators = 0
         skip_multiple_samples_per_donor = 0
@@ -182,6 +192,7 @@ class VariantsFilter(Filter):
         skip_coverage_positions = []
         skip_same_alt = 0
         skip_n_sequence = 0
+        skip_somatic_pon = 0
         skip_mismatch = 0
         skip_duplicated = 0
         skip_no_liftover = 0
@@ -242,6 +253,12 @@ class VariantsFilter(Filter):
                 skip_n_sequence += 1
                 continue
 
+            # Skip variants that are in the somatic_pon_count_filtered.tsv.gz file
+            var_value = (v['CHROMOSOME'], v['POSITION'], v['REF'], v['ALT'])
+            if var_value in somatic_pon:
+                skip_somatic_pon += 1
+                continue
+
             count_after += 1
             if v['ALT_TYPE'] == 'snp':
                 count_snp += 1
@@ -291,7 +308,8 @@ class VariantsFilter(Filter):
             'n_sequence': skip_n_sequence,
             'mismatch': skip_mismatch,
             'duplicated': skip_duplicated,
-            'noliftover': skip_no_liftover
+            'noliftover': skip_no_liftover,
+            'somatic_pon': skip_somatic_pon
         }
 
         self.stats[group_key]['count'] = {
