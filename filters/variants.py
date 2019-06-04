@@ -180,7 +180,7 @@ class VariantsFilter(Filter):
         somatic_pon = set()
         with gzip.open(somatic_pon_file, 'rt') as fd:
             for line in fd:
-                line = line.strip().split('\t')
+                line = tuple(line.strip().split('\t'))
                 somatic_pon.add(line)
 
         # Stats counter
