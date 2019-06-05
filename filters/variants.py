@@ -253,12 +253,6 @@ class VariantsFilter(Filter):
                 skip_n_sequence += 1
                 continue
 
-            # Skip variants that are in the somatic_pon_count_filtered.tsv.gz file
-            var_value = (v['CHROMOSOME'], v['POSITION'], v['REF'], v['ALT'])
-            if var_value in somatic_pon:
-                skip_somatic_pon += 1
-                continue
-
             count_after += 1
             if v['ALT_TYPE'] == 'snp':
                 count_snp += 1
@@ -289,6 +283,12 @@ class VariantsFilter(Filter):
             
             v['POSITION_HG19'] = v['POSITION'] if genome_ref == 'hg19' else lo_position
             v['POSITION_HG38'] = v['POSITION'] if genome_ref == 'hg38' else lo_position
+
+            # Skip variants that are in the somatic_pon_count_filtered.tsv.gz file
+            var_value = (v['CHROMOSOME'], str(v['POSITION_HG38']), v['REF'], v['ALT'])
+            if var_value in somatic_pon:
+                skip_somatic_pon += 1
+                continue
 
             yield v
 
