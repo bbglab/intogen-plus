@@ -35,4 +35,4 @@ class OncodriveFmlTask(Task):
         signatures = '' if self.signatures_file is None else f'--signature {self.signatures_file}'
         
         # Run OncodriveFML
-        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {self.out_file} {signatures} --cores {cores}")
+        run_command(f"{self.cmdline} -i {self.in_file} -e {cds_regions} -t coding -s {seq} -o {self.out_file} {signatures} --cores {cores} -c /oncodrivefml/oncodrivefml_v2.conf")

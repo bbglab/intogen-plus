@@ -14,7 +14,7 @@ path_base=$INTOGEN_DATASETS/stats_cohorts/
 path_output=$path_base/stats_cohorts.tsv
 # Datasets
 path_intogen=/workspace/datasets/intogen_datasets/genomes/
-path_hartwig=/workspace/datasets/hartwig/20181011/
+path_hartwig=/workspace/datasets/hartwig/20190502/DR-024-update2/data/
 path_stjude=/workspace/datasets/stjude/20180716/preprocess/
 # Mapping dictionary
 dict_mapping_cohorts=$path_base/dictionary_datasets.json

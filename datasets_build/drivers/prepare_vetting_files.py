@@ -173,7 +173,23 @@ def filter_by_olfactory_receptors(df, of_file):
     df["OR_Warning"] = df.apply(lambda row: True if row["GENE"] in orfs else False,axis=1)
     return df
 
-def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exact_germline_mutations,of_file):
+def include_literature(df,cancermine_file):
+    '''
+
+    :param df: df of drivers
+    :param cancermine_file:
+    :return:
+    '''
+    # read
+    cancermine = pd.read_csv(cancermine_file,sep="\t")
+    cancermine_g = cancermine.groupby("gene_normalized", as_index=False).agg({"pmid": "count"})
+    cancermine_g.rename(columns={"pmid": "n_papers", "gene_normalized": "GENE"}, inplace=True)
+    # Match with genes
+    df = df.merge(cancermine_g, how="left")
+    df["n_papers"].fillna(0, inplace=True)
+    return df
+
+def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exact_germline_mutations,of_file, cancermine_file):
 
     l = []
     for input_path in paths:
@@ -207,13 +223,14 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
     df_final_signatures_info=filter_by_expression(df_final_signatures_info,expression_file_tcga)
     # Filter by Polymorphism
     df_final_signatures_info=filter_by_polymorphism(df_final_signatures_info,exact_germline_mutations)
-    # Add filter by Gene Lenght
-    # Add filter by olfactory receptors
+     # Add filter by olfactory receptors
     df_final_signatures_info = filter_by_olfactory_receptors(df_final_signatures_info,of_file)
     # Add filter by known artifacts
     with open("artifacts.json") as f:
         artifacts = json.load(f)
     df_final_signatures_info["Warning_Artifact"] = df_final_signatures_info.apply(lambda row: row["GENE"] in artifacts["suspects"],axis=1)
+    # Add filter by literature
+    df_final_signatures_info = include_literature(df_final_signatures_info,cancermine_file)
     # Save it
     df_final_signatures_info.to_csv(output,sep="\t",index=False,compression="gzip")
 
@@ -228,12 +245,13 @@ def main(paths,pattern,n_muts_gene,info_cohorts,output,expression_file_tcga,exac
 @click.option('-t', '--expression_file_tcga', 'exp_tcga', type=click.Path(),  help="Path to non expressed genes form tcga", required=True)
 @click.option('-e', '--exact_germline_mutations', 'exact', type=click.Path(),  help="Path to exact germline variants", required=True)
 @click.option('-r', '--olfatory_receptors', 'olfatory_receptors', type=click.Path(),  help="Path to the olfactory receptors", required=True)
-def cmdline(intogen, hartwig, stjude,info_cohorts,output,exp_tcga,exact, olfatory_receptors):
+@click.option('-l', '--cancer_mine_file', 'cancermine', type=click.Path(),  help="Path to the cancermine sentences file", required=True)
+def cmdline(intogen, hartwig, stjude,info_cohorts,output,exp_tcga,exact, olfatory_receptors,cancermine):
     paths = [intogen,hartwig,stjude]
     # configuration
     pattern = re.compile("\/([A-Z0-9_\-\,]+)\.in\.gz")
     n_muts_gene = 3
-    main(paths,pattern,n_muts_gene,info_cohorts,output,exp_tcga,exact,olfatory_receptors)
+    main(paths,pattern,n_muts_gene,info_cohorts,output,exp_tcga,exact,olfatory_receptors,cancermine)
 
 
 if __name__ == "__main__":

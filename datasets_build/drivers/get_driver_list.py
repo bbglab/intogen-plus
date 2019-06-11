@@ -41,7 +41,7 @@ def get_cancer_genes(row):
         return False
 
 def perform_vetting(df):
-    with open("artifacts.json") as f:
+    with open("artifacts_new.json") as f:
         artifacts = json.load(f)
     l_data = []
     germ_center = ["AML","LY","CLL","MDS","DLBCL","NHLY"]
@@ -62,7 +62,11 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Samples with more than 3 mutations")
             l_data.append(l)
-        elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"]: # Less than 5 samples mutated and warning of germline
+        elif row["Samples_3muts"] >= 1 and (row["cancer_type"] in germ_center): # To discuss
+            l = list(row.values)
+            l.append("Samples with more than 3 mutations in Lymphoma")
+            l_data.append(l)
+        elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"] and not(row["Tier_CGC"]==1):
             l = list(row.values)
             l.append("Germline Warning")
             l_data.append(l)
@@ -70,11 +74,14 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Olfactory Receptor")
             l_data.append(l)
-        elif row["Warning_Artifact"] or row["SYMBOL"] in artifacts["suspects"]:
+        elif row["SYMBOL"] in artifacts["suspects"]:
+            l = list(row.values)
+            l.append("Known artifact")
+            l_data.append(l)
+        elif row["n_papers"]==0 and not(row["Tier_CGC"]==1):
             l = list(row.values)
             l.append("Lack of literature evidence")
             l_data.append(l)
-
         else:
             l = list(row.values)
             l.append("PASS")
@@ -112,14 +119,14 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     # load cgc
     cgc = pd.read_csv(cgc_path, sep="\t")
     cgc["CGC_GENE"] = True
-    cgc.rename(columns={"cancer_type":"cancer_type_intogen"},inplace=True)
+    cgc.rename(columns={"cancer_type":"cancer_type_intogen","Tier":"Tier_CGC"},inplace=True)
     # Read the data
     df_final = pd.concat(l_data,sort=True)
     # Load information of the data
     df_info = pd.read_csv(info_cohorts,sep="\t")
     df_info.rename(columns={"MUTATIONS": "MUTATIONS_COHORT", "SAMPLES": "SAMPLES_COHORT"}, inplace=True)
     df = df_final.merge(df_info, how="left", left_on="COHORT", right_on="COHORT")
-    df = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen"]], left_on="SYMBOL",
+    df = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen", "Tier_CGC"]], left_on="SYMBOL",
              right_on="Gene Symbol", how="left")
     df["CGC_GENE"].fillna(False, inplace=True)
     df["driver"] = df.apply(lambda row: get_drivers(row),axis=1)
@@ -136,7 +143,6 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     df_counts.rename(columns={"COHORT":"num_cohorts"},inplace=True)
     df_drivers=df_drivers.merge(df_counts)
     df_drivers["Warning_num_cohorts"] = df_drivers.apply(lambda row: True if row["num_cohorts"] == 1 else False,axis=1)
-
     # Perform the vetting
     df_vetting = pd.read_csv(vetting_file, sep="\t",
                              compression="gzip")
@@ -144,7 +150,7 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
     df_drivers_vetting = pd.merge(df_drivers, df_vetting[
         ["SNP", "INDEL", "COHORT", "INDEL/SNP", "Signature10", "Signature9", "Warning_Expression", "Warning_Germline",
-        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact"]].drop_duplicates(), how="left")
+        "SYMBOL", "Samples_3muts","OR_Warning","Warning_Artifact","n_papers"]].drop_duplicates(), how="left")
     df_drivers_vetting["Warning_Expression"].fillna(False, inplace=True)
     df_drivers_vetting["Warning_Germline"].fillna(False, inplace=True)
     df_drivers_vetting["OR_Warning"].fillna(False, inplace=True)
@@ -157,7 +163,7 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     df_drivers_vetting_info.to_csv(
         os.path.join(dir_out,"all_drivers"+threshold+".tsv"), sep="\t",index=False)
     # Save only those non-vetted
-    df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"].to_csv(os.path.join(dir_out,"vetted_drivers"+threshold+".tsv"), sep="\t",index=False)
+    df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"].to_csv(os.path.join(dir_out,"vetted_drivers"+threshold+"2.tsv"), sep="\t",index=False)
     print ("Number of drivers after-vetting:" + str(len(df_drivers_vetting_info[df_drivers_vetting_info["FILTER"]=="PASS"]["SYMBOL"].unique())))
     # Create a unique file of drivers
     drivers=df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"]["SYMBOL"].unique()

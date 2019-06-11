@@ -29,7 +29,7 @@ fi
 # Base paths
 
 base_intogen=/workspace/projects/intogen_2017/runs/20190325/
-base_hartwig=/workspace/projects/hartwig/intogen/runs/20181011_20190325/
+base_hartwig=/workspace/projects/hartwig/intogen/runs/20190502_20190503/
 base_stjude=/workspace/projects/stjude/intogen/runs/20190325/
 
 # deconstruct for vetting
@@ -67,10 +67,14 @@ output_intogen=${path_output}/drivers_intogen.05.tsv
 
 echo "Downloading ExAC"
 wget https://storage.googleapis.com/gnomad-public/release/2.1/ht/constraint/constraint.txt.bgz
-cp constraint.txt.bgz $INTOGEN_DATASETS/drivers/constraint.txt.gz
+mv constraint.txt.bgz $INTOGEN_DATASETS/drivers/constraint.txt.gz
 
+# Download cancer mine
 
+wget https://zenodo.org/record/2662509/files/cancermine_sentences.tsv
+mv cancermine_sentences.tsv  $INTOGEN_DATASETS/drivers/
 
+cancermine_file=$INTOGEN_DATASETS/drivers/cancermine_sentences.tsv
 exact_file=$INTOGEN_DATASETS/drivers/constraint.txt.gz
 
 expression_file_tcga=$INTOGEN_DATASETS/combination/non_expressed_genes_tcga.tsv
@@ -89,7 +93,7 @@ echo $exact_file
 if [ ! -f ${output_vetting}  ]; then
 
      python ${path_script_vetting}  -i ${intogen_decons} -w ${hartwig_decons} -s ${stjude_decons}  -c ${info_cohorts} -o ${output_vetting} \
-    -t $expression_file_tcga -e $exact_file -r $or_path
+    -t $expression_file_tcga -e $exact_file -r $or_path -l $cancermine_file
 
 else
     echo "File ${output_vetting} already exists! Skipping preparison of vetting files. If you what to recompute it, remove the output file"
