@@ -28,9 +28,9 @@ fi
 
 # Base paths
 
-base_intogen=/workspace/projects/intogen_2017/runs/20190325/
+base_intogen=/workspace/projects/intogen_2017/runs/20190607/
 base_hartwig=/workspace/projects/hartwig/intogen/runs/20190502_20190503/
-base_stjude=/workspace/projects/stjude/intogen/runs/20190325/
+base_stjude=/workspace/projects/stjude/intogen/runs/20190610/
 
 # deconstruct for vetting
 
@@ -56,6 +56,7 @@ cgc_info=${INTOGEN_DATASETS}/combination/cgc/cancer_gene_census_parsed.tsv
 
 path_script_vetting=prepare_vetting_files.py
 path_script_drivers=get_driver_list.py
+path_script_filtering=filter_vetted_list.py
 
 # Path output
 
@@ -84,13 +85,15 @@ expression_file_tcga=$INTOGEN_DATASETS/combination/non_expressed_genes_tcga.tsv
 or_path=$INTOGEN_DATASETS/drivers/olfactory_receptors.tsv
 
 cp olfactory_receptors.tsv $or_path
+cp white_listed.txt $INTOGEN_DATASETS/drivers/
+cp black_listed.txt $INTOGEN_DATASETS/drivers/
 
 # Run the vetting preparison
 
 echo "Preparing vetting DataFrame. This might take a while..."
 echo $exact_file
 
-if [ ! -f ${output_vetting}  ]; then
+if [  -f ${output_vetting}  ]; then
 
      python ${path_script_vetting}  -i ${intogen_decons} -w ${hartwig_decons} -s ${stjude_decons}  -c ${info_cohorts} -o ${output_vetting} \
     -t $expression_file_tcga -e $exact_file -r $or_path -l $cancermine_file
@@ -103,14 +106,21 @@ fi
 
 echo "Now running the driver discovery from the output of intOGen and the vetting information...."
 
-if [ ! -f ${output_intogen}  ]; then
+
+python ${path_script_drivers}  -i ${intogen_paths} -w ${hartwig_paths} -s ${stjude_paths}  -c ${info_cohorts} -o ${path_output} -t 05 -v ${output_vetting} -g ${cgc_info}
 
 
-    python ${path_script_drivers}  -i ${intogen_paths} -w ${hartwig_paths} -s ${stjude_paths}  -c ${info_cohorts} -o ${path_output} -t 05 -v ${output_vetting} -g ${cgc_info}
+# output from vetting of drivers
 
-else
-    echo "File ${output_intogen} already exists! Skipping driver list discovery. If you what to recompute it, rename the output file"
-fi
+output_vetting_drivers=$INTOGEN_DATASETS/drivers/vetted_drivers_preliminar_05.tsv
+output_all_drivers=$INTOGEN_DATASETS/drivers/all_drivers05.tsv
+white_listed=$INTOGEN_DATASETS/drivers/white_listed.txt
+black_listed=$INTOGEN_DATASETS/drivers/black_listed.txt
+
+echo "Finally, process white and black listed genes providing the final catalog of drivers..."
+
+python ${path_script_filtering} -i ${output_vetting_drivers} -a ${output_all_drivers} -b ${black_listed} -w ${white_listed} -o ${path_output} -t 05
+
 
 
 echo ""

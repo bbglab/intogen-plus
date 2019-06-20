@@ -8,5 +8,5 @@
            "PANCREAS":"Pancreas cancer","ST":"Stomach adeno","RPC":"Renal papillary cell", "CSCC":"Cutaneous squamous","RB":"RetinoBlastoma","HGG":"High-Grade Glioma","EPD":"Ependymoma","CPC":"Choroid Plexus Carcinoma","KIDNEY":"Kidney cancer",
              "R":"Kidney cancer",
            "SK":"Kidney Sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor", "SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer",
-            "ANGS":"Angiosarcoma", "PENILE_CANCER":"Penile cancer"
+            "ANGS":"Angiosarcoma", "PENILE_CANCER":"Penile cancer", "SPI": "Spiradenocarcinoma"
           }

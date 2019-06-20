@@ -28,9 +28,9 @@ fi
 
 # Base paths
 
-base_intogen=/workspace/projects/intogen_2017/runs/20190325/
+base_intogen=/workspace/projects/intogen_2017/runs/20190607/
 base_hartwig=/workspace/projects/hartwig/intogen/runs/20190502_20190503/
-base_stjude=/workspace/projects/stjude/intogen/runs/20190325/
+base_stjude=/workspace/projects/stjude/intogen/runs/20190610/
 
 # clustl for vetting
 

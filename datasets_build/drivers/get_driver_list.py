@@ -54,17 +54,9 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Warning Signature9")
             l_data.append(l)
-        elif row["Warning_num_cohorts"] and not(row["CGC_GENE"]) and (row["Warning_Artifact"]):
-            l = list(row.values)
-            l.append("Warning single cohort and lack evidence")
-            l_data.append(l)
         elif row["Samples_3muts"] >= 1 and not(row["CGC_GENE"]):
             l = list(row.values)
             l.append("Samples with more than 3 mutations")
-            l_data.append(l)
-        elif row["Samples_3muts"] >= 1 and (row["cancer_type"] in germ_center): # To discuss
-            l = list(row.values)
-            l.append("Samples with more than 3 mutations in Lymphoma")
             l_data.append(l)
         elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"] and not(row["Tier_CGC"]==1):
             l = list(row.values)
@@ -78,7 +70,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Known artifact")
             l_data.append(l)
-        elif row["n_papers"]==0 and not(row["Tier_CGC"]==1):
+        elif row["n_papers"]== 0 and not(row["Tier_CGC"]==1):
             l = list(row.values)
             l.append("Lack of literature evidence")
             l_data.append(l)
@@ -86,6 +78,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("PASS")
             l_data.append(l)
+
 
     columns = list(df.columns) + ["FILTER"]
     df_filtered = pd.DataFrame(l_data, columns=columns)
@@ -106,7 +99,7 @@ def concat(grp):
     return ",".join(list(set_ttypes))
 
 
-def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file):
+def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file):
     l_data = []
     for path in paths:
         for file_data in glob.glob(os.path.join(path, "*." + threshold + ".out.gz")):
@@ -163,14 +156,9 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
     df_drivers_vetting_info.to_csv(
         os.path.join(dir_out,"all_drivers"+threshold+".tsv"), sep="\t",index=False)
     # Save only those non-vetted
-    df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"].to_csv(os.path.join(dir_out,"vetted_drivers"+threshold+"2.tsv"), sep="\t",index=False)
+    df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"].to_csv(os.path.join(dir_out,"vetted_drivers_preliminar_"+threshold+".tsv"), sep="\t",index=False)
     print ("Number of drivers after-vetting:" + str(len(df_drivers_vetting_info[df_drivers_vetting_info["FILTER"]=="PASS"]["SYMBOL"].unique())))
-    # Create a unique file of drivers
-    drivers=df_drivers_vetting_info[df_drivers_vetting_info["FILTER"] == "PASS"]["SYMBOL"].unique()
-    # Add the ensembl gene id
-    df_ensembl = pd.read_csv(ensembl_file, sep="\t", index_col=False, usecols=[0,1,2,10], names=["ENSEMBL_GENE","SYMBOL","ENSEMBL_PROTEIN","ENSEMBL_TRANSCRIPT"], header=None) # ENSG00000160752	FDPS	ENSP00000349078	1	155312255	155312395	340	480	1260	1	ENST00000356657
-    df_drivers_unique= df_ensembl[df_ensembl["SYMBOL"].isin(drivers)].drop_duplicates()
-    df_drivers_unique.to_csv(os.path.join(dir_out,"unique_drivers"+threshold+".tsv"), sep="\t",index=False)
+
 
 
 @click.command()
@@ -181,12 +169,11 @@ def main(paths,info_cohorts,dir_out,threshold,cgc_path,vetting_file,ensembl_file
 @click.option('-o', '--output', 'output', type=click.Path(),  help="Path to the output folder.", required=True)
 @click.option('-t', '--threshold', 'threshold',  help="Threshold of the output files, 05 or 01. Default 05", default="05")
 @click.option('-g', '--cgc_path', 'cgc_path', type=click.Path(),  help="Path to the CGC information data")
-@click.option('-n', '--ensembl_file', 'ensembl_file', type=click.Path(),  help="Path to the canonical trancript information file",default="/workspace/projects/intogen_2017/pipeline/datasets/hg38_vep92_develop/shared/cds_biomart.tsv")
 @click.option('-v', '--vetting', 'vetting_file', type=click.Path(),  help="Path to the vetting file")
 
-def cmdline(intogen, hartwig, stjude, info_cohorts, output, threshold, cgc_path, vetting_file,ensembl_file):
+def cmdline(intogen, hartwig, stjude, info_cohorts, output, threshold, cgc_path, vetting_file):
     paths = [intogen,hartwig,stjude]
-    main(paths,info_cohorts,output,threshold,cgc_path,vetting_file,ensembl_file)
+    main(paths,info_cohorts,output,threshold,cgc_path,vetting_file)
 
 
 
