@@ -52,7 +52,6 @@ def prepare_task(reader, tasks, item):
 
 def prepare_tasks(output, groups, reader, tasks, cores=None):
     func = partial(prepare_task, reader, tasks)
-
     all_tasks = []
     if cores > 1:
         with ProcessPoolExecutor(cores) as executor:

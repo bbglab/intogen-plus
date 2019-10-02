@@ -4,21 +4,19 @@ import json
 import click
 import bglogs
 
-def load_data(path_cgc,path_cohorts,dict_mapping_cgc,dict_mapping_cgc_intogen):
+def load_data(path_cgc,dict_mapping_cgc,dict_mapping_cgc_intogen):
     '''
     Returns the dataframe and dictionaries loaded into python objects
     :param path_cgc:
-    :param path_cohorts:
     :param dict_mapping_cgc:
     :param dict_mapping_cgc_intogen:
     :return:
     '''
     # Read data
     cgc_dataset = pd.read_csv(path_cgc, sep=',', header=0)
-    intogen_ctypes = pd.read_csv(path_cohorts, sep='\t', header=0)
     mapping = json.load(open(dict_mapping_cgc, "rb"))
     mapping_cgc_intogen = json.load(open(dict_mapping_cgc_intogen, 'rb'))
-    return cgc_dataset, intogen_ctypes, mapping, mapping_cgc_intogen
+    return cgc_dataset, mapping, mapping_cgc_intogen
 
 def map_cgc_into_acronym(cgc_dataset,mapping):
     '''
@@ -76,15 +74,14 @@ def map_acronyms_into_intogen(acronyms, mapping_cgc_intogen):
 
 @click.command()
 @click.option('--path_cgc_original',help= 'path to the downloaded file from cgc', type=click.Path(),required=True)
-@click.option('--path_cohorts',help= 'path to the intogen information of the avaliable cohorts', type=click.Path(),required=True)
 @click.option('--dict_mapping_cgc',help= 'mapping of text of cgc to acronyms', type=click.Path(),required=True)
 @click.option('--dict_mapping_cgc_intogen',help= 'mapping cancer types cgc to intogen', type=click.Path(),required=True)
 @click.option('--path_output',help= 'path to the output directory', type=click.Path(),required=True)
 @click.option('--debug', is_flag=True)
 
-def cmdline(path_cgc_original, path_cohorts, dict_mapping_cgc, dict_mapping_cgc_intogen, path_output,debug=False):
+def cmdline(path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen, path_output,debug=False):
     bglogs.configure(debug=debug)
-    cgc_dataset, intogen_ctypes, mapping, mapping_cgc_intogen=load_data(path_cgc_original,path_cohorts, dict_mapping_cgc, dict_mapping_cgc_intogen)
+    cgc_dataset, mapping, mapping_cgc_intogen=load_data(path_cgc_original,dict_mapping_cgc, dict_mapping_cgc_intogen)
     cgc_dataset["acronym_cgc"] = map_cgc_into_acronym(cgc_dataset,mapping)
     intogen_ttypes = []
 
