@@ -12,7 +12,6 @@ fi
 # define the paths
 path_base=$INTOGEN_DATASETS/combination/
 path_cgc=$INTOGEN_DATASETS/combination/cgc/
-path_data_intogen=$INTOGEN_DATASETS/stats_cohorts/stats_cohorts.tsv
 file_cgc=$path_base/cgc/cancer_gene_census.csv
 dict_mapping_cgc=$path_base/cgc/mapping_cgc_ttypes.json
 dict_mapping_cgc_intogen=$path_base/cgc/mapping_cgc_ttypes_intogen.json
@@ -33,11 +32,11 @@ cp mapping_cgc_ttypes_intogen.json $INTOGEN_DATASETS/combination/cgc
 cp negative_gene_set.tsv $INTOGEN_DATASETS/combination
 
 echo "Parsing the dataframe"
-echo "python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_data_intogen \
+echo "python parse_cgc.py --path_cgc_original $file_cgc \
                     --dict_mapping_cgc $dict_mapping_cgc --dict_mapping_cgc_intogen $dict_mapping_cgc_intogen \
                     --path_output $path_output --debug"
 
-python parse_cgc.py --path_cgc_original $file_cgc --path_cohorts $path_data_intogen \
+python parse_cgc.py --path_cgc_original $file_cgc \
                     --dict_mapping_cgc $dict_mapping_cgc --dict_mapping_cgc_intogen $dict_mapping_cgc_intogen \
                     --path_output $path_cgc --debug
 
