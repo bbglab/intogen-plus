@@ -13,22 +13,23 @@ Regarding the expression of the genes:
 import os
 import random
 from glob import glob
-import pandas as pd
-import click
-import numpy as np
 
+import click
+import pandas as pd
+import bgdata
 
 
 class NegativeSet:
 
-    def __init__(self, olfactory_receptors, path_expression_data):
+    def __init__(self, olfactory_receptors):  #, path_expression_data):
         """Initialize the class
-        :param input_file: path, file with precalculated results
+        :param olfactory_receptors: path, file with a list of olfactory receptors
+        :param path_expression_data: path, compressed file of expression data (deprecated)
         :return: None
         """
         df_olfactory_receptors = pd.read_csv(olfactory_receptors, sep='\t', header=0)
-        self.olfactory_receptors=set(df_olfactory_receptors['Symbol'].tolist())
-        self.path_expression_data=path_expression_data
+        self.olfactory_receptors = set(df_olfactory_receptors['Symbol'].tolist())
+        self.path_expression_data = bgdata.get('intogen/expression/tcga_pancanatlas')  # path_expression_data
         self.negative_set, self.not_expressed = self.create_negative_set()
 
     def create_negative_set(self):
@@ -40,11 +41,14 @@ class NegativeSet:
             'HMCN1', 'TTN', 'OBSCN', 'GPR98',  'RYR2', 'RYR3'
         ])
         not_expressed_pancancer = {}
-        for input_file in glob(os.path.join(self.path_expression_data, '*.txt')):
-            if 'samplecorr' in input_file:
-                continue
-            tumor = os.path.splitext(os.path.basename(input_file))[0]
-            df = pd.read_csv(input_file, header=0, sep='\t')
+        # for input_file in glob(os.path.join(self.path_expression_data, '*.txt')):
+        #     if 'samplecorr' in input_file:
+        #         continue
+        data = pd.read_csv(self.path_expression_data, header=0, sep='\t', compression='infer')
+        tumors = data.groupby(by='TUMOR_TYPE')
+        for tumor, df in tumors:
+            # tumor = os.path.splitext(os.path.basename(input_file))[0]
+            # df = pd.read_csv(input_file, header=0, sep='\t', compression='infer')
             try:
                 values = df.groupby(by='GENE').apply(lambda x: x['log2(RSEM)'].tolist()).reset_index()
             except KeyError as e:
@@ -70,7 +74,7 @@ class NegativeSet:
 
         return results, not_expressed_pancancer
 
-    def save(self, output, output_expression ):
+    def save(self, output, output_expression):
         """Save the negative sets to an output file
         :param output: path, path of the file to create
         :param output_expression: path, path of the output file with the list of not-expressed genes
@@ -112,13 +116,13 @@ class NegativeSet:
 
 @click.command()
 @click.option('--olfactory_receptors', 'olfactory_receptors', help='Path to the olfactory receptors')
-@click.option('--path_expression_data', 'path_expression_data', help='Path to the expression data')
+# @click.option('--path_expression_data', 'path_expression_data', help='Path to the expression data')
 @click.option('--output_total', 'output_total', help='Output file of the total file')
 @click.option('--output_non_expressed', 'output_non_expressed', help='Output file of the non-expressed genes')
-def cmdline(olfactory_receptors,path_expression_data, output_total, output_non_expressed ):
-    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors,path_expression_data=path_expression_data)
-    negative_set.save(output=output_total,output_expression=output_non_expressed)
+def cmdline(olfactory_receptors, output_total, output_non_expressed):  # path_expression_data
+    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors)  #, path_expression_data=path_expression_data)
+    negative_set.save(output=output_total, output_expression=output_non_expressed)
+
 
 if __name__ == "__main__":
     cmdline()
-

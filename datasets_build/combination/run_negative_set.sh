@@ -15,13 +15,12 @@ file_output=$path_base/negative_gene_set.tsv
 file_output_non_expressed=$path_base/non_expressed_genes_tcga.tsv
 file_olfactory_receptors=olfactory_receptors.tsv
 
-path_expression_tcga=/workspace/datasets/TCGA_PanCanAtlas/open_version/expression/data_parsed_dataframe/
-
+# path_expression_tcga=/workspace/datasets/TCGA_PanCanAtlas/open_version/expression/data_parsed_dataframe/
+path_expression_tcga=pancanatlas_openversion.txt.xz
 
 # download the data
 
 wget https://genome.weizmann.ac.il/horde/download/genes.csv -O olfactory_receptors.tsv
-
 
 # create the dataframe
 
