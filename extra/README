@@ -1,0 +1,23 @@
+
+IntOGen pipeline extra content
+==============================
+
+In this document you can find scripts that we have used to do some
+postprocessing of our data.
+This is completely dependent of your own run, but here we provide instructions
+in case you want to similar (or the same) things.
+
+The Makefile will execute all this postprocessing of the data.
+
+
+Requirements:
+
+bgparsers
+numpy
+pandas
+pytabix
+
+
+Note that the count_samples.txt and count_variants.txt files
+do not have dependencies, as it is not that easy to track all the files.
+Those files must be manually deleted if you want them to be updated.
