@@ -11,3 +11,4 @@ fi
 ./ensembl_canonical_transcripts.sh
 ./cds.sh
 ./count.sh
+./somatic_pon_count.sh
