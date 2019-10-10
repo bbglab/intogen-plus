@@ -112,8 +112,8 @@ $(DRIVER_GENES): $(DRIVER_GENES_FILES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVER
 
 
 MUTATION_FILES = $(wildcard $(patsubst %,%/vep/*.out.gz, $(RUNS)))
-$(MUTATIONS): $(MUTATION_FILES)
-	python mutations.py $@ $(RUNS)
+$(MUTATIONS): $(MUTATION_FILES) $(BIOMART)
+	python mutations.py $@ $(BIOMART) $(RUNS)
 
 
 clean:

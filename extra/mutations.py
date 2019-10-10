@@ -1,7 +1,7 @@
 import glob
 import sys
 from os import path
-
+import logging
 import pandas as pd
 
 
@@ -44,9 +44,15 @@ def get_protein_mutation(pos, change):
     else:
         return wt_aa + str(pos)
 
-
-def run(paths, output):
+def count_unique(grp):
+    s = set(list(grp))
+    return len(s)
+def run(paths, biomart, output):
     list_dfs = []
+    df_ensembl = pd.read_csv(biomart, sep="\t", index_col=False, usecols=[0, 1, 2, 10],
+                             names=["ENSEMBL_GENE", "SYMBOL", "ENSEMBL_PROTEIN", "ENSEMBL_TRANSCRIPT"],
+                             header=None)
+    canonical_transcripts = df_ensembl["ENSEMBL_TRANSCRIPT"].unique()
     for path_ in paths:
         for filein in glob.glob(path.join(path_, 'vep', "*.out.gz")):
             cohort = path.basename(filein).split(".")[0]
@@ -56,7 +62,7 @@ def run(paths, output):
                 continue
 
             ##Uploaded_variation	Location	Allele	Gene	Feature	Feature_type	Consequence	cDNA_position	CDS_position	Protein_position	Amino_acids	Codons	Existing_variation	IMPACTDISTANCE	STRAND	FLAGS	SYMBOL	SYMBOL_SOURCE	HGNC_ID	CANONICAL	ENSP
-            df = df[(df["CANONICAL"] == "YES") & (valid_csqn(df["Consequence"]))][["#Uploaded_variation", "Location", "Feature", 'Consequence']]
+            df = df[(df["CANONICAL"] == "YES") & (valid_csqn(df["Consequence"])) & (df["Feature"].isin(canonical_transcripts))][["#Uploaded_variation", "Location", "Feature", 'Consequence']]
             df[["CHR", "POS", "REF", "ALT", "SAMPLES"]] = df.apply(lambda row: get_info(row["#Uploaded_variation"], row["Location"]), axis=1)
             df.rename(columns={'Feature': 'TRANSCRIPT'}, inplace=True)
             df["COHORT"] = cohort
@@ -68,10 +74,17 @@ def run(paths, output):
             list_dfs.append(df.drop_duplicates())
 
     df_final = pd.concat(list_dfs)
+    # check duplicated mutations
+    x=df_final.groupby(["MUTATION"],as_index=False).agg({"TRANSCRIPT":count_unique})
+    if x[x["TRANSCRIPT"]>0].shape[0]:
+        logging.error('A mutation appears to be mapped to 2+ transcripts')
+        quit(-1)
+
     df_final.to_csv(output, sep='\t', index=False)
 
 
 if __name__ == "__main__":
     output = sys.argv[1]
-    paths = sys.argv[2:]
-    run(paths, output)
+    biomart = sys.argv[2]
+    paths = sys.argv[3:]
+    run(paths, biomart, output)
