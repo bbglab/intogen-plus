@@ -27,9 +27,11 @@ DNDSCV_PAN = ${DNDSCV_PAN_RUN}
 
 # OUTPUTS
 OUTPUT_FOLDER = output
+CANCERS = $(OUTPUT_FOLDER)/ctypes.json
 STATS_COHORTS = $(OUTPUT_FOLDER)/cohorts.tsv
 GENES = $(OUTPUT_FOLDER)/genes.tsv
 DRIVER_GENES = $(OUTPUT_FOLDER)/drivers.tsv
+MUTATIONS = $(OUTPUT_FOLDER)/mutations.tsv.gz
 
 
 # Other intermediate files
@@ -38,11 +40,13 @@ OUTPUT_FOLDER_DRIVERS = $(OUTPUT_FOLDER)/drivers
 EXACT = $(OUTPUT_FOLDER_DRIVERS)/constraint.txt.gz
 CANCERMINE = $(OUTPUT_FOLDER_DRIVERS)/cancermine_sentences.tsv
 
-all: check-env cohorts genes drivers
+all: check-env cancers cohorts genes drivers mutations
 
+cancers: $(CANCERS)
 cohorts: check-env-datasets $(STATS_COHORTS)
 genes: check-env-datasets $(GENES)
 drivers: check-env $(DRIVER_GENES)
+mutations: $(MUTATIONS)
 
 
 # Ensure directories exits
@@ -53,8 +57,8 @@ $(OUTPUT_FOLDER_DRIVERS): | $(OUTPUT_FOLDER)
 	mkdir $(OUTPUT_FOLDER_DRIVERS)
 
 
-#TODO test $(wildcard $(INPUTS)/**/*.cpp) for counts
-# TODO add 'bgvariants list' that returns a list of files to be read
+$(CANCERS): data/dictionary_long_names.json | $(OUTPUT_FOLDER)
+	cp -f $< $@
 
 INFO_DATASETS = $(patsubst %,%/info_datasets.csv, $(INPUTS))
 
@@ -105,6 +109,11 @@ $(DRIVER_GENES): $(DRIVER_GENES_FILES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVER
 		$(RUNS) $(OUTPUT_FOLDER_DRIVERS)
 
 	python drivers_data.py $@ $(DNDSCV_PAN) $(VEP) $(RUNS) $(OUTPUT_FOLDER_DRIVERS)
+
+
+MUTATION_FILES = $(wildcard $(patsubst %,%/vep/*.out.gz, $(RUNS)))
+$(MUTATIONS): $(MUTATION_FILES)
+	python mutations.py $@ $(RUNS)
 
 
 clean:
