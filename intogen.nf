@@ -69,10 +69,9 @@ process PreprocessFromVep {
         file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
-        // file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase deconstructsig
+    $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase
     """
 }
 
