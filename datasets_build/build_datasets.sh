@@ -4,7 +4,7 @@ set -e
 
 export INTOGEN_GENOME=$1 "hg38"
 export INTOGEN_VEP=$2 "vep92"
-export INTOGEN_RELEASE=$3 "develop"
+export INTOGEN_RELEASE=$3 "v20191009"
 
 mkdir -p ../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
 
@@ -47,15 +47,15 @@ cd ..
 
 # PTMS
 echo "Building PTMA datasets"
-cd ptms
-./run_ptms.sh
-cd ..
+#cd ptms
+#./run_ptms.sh
+#cd ..
 
 # boostDM
 echo "Building boostDM datasets"
-cd boostDM
-./boostDM_features.sh
-cd ..
+#cd boostDM
+#./boostDM_features.sh
+#cd ..
 
 # Combination
 echo "Building combination datasets"
