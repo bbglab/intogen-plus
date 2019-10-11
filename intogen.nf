@@ -69,7 +69,7 @@ process PreprocessFromVep {
         file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
-        file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
+        // file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
     $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase deconstructsig
@@ -92,21 +92,6 @@ process PreprocessFromVepNonSynonymous {
     """
 }
 
-process DeconstructSig {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    input:
-        val task_file from IN_DECONSTRUCTSIG
-
-    output:
-        file "deconstructsig/*.out.gz" into OUT_DECONSTRUCTSIG mode flatten
-
-    """
-    $INTOGEN_SCRIPT run -o $OUTPUT deconstructsig $task_file
-    """
-}
-
 process DndsCV {
     tag { task_file.fileName }
     publishDir OUTPUT, mode: 'copy'
@@ -121,28 +106,6 @@ process DndsCV {
 
     """
     $INTOGEN_SCRIPT run -o $OUTPUT dndscv $task_file
-    """
-}
-
-// Duplicate this stream
-OUT_DNDSCV.into { OUT_DNDSCV_01; OUT_DNDSCV_02; }
-
-// Combination stream
-// IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName }.map{ it[0] }
-IN_MUTRATE = OUT_DNDSCV_01.phase(OUT_DECONSTRUCTSIG){ it -> it.fileName.toString().tokenize('.').get(0) }.map{ it[0] }
-
-process MutRate {
-    tag { task_file.fileName }
-    publishDir OUTPUT, mode: 'copy'
-
-    input:
-        val task_file from IN_MUTRATE
-
-    output:
-        file "mutrate/*.tar.gz" into OUT_MUTRATE mode flatten
-
-    """
-    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutrate $task_file
     """
 }
 
@@ -236,20 +199,18 @@ process CBase {
     """
 }
 
-
 // Combination stream
 IN_COMBINATION = OUT_ONCODRIVEFML
                     .phase(OUT_ONCODRIVECLUSTL){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_HOTMAPS){ it -> it.fileName }
                     .map{ it[0] }
-                    .phase(OUT_DNDSCV_02){ it -> it.fileName }
+                    .phase(OUT_DNDSCV){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_SMREGIONS){ it -> it.fileName }
                     .map{ it[0] }
                     .phase(OUT_CBASE){ it -> it.fileName }
                     .map{ it[0] }
-
 
 process Combination {
     tag { task_file.fileName }
@@ -262,4 +223,3 @@ process Combination {
     $INTOGEN_SCRIPT run -o $OUTPUT combination $task_file
     """
 }
-
