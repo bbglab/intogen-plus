@@ -119,7 +119,7 @@ $(MUTATIONS): $(MUTATION_FILES) $(BIOMART)
 clean:
 	@echo "Removing data"
 	#rm -rf $(COUNT_SAMPLES) $(COUNT_VARIANTS)
-	rm $(STATS_COHORTS) $(DRIVER_GENES) $(GENES)
+	rm $(STATS_COHORTS) $(DRIVER_GENES) $(GENES) $(MUTATIONS)
 	rm -rf $(OUTPUT_FOLDER_DRIVERS)
 
 check-env: check-env-datasets check-env-dndscv
