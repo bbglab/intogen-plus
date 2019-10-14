@@ -35,13 +35,13 @@ BIOMART_QUERY='''
 '''
 BIOMART_QUERY_ENCODED=$(python3 -c "from urllib.parse import quote_plus; print(quote_plus('''${BIOMART_QUERY}'''.replace('\n', '')))")
 
-CDS_BIOMART_FILE="../../datasets/${INTOGEN_RELEASE}/shared/cds_biomart.tsv"
-CDS_REGIONS_FILE="../../datasets/${INTOGEN_RELEASE}/shared/cds.regions.gz"
+CDS_BIOMART_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds_biomart.tsv"
+CDS_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds.regions.gz"
 
-mkdir -p ../../datasets/${INTOGEN_RELEASE}/shared
-curl -s ${BIOMART_URL}?query=${BIOMART_QUERY_ENCODED} | grep -f <(cut -f2 ../../datasets/${INTOGEN_RELEASE}/shared/ensembl_canonical_transcripts.tsv) | awk -F'\t' '($5!=""){print($0)}' > ${CDS_BIOMART_FILE}
+mkdir -p ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared
+curl -s ${BIOMART_URL}?query=${BIOMART_QUERY_ENCODED} | grep -f <(cut -f2 ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/ensembl_canonical_transcripts.tsv) | awk -F'\t' '($5!=""){print($0)}' > ${CDS_BIOMART_FILE}
 
-cat ${CDS_BIOMART_FILE} | awk -F'\t' '($5!=""){gsub("-1", "-", $10); gsub("1", "+", $10); print($4"\t"$5"\t"$6"\t"$10"\t"$1"\t"$1"\t"$2)}' | gzip > ${CDS_REGIONS_FILE}
-
-
-
+cat ${CDS_BIOMART_FILE} | awk -F'\t' '($5!=""){gsub("-1", "-", $10); gsub("1", "+", $10); print($4"\t"$5"\t"$6"\t"$10"\t"$1"\t"$1"\t"$2)}' > "tmpfile"
+echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT\tSEGMENT\tSYMBOL" > "tmpheader"
+cat "tmpheader" "tmpfile" | gzip > ${CDS_REGIONS_FILE}
+rm "tmpheader" "tmpfile"

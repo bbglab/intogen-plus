@@ -8,7 +8,17 @@ then
       exit -1
 fi
 
+echo -e "\tBuilding ensembl canonical transcripts"
 ./ensembl_canonical_transcripts.sh
+
+echo -e "\tBuilding CDS annotations"
 ./cds.sh
+
+echo -e "\tBuilding WG annotations"
+./wg.sh
+
+echo -e "\tBuilding counts"
 ./counts.sh
+
+echo -e "\tBuilding PON counts"
 ./somatic_pon_count.sh

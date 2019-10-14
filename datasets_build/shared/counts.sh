@@ -9,8 +9,10 @@ then
 fi
 
 
-CDS_REGIONS_FILE="../../datasets/${INTOGEN_RELEASE}/shared/cds.regions.gz"
-TRIPLETS_FILE="../../datasets/${INTOGEN_RELEASE}/shared/triplets.gz"
-CONSEQUENCES_FILE="../../datasets/${INTOGEN_RELEASE}/shared/consequences.gz"
+CDS_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds.regions.gz"
+WG_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/wg.regions.gz"
+COUNT_CDS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds.counts.gz"
+COUNT_WG="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/wg.counts.gz"
 
-python count.py -r ${CDS_REGIONS_FILE} -t ${TRIPLETS_FILE} -c ${CONSEQUENCES_FILE} -v 92 -g hg38
+bgsignature count -r ${CDS_REGIONS_FILE} -s 3 -g hg38 --cores 12 --collapse --exclude-N -o ${COUNT_CDS}
+bgsignature count -r ${WG_REGIONS_FILE} -s 3 -g hg38 --cores 12 --collapse --exclude-N -o ${COUNT_WG}

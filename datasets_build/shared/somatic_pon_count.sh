@@ -9,7 +9,7 @@ then
 fi
 
 
-INPUT_URL="https://nc.hartwigmedicalfoundation.nl/index.php/s/a8lgLsUrZI5gndd/download?path=%2FHMF-Pipeline-Resources&files=SOMATIC_PON.vcf.gz"
-OUTPUT_FILE="../../datasets/${INTOGEN_RELEASE}/shared/somatic_pon_count_filtered.tsv.gz"
+INPUT_URL="https://nc.hartwigmedicalfoundation.nl/index.php/s/a8lgLsUrZI5gndd/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
+OUTPUT_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/somatic_pon_count_filtered.tsv.gz"
 
 python somatic_pon_counts.py -u ${INPUT_URL} -o ${OUTPUT_FILE}
