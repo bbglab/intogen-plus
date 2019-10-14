@@ -34,11 +34,12 @@ class OncodriveClustlTask(Task):
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
         cores = os.environ.get("INTOGEN_CPUS", 4)
         genome = os.environ['INTOGEN_GENOME']
-        kmer = 5 if self.CANCER_TYPE == 'SKCM' else 3
+        kmer = 3
         signatures = '' if self.signatures_file is None else f'-sig {self.signatures_file}'
 
-        if kmer != 3:
-            signatures = ''
+        if self.CANCER_TYPE == 'SKCM':
+            kmer = 5
+            signatures = '-sigcalc region_normalized'
 
         run_command(f"""
             {self.cmdline} -i {self.in_file} -o {self.output_folder}/{self.name} -r {cds_regions}  
