@@ -7,6 +7,7 @@ then
       echo "ERROR: Define the INTOGEN_RELEASE variable"
       exit -1
 fi
+
 INTOGEN_DATASETS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"
 
 # Biomart release 92

@@ -7,7 +7,7 @@ END=$4
 
 
 INTOGEN_DATASETS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"
-INTOGEN_CONTAINERS="../../containers/${INTOGEN_RELEASE}"
+INTOGEN_CONTAINERS="../../containers/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"
 
 RANGE1=`singularity run -c -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$START | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
 RANGE2=`singularity run -c -B ${INTOGEN_DATASETS}/transvar:/data ${INTOGEN_CONTAINERS}/transvar.simg panno --ensembl -i $TRANSCRIPT:$END | tail -n+2 | cut -f5 | cut -d'/' -f1 | sed 's/\:g\./_/g' | tr '_' '\t'`
