@@ -20,12 +20,14 @@ then
       exit -1
 fi
 
+mkdir -p ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/dndscv
+
 GENOME=$(mktemp --suffix=.fa)
 for f in $(ls ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/datasets/genomereference/hg38-20161209/chr*.txt); do
     basename $f | sed 's/chr/>/g' | sed 's/.txt//g' >> ${GENOME}
     fold -w61 $f | awk '{printf "%61s\n", $0}' >> ${GENOME}
 done
 
-echo "library(dndscv); buildref(\"../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds_biomart.tsv\", \"${GENOME}\", outfile = \"../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/RefCDS.rda\")" | singularity exec ../../containers/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/dndscv.simg R --no-save
+echo "library(dndscv); buildref(\"../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds_biomart.tsv\", \"${GENOME}\", outfile = \"../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/dndscv/RefCDS.rda\")" | singularity exec ../../containers/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/dndscv.simg R --no-save
 
 rm ${GENOME}
