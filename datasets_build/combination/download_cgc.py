@@ -1,13 +1,15 @@
+# Import modules
 import os
 import sys
 
 import bglogs
 import click
 import requests
-
 from homura import download
 
-CGC_URL = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v87/cancer_gene_census.csv" # Currently version v87
+
+# Currently version v87
+CGC_URL = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v87/cancer_gene_census.csv"
 COSMIC_KEY = os.getenv("COSMIC_KEY", None)
 
 

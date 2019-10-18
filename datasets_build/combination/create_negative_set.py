@@ -21,10 +21,9 @@ import bgdata
 
 class NegativeSet:
 
-    def __init__(self, olfactory_receptors):  #, path_expression_data):
+    def __init__(self, olfactory_receptors):  # path_expression_data):
         """Initialize the class
         :param olfactory_receptors: path, file with a list of olfactory receptors
-        :param path_expression_data: path, compressed file of expression data (deprecated)
         :return: None
         """
         df_olfactory_receptors = pd.read_csv(olfactory_receptors, sep='\t', header=0)
@@ -120,7 +119,7 @@ class NegativeSet:
 @click.option('--output_total', 'output_total', help='Output file of the total file')
 @click.option('--output_non_expressed', 'output_non_expressed', help='Output file of the non-expressed genes')
 def cmdline(olfactory_receptors, output_total, output_non_expressed):  # path_expression_data
-    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors)  #, path_expression_data=path_expression_data)
+    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors)  # path_expression_data=path_expression_data)
     negative_set.save(output=output_total, output_expression=output_non_expressed)
 
 
