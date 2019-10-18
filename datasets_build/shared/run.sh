@@ -8,6 +8,18 @@ then
       exit -1
 fi
 
+if [ -z "${INTOGEN_VEP}" ]
+then
+      echo "ERROR: Define the INTOGEN_VEP variable"
+      exit -1
+fi
+
+if [ -z "${INTOGEN_GENOME}" ]
+then
+      echo "ERROR: Define the INTOGEN_GENOME variable"
+      exit -1
+fi
+
 echo -e "\tBuilding ensembl canonical transcripts"
 ./ensembl_canonical_transcripts.sh
 

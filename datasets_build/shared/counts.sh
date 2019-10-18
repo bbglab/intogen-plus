@@ -8,6 +8,18 @@ then
       exit -1
 fi
 
+if [ -z "${INTOGEN_VEP}" ]
+then
+      echo "ERROR: Define the INTOGEN_VEP variable"
+      exit -1
+fi
+
+if [ -z "${INTOGEN_GENOME}" ]
+then
+      echo "ERROR: Define the INTOGEN_GENOME variable"
+      exit -1
+fi
+
 
 CDS_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds.regions.gz"
 WG_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/wg.regions.gz"
