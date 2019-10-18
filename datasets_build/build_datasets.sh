@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 export INTOGEN_GENOME=$1 "hg38"
 export INTOGEN_VEP=$2 "vep92"
@@ -9,60 +9,63 @@ export INTOGEN_RELEASE=$3 "v20191009"
 mkdir -p ../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
 
 # Shared
-echo "Building shared datasets"
+echo "- Building shared datasets"
 cd shared
 ./run.sh
 cd ..
 
+# Bgdata
+echo "- Bgdata datasets"
+BGDATA_LOCAL="../datasets/"${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"/bgdata"
+bgdata get --force datasets/genomereference/${INTOGEN_GENOME}
+
 # Transvar
-echo "Building Transvar datasets"
+echo "- Building Transvar datasets"
 cd transvar
 ./build_hg38.sh
 cd ..
 
 # SmRegions
-echo "Building SmRegions datasets"
+echo "- Building SmRegions datasets"
 cd smregions
 ./regions_pfam.sh
 ./panno.sh
 cd ..
 
 # dNdSCV
-echo "Building dNdSCV datasets"
+echo "- Building dNdSCV datasets"
 cd dndscv
 ./refcds_rda.sh
 cd ..
 
 # Mutrate
-echo "Building Mutrate datasets"
+echo "- Building Mutrate datasets"    # FIXME: failing
 cd mutrate
 python cosmic_to_exome.py
 cd ..
 
 # OncodriveFML
-echo "Building OncodriveFML datasets"
+echo "- Building OncodriveFML datasets"
 cd oncodrivefml
 ./cadd.sh
 cd ..
 
 # PTMS
-echo "Building PTMA datasets"
+echo "- Building PTMA datasets"
 #cd ptms
 #./run_ptms.sh
 #cd ..
 
 # boostDM
-echo "Building boostDM datasets"
+echo "- Building boostDM datasets"
 #cd boostDM
 #./boostDM_features.sh
 #cd ..
 
 # Combination
-echo "Building combination datasets"
+echo "- Building combination datasets"
 cd combination
-./run_negative_set.sh
-./run_cgc.sh
+./run.sh
 cd ..
 
-sudo chown -R $USER: ../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
-
+chown -R $USER: ../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
