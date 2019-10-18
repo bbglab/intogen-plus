@@ -65,7 +65,7 @@ def run(paths, biomart, output):
                 continue
 
             ##Uploaded_variation	Location	Allele	Gene	Feature	Feature_type	Consequence	cDNA_position	CDS_position	Protein_position	Amino_acids	Codons	Existing_variation	IMPACTDISTANCE	STRAND	FLAGS	SYMBOL	SYMBOL_SOURCE	HGNC_ID	CANONICAL	ENSP
-            df = df[(df["CANONICAL"] == "YES") & (valid_csqn(df["Consequence"])) & (df["Feature"].isin(canonical_transcripts))][["#Uploaded_variation", "Location", "Feature", 'Consequence', 'Protein_position']]
+            df = df[(df["CANONICAL"] == "YES") & (valid_csqn(df["Consequence"])) & (df["Feature"].isin(canonical_transcripts))][["#Uploaded_variation", "Location", "Feature", 'Consequence', 'Protein_position', "SYMBOL"]]
             df[["CHR", "POS", "REF", "ALT", "SAMPLES"]] = df.apply(lambda row: get_info(row["#Uploaded_variation"], row["Location"]), axis=1)
             df.rename(columns={'Feature': 'TRANSCRIPT'}, inplace=True)
             df["COHORT"] = cohort
@@ -73,7 +73,7 @@ def run(paths, biomart, output):
             df["CONSEQUENCE"] = df['Consequence'].str.split(',').str[0]
             df.drop(labels=["#Uploaded_variation", "Location", "Consequence"], axis=1)
             df = df.groupby(["MUTATION", "COHORT", "CONSEQUENCE", "CHR", "POS", "REF",
-                             "ALT", "TRANSCRIPT", 'Protein_position'], as_index=False).agg({"SAMPLES": "count"})
+                             "ALT", "TRANSCRIPT", 'Protein_position', "SYMBOL"], as_index=False).agg({"SAMPLES": "count"})
             list_dfs.append(df.drop_duplicates())
 
     df_final = pd.concat(list_dfs)
