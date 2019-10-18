@@ -8,7 +8,8 @@ ENSEMBL_REFERENCE=${ENSEMBL_REFERENCE/GRCh19/GRCh37}
 
 GENOME="Homo_sapiens.${ENSEMBL_REFERENCE}.fa"
 echo -e "\tBuild genome fasta file"
-for f in $(ls ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/datasets/genomereference/hg38-20161209/chr*.txt); do 
+LAST_VERSION=`cat ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/datasets/genomereference/hg38.master`
+for f in $(ls ../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/datasets/genomereference/hg38-${LAST_VERSION}/chr*.txt); do
     basename $f | sed 's/chr/>/g' | sed 's/.txt//g' >> ${GENOME}
     fold -w61 $f | awk '{printf "%61s\n", $0}' >> ${GENOME}
 done
