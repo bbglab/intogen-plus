@@ -103,12 +103,13 @@ DRIVER_GENES_FILES += $(EXPRESSION_TCGA) $(ORFACTORY) $(CANCERMINE) $(EXACT) $(C
 DRIVER_GENES_FILES += $(STATS_COHORTS) $(DNDSCV_PAN)
 DRIVER_GENES_FILES += data/artifacts.json data/black_listed.txt data/white_listed.txt \
 	data/gene_MoA.tsv
+DRIVER_GENES_FILES += $(MUTATIONS)
 $(DRIVER_GENES): $(DRIVER_GENES_FILES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVERS)
 	python drivers.py $@ $(EXPRESSION_TCGA) $(ORFACTORY) $(CANCERMINE) \
 		$(EXACT) $(CGC) $(BIOMART) $(STATS_COHORTS) $(DRIVER_GENES_THRESHOLD) \
 		$(RUNS) $(OUTPUT_FOLDER_DRIVERS)
 
-	python drivers_data.py $@ $(DNDSCV_PAN) $(VEP) $(RUNS) $(OUTPUT_FOLDER_DRIVERS)
+	python drivers_data.py $@ $(DNDSCV_PAN) $(VEP) $(MUTATIONS) $(RUNS) $(OUTPUT_FOLDER_DRIVERS)
 
 
 MUTATION_FILES = $(wildcard $(patsubst %,%/vep/*.out.gz, $(RUNS)))

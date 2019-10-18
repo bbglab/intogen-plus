@@ -233,7 +233,17 @@ def excess(paths):
     return df
 
 
-def run(paths, drivers, dndscv, vep, tmp_folder=None):
+def mutations(muts):
+    mutations_ = pd.read_csv(muts, sep='\t', dtype={'CHR': str})
+
+    mut_counts = mutations_.groupby(['TRANSCRIPT', 'SYMBOL', 'COHORT'], as_index=False).agg({
+        'SAMPLES': np.sum
+    })
+    mut_counts.rename(columns={'SAMPLES': 'MUTATIONS'}, inplace=True)
+    return mut_counts
+
+
+def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
     tmp_folder = tmp_folder or tempfile.TemporaryDirectory().name
 
     df_drivers = pd.read_csv(drivers, sep='\t', dtype={'MUTS': int, 'SAMPLES': int})
@@ -246,7 +256,8 @@ def run(paths, drivers, dndscv, vep, tmp_folder=None):
         significative_domains(paths),
         clusters_2D(paths, vep),
         clusters_3D(paths),
-        excess(paths)
+        excess(paths),
+        mutations(muts)
     ]
 
     for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
@@ -259,7 +270,8 @@ if __name__ == "__main__":
     drivers = sys.argv[1]
     dndscv = sys.argv[2]
     vep = sys.argv[3]
-    paths = sys.argv[3:-1]
+    muts = sys.argv[4]
+    paths = sys.argv[5:-1]
     tmp_folder = sys.argv[-1]
-    run(paths, drivers, dndscv, vep, tmp_folder)
+    run(paths, drivers, dndscv, vep, muts, tmp_folder)
 
