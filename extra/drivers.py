@@ -380,7 +380,12 @@ def run(paths, expression, olfactory, cancermine, germline, cgc, ensembl, cohort
     vet_paths = [path.join(path_, 'combination') for path_ in paths]
     df = vet(df, vet_paths, cohorts, cgc, threshold)
     vet_file = path.join(tmp_folder, f'all_drivers{threshold}.tsv')
-    df.to_csv(vet_file, sep="\t", index=False)
+    df.rename(columns={"QVALUE_stouffer_w":"QVALUE_COMBINATION","Significant_Bidders":"METHODS","n_papers":"NUM_PAPERS", "cancer_type":"CANCER_TYPE"},inplace=True)
+    df.columns = map(str.upper, df.columns)
+    columns= ["SYMBOL","COHORT","CANCER_TYPE","METHODS","QVALUE_COMBINATION","TIER","MUTATIONS_COHORT","SAMPLES_COHORT","ROLE", "CGC_GENE", "TIER_CGC",
+              "CGC_CANCER_GENE", "NUM_COHORTS", "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE", "SAMPLES_3MUTS", "OR_WARNING", "WARNING_ARTIFACT",
+              "KNOWN_ARTIFACT", "NUM_PAPERS", "FILTER"]
+    df[columns].sort_values(["SYMBOL","CANCER_TYPE"]).to_csv(vet_file, sep="\t", index=False)
 
     df = filter(df)
 
