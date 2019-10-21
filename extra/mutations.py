@@ -90,4 +90,4 @@ if __name__ == "__main__":
     output = sys.argv[1]
     biomart = sys.argv[2]
     paths = sys.argv[3:]
-    #run(paths, biomart, output)
+    run(paths, biomart, output)
