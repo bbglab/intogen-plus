@@ -1,7 +1,6 @@
 import os
 import json
 import click
-import logging
 import numpy as np
 from functools import partial
 from tqdm import tqdm
@@ -13,28 +12,26 @@ import pandas as pd
 from multiprocessing import Pool
 
 from utils import complementary, mut_key_generator, normalize_profile, shortkey_to_lex
-
-
-logger = logging.getLogger(__name__)
+from config import Values
 
 
 # global variables
 
 folder = os.environ.get("INTOGEN_DATASETS")  # './'
 
-SITE_COUNTS_PATH = os.path.join(folder, 'shared', 'consequences.pickle.gz')
+SITE_COUNTS_PATH = Values.SITE_COUNTS_PATH
 
-TRI_COUNT_GENOME_PATH = os.path.join(folder, 'mutrate', 'tri.counts.genome.tsv')
-tri_count_genome = pd.read_csv(TRI_COUNT_GENOME_PATH, sep='\t')
-tri_count_genome = dict(zip(tri_count_genome.iloc[:, 0], tri_count_genome.iloc[:, 1]))
+TRI_COUNT_GENOME_PATH = Values.TRI_COUNT_GENOME_PATH
+with gzip.open(TRI_COUNT_GENOME_PATH, 'rb') as f:
+    tri_count_genome = json.load(f)
 
-TRI_COUNT_EXOME_PATH = os.path.join(folder, 'mutrate', 'tri.counts.exome.tsv')
-tri_count_exome = pd.read_csv(TRI_COUNT_EXOME_PATH, sep='\t')
-tri_count_exome = dict(zip(tri_count_exome.iloc[:, 0], tri_count_exome.iloc[:, 1]))
+TRI_COUNT_EXOME_PATH = Values.TRI_COUNT_EXOME_PATH
+with gzip.open(TRI_COUNT_EXOME_PATH, 'rb') as f:
+    tri_count_exome = json.load(f)
 
-COSMIC_GENOME_PATH = os.path.join(folder, 'mutrate', 'signatures.cosmic.genome.tsv')
-cosmic = pd.read_csv(COSMIC_GENOME_PATH, sep='\t', index_col=0)
-cosmic = {sign: cosmic.loc[sign, :].values.tolist() for sign in cosmic.index}
+SIGNATURES_PATH = Values.SIGNATURES_PATH
+signatures = pd.read_csv(SIGNATURES_PATH, sep='\t', index_col=0)
+signatures = {sign: signatures.loc[sign, :].values.tolist() for sign in signatures.index}
 
 
 class dNdSOut:
@@ -129,22 +126,27 @@ class SiteCounts:
         return d
 
 
-def combine_cosmic(weights):
+def combine_signatures(weights, sig_labels, scope='exome'):
     """
     Args:
         weights: array of relative exposures
+        sig_labels: list of signature labels
+        scope: which region should we normalize for
     Returns:
         normalized linear combination of signatures according to weights
     """
 
     combined = {mk: 0 for mk in mut_key_generator()}
-    for i, sign in enumerate(cosmic):
-        profile = cosmic[sign]
+    for i, sign in enumerate(sig_labels):
+        profile = signatures[sign]
         for j, mk in enumerate(mut_key_generator()):
             combined[mk] += weights[i] * profile[j]
     total = sum(combined.values())
     combined = {k: combined[k] / total for k in combined}
-    combined = normalize_profile(combined, tri_count_genome)
+    if scope == 'exome':
+        combined = normalize_profile(combined, tri_count_exome)
+    elif scope == 'genome':
+        combined = normalize_profile(combined, tri_count_genome)
     return combined
 
 
@@ -155,32 +157,37 @@ def genewise_run(gene, weights, annotmuts, genemuts):
     exp = dndsout.expected_syn(gene)  # expected syn count at gene
     syn_proportion = dndsout.relative_syn  # proportion of syn mutations per sample
     expected_syn = {sample: prop * exp for sample, prop in syn_proportion.items()}
-    weights_df = pd.read_csv(weights, sep='\t', index_col=0)  # weights after signature fitting
-    # available_samples = set.intersection(set(weights_df.sample.tolist()), set(dndsout.samples))
-    available_samples = set.intersection(
-        set(weights_df.index.tolist()),
-        set(dndsout.samples)
-    )
-    discarded_samples = set(dndsout.samples) - available_samples
-    if len(discarded_samples) > 0:
-        logger.warning('Discarded {} samples'.format(len(discarded_samples)))
-    rates = {sample: combine_cosmic(weights_df.loc[sample, :].values) for sample in available_samples}
+    weights_df = pd.read_csv(weights, sep='\t', index_col=0)
+
+    # weights table after signature fitting
+    # cols have signatures + SSE + mut_count
+
+    rates = {sample: combine_signatures(weights_df.loc[sample, :].values, weights_df.columns[:-2].tolist()) for sample in dndsout.samples if sample in weights_df.index}
     mutrate = {}
-    # for sample in dndsout.samples:
-    for sample in available_samples:
+    for sample in rates:
         k = sum([rates[sample][ctxt] * syn_sites[ctxt] for ctxt in mut_key_generator()])
         k = expected_syn[sample] / k
         mutrate[sample] = list(map(lambda x: k * x, [rates[sample][ctxt] for ctxt in mut_key_generator()]))
     return {gene: mutrate}
 
 
-def normalizing_constant(path):
-    """compute normalization constant for each sample"""
+def normalization_constant(mutrate_output_folder, output_json):
+    """
+    computes the normalization constant for each sample
+    this is a necessary first step in function normalization()
+
+    mutrate_output_folder: folder where mutrate results are kept for each gene
+    output_json: json file with dict with normalization constant per sample
+
+    Example
+    -------
+    normalization_constant('./mutrate_output', './constants.json')
+    """
 
     site_counts = SiteCounts()
     res = {}
-    for fn in tqdm(os.listdir(path)):
-        with open(os.path.join(path, fn), 'rt') as f:
+    for fn in tqdm(os.listdir(mutrate_output_folder)):
+        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
             d = json.load(f)
         gene = next(iter(d.keys()))
         context_count = site_counts.context_per_gene(gene)
@@ -188,57 +195,75 @@ def normalizing_constant(path):
         for sample in d[gene]:
             arr = np.array(d[gene][sample])
             res[sample] = res.get(sample, 0) + np.dot(context_count, arr)
-    with open('./normalizing_constant.json', 'wt') as f:
+    with open(output_json, 'wt') as f:
         json.dump(res, f)
 
 
-def normalization(path, constants_path):
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+@click.option('--mutrate_output_folder', type=click.Path(), help='results folder')
+@click.option('--constants_path', type=click.Path(), help='json file for constants dict')
+def normalization(mutrate_output_folder, constants_path):
     """
-    compute normalized mutation rate a.k.a. per-site probability
-    of mutation conditioned to having one coding mutation
+    computes a normalized version of mutrate, i.e.:
+    conditioning on the observation of a single mutation, what is the per-site probability
+    for the mutation to occur across all possible coding mutation sites
+
+    Example
+    -------
+    normalization('./mutrate_output', './constants.json')
     """
+
+    normalization_constant(mutrate_output_folder, constants_path)
     with open(constants_path, 'rt') as f:
         constants = json.load(f)
-    print(constants)
-    for fn in tqdm(os.listdir(path)):
-        with open(os.path.join(path, fn), 'rt') as f:
+    for fn in tqdm(os.listdir(mutrate_output_folder)):
+        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
             d = json.load(f)
         gene = next(iter(d.keys()))
         norm_d = {gene: {}}
         for sample in d[gene]:
             norm_d[gene][sample] = [x / constants[sample] if constants[sample] != 0 else 0 for x in d[gene][sample]]
-        with open(os.path.join(path, 'norm_' + fn), 'wt') as g:
+        with open(os.path.join(mutrate_output_folder, 'norm_' + fn), 'wt') as g:
             json.dump(norm_d, g)
 
 
-# cli
-
-
-@click.command(context_settings={'help_option_names': ['-h', '--help']})
+@cli.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--annotmuts', type=click.Path(), help='path to dndsout$annotmuts')
 @click.option('--genemuts', type=click.Path(), help='path to dndsout$genemuts')
-@click.option('--weights', type=click.Path(), help='path to COSMIC weights upon fitting')
+@click.option('--weights', type=click.Path(), help='path to signature weights upon fitting')
 @click.option('--cores', default=os.cpu_count(), help='Max processes to run multiprocessing', type=click.INT)
 @click.option('--output', required=True, type=click.Path(), help='file folder for outputs')
-def compute_mutrate(annotmuts, genemuts, weights, cores, output):
+@click.option('--test', is_flag=True, help='test flag to run a reduced number of genes')
+def compute_mutrate(annotmuts, genemuts, weights, cores, output, test):
     """
-    Requirements:
+    Requirements
+    ------------
     compute_mutrate.py uses the fitting obtained by deconstructSig
-    python mutrate.py compute_mutrate --annotmuts <annotmuts_path> --genemuts <genemuts_path> \\
-                                      --weights <deconstructSigs_path> --cores <multiprocessing_cores> \\
-                                      --output <output_folder>
-    """
 
+    Example
+    -------
+    python compute_mutrate.py compute-mutrate --annotmuts <annotmuts_path> --genemuts <genemuts_path> \\
+                                              --weights <deconstructSigs_path> --cores <multiprocessing_cores> \\
+                                              --output <output_folder>
+    """
     dndsout = dNdSOut(annotmuts, genemuts)
 
     # Define the geneset: minimal set required to annotate MAF with expected mutations per bp
+
     dg = dndsout.annotmuts[dndsout.annotmuts['mut'].isin(list('ACGT'))]
     gene_set = dg['gene'].unique()
 
-    # instantiate a partial of genewise_run, which encapsulates the main task
-    task = partial(
-        genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts
-    )
+    if test:
+        gene_set = gene_set[:1]
+
+    # instantiate a partial of genewise_run that encapsulates the main task
+
+    task = partial(genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts)
 
     # prepare output dir
     if not os.path.exists(output):
@@ -246,20 +271,20 @@ def compute_mutrate(annotmuts, genemuts, weights, cores, output):
 
     # loop task through gene_set
     with Pool(cores) as pool:
-        for a in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
-            # option 1: dump to separate json files, one per each gene
-            # with gzip.open(os.path.join(output, '{0}.out.json.gz'.format(next(iter(a.keys())))), 'wt') as f_output:
-            #     json.dump(a, f_output)
-            d = {}
-            for gene, samples in a.items():
-                for key, value in samples.items():
-                    d[key] = np.array(value, dtype=np.float32)
-            output_file = os.path.join(output, '{0}.npz'.format(next(iter(a.keys()))))
-            np.savez_compressed(output_file, **{gene: d})
+        for res in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
+
+            # dump to separate json files, one per each gene
+
+            with open(os.path.join(output, '{0}.out.json'.format(next(iter(res.keys())))), 'wt') as f_output:
+                json.dump(res, f_output)
 
 
 if __name__ == '__main__':
 
-    compute_mutrate()
-    # normalizing_constant('mutrate_output')
-    # normalization('mutrate_output', './normalizing_constant.json')
+    cli()
+
+    # tests
+    # -----
+    # normalization_constant('./mutrate_output', './constants.json')
+    # normalization('./mutrate_output', './normalizing_constant.json')
+
