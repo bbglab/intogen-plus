@@ -8,16 +8,21 @@ export INTOGEN_RELEASE=$3 "v20191009"
 
 mkdir -p ../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
 
+# Bgdata
+echo "- Bgdata datasets"
+BGDATA_LOCAL="../datasets/"${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"/bgdata"
+BGDATA_OFFLINE="FALSE"
+export BGDATA_LOCAL=${BGDATA_LOCAL}
+export BGDATA_OFFLINE=${BGDATA_OFFLINE}
+bgdata get datasets/genomereference/${INTOGEN_GENOME}
+# Redo the download (it will not download the data again) to force to get the hg38.master file
+bgdata get datasets/genomereference/${INTOGEN_GENOME}
+
 # Shared
 echo "- Building shared datasets"
 cd shared
 ./run.sh
 cd ..
-
-# Bgdata
-echo "- Bgdata datasets"
-BGDATA_LOCAL="../datasets/"${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}"/bgdata"
-bgdata get --force datasets/genomereference/${INTOGEN_GENOME}
 
 # Transvar
 echo "- Building Transvar datasets"
@@ -29,7 +34,6 @@ cd ..
 echo "- Building SmRegions datasets"
 cd smregions
 ./regions_pfam.sh
-./panno.sh
 cd ..
 
 # dNdSCV
