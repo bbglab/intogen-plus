@@ -4,7 +4,7 @@
            "ALL":"Acute lymphoblastic leukemia","CLL":"Chronic lymphoblastic leukemia","CESC":"Cervix squamous cancer","LGG":"Lower grade glioma","GBM":"Glioblastoma","MDPS":"Myelodisplasic proliferative","SG":"Salivary glands cancer","NHLY":"Non-hodking lymphoma",
            "SCLC":"Small-cell lung cancer","CM":"Cutaneous melanoma of the skin","MDS":"Myelodisplasic syndrome","LEIS":"Leiomyosarcoma","LUSC":"Lung squamous cell carcinoma","DLBCL":"Diffuse large B-cell lymphoma","LUAD":"Lung adenocarcinoma","MB":"Medulloblastoma",
            "OS":"Osteosarcoma","RCH":"Chromophobe renal cell carcinoma","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal cancer","NB":"Neuroblastoma","UVM":"Uveal melanoma","PAIS":"Pancreatic neuroendocrine cancer",
-           "PIA":"Pilocytic astrocytoma","ACC":"Adrenocortical carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell","MM":"Multiple myeloma",
+           "PIA":"Pilocityc astrocytoma","ACC":"Adrenocortical carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell","MM":"Multiple myeloma",
            "PANCREAS":"Cancer of the pancreas","ST":"Stomach adenocarcinoma","CSCC":"Cutaneous squamous cell carcinoma","RB":"Retinoblastoma","HGG":"High-grade Glioma","EPD":"Ependymoma","CPC":"Choroid plexus carcinoma","KIDNEY":"Kidney cancer","R":"Kidney cancer",
            "SK":"Kidney sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor","SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer","ANGS":"Angiosarcoma","PENILE_CANCER":"Penile cancer",
             "SPI": "Spiradenocarcinoma"
