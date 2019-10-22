@@ -4,27 +4,45 @@ It takes deconstructSigs format as input: columns ~ A[C>T]G, rows ~ Signature.4
 It return the output in the same format.
 """
 
+# Import modules
 import os
+import sys
+import gzip
+import json
+from shutil import copyfile
+
 import pandas as pd
 
-import sys
 sys.path.append('../mutrate/')
 
 from utils import deconstruct_to_lex, lex_to_deconstruct, normalize_profile, denorm_profile
 
 
-GENOME_TRIPLETS_PATH = os.path.join(os.environ['INTOGEN_DATASETS'], 'mutrate', 'tri.counts.genome.tsv')
-EXOME_TRIPLETS_PATH = os.path.join(os.environ['INTOGEN_DATASETS'], 'mutrate', 'tri.counts.exome.tsv')
-COSMIC_GENOME_PATH = os.path.join(os.environ['INTOGEN_DATASETS'], 'mutrate', 'signatures.cosmic.genome.tsv')
-COSMIC_EXOME_PATH = os.path.join(os.environ['INTOGEN_DATASETS'], 'mutrate', 'signatures.cosmic.exome.tsv')
+INTOGEN_DATASETS = os.path.join(
+    '../../datasets', '{}_{}_{}'.format(
+        os.environ['INTOGEN_GENOME'],
+        os.environ['INTOGEN_VEP'],
+        os.environ['INTOGEN_RELEASE']
+    )
+)
+GENOME_TRIPLETS_PATH = os.path.join(INTOGEN_DATASETS, 'shared', 'cds.counts.gz')
+EXOME_TRIPLETS_PATH = os.path.join(INTOGEN_DATASETS, 'shared', 'wg.counts.gz')
+COSMIC_GENOME_PATH = os.path.join(INTOGEN_DATASETS, 'mutrate', 'signatures.cosmic.genome.tsv')
+COSMIC_EXOME_PATH = os.path.join(INTOGEN_DATASETS, 'mutrate', 'signatures.cosmic.exome.tsv')
 
 exists = os.path.isfile(COSMIC_EXOME_PATH)
 
-genome_triplets = pd.read_csv(GENOME_TRIPLETS_PATH, sep='\t', header=None)
-genome_triplets = dict(zip(genome_triplets.iloc[:, 0], genome_triplets.iloc[:, 1]))
+# Copy the file to the dataset folder
+os.makedirs(os.path.dirname(COSMIC_GENOME_PATH), exist_ok=True)
+copyfile('signatures.cosmic.genome.tsv', COSMIC_GENOME_PATH)
+copyfile('signatures.cosmic.exome.tsv', COSMIC_EXOME_PATH)
 
-exome_triplets = pd.read_csv(EXOME_TRIPLETS_PATH, sep='\t', header=None)
-exome_triplets = dict(zip(exome_triplets.iloc[:, 0], exome_triplets.iloc[:, 1]))
+# Read the counts
+with gzip.open(GENOME_TRIPLETS_PATH, 'rb') as f:
+    genome_triplets = json.load(f)
+
+with gzip.open(EXOME_TRIPLETS_PATH, 'rb') as f:
+    exome_triplets = json.load(f)
 
 cosmic_genome = pd.read_csv(COSMIC_GENOME_PATH, sep='\t', index_col=0)
 

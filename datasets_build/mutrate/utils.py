@@ -205,4 +205,3 @@ def denorm_subs(profile, subs_abundance):
     b[95] = 1
     x = np.linalg.solve(coef_matrix, b)
     return dict(zip(list(mut_key_generator()), x))
-
