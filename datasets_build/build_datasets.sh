@@ -24,6 +24,12 @@ cd shared
 ./run.sh
 cd ..
 
+# Preprocess
+echo "- Building preprocess datasets"
+cd preprocess
+./run.sh
+cd ..
+
 # Transvar
 echo "- Building Transvar datasets"
 cd transvar
