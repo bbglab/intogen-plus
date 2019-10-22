@@ -25,7 +25,9 @@ def run(paths, output='stats_cohorts.tsv'):
     for path_ in paths:
         data.append(read_files(path_))
     df_final = pd.concat(data, sort=True)
-    df_final.to_csv(output, index=False, sep='\t')
+    df_final.columns = map(str.upper, df_final.columns)
+    columns = ["COHORT", "CANCER_TYPE", "SOURCE", "PLATFORM", "PROJECT", "REFERENCE", "TYPE", "TREATED", "AGE",  "SAMPLES", "MUTATIONS", "WEB_SHORT_COHORT_NAME", "WEB_LONG_COHORT_NAME"]
+    df_final[columns].sort_values("CANCER_TYPE").to_csv(output, index=False, sep='\t')
 
 
 if __name__ == "__main__":

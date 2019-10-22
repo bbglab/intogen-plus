@@ -91,8 +91,8 @@ def get_ratio_indels(df_combined):
 
 
 def check_expression(row,d_expression_tcga):
-    if row["cancer_type"] in d_expression_tcga:
-        return row["GENE"] in d_expression_tcga[row["cancer_type"]]
+    if row["CANCER_TYPE"] in d_expression_tcga:
+        return row["GENE"] in d_expression_tcga[row["CANCER_TYPE"]]
     else:
         return row["GENE"] in d_expression_tcga["PANCANCER"]
 
@@ -211,7 +211,7 @@ def two_methods(vals):
 
 def get_cancer_genes(row):
 
-    if row["CGC_GENE"] and (not row["cancer_type"] is np.nan) and str(row["cancer_type"]) in str(row["cancer_type_intogen"]):
+    if row["CGC_GENE"] and (not row["CANCER_TYPE"] is np.nan) and str(row["CANCER_TYPE"]) in str(row["cancer_type_intogen"]):
         return True
     else:
         return False
@@ -224,7 +224,7 @@ def perform_vetting(df):
             l = list(row.values)
             l.append("Warning expression")
             l_data.append(l)
-        elif ((row["Signature9"] >= 0.5) and (row["cancer_type"] in germ_center)):
+        elif ((row["Signature9"] >= 0.5) and (row["CANCER_TYPE"] in germ_center)):
             l = list(row.values)
             l.append("Warning Signature9")
             l_data.append(l)
@@ -353,7 +353,7 @@ def filter(df_all):
     df_drivers = df_drivers[~df_drivers["SYMBOL"].isin(black_listed)]
 
     # Now rescue white listed discarded genes
-    df_discarded = df_all[df_all["FILTER"]=="Lack of literature evidence"]
+    df_discarded = df_all[df_all["FILTER"] == "Lack of literature evidence"]
 
     # Recover white listed genes
     white_listed_file = path.join(FOLDER, 'data', 'white_listed.txt')
@@ -380,7 +380,12 @@ def run(paths, expression, olfactory, cancermine, germline, cgc, ensembl, cohort
     vet_paths = [path.join(path_, 'combination') for path_ in paths]
     df = vet(df, vet_paths, cohorts, cgc, threshold)
     vet_file = path.join(tmp_folder, f'all_drivers{threshold}.tsv')
-    df.to_csv(vet_file, sep="\t", index=False)
+    df.rename(columns={"QVALUE_stouffer_w":"QVALUE_COMBINATION","Significant_Bidders":"METHODS","n_papers":"NUM_PAPERS", "cancer_type":"CANCER_TYPE"},inplace=True)
+    df.columns = map(str.upper, df.columns)
+    columns= ["SYMBOL","COHORT","CANCER_TYPE","METHODS","QVALUE_COMBINATION","TIER","MUTATIONS_COHORT","SAMPLES_COHORT","ROLE", "CGC_GENE", "TIER_CGC",
+              "CGC_CANCER_GENE", "NUM_COHORTS", "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE", "SAMPLES_3MUTS", "OR_WARNING",
+              "KNOWN_ARTIFACT", "NUM_PAPERS", "FILTER"]
+    df[columns].sort_values(["SYMBOL","CANCER_TYPE"]).to_csv(vet_file, sep="\t", index=False)
 
     df = filter(df)
 

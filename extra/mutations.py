@@ -82,6 +82,7 @@ def run(paths, biomart, output):
     if x[x["TRANSCRIPT"] > 0].shape[0]:
         logging.warning('A mutation appears to be mapped to 2+ transcripts')
 
+
     df_final.to_csv(output, sep='\t', index=False)
 
 

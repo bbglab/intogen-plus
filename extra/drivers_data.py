@@ -247,8 +247,8 @@ def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
     tmp_folder = tmp_folder or tempfile.TemporaryDirectory().name
 
     df_drivers = pd.read_csv(drivers, sep='\t', dtype={'MUTS': int, 'SAMPLES': int})
-    df_drivers = df_drivers.rename(columns={'MUTS': 'MUTATIONS', 'Significant_Bidders': 'METHODS'})
-    df_drivers = df_drivers[['COHORT', 'SAMPLES', 'SYMBOL', 'METHODS']]
+    df_drivers = df_drivers.rename(columns={'MUTS': 'MUTATIONS'})
+    df_drivers = df_drivers[['COHORT', 'SAMPLES', 'SYMBOL', 'METHODS', 'CANCER_TYPE', 'QVALUE_COMBINATION']]
     df_drivers['METHODS'].fillna('combination', inplace=True)
 
     dfs = [
@@ -262,8 +262,10 @@ def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
 
     for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
         df_drivers = df_drivers.merge(df, how='left')
-
-    df_drivers.to_csv(drivers, sep="\t", index=False)
+    df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
+    columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","QVALUE_COMBINATION","ROLE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
+               "EXCESS_NON","EXCESS_SPL"]
+    df_drivers[columns].sort_values(["SYMBOL","CANCER_TYPE"]).to_csv(drivers, sep="\t", index=False)
 
 
 if __name__ == "__main__":

@@ -25,3 +25,6 @@ containers/
 *.pyc
 *.egg-info/
 dist/
+
+# Build docs
+docs/build
