@@ -105,6 +105,15 @@ if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEA
     cd ..
 fi
 
+# Signature
+if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/signature.simg ]; then
+    echo "Building signature.simg"
+    cd signature
+    sudo singularity build ../../containers/${INTOGEN_RELEASE}/signature.simg Singularity
+    mv ../../containers/${INTOGEN_RELEASE}/signature.simg ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/
+    cd ..
+fi
+
 # Transvar
 if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/transvar.simg ]; then
     echo "Building transvar.simg"
