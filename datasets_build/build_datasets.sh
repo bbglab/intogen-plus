@@ -60,6 +60,12 @@ cd oncodrivefml
 ./cadd.sh
 cd ..
 
+# CBaSE
+echo "- Building CBaSE datasets"
+cd cbase
+./run.sh
+cd ..
+
 # PTMS
 echo "- Building PTMA datasets"
 #cd ptms
