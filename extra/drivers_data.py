@@ -262,6 +262,8 @@ def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
 
     for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
         df_drivers = df_drivers.merge(df, how='left')
+    # check if the number of mutations is np.nan then discard it
+    df_drivers = df_drivers[~np.isnan(df_drivers["MUTATIONS"])]
     df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
     columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","QVALUE_COMBINATION","ROLE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
                "EXCESS_NON","EXCESS_SPL"]
