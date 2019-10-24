@@ -26,6 +26,9 @@ mkdir -p ${PREPROCESS}
 wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz -O ${PREPROCESS}/hg19ToHg38.over.chain.gz
 wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg38ToHg19.over.chain.gz -O ${PREPROCESS}/hg38ToHg19.over.chain.gz
 
-echo -e "\tCopy pileup mappability files"
-cp hg19_100bp.coverage.regions.gz ${PREPROCESS}/.
-cp hg38_100bp.coverage.regions.gz ${PREPROCESS}/.
+echo -e "\tDownloading pileup mappability files"
+bgdata get --force intogen/coverage/${INTOGEN_GENOME}
+# Redo the download (it will not download the data again) to force to get the hg38.master file
+bgdata get datasets/genomereference/${INTOGEN_GENOME}COVERAGE=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/intogen/coverage
+LAST_VERSION=`cat ${COVERAGE}/${INTOGEN_GENOME}.master`
+cp ${COVERAGE}=${LAST_VERSION}/${INTOGEN_GENOME}_100bp.coverage.regions.gz ${PREPROCESS}/.
