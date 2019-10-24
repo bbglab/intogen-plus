@@ -49,7 +49,7 @@ cd dndscv
 cd ..
 
 # Mutrate
-echo "- Building Mutrate datasets"    # FIXME: failing
+echo "- Building Mutrate datasets"
 cd mutrate
 python cosmic_to_exome.py
 cd ..
@@ -63,6 +63,12 @@ cd ..
 # CBaSE
 echo "- Building CBaSE datasets"
 cd cbase
+./run.sh
+cd ..
+
+# Vep
+echo "- Building CBaSE datasets"
+cd vep
 ./run.sh
 cd ..
 
