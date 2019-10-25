@@ -22,5 +22,6 @@ fi
 
 
 # Answer 'n' to this question: Do you wish to exit so you can get updates (y) or continue (n)
-DATASETS=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
+DATASETS=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/vep
+mkdir -p ${DATASETS}
 vep_install -a cf -s homo_sapiens -y GRCh38 -c ${DATASETS} --CONVERT
