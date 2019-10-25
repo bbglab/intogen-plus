@@ -67,7 +67,7 @@ cd cbase
 cd ..
 
 # Vep
-echo "- Building CBaSE datasets"
+echo "- Building VEP datasets"
 cd vep
 ./run.sh
 cd ..
