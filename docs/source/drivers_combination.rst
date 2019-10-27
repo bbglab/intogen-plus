@@ -9,25 +9,17 @@ appropriately reflects the consensus from the DIMs we run.
 
 To combine the results of individual statistical tests, p-value
 combination methods continue to be a standard approach in the field:
-e.g., Fisher [REF], Brown [REF] and Stouffer Z-score [REF] methods have
+e.g., Fisher [1]_, Brown [2]_, [3]_ and Stouffer Z-score [4]_ methods have
 been used for this purpose. These methods are useful for combining
 probabilities in meta-analysis, hence to provide a ranking based on
 combined significance under statistical grounds. However, the
 application of these methods may bear some caveats:
 
-1. The ranking resulting from p-value combination may lead to
-       inconsistencies when compared to the individual rankings, i.e.,
-       they may yield a consensus ranking that does not preserve
-       recurrent precedence relationships found in the individual
-       rankings.
+1. The ranking resulting from p-value combination may lead to inconsistencies when compared to the individual rankings, i.e., they may yield a consensus ranking that does not preserve recurrent precedence relationships found in the individual rankings.
 
-2. Some methods, like Fisher’s or Brown’s method, tend to bear
-       anti-conservative performance, thus leading to many likely false
-       discoveries.
+2. Some methods, like Fisher’s or Brown’s method, tend to bear anti-conservative performance, thus leading to many likely false discoveries.
 
-3. Balanced (non-weighted) p-value combination methods may lead to
-       faulty results just because of the influence of one or more DIM
-       performing poorly for a given dataset.
+3. Balanced (non-weighted) p-value combination methods may lead to faulty results just because of the influence of one or more DIM performing poorly for a given dataset.
 
 Weighted methods to combine p-values, like the weighted Stouffer
 Z-score, provide some extra room for proper balancing, in the sense of
@@ -50,8 +42,10 @@ combination takes the DIMs credibility into account. Based on the
 combined p-values, we conduct FDR correction to conclude a ranking of
 candidate driver genes alongside q-values.
 
+|image1|
+
 Weight Estimation by Voting
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The relative credibility for each method is based on the ability of the
 method to give precedence to well-known genes already collected in the
@@ -61,7 +55,7 @@ so-called Schulze’s method. The method allows us to consider each method
 as a voter with some voting rights (weighting) which casts ballots
 containing a list of candidates sorted by precedence. Schulze’s method
 takes precedence information from each individual method and produces a
-new consensus ranking [ref].
+new consensus ranking [5]_.
 
 Instead of conducting balanced voting, we tune the voting rights of the
 methods so that we maximize the enrichment of CGC genes at the top
@@ -73,7 +67,7 @@ The solution voting rights are deemed the relative credibility for each
 method.
 
 Ranking Score
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 Upon selection of a catalogue of bona-fide known driver elements (CGC
 catalogue of driver genes) we can provide a score for each ranking
@@ -90,7 +84,7 @@ ranking obtained by applying Schulze’s voting with voting rights given
 by the weighting vector w.
 
 Optimization with constraints
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finally we are bound to find a good candidate for
 :math:`\widehat{w_{}} = argmax_{}(f)`. In order to prevent spurious
@@ -109,7 +103,7 @@ hill-climbing procedure (using Python’s scipy.optimize “basinhopping”,
 method=SLSQP and stepsize=0.05).
 
 Estimation of combined p-values using weighted Stouffer Z-score
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Using the relative weight estimate that yields a maximum value of the
 objective function f we combined the p-values resorting to the weighted
@@ -121,42 +115,17 @@ Otherwise, we computed the q-value using all the computed p-values.
 
 
 Tiers of driver genes from sorted list of combined rankings and p-values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To finalize the analysis we considered only genes with at least two
 mutated samples in the cohort under analysis. These genes were
 classified into four groups according to the level of evidence in that
 cohort that the gene harbours positive selection.
 
-1) The first group, named as TIER1, contained genes showing high
-       confidence and agreement in their positive selection signals.
-       Given the ranked list of genes obtained by the Schulze voting,
-       TIER1 comprises all the ranked genes whose ranking is higher than
-       the first gene with combined q-value lower than a specific
-       threshold (by default threshold=0.05). The second group, name as
-       TIER2, was devised to contain known cancer driver genes, showing
-       mild signals of positive selection, that were not included in
-       TIER1. More in detail, we defined TIER2 genes as those CGC genes,
-       not included in TIER2, whose CGC q-value was lower than a given
-       threshold (default CGC q-value=0.25). CGC q-value is computed by
-       performing multiple test correction of combined p-values
-       restricted to CGC genes. The third group, are genes not included
-       in TIER1 or TIER2 with scattered signals of positive selection,
-       frequently coming from one single method. Particularly, given the
-       ranked list of genes by the Schulze voting, TIER3 was composed of
-       all the ranked genes with q-value lower than a given threshold
-       (by default threshold=0.05) whose ranking is higher than TIER1
-       last gene position and lower than the rejection ranking position.
-       The rejection ranking position is defined as the ranking position
-       for which all elements have a q-value lower than the input
-       threshold (by default threshold=0.05). Finally, other genes not
-       included in the aforementioned classes are considered non-driver
-       genes.
-
-|image1|
+1) The first group, named as TIER1, contained genes showing high confidence and agreement in their positive selection signals. Given the ranked list of genes obtained by the Schulze voting, TIER1 comprises all the ranked genes whose ranking is higher than the first gene with combined q-value lower than a specific threshold (by default threshold=0.05). The second group, name as TIER2, was devised to contain known cancer driver genes, showing mild signals of positive selection, that were not included in TIER1. More in detail, we defined TIER2 genes as those CGC genes, not included in TIER2, whose CGC q-value was lower than a given threshold (default CGC q-value=0.25). CGC q-value is computed by performing multiple test correction of combined p-values restricted to CGC genes. The third group, are genes not included in TIER1 or TIER2 with scattered signals of positive selection, frequently coming from one single method. Particularly, given the ranked list of genes by the Schulze voting, TIER3 was composed of all the ranked genes with q-value lower than a given threshold (by default threshold=0.05) whose ranking is higher than TIER1 last gene position and lower than the rejection ranking position. The rejection ranking position is defined as the ranking position for which all elements have a q-value lower than the input threshold (by default threshold=0.05). Finally, other genes not included in the aforementioned classes are considered non-driver genes.
 
 Combination benchmark
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 We have assessed the performance of the combination compared to i) each
 of the six individual methods and ii) other strategies to combine the
@@ -182,7 +151,7 @@ We created a catalog of genes that are known not to be involved in
 cancerogenesis. This set includes very long genes (HMCN1, TTN, OBSCN,
 GPR98, RYR2 and RYR3), and a list of olfactory receptors from Human
 Olfactory Receptor Data Exploratorium (HORDE)
-(https://genome.weizmann.ac.il/horde/; download date 14/02/2018) [Ref].
+(https://genome.weizmann.ac.il/horde/; download date 14/02/2018).
 In addition, for all TCGA cohorts, we added non-expressed genes, defined
 as genes where at least 80% of the samples showed a RSEM expressed in
 log2 scale smaller or equal to 0. Expression data for TCGA was
@@ -231,8 +200,8 @@ discovery methods integrated in the pipeline.
 
 As a result we observed a consistent increase in CGC-Score of the
 combinatorial strategy compared to individual methods across TCGA
-cohorts **[Figure].** Similarly, we observed a consistent decrease in
-Negative-Score across TCGA cohorts **[Figure].** In summary, the
+cohorts (see Figure below panel A-B). Similarly, we observed a consistent decrease in
+Negative-Score across TCGA cohorts (see Figure below panel C). In summary, the
 evaluation shows that the combinatorial strategy increases the True
 Positive Rate (measured using the CGC-Score) preserving lower False
 Positive Rate (measured using the Negative-Score) than the six
@@ -258,7 +227,7 @@ performance. Moreover, there is substantial variability across TCGA
 cohorts in the contribution of each method to the combination
 performance. In summary, all methods contributed positively to the
 combinatorial performance across TCGA supporting our methodological
-choice for the individual driver discovery methods [Figure].
+choice for the individual driver discovery methods (see Figure below panel E).
 
 Comparison with other combinatorial selection methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -266,8 +235,8 @@ Comparison with other combinatorial selection methods
 We compared the CGC-Score and Negative-Score of our combinatorial
 selection strategy against other methods frequently used employed to
 produce ranking combinations, either based on ranking information --such
-as Borda Count (REF)-- or based on statistical information --such as
-Fisher (REF) or Brown (REF, REF) methods. Hereto, we briefly describe
+as Borda Count [6]_ -- or based on statistical information --such as
+Fisher [1]_ or Brown [2]_, [3]_ methods. Hereto, we briefly describe
 the rationale of the four methods we used to benchmark our ranking. For
 the sake of compact notation, let’s denote the rank and p-value of gene
 :math:`g` produced by method :math:`m_{i}`\ as :math:`r_{i,\ g}` and
@@ -297,21 +266,44 @@ assumption that the methods provide independent significance tests.
 method by modeling the dependencies between the statistical tests
 produced by each method, specifically by estimating the covariance
 :math:`\Omega_{i,\ j} = cov( - 2\log\text{\ p}_{i,\ g},\  - 2\log\ p_{j,\ g}).`
-Brown’s method (REF) and its most recent adaptation (REF) have been
+Brown’s method [2]_ and its most recent adaptation [3]_ have been
 proposed as less biased alternatives to Fisher.
 
 We then computed the CGC-Score and Negative-Score based on the consensus
 ranking from the aforementioned combinatorial methods and compared them
 to our Schulze’s weighted combination ranking across all TCGA cohorts.
 Our combinatorial approach met a larger enrichment in known cancer genes
-for 29/32 (90%) TCGA cohorts **[Figure]. **
+for 29/32 (90%) TCGA cohorts (see Figure below panel D).
 
 |image2|
 
-.. |image1| image:: /_static/schema_intogen_methods.png
-   :width: 6.50000in
-   :height: 1.83333in
 
-.. |image2| image:: /_static/benchmkark.png
-   :width: 6.50000in
-   :height: 1.83333in
+
+
+.. [1] Fisher R.A. (1948) figure to question 14 on combining independent tests of significance. Am. Statistician , 2, 30–31.
+
+.. [2] Brown, M. B. 400: A Method for Combining Non-Independent, One-Sided Tests of Significance. Biometrics 31, 987 (1975). DOI: 10.2307/2529826
+
+.. [3] William Poole, et al. Combining dependent P-values with an empirical adaptation of Brown’s method, Bioinformatics, Volume 32, Issue 17, 1 September 2016, Pages i430–i436, https://doi.org/10.1093/bioinformatics/btw438
+
+.. [4] Zaykin, D. V. Optimally weighted Z-test is a powerful method for combining probabilities in meta-analysis. Journal of Evolutionary Biology 24, 1836–1841 (2011). doi: 10.1111/j.1420-101.2011.02297.x
+
+.. [5] https://arxiv.org/pdf/1804.02973.pdf
+
+.. [6] Emerson P. The original Borda count and partial voting. Soc Choice Welf (2013) 40:353–358. doi 10.1007/s00355-011-0603-9
+
+
+.. |image1| image:: /_static/schema_intogen_methods.png
+   :width: 7.2in
+   :height: 2.3in
+   :align: middle
+   :scale: 100%
+
+.. |image2| image:: /_static/benchmark.png
+   :width: 9.00000in
+   :height: 6in
+   :align: middle
+
+
+
+
