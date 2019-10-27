@@ -32,7 +32,7 @@ class SmregionsTask(Task):
     def run(self):
 
         cds_regions = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'shared', 'cds.regions.gz')
-        interes_regions = os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'regions_pfam.tsv.gz')
+        interes_regions = os.path.join(os.environ['INTOGEN_DATASETS'], 'smregions', 'regions_pfam.tsv')
         signatures = '' if self.signatures_file is None else f'-s {self.signatures_file}'
 
         run_command(
