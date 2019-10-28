@@ -7,9 +7,9 @@ TCGA
 TCGA somatic mutations (mc3.v0.2.8 version) were downloaded from
 (`https://gdc.cancer.gov/about-data/publications/pancanatlas <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__).
 We then grouped mutations according to their patient’s cancer type into
-32 different cohorts. Additionally, we filtered out somatic mutations
-that did not pass the somatic filtering from TCGA (i.e., column FILTER
-!= “PASS”).
+32 different cohorts. Additionally, we kept somatic mutations
+passing the somatic filtering from TCGA (i.e., column FILTER
+== “PASS”).
 
 PCAWG
 ^^^^^
