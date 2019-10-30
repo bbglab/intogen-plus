@@ -73,26 +73,26 @@ Upon selection of a catalogue of bona-fide known driver elements (CGC
 catalogue of driver genes) we can provide a score for each ranking
 :math:`R` of genes as follows:
 
-:math:`E(R)\  = \frac{p_{i}}{\log(i + 1)}`
+:math:`E(R)\  = \sum_{i=1}^N \frac{p_{i}}{\log(i + 1)}`
 
-where :math:`p_{i}`\ is the proportion of elements with rank higher than
+where :math:`p_{i}` is the proportion of elements with rank higher than
 :math:`i` which belong to CGC and N is a suitable threshold to consider
 only the N top ranked elements. Using :math:`E` we can define a function
 :math:`f` that maps each weighting vector :math:`w` (in the 5-simplex)
 to a value :math:`E(R_{w})` where :math:`R_{w}` denotes the consensus
 ranking obtained by applying Schulze’s voting with voting rights given
-by the weighting vector w.
+by the weighting vector :math:`w`.
 
 Optimization with constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finally we are bound to find a good candidate for
-:math:`\widehat{w_{}} = argmax_{}(f)`. In order to prevent spurious
+:math:`\widehat{w} = \textrm{argmax}(f)`. In order to prevent spurious
 outcomes that could be explained by the concordant detection of driver
 signals by methods with similar underlying assumptions, we impose a set
 of mild ad-hoc constraints. Specifically, we set the following
 constraints: i) all relative weights :math:`\geq` 0.05; ii) w(dNdScv) +
-w(cBaSe) :math:`\leq` 0.5; iii) w(OncodriveCLUSTL) + w(HotMaps3D) +
+w(CBaSE) :math:`\leq` 0.5; iii) w(OncodriveCLUSTL) + w(HotMaps3D) +
 w(smRegions) :math:`\leq` 0.5; w(OncodriveFML) :math:`\leq` 0.5.
 
 Optimization is then carried out in two steps. The first step finds a
@@ -165,30 +165,28 @@ We defined a metric, referred to as CGC-Score, that is intended to
 measure the quality of a ranking of genes as the enrichment of CGC
 elements in the top positions of the ranking; specifically given a
 ranking :math:`R` mapping each element to a rank, we define the
-CGC-Score of :math:`R`\ as
+CGC-Score of :math:`R` as
 
-:math:`\text{CGC}\text{score}(R)\  = \frac{p_{i}}{log(i + 1)}` /
-:math:``\ :math:`\frac{1}{log(i + 1)}`
+:math:`\text{CGC-Score}(R)\  = \sum_{i=1}^N\frac{p_{i}}{log(i + 1)} \; /\; \sum_{i=1}^N\frac{1}{log(i + 1)}`
 
-where :math:`p_{i}`\ is the proportion of elements with rank
-:math:`\leq i` that belong to CGC and :math:`N`\ is a suitable threshold
+where :math:`p_{i}` is the proportion of elements with rank
+:math:`\leq i` that belong to CGC and :math:`N` is a suitable threshold
 to consider just the top elements in the ranking (by default N=40).
 
-We estimated the CGC-score across TCGA cohorts for the individual
+We estimated the CGC-Score across TCGA cohorts for the individual
 methods ranking and the combined Schulze ranking.
 
 Similarly, we defined a metric, referred to as Negative-Score, that aims
 to measure the proportion non-cancer genes among the top positions in
 the ranking. Particularly, given a ranking :math:`R` mapping each
-element to a rank, we define the Negative-Score of :math:`R`\ as
+element to a rank, we define the Negative-Score of :math:`R` as:
 
-:math:`\text{CGC}\text{score}(R)\  = \frac{p_{i}}{log(i + 1)}` /
-:math:``\ :math:`\frac{1}{log(i + 1)}`
+:math:`\text{Negative-Score}(R)\  = \sum_{i=1}^N \frac{p_{i}}{log(i + 1)}\; /\; \sum_{i=1}^N \frac{1}{log(i + 1)}`
 
-where :math:`p_{i}`\ is the proportion of elements with rank
-:math:`\leq i` that belong to the negative set and :math:`N`\ is a
+where :math:`p_{i}` is the proportion of elements with rank
+:math:`\leq i` that belong to the negative set and :math:`N` is a
 suitable threshold to consider just the top elements in the ranking (by
-default N=40). We estimated the Negative-score across TCGA cohorts for
+default N = 40). We estimated the Negative-Score across TCGA cohorts for
 the individual methods ranking and the combined Schulze ranking.
 
 Comparison with individual methods
@@ -213,7 +211,7 @@ Leave-one-out combination
 We aimed to estimate the contribution of each method’s ranking to the
 final ranking after Schulze's weighted combination. To tackle this
 question, we measured the effect of removing one method from the
-combination by, first, calculating the CGCscore of the combination
+combination by, first, calculating the CGC-Score of the combination
 excluding the aforementioned method and, next, obtaining its ratio with
 the original combination (i.e., including all methods). This was
 iteratively calculated for all method across TCGA cohorts. Methods that
@@ -239,23 +237,23 @@ as Borda Count [6]_ -- or based on statistical information --such as
 Fisher [1]_ or Brown [2]_, [3]_ methods. Hereto, we briefly describe
 the rationale of the four methods we used to benchmark our ranking. For
 the sake of compact notation, let’s denote the rank and p-value of gene
-:math:`g` produced by method :math:`m_{i}`\ as :math:`r_{i,\ g}` and
-:math:`p_{i,\ g}`, respectively.
+:math:`g` produced by method :math:`m_{i}` as :math:`r_{i,g}` and
+:math:`p_{i,g}`, respectively.
 
 *Borda Count:* For each ranked item :math:`g` and method :math:`m_{i},`
-it assigns a score :math:`s_{i,\ g} = N - l_{i,\ g},` where :math:`N`
-stands for the total number of items to rank and :math:`l_{i,\ g}` is
+it assigns a score :math:`s_{i,g} = N - l_{i,g},` where :math:`N`
+stands for the total number of items to rank and :math:`l_{i,g}` is
 the number of items ranked below :math:`g` according to method
 :math:`m_{i}`. For each item :math:`g` an overall score
-:math:`s_{g}{\  = \ s}_{1,\ g} + \ldots + s_{k,\ g}` can then be
+:math:`s_{g}= s_{1,g} + \ldots + s_{k,g}` can then be
 computed for each :math:`g,` whence a ranking is obtained by descending
 sort.
 
-*Fisher:* It is based on the p-values :math:`p_{i,\ g}`. For each item
+*Fisher:* It is based on the p-values :math:`p_{i,g}`. For each item
 :math:`g` the method produces a new combined p-value by computing the
 statistic:
 
-:math:`F_{g} = - 2\log\ p_{i,\ g}\  \sim \ \chi_{2k}^{2}`.
+:math:`F_{g} = - 2\log\ p_{i, g} \sim \chi_{2k}^{2}`.
 
 Under the null hypothesis, :math:`F_{g}` are distributed as a chi-square
 with :math:`2k` degrees of freedom, whence a p-value, which in turn
@@ -265,7 +263,7 @@ assumption that the methods provide independent significance tests.
 *Brown:* This method overcomes the independence requirement of Fisher’s
 method by modeling the dependencies between the statistical tests
 produced by each method, specifically by estimating the covariance
-:math:`\Omega_{i,\ j} = cov( - 2\log\text{\ p}_{i,\ g},\  - 2\log\ p_{j,\ g}).`
+:math:`\Omega_{i,j} = \textrm{cov}( - 2\log p_{i,g}, - 2\log p_{j,g}).`
 Brown’s method [2]_ and its most recent adaptation [3]_ have been
 proposed as less biased alternatives to Fisher.
 

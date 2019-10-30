@@ -1,4 +1,4 @@
-Data Gathering
+Data Collection
 ---------------
 
 TCGA
@@ -7,9 +7,9 @@ TCGA
 TCGA somatic mutations (mc3.v0.2.8 version) were downloaded from
 (`https://gdc.cancer.gov/about-data/publications/pancanatlas <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__).
 We then grouped mutations according to their patient’s cancer type into
-32 different cohorts. Additionally, we filtered out somatic mutations
-that did not pass the somatic filtering from TCGA (i.e., column FILTER
-!= “PASS”).
+32 different cohorts. Additionally, we kept somatic mutations
+passing the somatic filtering from TCGA (i.e., column FILTER
+== “PASS”).
 
 PCAWG
 ^^^^^
@@ -26,10 +26,9 @@ cBioPortal
 
 Somatic mutations from Whole Exome Sequencing (WXS) and Whole Genome
 Sequencing (WGS) cohorts uploaded in cBioPortal that were not part of
-any other projects included in the analysis (i.e., TCGA, PCAWG, ST. JUDE
-or HARTWIG) were downloaded (download date 2018/09/01;
-http://www.cbioportal.org/datasets). We then created cohorts following
-the next criteria:
+any other projects included in the analysis (i.e., TCGA, PCAWG, St. Jude
+or HARTWIG) were downloaded on 2018/09/01 (http://www.cbioportal.org/datasets).
+We then created cohorts following the next criteria:
 
 1. Cohorts with a limited number of samples (i.e., lower than 30 samples) associated to cancer types with extensive representation (such as Breast cancer, Prostate cancer or Colorectal adenocarcinoma) across the compendium of cohorts were removed.
 
@@ -51,7 +50,7 @@ Hartwig Medical Foundation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Somatic mutations of metastatic WGS from Hartwig Medical Foundation `https://www.hartwigmedicalfoundation.nl/en/database/ <https://www.hartwigmedicalfoundation.nl/en/database/>`__ were
-downloaded through their platform (download date 2019/05/02). Datasets
+downloaded on 2019/05/02 through their platform. Datasets
 were split according to their primary site. Samples from unknown primary
 sites (i.e., None, Nan, Unknown, Cup, Na), double primary or aggregating
 into cohorts of fewer than 5 samples (i.e., Adrenal, Myeloid, Thymus and
@@ -64,11 +63,11 @@ Somatic mutations from Whole Exome Sequencing (WXS) and Whole Genome
 Sequencing (WGS) studies uploaded in ICGC Data Portal
 (`https://dcc.icgc.org/repositories <https://dcc.icgc.org/repositories>`__)
 not overlapping with other projects included in the analysis (i.e.,
-TCGA, PCAWG, CBIOP or ST. JUDE) were downloaded on 2018/01/09. We then
+TCGA, PCAWG, CBIOP or St. Jude) were downloaded on 2018/01/09. We then
 created cohorts following the criteria used for the cBioPortal datasets
 (cBioPortal).
 
-ST. Jude
+St. Jude
 ^^^^^^^^
 
 Somatic mutations from Whole Exome Sequencing (WXS) and Whole Genome
@@ -84,9 +83,8 @@ PedcBioPortal
 
 Somatic mutations from Whole Exome Sequencing (WXS) and Whole Genome
 Sequencing (WGS) studies uploaded in PedcBioPortal that were not part of
-any other projects included in the analysis (i.e., ST. JUDE or CBIOP)
-were downloaded (download date 2018/10/01;
-`http://www.pedcbioportal.org/datasets <http://www.pedcbioportal.org/datasets>`__).
+any other projects included in the analysis (i.e., St. Jude or CBIOP)
+were downloaded on 2018/10/01 (`http://www.pedcbioportal.org/datasets <http://www.pedcbioportal.org/datasets>`__).
 We then created cohorts following the criteria described in the
 cBioPortal dataset (cBioPortal).
 
@@ -94,8 +92,8 @@ TARGET
 ^^^^^^
 
 Somatic SNVs from WXS and WGS of two TARGET studies, Neuroblastoma (NB)
-and Wilms Tumor (WT), from the TARGET consortium were downloaded from
-the `Genomic Data Commons Portal <https://gdc.cancer.gov/>`__ (download date 2019/03/07).
+and Wilms Tumor (WT), from the TARGET consortium were downloaded on 2019/03/07 from
+the `Genomic Data Commons Portal <https://gdc.cancer.gov/>`__.
 
 Beat AML
 ^^^^^^^^

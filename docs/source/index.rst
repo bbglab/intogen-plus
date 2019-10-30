@@ -15,6 +15,7 @@ Welcome to IntOGen's documentation
    methods_driver_discovery
    drivers_combination
    postprocessing
+   mutational_features
 
 
 Indices and tables
