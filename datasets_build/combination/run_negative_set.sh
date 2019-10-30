@@ -26,7 +26,7 @@ INTOGEN_DATASETS=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEA
 path_base=${INTOGEN_DATASETS}/combination/
 file_output=${path_base}/negative_gene_set.tsv
 file_output_non_expressed=${path_base}/non_expressed_genes_tcga.tsv
-file_olfactory_receptors=olfactory_receptors.tsv
+file_olfactory_receptors=${path_base}/olfactory_receptors.tsv
 
 mkdir -p ${path_base}
 
@@ -34,7 +34,7 @@ mkdir -p ${path_base}
 bgdata get --force intogen/expression/tcga_pancanatlas
 
 # download the data
-wget https://genome.weizmann.ac.il/horde/download/genes.csv -O olfactory_receptors.tsv
+wget https://genome.weizmann.ac.il/horde/download/genes.csv -O ${file_olfactory_receptors}
 
 # create the dataframe
 python create_negative_set.py \
