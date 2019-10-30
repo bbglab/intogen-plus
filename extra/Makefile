@@ -1,25 +1,21 @@
 .PHONY: all clean cohorts check-env
 
 # The following environment variables must be defined
-INTOGEN_DATASETS = /workspace/projects/intogen_2017/pipeline/datasets/hg38_vep92_develop
-DNDSCV_PAN_RUN = /workspace/projects/ubiquitins/run_tcga_pan/intogen_runs/20181105/dndscv/PCATLAS_WXS_PAN.out.gz
+INTOGEN_DATASETS = ${INTOGEN_DATASETS_FOLDER}
+DNDSCV_PAN_RUN = ${INTOGEN_DNDSCV_PAN_RUN}
 
 CORES = 54
 
 # FOLDERS with input datasets
-INPUTS = /workspace/datasets/intogen_datasets/genomes \
-		/workspace/datasets/hartwig/20190502/DR-024-update2/data \
-		/workspace/datasets/stjude/20180716/preprocess
+INPUTS = ${INTOGEN_INPUTS}
 
 # FOLDERS with the runs
-RUNS = /workspace/projects/intogen_2017/runs/20190607 \
-		/workspace/projects/hartwig/intogen/runs/20190502_20190503 \
-		/workspace/projects/stjude/intogen/runs/20190610/
+RUNS = ${INTOGEN_RUNS}
 
 EXPRESSION_TCGA = ${INTOGEN_DATASETS}/combination/non_expressed_genes_tcga.tsv
 #ORFACTORY = ${INTOGEN_DATASETS}/combination/olfactory_receptors.tsv
 # TODO fix. Should be in the one above
-ORFACTORY = ${INTOGEN_DATASETS}/drivers/olfactory_receptors.tsv
+ORFACTORY = ${INTOGEN_DATASETS}/combination/olfactory_receptors.tsv
 CGC = ${INTOGEN_DATASETS}/combination/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/shared/cds_biomart.tsv
 VEP = ${INTOGEN_DATASETS}/shared/vep.tsv.bgz
