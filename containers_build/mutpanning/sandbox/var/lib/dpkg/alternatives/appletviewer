@@ -1,0 +1,9 @@
+auto
+/usr/bin/appletviewer
+appletviewer.1.gz
+/usr/share/man/man1/appletviewer.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/appletviewer
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/appletviewer.1.gz
+

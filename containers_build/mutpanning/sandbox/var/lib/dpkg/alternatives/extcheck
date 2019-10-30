@@ -1,0 +1,9 @@
+auto
+/usr/bin/extcheck
+extcheck.1.gz
+/usr/share/man/man1/extcheck.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/extcheck
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/extcheck.1.gz
+

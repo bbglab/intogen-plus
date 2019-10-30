@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+multiarch=x86_64-linux-gnu
+old_basedir=/usr/lib/jvm/java-7-openjdk
+jdk_tools='appletviewer jconsole'
+
+case "$1" in
+    upgrade)
+	if [ -n "$multiarch" ] && [ -n "$2" ]; then
+	    for i in $jdk_tools; do
+		if [ -n "$(update-alternatives --list $i 2>/dev/null | grep ^$old_basedir/)" ]; then
+		    update-alternatives --remove $i $old_basedir/bin/$i || true
+		fi
+	    done
+	fi
+	;;
+esac
+
+
+
+exit 0

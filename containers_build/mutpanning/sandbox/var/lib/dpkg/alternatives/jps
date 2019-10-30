@@ -1,0 +1,9 @@
+auto
+/usr/bin/jps
+jps.1.gz
+/usr/share/man/man1/jps.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/jps
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/jps.1.gz
+

@@ -1,0 +1,9 @@
+auto
+/usr/bin/jdb
+jdb.1.gz
+/usr/share/man/man1/jdb.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/jdb
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/jdb.1.gz
+

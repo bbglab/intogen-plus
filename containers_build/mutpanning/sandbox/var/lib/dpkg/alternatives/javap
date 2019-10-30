@@ -1,0 +1,9 @@
+auto
+/usr/bin/javap
+javap.1.gz
+/usr/share/man/man1/javap.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javap
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/javap.1.gz
+

@@ -1,0 +1,9 @@
+auto
+/usr/bin/jdeps
+jdeps.1.gz
+/usr/share/man/man1/jdeps.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/jdeps
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/jdeps.1.gz
+

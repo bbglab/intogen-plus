@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+basedir=/usr/lib/jvm/java-8-openjdk-amd64
+jre_tools='rmid java keytool jjs pack200 rmiregistry unpack200 orbd servertool tnameserv'
+
+rm -f $basedir/jre/lib/amd64/client/classes.jsa
+rm -f $basedir/jre/lib/amd64/server/classes.jsa
+
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    for i in $jre_tools; do
+	update-alternatives --remove $i $basedir/jre/bin/$i
+    done
+
+    if which update-binfmts >/dev/null; then
+	# try to remove and ignore the error
+	if [ -e /var/lib/binfmts/openjdk-8 ]; then
+	    update-binfmts --package openjdk-8 \
+		--remove jar /usr/bin/jexec || true
+	fi
+    fi
+
+    update-alternatives --remove jexec $basedir/jre/lib/jexec
+fi
+
+

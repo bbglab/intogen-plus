@@ -1,0 +1,9 @@
+auto
+/usr/bin/javah
+javah.1.gz
+/usr/share/man/man1/javah.1.gz
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javah
+1081
+/usr/lib/jvm/java-8-openjdk-amd64/man/man1/javah.1.gz
+

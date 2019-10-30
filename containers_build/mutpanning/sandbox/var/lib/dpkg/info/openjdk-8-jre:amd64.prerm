@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+basedir=/usr/lib/jvm/java-8-openjdk-amd64
+jre_tools='policytool'
+
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    for i in $jre_tools; do
+	update-alternatives --remove $i $basedir/jre/bin/$i
+    done
+fi
+
+

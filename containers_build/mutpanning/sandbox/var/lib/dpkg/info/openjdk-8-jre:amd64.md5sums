@@ -1,0 +1,16 @@
+f79ee3ed2673533351d9de4a6e19937f  usr/lib/jvm/java-8-openjdk-amd64/jre/bin/policytool
+c949f650f136940a7d91f346a4c48ad7  usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libicedtea-sound.so
+d215d6ee58b9d415db5ca2c6e01abdf0  usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libjsoundalsa.so
+c5eb171ab5d2eeb64572aefca7449280  usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/libsplashscreen.so
+a7bfd9743910e449cafe9db443184685  usr/lib/jvm/java-8-openjdk-amd64/jre/man/ja_JP.UTF-8/man1/policytool.1.gz
+164fd9e4e65220c90905bc58195709ae  usr/lib/jvm/java-8-openjdk-amd64/jre/man/man1/policytool.1.gz
+679082784519a73f168f5c296ae8e832  usr/share/application-registry/openjdk-8-archive.applications
+bb72443539c9b4dae80d3fc8972fa2af  usr/share/applications/openjdk-8-policytool.desktop
+3fc92acc9ae2008f239dfdcad13db486  usr/share/icons/hicolor/16x16/apps/openjdk-8.png
+6ec5775e99735e6da7e09a4c2b7d1421  usr/share/icons/hicolor/24x24/apps/openjdk-8.png
+82963a4b30de3ff6c6c33af9def62928  usr/share/icons/hicolor/32x32/apps/openjdk-8.png
+cad62d37bb958532d6298b10a45697f7  usr/share/icons/hicolor/48x48/apps/openjdk-8.png
+84f0413943aeb3dc570a5ec0b77933e2  usr/share/lintian/overrides/openjdk-8-jre
+2f97e2ef3543ac723ef185af4d3cec4e  usr/share/mime-info/openjdk-8-archive.keys
+3703e5f1e5748cca784ff793032263a1  usr/share/mime-info/openjdk-8-archive.mime
+b5fc0cafdf7025036ebae6dc53791f6b  usr/share/pixmaps/openjdk-8.xpm
