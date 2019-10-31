@@ -5,13 +5,29 @@ set -e
 export INTOGEN_GENOME=$1 "hg38"
 export INTOGEN_VEP=$2 "vep92"
 export INTOGEN_RELEASE=$3  "v20191009"
-export INTOGEN_CONTAINERS=$4 #"/workspace/projects/intogen_2017/pipeline/containers/"
+export INTOGEN_CONTAINERS=$4
 mkdir -p ../containers/${INTOGEN_RELEASE}
 
 # CBase
-
 if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/cbase.simg ]; then
     echo "Building cbase.simg..."
+    cd cbase
+    sudo singularity build ../../containers/${INTOGEN_RELEASE}/cbase.simg Singularity
+    mv ../../containers/${INTOGEN_RELEASE}/cbase.simg ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/
+    cd ..
+fi
+
+
+# MutPanning
+if [ ! -f ${JAR_FILE} ]; then
+    echo "ERROR: the MutPanning software should be downloaded beforehand."
+    echo "The program can be obtained in the Download section of http://www.cancer-genes.org/"
+    echo "Download the JAR version of MutPanning, decompress it with unzip, and"
+    echo "move the MutPanning.jar file to the mutpanning/ folder."
+    exit -1
+fi
+if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/cbase.simg ]; then
+    echo "Building MutPanning.simg..."
     cd cbase
     sudo singularity build ../../containers/${INTOGEN_RELEASE}/cbase.simg Singularity
     mv ../../containers/${INTOGEN_RELEASE}/cbase.simg ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/
@@ -30,7 +46,6 @@ fi
 
 
 # DeconstructSig
-
 if [ ! -f ${INTOGEN_CONTAINERS}/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/deconstructsig.simg ]; then
     echo "Building deconstructsig.simg"
     cd deconstructsig
