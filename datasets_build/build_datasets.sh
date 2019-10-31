@@ -66,6 +66,12 @@ cd cbase
 ./run.sh
 cd ..
 
+# MutPanning
+echo "- Building MutPanning datasets"
+cd mutpanning
+./run.sh
+cd ..
+
 # Vep
 echo "- Building VEP datasets"
 cd vep

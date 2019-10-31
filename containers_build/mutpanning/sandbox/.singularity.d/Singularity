@@ -1,3 +1,0 @@
-bootstrap: docker
-from: debian:stretch
-

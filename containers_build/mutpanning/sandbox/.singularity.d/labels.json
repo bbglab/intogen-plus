@@ -1,7 +1,0 @@
-{
-	"org.label-schema.build-date": "Tuesday_29_October_2019_11:8:55_CET",
-	"org.label-schema.schema-version": "1.0",
-	"org.label-schema.usage.singularity.deffile.bootstrap": "docker",
-	"org.label-schema.usage.singularity.deffile.from": "debian:stretch",
-	"org.label-schema.usage.singularity.version": "3.4.1+427-g566eef658"
-}

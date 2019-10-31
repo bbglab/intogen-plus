@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-
-update-alternatives --install \
-	/usr/lib/x86_64-linux-gnu/libtxc_dxtn.so libtxc-dxtn-x86_64-linux-gnu /usr/lib/x86_64-linux-gnu/s2tc/libtxc_dxtn.so 10
-
-
