@@ -265,7 +265,9 @@ def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
     # check if the number of mutations is np.nan then discard it
     df_drivers = df_drivers[~np.isnan(df_drivers["MUTATIONS"])]
     df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
-    columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","QVALUE_COMBINATION","ROLE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
+    # Compute % of samples per cohort
+    df_drivers["%_SAMPLES_COHORT"] = df_drivers.apply(lambda row: row["SAMPLES"] / row["SAMPLES_COHORT"],axis=1)
+    columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","%_SAMPLES_COHORT","QVALUE_COMBINATION","ROLE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
                "EXCESS_NON","EXCESS_SPL"]
     df_drivers[columns].sort_values(["SYMBOL","CANCER_TYPE"]).to_csv(drivers, sep="\t", index=False)
 
