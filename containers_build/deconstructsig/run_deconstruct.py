@@ -12,11 +12,11 @@ import pandas as pd
 
 folder = '/deconstructsig'
 
-# DRIVERS_PATH = os.path.join(folder, 'output_pass_drivers_01.csv')
-DRIVERS_PATH = os.path.join(
-    os.environ.get("INTOGEN_DATASETS"),
-    'drivers', 'vetted_drivers05.tsv'
-)
+DRIVERS_PATH = os.path.join(folder, 'output_pass_drivers_01.csv')
+# DRIVERS_PATH = os.path.join(
+#     os.environ.get("INTOGEN_DATASETS"),
+#     'drivers', 'vetted_drivers05.tsv'
+# )
 tmpdir = tempfile.mkdtemp()
 MUTS_PATH = os.path.join(tmpdir, 'mutations_snv.csv')
 
