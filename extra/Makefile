@@ -3,6 +3,8 @@
 # The following environment variables must be defined
 INTOGEN_DATASETS = ${INTOGEN_DATASETS_FOLDER}
 DNDSCV_PAN_RUN = ${INTOGEN_DNDSCV_PAN_RUN}
+INTOGEN_GENOME_VERSION = ${INTOGEN_GENOME}
+INTOGEN_VEP_VERSION = ${INTOGEN_VEP}
 
 CORES = 54
 
@@ -18,7 +20,6 @@ EXPRESSION_TCGA = ${INTOGEN_DATASETS}/combination/non_expressed_genes_tcga.tsv
 ORFACTORY = ${INTOGEN_DATASETS}/combination/olfactory_receptors.tsv
 CGC = ${INTOGEN_DATASETS}/combination/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/shared/cds_biomart.tsv
-VEP = ${INTOGEN_DATASETS}/shared/vep.tsv.bgz
 DNDSCV_PAN = ${DNDSCV_PAN_RUN}
 
 # OUTPUTS
@@ -95,7 +96,7 @@ DRIVER_GENES_FILES = $(wildcard $(patsubst %,%/smregions/*.out.gz, $(RUNS)))
 DRIVER_GENES_FILES = $(wildcard $(patsubst %,%/oncodriveclustl/*.clusters.gz, $(RUNS)))
 DRIVER_GENES_FILES = $(wildcard $(patsubst %,%/hotmaps/*.clusters.gz, $(RUNS)))
 DRIVER_GENES_FILES = $(wildcard $(patsubst %,%/dndscv/*.out.gz, $(RUNS)))
-DRIVER_GENES_FILES += $(EXPRESSION_TCGA) $(ORFACTORY) $(CANCERMINE) $(EXACT) $(CGC) $(ENSEMBL) $(VEP)
+DRIVER_GENES_FILES += $(EXPRESSION_TCGA) $(ORFACTORY) $(CANCERMINE) $(EXACT) $(CGC) $(ENSEMBL)
 DRIVER_GENES_FILES += $(STATS_COHORTS) $(DNDSCV_PAN)
 DRIVER_GENES_FILES += data/artifacts.json data/black_listed.txt data/white_listed.txt \
 	data/gene_MoA.tsv
@@ -105,7 +106,8 @@ $(DRIVER_GENES): $(DRIVER_GENES_FILES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVER
 		$(EXACT) $(CGC) $(BIOMART) $(STATS_COHORTS) $(DRIVER_GENES_THRESHOLD) \
 		$(RUNS) $(OUTPUT_FOLDER_DRIVERS)
 
-	python drivers_data.py $@ $(DNDSCV_PAN) $(VEP) $(MUTATIONS) $(RUNS) $(OUTPUT_FOLDER_DRIVERS)
+	python drivers_data.py $@ $(DNDSCV_PAN) $(INTOGEN_VEP_VERSION) $(INTOGEN_GENOME_VERSION) \
+		$(MUTATIONS) $(RUNS) $(OUTPUT_FOLDER_DRIVERS)
 
 
 MUTATION_FILES = $(wildcard $(patsubst %,%/vep/*.out.gz, $(RUNS)))
