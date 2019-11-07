@@ -14,11 +14,12 @@ from tasks.oncodriveclustl import OncodriveClustlTask
 from tasks.oncodrivefml import OncodriveFmlTask
 from tasks.hotmaps import HotmapsTask
 from tasks.vep import VepTask
+from tasks.mutpanning import MutPanningTask
 from tasks.combination import CombinationTask
 from tasks.mutrate import MutrateTask
 from tasks.smregions import SmregionsTask
 from tasks.signatures import SignatureTask
-from filters.base import VariantsReader, TSVReader
+from filters.base import VariantsReader, VariantsReaderAll, TSVReader
 from filters.variants import VariantsFilter
 from filters.vep import VepFilter, NonSynonymousFilter
 
@@ -34,7 +35,8 @@ TASKS = {t.KEY: t for t in [
     CBaseTask,
     MutrateTask,
     SmregionsTask,
-    SignatureTask
+    SignatureTask,
+    MutPanningTask
 ]}
 
 

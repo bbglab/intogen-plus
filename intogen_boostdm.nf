@@ -69,10 +69,11 @@ process PreprocessFromVep {
         file "hotmaps/*.in.gz" into IN_HOTMAPS mode flatten
         file "cbase/*.in.gz" into IN_CBASE mode flatten
         file "filters/vep/*.json" into FILTERS_VEP
+        file "mutpanning/*.in.gz" into IN_MUTPANNING mode flatten
         file "deconstructsig/*.in.gz" into IN_DECONSTRUCTSIG mode flatten
 
     """
-    $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase deconstructsig
+    $INTOGEN_SCRIPT readvep -i $task_file -o $OUTPUT hotmaps cbase mutpanning deconstructsig
     """
 }
 
@@ -161,6 +162,22 @@ process OncodriveFML {
 
     """
     $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT oncodrivefml $task_file
+    """
+}
+
+process MutPanning {
+
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_MUTPANNING
+
+    output:
+        file "mutpanning/SignificanceFiltered/Significance*.txt" into OUT_MUTPANNING mode flatten
+
+    """
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutpanning $task_file
     """
 }
 
