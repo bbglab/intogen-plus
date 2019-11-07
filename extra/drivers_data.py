@@ -6,7 +6,7 @@ from os import path
 
 import numpy as np
 import pandas as pd
-import tabix
+from bgvep.readers import Tabix
 
 FOLDER = path.dirname(path.abspath(__file__))
 
@@ -137,23 +137,12 @@ GENOME_SEQUENCE_MAPS.update({'chrX': 'X', '23': 'X', 'chr23': 'X', 'chrY': 'Y', 
 GENOME_SEQUENCE_MAPS.update({'chrM': 'M', 'MT': 'M', 'chrMT': 'M'})
 
 
-class TabixAAReader:
-
-    def __init__(self, file):
-        self.file = file
-        self.tb = None
-
-    def __enter__(self):
-        self.tb = tabix.open(self.file)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return True
+class TabixAAReader(Tabix):
 
     def get(self, chromosome, pos, gene):
         chr_ = GENOME_SEQUENCE_MAPS.get(chromosome, chromosome)
-        for row in self.tb.query("{}".format(chr_), pos, pos):
-            canonical_vep = ((row[-4] == 'YES') and (row[4] == gene))
+        for row in super().get("{}".format(chr_), pos, pos):
+            canonical_vep = ((row[-2] == 'YES') and (row[4] == gene))
             if canonical_vep:
                 return row[10]
 
@@ -170,10 +159,10 @@ def get_position_aa(reader, c, chr_, gene_id):
         return pd.Series([start_aa, end_aa])
 
 
-def clusters_2D(paths, vep_tabix):
+def clusters_2D(paths, genome_version, vep_version):
     PVALUE_THRESHOLD = 0.05
     clusters = []
-    with TabixAAReader(vep_tabix) as reader:
+    with TabixAAReader(genome_version, vep_version) as reader:
         for path_ in paths:
             for file in glob.glob(path.join(path_, 'oncodriveclustl', '*.clusters.gz')):
                 cohort = path.basename(file).split(".")[0]
@@ -243,7 +232,7 @@ def mutations(muts):
     return mut_counts
 
 
-def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
+def run(paths, drivers, dndscv, vep, genome, muts, tmp_folder=None):
     tmp_folder = tmp_folder or tempfile.TemporaryDirectory().name
 
     df_drivers = pd.read_csv(drivers, sep='\t', dtype={'MUTS': int, 'SAMPLES': int})
@@ -254,7 +243,7 @@ def run(paths, drivers, dndscv, vep, muts, tmp_folder=None):
     dfs = [
         role(dndscv, tmp_folder=tmp_folder),
         significative_domains(paths),
-        clusters_2D(paths, vep),
+        clusters_2D(paths, vep, genome),
         clusters_3D(paths),
         excess(paths),
         mutations(muts)
@@ -276,8 +265,9 @@ if __name__ == "__main__":
     drivers = sys.argv[1]
     dndscv = sys.argv[2]
     vep = sys.argv[3]
-    muts = sys.argv[4]
-    paths = sys.argv[5:-1]
+    genome = sys.argv[4]
+    muts = sys.argv[5]
+    paths = sys.argv[6:-1]
     tmp_folder = sys.argv[-1]
-    run(paths, drivers, dndscv, vep, muts, tmp_folder)
+    run(paths, drivers, dndscv, vep, genome, muts, tmp_folder)
 
