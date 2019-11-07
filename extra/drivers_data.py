@@ -126,7 +126,7 @@ def significative_domains(paths):
                 df[["ENSEMBL_TRANSCRIPT", "PFAM_ID", "START", "END"]] = df['REGION'].str.split(':', expand=True)
                 df["DOMAIN"] = df["PFAM_ID"] + ":" + df["START"] + ":" + df["END"]
                 df = df.groupby(["SYMBOL", "COHORT"], as_index=False).agg({"DOMAIN": lambda x: ','.join(set(x))})
-                domains.append(df)
+                domains.append(df.copy())
 
     df = pd.concat(domains, sort=True)
     return df
@@ -164,7 +164,7 @@ def get_position_aa(reader, c, chr_, gene_id):
     end = d[-1]
     start_aa = reader.get(chr_, int(start), gene_id)
     end_aa = reader.get(chr_, int(end), gene_id)
-    if start_aa > end_aa:
+    if int(start_aa) > int(end_aa):
         return pd.Series([end_aa, start_aa])
     else:
         return pd.Series([start_aa, end_aa])
@@ -188,7 +188,7 @@ def clusters_2D(paths, vep_tabix):
                     df["2D_CLUSTERS"] = df["AA_START"] + ":" + df["AA_END"]
                     df = df.groupby(["SYMBOL", "COHORT"], as_index=False).agg(
                         {"2D_CLUSTERS": lambda x: ','.join(set(map(str, x)))})
-                    clusters.append(df)
+                    clusters.append(df.copy())
 
     df = pd.concat(clusters, sort=True)
     return df
@@ -209,7 +209,7 @@ def clusters_3D(paths):
                 # Get the amino acid coordinates
                 df = df.groupby(["SYMBOL", "COHORT"], as_index=False).agg(
                     {"3D_CLUSTERS": lambda x: ','.join(set(map(str, x)))})
-                clusters.append(df)
+                clusters.append(df.copy())
 
     df = pd.concat(clusters, sort=True)
     return df
@@ -228,7 +228,7 @@ def excess(paths):
                 df['EXCESS_NON'] = df.apply(lambda v: excess_rate(v['n_non'], v['wnon_cv']), axis=1)
                 df['EXCESS_SPL'] = df.apply(lambda v: excess_rate(v['n_spl'], v['wspl_cv']), axis=1)
                 df = df[["SYMBOL", "COHORT", "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL"]].drop_duplicates()
-                excess.append(df)
+                excess.append(df.copy())
     df = pd.concat(excess)
     return df
 
