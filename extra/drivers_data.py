@@ -243,7 +243,7 @@ def run(paths, drivers, dndscv, vep, genome, muts, tmp_folder=None):
     dfs = [
         role(dndscv, tmp_folder=tmp_folder),
         significative_domains(paths),
-        clusters_2D(paths, vep, genome),
+        clusters_2D(paths, genome, vep),
         clusters_3D(paths),
         excess(paths),
         mutations(muts)
