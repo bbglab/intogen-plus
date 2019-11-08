@@ -1,13 +1,18 @@
 # IntOGen #
 
+| WARNING: Please note that IntOGen needs a lot of resources. We strongly suggest to run it in a cluster environment!|
+| --- |
+
 ### Install requirements
 
 1. Install [miniconda or conda python distributions](https://docs.conda.io/projects/conda/en/latest/index.html)
 2. Install [singularity](https://sylabs.io/singularity/) (the pipeline has been tested 
-with version 2.x)
+with version 2.x. You can use `conda install -c bioconda singularity`)
 3. Install nextflow  (You can use `conda install nextflow`)
 
-### Download or build datasets
+### Download and build datasets
+
+> :warning: The pipeline has been tested with **hg38** and **vep92**
 
 All the required datasets will be stored into the `datasets` folder, 
 if you want to use a different folder you must create a symbolic link 
@@ -36,7 +41,9 @@ cd datasets_build
 ./build_datasets.sh hg38 vep92 stable
 ```
 
-### Download or build singularity images
+### Download and build singularity images
+
+> :warning: The pipeline has been tested with **hg38** and **vep92**
 
 All the images will be stored into the `containers` folder, if you want to use a 
 different folder you must create a symbolic link before running this script. 
