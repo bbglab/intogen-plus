@@ -17,6 +17,10 @@ class MutPanningTask(Task):
     SAMPLES_HEADER = [
         'ID', 'Sample', 'Cohort',  # 'Subtype', 'ConfidenceLevel', 'Study'
     ]
+    OUTPUT_HEADER = [
+        'Name', 'TargetSize', 'TargetSizeSyn', 'Count',
+        'CountSyn', 'Significance', 'FDR'
+    ]
     LIFTOVER = None
 
     def input_start(self):
@@ -78,14 +82,36 @@ class MutPanningTask(Task):
             for _id, sample in enumerate(samples):
                 fd.write(f"{_id}\t{sample}\t{self.name}\n")
 
+    def create_output_files(self, result_file):
+        """
+        Create an empty output file, with only the header
+        :param result_file:
+        :return:
+        """
+        os.makedirs(os.path.dirname(result_file), exist_ok=True)
+        with open(result_file, 'w') as fd:
+            fd.write('\t'.join(self.OUTPUT_HEADER) + '\n')
+
     def run(self):
         # Input parameters
-        mutations_file = os.path.join(self.output_work, '{}.mutations'.format(self.name))
-        sample_file = os.path.join(self.output_work, '{}.samples'.format(self.name))
+        mutations_file = os.path.join(self.output_work, f'{self.name}.mutations')
+        sample_file = os.path.join(self.output_work, f'{self.name}.samples')
         self.create_input_files(mutations_file, sample_file)
         database = os.path.join(os.environ.get("INTOGEN_DATASETS"), 'mutpanning', 'Hg19/')
 
-        # Run MutPanning
-        run_command(
-            f"{self.cmdline} {self.output_folder} {mutations_file} {sample_file} {database}"
+        # Output parameters
+        result_file = os.path.join(
+            self.output_folder,
+            'SignificanceFiltered',
+            f'Significance{self.name}.txt'
         )
+
+        # Create an output file with only the header. If the method fails,
+        # this is the file that will be compressed as self.out_file
+        self.create_output_files(result_file)
+
+        # Run MutPanning
+        run_command(f"""
+        {self.cmdline} {self.output_folder} {mutations_file} {sample_file} {database} && \
+        cat {result_file} | gzip > {self.out_file}
+        """)
