@@ -1,7 +1,6 @@
 # IntOGen #
 
-| WARNING: Please note that IntOGen needs a lot of resources. We strongly suggest to run it in a cluster environment!|
-| --- |
+> :warning: Please note that IntOGen needs a lot of resources. We strongly suggest to run it in a cluster environment!
 
 ### Install requirements
 
