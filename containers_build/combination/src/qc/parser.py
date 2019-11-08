@@ -28,7 +28,6 @@ class Parser:
         self.pvalue = configs['methods'][method]['PVALUE']
         self.qvalue = configs['methods'][method]['QVALUE']
 
-
     def read(self, input_file):
         """Read an output file. 
         :param input_file: path, file to read with results
@@ -44,7 +43,7 @@ class Parser:
             df = df[np.isfinite(df[self.pvalue])]
         except Exception:
             logger.warning('No finite p-value'.format(input_file))
-        df = df[[self.gene_id,self.pvalue,self.qvalue]]
+        df = df[[self.gene_id, self.pvalue, self.qvalue]]
         df.rename(columns={
             self.gene_id: 'GENE_ID', self.pvalue: 'PVALUE', self.qvalue: 'QVALUE'
         }, inplace=True)

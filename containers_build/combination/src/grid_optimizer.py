@@ -279,8 +279,7 @@ def optimize_with_seed(func, w0, low_quality=set()):
 
 
 def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cgc, seed):
-    '''
-
+    """
     :param cancer:
     :param input_rankings:
     :param method_reject:
@@ -288,7 +287,7 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     :param percentage_cgc:
     :param seed:
     :return:
-    '''
+    """
 
     global gavaliable_methods
     if seed == 'T':
@@ -322,7 +321,6 @@ def full_optimizer(cancer, input_rankings, method_reject, moutput, percentage_cg
     for method in METHODS:
         if method not in gavaliable_methods:
             d_results_methodsr[method] = {}
-
 
     # Instantiate the enrichment objective function
     objective_function = Evaluation_Enrichment(percentage_cgc)
@@ -376,7 +374,6 @@ def skip_optimizer(method_reject, moutput, cancer):
             df[md] = 0.0
     df["Objective_Function"] = np.nan
     return df
-
 
 
 @click.command()

@@ -26,7 +26,7 @@ def get_voters(gene, d):
         else:
             continue
     methods = list(d_rank.keys())
-    if len(methods)==0:
+    if len(methods) == 0:
         print(gene)
     sorted_methods = sorted(d_rank.items(), key=lambda x: (x[1], x[0]))
     try:

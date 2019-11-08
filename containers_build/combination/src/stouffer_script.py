@@ -283,4 +283,3 @@ def run_stouffer_script(input_path, output_path, path_rankings, path_weights, pa
 
 if __name__ == '__main__':
     run_stouffer_script()
-
