@@ -174,7 +174,7 @@ process MutPanning {
         val task_file from IN_MUTPANNING
 
     output:
-        file "mutpanning/SignificanceFiltered/Significance*.txt" into OUT_MUTPANNING mode flatten
+        file "mutpanning/*.out.gz" into OUT_MUTPANNING mode flatten
 
     """
     $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutpanning $task_file
@@ -264,8 +264,10 @@ IN_COMBINATION = OUT_ONCODRIVEFML
                     .map{ it[0] }
                     .phase(OUT_SMREGIONS){ it -> it.fileName }
                     .map{ it[0] }
-                    .phase(OUT_CBASE){ it -> it.fileName }
+                    .phase(OUT_MUTPANNING){ it -> it.fileName }
                     .map{ it[0] }
+                    // .phase(OUT_CBASE){ it -> it.fileName }
+                    // .map{ it[0] }
 
 
 process Combination {
