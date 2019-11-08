@@ -1,0 +1,8 @@
+pattern = "*/data_mutations_extended.txt"
+recursive = False
+
+[annotations]
+PLATFORM = WXS
+CANCER = PRAD
+DATASET = "('dirname', '(.*)', lambda v: 'CBIOP_{{PLATFORM}}_{}'.format(v.upper()))"
+DONOR = "('internal', 'SAMPLE')"

@@ -8,8 +8,6 @@ class Values:
 
     """Update the attributes to let the other scripts import them"""
 
-    os.environ.get("INTOGEN_DATASETS")
-
     # dict with site counts for each gene, context and consequence type
     SITE_COUNTS_PATH = os.path.join(
         os.environ.get("INTOGEN_DATASETS"), 'shared', 'consequences.pickle.gz'

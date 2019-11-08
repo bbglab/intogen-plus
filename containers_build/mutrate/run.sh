@@ -16,7 +16,7 @@ CORES=$4
 OUTPUT=$5
 
 
-/usr/bin/python3 /mutrate/compute_mutrate.py \
+/usr/bin/python3 /mutrate/compute_mutrate.py compute-mutrate \
                         --annotmuts ${ANNOTMUTS} \
                         --genemuts ${GENEMUTS} \
                         --weights ${WEIGHTS} \
