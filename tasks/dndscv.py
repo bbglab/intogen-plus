@@ -26,8 +26,4 @@ class DndsCvTask(Task):
 
         out_annotmuts = self.out_file.replace(".out.gz", ".annotmuts.gz")
         out_genemuts = self.out_file.replace(".out.gz", ".genemuts.gz")
-
         run_command(f"{self.cmdline} {self.in_file} {self.out_file} {out_annotmuts} {out_genemuts}")
-
-        
-
