@@ -253,6 +253,21 @@ process CBase {
     """
 }
 
+process MutPanning {
+
+    tag { task_file.fileName }
+    publishDir OUTPUT, mode: 'copy'
+
+    input:
+        val task_file from IN_MUTPANNING
+
+    output:
+        file "mutpanning/*.out.gz" into OUT_MUTPANNING mode flatten
+
+    """
+    $INTOGEN_SCRIPT run -c $task.cpus -o $OUTPUT mutpanning $task_file
+    """
+}
 
 // Combination stream
 IN_COMBINATION = OUT_ONCODRIVEFML
