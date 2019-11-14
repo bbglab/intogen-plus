@@ -19,7 +19,7 @@ from tasks.combination import CombinationTask
 from tasks.mutrate import MutrateTask
 from tasks.smregions import SmregionsTask
 from tasks.signatures import SignatureTask
-from filters.base import VariantsReader, VariantsReaderAll, TSVReader
+from filters.base import VariantsReader, TSVReader
 from filters.variants import VariantsFilter
 from filters.vep import VepFilter, NonSynonymousFilter
 
