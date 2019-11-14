@@ -9,7 +9,7 @@ from .base import Task, run_command
 
 class CombinationTask(Task):
 
-    KEY = 'combination_mutpanning'
+    KEY = 'combination'
 
     def run(self):
         run_command(f"{self.cmdline} {self.output_folder} {self.name}")
