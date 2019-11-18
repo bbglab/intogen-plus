@@ -25,6 +25,9 @@ CDS_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELE
 WG_REGIONS_FILE="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/wg.regions.gz"
 COUNT_CDS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/cds.counts.gz"
 COUNT_WG="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/wg.counts.gz"
+CONSEQUENCE_CDS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/consequences.pickle.gz"
+TRIPLETS_CDS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/shared/triplets.json.gz"
 
-bgsignature count -r ${CDS_REGIONS_FILE} -s 3 -g hg38 --cores 12 --collapse --exclude-N -o ${COUNT_CDS}
-bgsignature count -r ${WG_REGIONS_FILE} -s 3 -g hg38 --cores 12 --collapse --exclude-N -o ${COUNT_WG}
+bgsignature count -r ${CDS_REGIONS_FILE} -s 3 -g ${INTOGEN_GENOME} --cores 12 --collapse --exclude-N -o ${COUNT_CDS}
+bgsignature count -r ${WG_REGIONS_FILE} -s 3 -g ${INTOGEN_GENOME} --cores 12 --collapse --exclude-N -o ${COUNT_WG}
+python count.py -r ${CDS_REGIONS_FILE} -t ${TRIPLETS_CDS} -c ${CONSEQUENCE_CDS} -v ${INTOGEN_VEP} -g ${INTOGEN_GENOME}

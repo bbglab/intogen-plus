@@ -80,12 +80,18 @@ def pickle_counts(counts, file):
 
 def load_regions(file):
     with open_(file) as fd:
-        for row in csv.DictReader(fd, delimiter='\t',
-                                  fieldnames=['CHR', 'START', 'STOP', 'STRAND', 'GENE', 'TRANSCRIPT', 'SYMBOL']):
+        for row in csv.DictReader(
+                fd, delimiter='\t',
+                fieldnames=['CHROMOSOME', 'START', 'END', 'STRAND', 'ELEMENT', 'SEGMENT', 'SYMBOL']):
             gene = row['SYMBOL']
-            chr_ = row['CHR']
+            chr_ = row['CHROMOSOME']
+
+            # Skip the header
+            if chr_ == 'CHROMOSOME':
+                continue
+
             start = int(row['START'])
-            stop = int(row['STOP'])
+            stop = int(row['END'])
 
             yield gene, chr_, start, stop
 

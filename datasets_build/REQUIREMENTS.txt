@@ -8,4 +8,5 @@ conda install bgsignature
 conda install pandas
 conda install tabix
 conda install -c conda-forge -c bioconda ensembl-vep=92.4
-conda install -c anaconda sqlite 
+conda install -c anaconda sqlite
+conda install bgvep
