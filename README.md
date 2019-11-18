@@ -19,19 +19,7 @@ before running this script.
 
 First, make sure you have all the required libraries listed in `REQUIREMENTS.txt`
 
-Then you can download and create all the datasets using this command:
-
-```bash
-./download_datasets.sh <INTOGEN_GENOME> <INTOGEN_VEP> <INTOGEN_RELEASE>
-```
-where:
-```bash
-INTOGEN_GENOME is the release of the genome (such as hg19, hg38)
-INTOGEN_VEP is the release of VEP (such as vep88, vep92)
-INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
-```
-
-Alternatively you can build all the datasets from the original sources. 
+Then you can build all the datasets from the original sources. 
 Note that this process can take a very long time and it might fail if the 
 original sources had changed.
 
@@ -40,18 +28,6 @@ cd datasets_build
 ./build_datasets.sh hg38 vep92 stable
 ```
 
-### Download and build singularity images
-
-> :warning: The pipeline has been tested with **hg38** and **vep92**
-
-All the images will be stored into the `containers` folder, if you want to use a 
-different folder you must create a symbolic link before running this script. 
-
-You can download all the singularity images using this command:
-
-```bash
-./download_containers.sh <INTOGEN_GENOME> <INTOGEN_VEP> <INTOGEN_RELEASE>
-```
 where:
 ```bash
 INTOGEN_GENOME is the release of the genome (such as hg19, hg38)
@@ -59,11 +35,28 @@ INTOGEN_VEP is the release of VEP (such as vep88, vep92)
 INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
 ```
 
-Or alternatively you can build all the singularity images yourself. 
+
+
+
+### Download and build singularity images
+
+> :warning: The pipeline has been tested with **hg38** and **vep92**
+
+All the images will be stored into the `containers` folder, if you want to use a 
+different folder you must create a symbolic link before running this script. 
+
+You can build all the singularity images using this command:
 
 ```bash
 cd containers_build
 ./build_containers.sh <INTOGEN_GENOME> <INTOGEN_VEP> <INTOGEN_RELEASE>
+```
+
+where:
+```bash
+INTOGEN_GENOME is the release of the genome (such as hg19, hg38)
+INTOGEN_VEP is the release of VEP (such as vep88, vep92)
+INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
 ```
 
 ### Run the pipeline
