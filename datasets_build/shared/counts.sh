@@ -30,4 +30,4 @@ TRIPLETS_CDS="../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}
 
 bgsignature count -r ${CDS_REGIONS_FILE} -s 3 -g ${INTOGEN_GENOME} --cores 12 --collapse --exclude-N -o ${COUNT_CDS}
 bgsignature count -r ${WG_REGIONS_FILE} -s 3 -g ${INTOGEN_GENOME} --cores 12 --collapse --exclude-N -o ${COUNT_WG}
-python count.py -r ${CDS_REGIONS_FILE} -t ${TRIPLETS_CDS} -c ${CONSEQUENCE_CDS} -v ${INTOGEN_VEP} -g ${INTOGEN_GENOME}
+python count.py -r ${CDS_REGIONS_FILE} -t ${TRIPLETS_CDS} -c ${CONSEQUENCE_CDS} -v ${INTOGEN_VEP#"vep"} -g ${INTOGEN_GENOME}
