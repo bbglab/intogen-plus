@@ -30,8 +30,8 @@ cd datasets_build
 
 where:
 ```bash
-INTOGEN_GENOME is the release of the genome (such as hg19, hg38)
-INTOGEN_VEP is the release of VEP (such as vep88, vep92)
+INTOGEN_GENOME is the release of the genome (such as hg38)
+INTOGEN_VEP is the release of VEP (such as vep92)
 INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
 ```
 
