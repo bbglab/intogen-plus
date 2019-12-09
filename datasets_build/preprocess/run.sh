@@ -29,6 +29,7 @@ wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg38ToHg19.over.
 echo -e "\tDownloading pileup mappability files"
 bgdata get --force intogen/coverage/${INTOGEN_GENOME}
 # Redo the download (it will not download the data again) to force to get the hg38.master file
-bgdata get datasets/genomereference/${INTOGEN_GENOME}COVERAGE=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/intogen/coverage
+bgdata get datasets/genomereference/${INTOGEN_GENOME}
+COVERAGE=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/bgdata/intogen/coverage
 LAST_VERSION=`cat ${COVERAGE}/${INTOGEN_GENOME}.master`
-cp ${COVERAGE}=${LAST_VERSION}/${INTOGEN_GENOME}_100bp.coverage.regions.gz ${PREPROCESS}/.
+cp ${COVERAGE}/${INTOGEN_GENOME}-${LAST_VERSION}/${INTOGEN_GENOME}_100bp.coverage.regions.gz ${PREPROCESS}/.
