@@ -165,7 +165,8 @@ def upper_bound(w, i):
 def simplex_bound(w):
     return sum(w) - 1
 
-
+'''
+No longer used 
 def clustering_bound(w):
     return - w[0] - w[3] - w[4] + 0.5
 
@@ -176,6 +177,7 @@ def recurrence_bound(w):
 
 def fm_bound(w):
     return - w[2] + 0.5
+'''
 
 
 def grid_optimize(func, low_quality=set()):
@@ -185,10 +187,8 @@ def grid_optimize(func, low_quality=set()):
 
     These are the constraints that must be in place:
     constraint 1: sum w_i = 1
-    constraint 2: w_clust + w_hotmaps +w_smregions <= 0.5
-    constraint 3: w_dndscv + w_cbase <= 0.5
-    constraint 4: w_fml <= 0.5
-    constraint 5*: w_i <= 0.05 for all w_i may not apply if some w_i is discarded
+    constraint 2*: w_i <= 0.05 for all w_i may not apply if some w_i is discarded
+    contraint 3*: w_i <
 
     """
 
