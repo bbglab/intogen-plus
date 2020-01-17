@@ -20,6 +20,8 @@ CODE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 configs_file = os.path.join(CODE_DIR, 'config', 'intogen_qc.cfg')
 configs = ConfigObj(configs_file)
 METHODS = configs["methods"].keys()  # reads them in order
+LOWER_BOUND = 0.05
+UPPER_BOUND = 0.3
 
 gavaliable_methods = None
 
@@ -147,7 +149,8 @@ def prepare_output(methods_order, solutions):
         l_solutions.append((d, area))
     return l_solutions
 
-# constraint function wrappers
+
+# optimization constraint wrappers
 
 
 def array_component(w, i):
@@ -155,67 +158,65 @@ def array_component(w, i):
 
 
 def lower_bound(w, i):
-    return w[i] - 0.05
+    return w[i] - LOWER_BOUND
 
 
 def upper_bound(w, i):
-    return - w[i] + 0.5
+    return - w[i] + UPPER_BOUND
 
 
 def simplex_bound(w):
     return sum(w) - 1
 
-'''
-No longer used 
-def clustering_bound(w):
-    return - w[0] - w[3] - w[4] + 0.5
+
+def all_constraints(w):
+    return all((x >= LOWER_BOUND) and (x <= UPPER_BOUND) for x in w)
 
 
-def recurrence_bound(w):
-    return - w[1] - w[5] + 0.5
+def fill_with_zeros(w, low_quality_index):
+
+    w_zero_filled = []
+    j = 0
+    for i, m in enumerate(METHODS):
+        if i in low_quality_index:
+            w_zero_filled += [0.]
+        else:
+            w_zero_filled += [w[j]]
+            j += 1
+    return w_zero_filled
 
 
-def fm_bound(w):
-    return - w[2] + 0.5
-'''
-
-
-def grid_optimize(func, low_quality=set()):
+def grid_optimize(func, low_quality=None):
     """
     :param: func: function to be optimized
     :return: best candidates
 
     These are the constraints that must be in place:
     constraint 1: sum w_i = 1
-    constraint 2*: w_i <= 0.05 for all w_i may not apply if some w_i is discarded
-    contraint 3*: w_i <
+    constraint 2: w_i >= 0.05 for all w_i may not apply if some w_i is discarded
+    constraint 3: w_i <= 0.3 for all w_i
 
     """
 
     optimum = {k: None for k in METHODS}
-    optimum.update({'Objective_Function': 0})
-    low_quality_index = None
-    if len(low_quality) > 0:
-        low_quality_index = [METHODS.index(v) for v in low_quality]
-    low = [0.05 if v not in low_quality else 0 for v in METHODS]  # change lower bound on discarded methods
-    for w in itertools.product(np.linspace(0, 1, 21), repeat=5):
-        if sum(w) <= 0.95:  # belongs to simplex
-            w = list(np.append(w, [1 - sum(w)]))
-            if low_quality_index is not None:  # add zeros at discarded / low-quality methods
-                for ind in low_quality_index:
-                    w[ind] = 0.
-                total_weight = sum(w)
-                w = [v / total_weight for v in w]
-            if (low[0] <= w[0] < 0.5) and (low[3] <= w[3] < 0.5) and (low[4] <= w[4] < 0.5):
-                if w[0] + w[3] + w[4] < 0.5:  # cluster constraint
-                    if low[2] <= w[2] < 0.5:    # fm bias constraint
-                        if (low[1] <= w[1] < 0.5) and (low[5] <= w[5] < 0.5):
-                            if w[1] + w[5] < 0.5:  # recurrence constraint
-                                f = func(w)
-                                if optimum['Objective_Function'] > f:
-                                    optimum['Objective_Function'] = f
-                                    for i, v in enumerate(METHODS):
-                                        optimum[v] = w[i]
+    optimum.update({'Objective_Function': 0})  # we will minimize a negative function
+
+    low_quality_index = set()
+    if low_quality is not None:
+        low_quality_index = [i for i, m in enumerate(METHODS) if m in low_quality]
+
+    dim = len(METHODS) - len(low_quality_index)
+    for w in itertools.product(np.linspace(0, 1, 21), repeat=dim-1):
+        if sum(w) <= 1 - LOWER_BOUND:                        # inside the simplex
+            w_dim = list(np.append(w, [1 - sum(w)]))   # consequently len(w_dim) == dim
+            if all_constraints(w_dim):
+                w_all = fill_with_zeros(w_dim, low_quality_index)
+                f = func(w_all)
+                if optimum['Objective_Function'] > f:  # remember we are running a minimization
+                    optimum['Objective_Function'] = f
+                    for i, v in enumerate(METHODS):
+                        optimum[v] = w_all[i]
+
     return optimum
 
 
@@ -225,17 +226,11 @@ def create_scipy_constraints(low_quality=set()):
     """
 
     # constraints of the optimization problem
-    # methods=["oncodriveclustl_r", "dndscv_r", "oncodrivefml_r", "hotmaps_r", "cbase"]
     # constraint 1: sum weights = 1
     # constraint 2: for each weight, weight >= 0.05
-    # constraint 3: clust + hotmaps + e_driver <= 0.5
-    # constraint 4: dndscv <= 0.5
-    # constraint 5: fml <= 0.5
+    # constraint 3: for each weight, weight <= 0.3
 
-    cons = [{'type': 'eq', 'fun': simplex_bound},
-            {'type': 'ineq', 'fun': clustering_bound},
-            {'type': 'ineq', 'fun': recurrence_bound},
-            {'type': 'ineq', 'fun': fm_bound}]
+    cons = [{'type': 'eq', 'fun': simplex_bound}]
     for ind, v in enumerate(METHODS):
         if v in low_quality:
             cons += [{'type': 'eq', 'fun': partial(array_component, i=ind)}]
@@ -252,9 +247,6 @@ def satisfy_constraints(w, low_quality=set()):
             satisfy = satisfy and (abs(array_component(w, i)) < 0.01)
         else:
             satisfy = satisfy and (lower_bound(w, i) >= 0)
-    satisfy = satisfy and (fm_bound(w) >= 0)
-    satisfy = satisfy and (clustering_bound(w) >= 0)
-    satisfy = satisfy and (recurrence_bound(w) >= 0)
     satisfy = satisfy and (abs(simplex_bound(w)) < 0.01)
     return satisfy
 
