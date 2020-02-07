@@ -4,18 +4,12 @@ GENOME = 38
 ENSEMBL ?= 92
 # TODO upgrade CADD version
 CADD ?= 1.4
-DATASETS?=../datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
+FOLDER?=../datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
 CORES ?= 1
 
 # TODO
 # export COSMIC_KEY=$(echo "email@example.com:mycosmicpassword" | base64)
 
-
-# Configure BGData
-BGDATA_LOCAL=$(DATASETS)/bgdata
-BGDATA_OFFLINE="FALSE"
-export BGDATA_LOCAL
-export BGDATA_OFFLINE
 
 .PHONY: fall all clean
 
@@ -39,12 +33,20 @@ $(DATASETS):
 
 # BGData package are managed by bgdata itself
 .PHONY: bgdata
-bgdata: | $(DATASETS)
-	@echo bgdata datasets
-	bgdata get datasets/genomereference/hg${GENOME}
-	bgdata get intogen/expression/tcga_pancanatlas
+bgdata:
+	$(MAKE) -C bgdata FOLDER=$(DATASETS)/bgdata GENOME=${GENOME}
 
 ALL_TARGETS+=bgdata
+
+####### self-contained targets #######
+SELF_CONTAINED = cbase mutpanning combination mutpanning
+.PHONY: $(SELF_CONTAINED)
+
+$(SELF_CONTAINED):
+	$(MAKE) -C $@ FOLDER=$(DATASETS)/$@
+
+
+
 
 ####### SHARED #######
 SHARED_FOLDER ?= $(DATASETS)/shared
@@ -189,18 +191,17 @@ $(MUTRATE_FOLDER):
 	mkdir $@
 
 # TODO where are the signature files coming from
-GENOME_SIGNATURE = mutrate/signatures.cosmic.genome.tsv
+.PHONY: mutrate
+mutrate:
+	$(MAKE) -C mutrate FOLDER=$(DATASETS)/mutrate
+
+ALL_TARGETS+=mutrate
+
 MUTRATE_GENOME_SIGNATURE = $(MUTRATE_FOLDER)/signatures.cosmic.genome.tsv
-$(MUTRATE_GENOME_SIGNATURE): $(GENOME_SIGNATURE) | $(MUTRATE_FOLDER)
-	cp -f $< $@
-
-ALL_TARGETS+=$(MUTRATE_GENOME_SIGNATURE)
-
-EXOME_SIGNATURE = mutrate/signatures.cosmic.exome.tsv
 MUTRATE_EXOME_SIGNATURE = $(MUTRATE_FOLDER)/signatures.cosmic.exome.tsv
-$(MUTRATE_EXOME_SIGNATURE): $(EXOME_SIGNATURE) $(MUTRATE_GENOME_SIGNATURE) $(COUNT_CDS) $(COUNT_WG) mutrate/cosmic2exome.py | $(MUTRATE_FOLDER)
+$(MUTRATE_EXOME_SIGNATURE): mutrate $(MUTRATE_GENOME_SIGNATURE) $(COUNT_CDS) $(COUNT_WG) mutrate/cosmic2exome.py | $(MUTRATE_FOLDER)
 	@echo Building mutrate exome signature
-	python mutrate/cosmic2exome.py $(EXOME_SIGNATURE) $(MUTRATE_GENOME_SIGNATURE) $(COUNT_CDS) $(COUNT_WG) $@
+	python mutrate/cosmic2exome.py $(MUTRATE_GENOME_SIGNATURE) $(COUNT_CDS) $(COUNT_WG) $@
 
 # TODO remove the original exome signature file as is not used
 
@@ -233,42 +234,10 @@ $(CADD_SCORES) $(CADD_SCORES_INDEX) &: $(REGIONS_CDS) | $(ONCODRIVEFML_FOLDER)
 ALL_TARGETS+=$(CADD_SCORES) $(CADD_SCORES_INDEX)
 
 
-# TODO include FML configuration file
 
 
-####### CBASE #######
-CBASE_FOLDER = $(DATASETS)/cbase
-$(CBASE_FOLDER): | $(DATASETS)
-	mkdir $@
-
-.PHONY: cbase
-
-cbase: | $(CBASE_FOLDER)
-	@echo Building CBaSE datasets
-	wget -c http://genetics.bwh.harvard.edu/cbase/CBaSE_v1.1.zip -O $(CBASE_FOLDER)/cbase.zip
-	unzip -d $(CBASE_FOLDER)/ $(CBASE_FOLDER)/cbase.zip
-	mv $(CBASE_FOLDER)/CBaSE_v1.1/Auxiliary/*.gz $(CBASE_FOLDER)/
-	mv $(CBASE_FOLDER)/CBaSE_v1.1/Auxiliary/*.txt $(CBASE_FOLDER)/
-	rm -r $(CBASE_FOLDER)/CBaSE_v1.1
-	rm -r $(CBASE_FOLDER)/__MACOSX/
 
 
-ALL_TARGETS+=cbase
-
-####### MUTPANNING #######
-MUTPANNING_FOLDER = $(DATASETS)/mutpanning
-$(MUTPANNING_FOLDER): | $(DATASETS)
-	mkdir $@
-
-.PHONY: mutpanning
-
-mutpanning: | $(MUTPANNING_FOLDER)
-	@echo Building MutPanning datasets
-	wget https://datasets.genepattern.org/data/module_support_files/MutPanning/Hg19.zip -O $(MUTPANNING_FOLDER)/mutpanning.zip
-	unzip -d $(MUTPANNING_FOLDER) $(MUTPANNING_FOLDER)/mutpanning.zip
-	rm -r $(MUTPANNING_FOLDER)/__MACOSX/
-
-ALL_TARGETS+=mutpanning
 
 ####### VEP #######
 VEP_FOLDER = $(DATASETS)/vep
@@ -285,62 +254,21 @@ $(VEP_FOLDER): | $(DATASETS)
 ####### BOOSTDM #######
 # TODO not required?
 
-####### COMBINATION #######
-COMBINATION_FOLDER = $(DATASETS)/combination
-$(COMBINATION_FOLDER): | $(DATASETS)
-	mkdir $@
+#TODO
+####### CGC #######
 
-OLFACTORY_RECEPTORS = $(COMBINATION_FOLDER)/olfactory_receptors.tsv
-$(OLFACTORY_RECEPTORS): | $(COMBINATION_FOLDER)
-	wget https://genome.weizmann.ac.il/horde/download/genes.csv \
-		-O $(OLFACTORY_RECEPTORS)
+.PHONY: cgc
+cgc:
+	$(MAKE) -C cgc FOLDER=$(DATASETS)/cgc
 
-ALL_TARGETS += $(OLFACTORY_RECEPTORS)
+ALL_TARGETS+=combination
 
-COMBINATION_NEGATIVE_SET = $(COMBINATION_FOLDER)/negative_gene_set.tsv
-COMBINATION_NON_EXPRESSED = $(COMBINATION_FOLDER)/non_expressed_genes_tcga.tsv
-$(COMBINATION_NEGATIVE_SET) $(COMBINATION_NON_EXPRESSED) &: $(OLFACTORY_RECEPTORS) combination/create_negative_set.py | $(COMBINATION_FOLDER)
-	@echo Building negative set
-#	python combination/create_negative_set.py \
-#		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
-#		--output_total $(COMBINATION_NEGATIVE_SET) \
-#		--output_non_expressed $(COMBINATION_NON_EXPRESSED)
 
-ALL_TARGETS += $(COMBINATION_NEGATIVE_SET) $(COMBINATION_NON_EXPRESSED)
-
-GCC_FOLDER = $(COMBINATION_FOLDER)/cgc
-$(GCC_FOLDER): | $(COMBINATION_FOLDER)
-	mkdir $@
-
-CGC = $(GCC_FOLDER)/cancer_gene_census.csv
-$(CGC): combination/download_cgc.py | $(GCC_FOLDER)
-	@echo Download CGC
-	python combination/download_cgc.py --download $(GCC_FOLDER)
-
-# TODO why 2 mappings
-CGC_MAP=$(GCC_FOLDER)/mapping_cgc_ttypes.json
-$(CGC_MAP): combination/mapping_cgc_ttypes.json
-		cp -f $< $@
-
-CGC_MAP_INTOGEN=$(GCC_FOLDER)/cgc/mapping_cgc_ttypes_intogen.json
-$(CGC_MAP_INTOGEN): combination/mapping_cgc_ttypes_intogen.json
-		cp -f $< $@
-
-CGC_PARSED = $(GCC_FOLDER)/cancer_gene_census_parsed.csv
-$(CGC_PARSED): $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) combination/parse_cgc.py | $(GCC_FOLDER)
-	@echo Parsing CGC dataframe
-#	python combination/parse_cgc.py \
-#		--path_cgc_original $(CGC) \
-#		--dict_mapping_cgc $(CGC_MAP) \
-#		--dict_mapping_cgc_intogen $(CGC_MAP_INTOGEN) \
-#		--path_output $(GCC_FOLDER) \
-
-ALL_TARGETS += $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) $(CGC_PARSED)
 
 
 #########################
 
-all: $(ALL_TARGETS) | $(DATASETS)
+all: $(SELF_CONTAINED) | $(DATASETS)
 
 clean:
 	rm -rf $(DATASETS)
