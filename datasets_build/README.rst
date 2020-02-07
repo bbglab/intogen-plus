@@ -24,10 +24,13 @@ awk
 curl
 make
 mysql
+tabix
 python
 bgdata
 bgsignature
 bgreference
 bgvep
 click
+numpy
+pandas
 tqdm

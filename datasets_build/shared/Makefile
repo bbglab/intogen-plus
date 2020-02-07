@@ -42,7 +42,7 @@ $(TRANSCRIPTS): | $(FOLDER)
 
 
 # Biomart file
-ENSEMBL_ARCHIVE = $(shell awk -v release=92 '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
+ENSEMBL_ARCHIVE = $(shell awk -v release=${ENSEMBL} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
 BIOMART_URL = http://${ENSEMBL_ARCHIVE}.archive.ensembl.org/biomart/martservice
 # Biomart Query
 BIOMART_QUERY=`cat biomartQuery.txt`
