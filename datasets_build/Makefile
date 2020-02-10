@@ -51,12 +51,11 @@ bgdata: | $(DATASETS)
 ALL_TARGETS += bgdata
 
 ####### self-contained targets #######
-SELF_CONTAINED = cbase mutpanning combination mutpanning shared
+SELF_CONTAINED = cbase mutpanning combination mutpanning preprocess shared
 .PHONY: $(SELF_CONTAINED)
 
 $(SELF_CONTAINED): bgdata | $(DATASETS)
 	$(MAKE) -C $@ FOLDER=$(DATASETS)/$@ GENOME=${GENOME} ENSEMBL=${ENSEMBL}
-
 
 ALL_TARGETS += $(SELF_CONTAINED)
 
