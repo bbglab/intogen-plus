@@ -1,8 +1,5 @@
 SHELL := /bin/bash
 
-FOLDER ?= ${INTOGEN_DATASETS}/shared
-ENSEMBL ?= ${INTOGEN_ENSEMBL}
-GENOME ?= ${INTOGEN_GENOME}
 CORES ?= 1
 
 .PHONY: all clean
@@ -33,8 +30,6 @@ $(FOLDER):
 # Ensembl transcripts
 SQL_QUERY="SELECT g.stable_id, t.stable_id, x.display_label FROM gene g JOIN transcript t ON (g.canonical_transcript_id = t.transcript_id) JOIN xref x ON (g.display_xref_id = x.xref_id AND g.biotype='protein_coding') LEFT JOIN external_db ed USING (external_db_id) WHERE ed.db_name = 'HGNC';"
 ENSEMBL_DATABASE="homo_sapiens_core_${ENSEMBL}_${GENOME}"
-
-
 $(TRANSCRIPTS): | $(FOLDER)
 	@echo Building ensembl canonical transcripts
 	mysql -u anonymous -h ensembldb.ensembl.org --column-names=FALSE \
@@ -42,7 +37,7 @@ $(TRANSCRIPTS): | $(FOLDER)
 
 
 # Biomart file
-ENSEMBL_ARCHIVE = $(shell awk -v release=${ENSEMBL} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
+ENSEMBL_ARCHIVE = $(shell awk -v release=${ENSEMBL} '{if ($$1 == release) {print $$2}}' ../ensembl_archive.txt)
 BIOMART_URL = http://${ENSEMBL_ARCHIVE}.archive.ensembl.org/biomart/martservice
 # Biomart Query
 BIOMART_QUERY=`cat biomartQuery.txt`
@@ -63,41 +58,42 @@ $(REGIONS_CDS): $(BIOMART) | $(FOLDER)
 		gzip >> $@
 
 
-$(REGIONS_WG): | $(FOLDER)
+$(REGIONS_WG): create_wg_regions.py | $(FOLDER)
 	@echo Building whole-genome regions
 	python create_wg_regions.py hg${GENOME} 3 | gzip > $@
 
 $(COUNT_CDS): $(REGIONS_CDS) | $(FOLDER)
 	@echo Computing CDS signature
-	bgsignature count -r $(REGIONS_CDS) -s 3 -g hg${INTOGEN_GENOME} --cores ${CORES} --collapse --exclude-N -o $@
+	bgsignature count -r $(REGIONS_CDS) -s 3 -g hg${GENOME} --cores ${CORES} --collapse --exclude-N -o $@
 
 $(COUNT_WG): $(REGIONS_WG) | $(FOLDER)
 	@echo Computing whole-genome signature
-	bgsignature count -r $(REGIONS_WG) -s 3 -g hg${INTOGEN_GENOME} --cores ${CORES} --collapse --exclude-N -o $@
+	bgsignature count -r $(REGIONS_WG) -s 3 -g hg${GENOME} --cores ${CORES} --collapse --exclude-N -o $@
 
 SOMATIC_PON_URL="https://nc.hartwigmedicalfoundation.nl/index.php/s/a8lgLsUrZI5gndd/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
 
-$(SOMATIC_PON): | $(FOLDER)
+$(SOMATIC_PON): somatic_pon_counts.py | $(FOLDER)
 	@echo Getting somatic panel of normal counts
 	python somatic_pon_counts.py -u ${SOMATIC_PON_URL} -o $@
 
 
 # TODO avoid the use of bgvep
-$(CONSEQUENCE_CDS) $(TRIPLETS_CDS) &: $(REGIONS_CDS) | $(FOLDER)
+$(CONSEQUENCE_CDS) $(TRIPLETS_CDS) &: $(REGIONS_CDS) count.py | $(FOLDER)
 	@echo Computing CDS triplets and consequences
 	python count.py -r $(REGIONS_CDS) -t ${TRIPLETS_CDS} -c $(CONSEQUENCE_CDS) \
 		-v ${ENSEMBL} -g hg${GENOME}
 
 clean:
-	rm -rf $(FOLDER)
+	rm -f $(TRANSCRIPTS) $(BIOMART) $(REGIONS_CDS) $(REGIONS_WG) \
+		$(COUNT_CDS) $(COUNT_WG) $(SOMATIC_PON)
 
 check:
-ifeq ($(FOLDER), /shared)
+ifeq ($(FOLDER), )
 	$(error FOLDER not set)
 endif
-ifeq (${ENSEMBL}, )
+ifeq ($(ENSEMBL), )
 	$(error ENSEMBL not set)
 endif
-ifeq (${GENOME}, )
+ifeq ($(GENOME), )
 	$(error GENOME not set)
 endif

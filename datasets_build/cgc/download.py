@@ -24,7 +24,7 @@ def cmdline(download_folder, debug=False):
         bglogs.error("Define your key like this:\n\texport COSMIC_KEY=$(echo \"email@example.com:mycosmicpassword\" | base64)")
         sys.exit(-1)
 
-    output_folder = os.path.join(download_folder, 'cgc')
+    output_folder = download_folder
     os.makedirs(output_folder, exist_ok=True)
     output_file = os.path.join(output_folder, 'cancer_gene_census.csv')
 
