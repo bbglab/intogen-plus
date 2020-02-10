@@ -2,12 +2,6 @@
 
 FOLDER ?= bgdata
 
-# Configure BGData
-BGDATA_LOCAL=$(FOLDER)
-BGDATA_OFFLINE="FALSE"
-export BGDATA_LOCAL
-export BGDATA_OFFLINE
-
 .PHONY: all
 
 all: | check

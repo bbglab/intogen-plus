@@ -4,7 +4,7 @@ GENOME = 38
 ENSEMBL ?= 92
 # TODO upgrade CADD version
 CADD ?= 1.4
-FOLDER?=../datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
+DATASETS?=../datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
 CORES ?= 1
 
 # TODO
@@ -32,11 +32,29 @@ $(DATASETS):
 	mkdir $@
 
 
+####### bgdata #######
+# bgdata is configured in this Makefile and not in its own,
+# because this way the variables are exported to all datasets
+
+# Configure BGData
+BGDATA_LOCAL=$(DATASETS)/bgdata
+BGDATA_OFFLINE="FALSE"
+export BGDATA_LOCAL
+export BGDATA_OFFLINE
+
+# BGData is set as prerrequisite of the other SELF_CONTAINED targets
+# to avoid issues when parallelizing the Makefile
+.PHONY: bgdata
+bgdata: | $(DATASETS)
+	$(MAKE) -C $@ FOLDER=$(DATASETS)/$@ GENOME=${GENOME} ENSEMBL=${ENSEMBL}
+
+ALL_TARGETS += bgdata
+
 ####### self-contained targets #######
-SELF_CONTAINED = bgdata cbase mutpanning combination mutpanning shared
+SELF_CONTAINED = cbase mutpanning combination mutpanning shared
 .PHONY: $(SELF_CONTAINED)
 
-$(SELF_CONTAINED): | $(DATASETS)
+$(SELF_CONTAINED): bgdata | $(DATASETS)
 	$(MAKE) -C $@ FOLDER=$(DATASETS)/$@ GENOME=${GENOME} ENSEMBL=${ENSEMBL}
 
 
