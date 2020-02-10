@@ -24,11 +24,11 @@ $(FOLDER)/%.json: %.json | $(FOLDER)
 
 $(CGC_PARSED): $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) parse.py | $(FOLDER)
 	@echo Parsing CGC dataframe
-#	python combination/parse.py \
-#		--path_cgc_original $(CGC) \
-#		--dict_mapping_cgc $(CGC_MAP) \
-#		--dict_mapping_cgc_intogen $(CGC_MAP_INTOGEN) \
-#		--path_output $(FOLDER) \
+	python parse.py \
+		--path_cgc_original $(CGC) \
+		--dict_mapping_cgc $(CGC_MAP) \
+		--dict_mapping_cgc_intogen $(CGC_MAP_INTOGEN) \
+		--path_output $(FOLDER)
 
 clean:
 	rm -f $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) $(CGC_PARSED)
