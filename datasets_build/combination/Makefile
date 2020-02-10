@@ -19,7 +19,7 @@ $(OLFACTORY_RECEPTORS): | $(FOLDER)
 
 $(NEGATIVE_SET) $(NON_EXPRESSED) &: $(OLFACTORY_RECEPTORS) create_negative_set.py | $(FOLDER)
 	@echo Building negative set
-#	python combination/create_negative_set.py \
+#	python create_negative_set.py \
 #		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
 #		--output_total $(NEGATIVE_SET) \
 #		--output_non_expressed $(NON_EXPRESSED)
