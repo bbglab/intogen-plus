@@ -2,9 +2,9 @@
 import os
 import json
 
-import pandas as pd
-import click
 import bglogs
+import click
+import pandas as pd
 
 
 def load_data(path_cgc, dict_mapping_cgc, dict_mapping_cgc_intogen):

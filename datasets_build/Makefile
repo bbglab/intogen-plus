@@ -32,7 +32,7 @@ $(DATASETS):
 	mkdir $@
 
 
-####### bgdata #######
+####### BGDATA #######
 # bgdata is configured in this Makefile and not in its own,
 # because this way the variables are exported to all datasets
 
@@ -51,7 +51,8 @@ bgdata: | $(DATASETS)
 ALL_TARGETS += bgdata
 
 ####### self-contained targets #######
-SELF_CONTAINED = cbase mutpanning combination mutpanning preprocess shared
+# these are targets that are not prerrequisites of another and do not have "external" prerequisites
+SELF_CONTAINED = cbase mutpanning mutrate preprocess shared
 .PHONY: $(SELF_CONTAINED)
 
 $(SELF_CONTAINED): bgdata | $(DATASETS)
@@ -66,10 +67,15 @@ cgc: | $(DATASETS)
 
 ALL_TARGETS += cgc
 
+# BGData-dependent targests
 
+BGDATA_DEPENDENT = combination transvar
+.PHONY: $(BGDATA_DEPENDENT)
 
-####### PREPROCESS #######
-# TODO
+$(BGDATA_DEPENDENT): bgdata | $(DATASETS)
+	$(MAKE) -C $@ FOLDER=$(DATASETS)/$@ GENOME=${GENOME} ENSEMBL=${ENSEMBL}
+
+ALL_TARGETS += $(BGDATA_DEPENDENT)
 
 ####### TRANSVAR #######
 TRANSVAR_FOLDER ?= $(DATASETS)/transvar
@@ -128,16 +134,12 @@ $(REF_RDA): $(GENOME_FASTA) | $(DNDSCV_FOLDER)
 
 ####### MUTRATE #######
 MUTRATE_FOLDER ?= $(DATASETS)/mutrate
-$(MUTRATE_FOLDER):
-	mkdir $@
 
 # TODO where are the signature files coming from
-.PHONY: mutrate
-mutrate:
-	$(MAKE) -C mutrate FOLDER=$(DATASETS)/mutrate
 
-ALL_TARGETS+=mutrate
-
+# TODO counts are only used here?
+COUNT_CDS = $(DATASETS)/shared/cds.counts.gz
+COUNT_WG = $(DATASETS)/shared/wg.counts.gz
 MUTRATE_GENOME_SIGNATURE = $(MUTRATE_FOLDER)/signatures.cosmic.genome.tsv
 MUTRATE_EXOME_SIGNATURE = $(MUTRATE_FOLDER)/signatures.cosmic.exome.tsv
 $(MUTRATE_EXOME_SIGNATURE): mutrate $(MUTRATE_GENOME_SIGNATURE) $(COUNT_CDS) $(COUNT_WG) mutrate/cosmic2exome.py | $(MUTRATE_FOLDER)
@@ -151,24 +153,22 @@ ALL_TARGETS+=$(MUTRATE_EXOME_SIGNATURE)
 
 ####### ONCODRIVEFML #######
 ONCODRIVEFML_FOLDER ?= $(DATASETS)/oncodrivefml
-$(ONCODRIVEFML_FOLDER):
-	mkdir $@
-
+REGIONS_CDS = $(DATASETS)/shared/shared/cds.regions.gz
 # FIXME for other genomes than hg38, the GRCh version may differ
 CADD_URL = http://krishna.gs.washington.edu/download/CADD/v${CADD}/GRCh${GENOME}/whole_genome_SNVs.tsv.gz
-CADD_SCORES = $(ONCODRIVEFML_FOLDER)/cadd.tsv.gz
-CADD_SCORES_INDEX = $(ONCODRIVEFML_FOLDER)/cadd.tsv.gz.tbi
+CADD_SCORES = ${ONCODRIVEFML_FOLDER}/cadd.tsv.gz
+CADD_SCORES_INDEX = ${ONCODRIVEFML_FOLDER}/cadd.tsv.gz.tbi
 $(CADD_SCORES) $(CADD_SCORES_INDEX) &: $(REGIONS_CDS) | $(ONCODRIVEFML_FOLDER)
 	@echo Building OncodriveFML datasets
-#	zcat $(REGIONS_CDS) | tail -n +2 |\
-#		awk -v cadd="${CADD_URL}" '{system("tabix "cadd" "$$1":"$$2"-"$$3)}' |\
-#			gzip > ${CADD_SCORES}.tmp
-#	zcat ${CADD_SCORES}.tmp |\
-#		sort --parallel=${CORES} -S 4G -k1,1 -k2,2n |\
-#		uniq | bgzip > $(CADD_SCORES)
-#	rm ${CADD_SCORES}.tmp
-#	tabix -s 1 -b 2 -e 2 $(CADD_SCORES)
-
+	mkdir -p ${ONCODRIVEFML_FOLDER}
+	zcat $(REGIONS_CDS) | tail -n +2 |\
+		awk -v cadd="${CADD_URL}" '{system("tabix "cadd" "$$1":"$$2"-"$$3)}' |\
+		gzip > ${CADD_SCORES}.tmp
+	zcat ${CADD_SCORES}.tmp |\
+		sort --parallel=${CORES} -S 4G -k1,1 -k2,2n |\
+		uniq | bgzip > $(CADD_SCORES)
+	rm ${CADD_SCORES}.tmp
+	tabix -s 1 -b 2 -e 2 $(CADD_SCORES)
 
 # TODO set a oneliner
 
