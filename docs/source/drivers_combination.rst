@@ -23,9 +23,9 @@ application of these methods may bear some caveats:
 
 Weighted methods to combine p-values, like the weighted Stouffer
 Z-score, provide some extra room for proper balancing, in the sense of
-modelling the relative credibility of each DIM. We reasoned that any
+incorporating the relative credibility of each DIM. We reasoned that any
 good operational criteria to allocate weights should satisfy the
-following requirements: i) provide a specific weighting for each cohort,
+following requirements: i) provide weighting on a cohort-specific basis,
 thereby allowing the relative credibility of a DIM to depend on the
 cohort; ii) reflect prior knowledge about known bona-fide driver genes;
 iii) reflect prior knowledge about the criteria that each DIM employed
@@ -33,11 +33,11 @@ to yield its output.
 
 Our approach works independently for each cohort: to create a consensus
 list of driver genes for each cohort, we first determine how credible
-each DIM is when applied to this specific cohort, on the basis of how
-many bona fide cancer genes reported in the COSMIC Cancer Gene Census
-database (CGC) are highly ranked according to the DIM. Once the
-credibility has been quantified, we use a weighted method for combining
-the p-values that each DIM produces for each candidate gene. This
+each DIM is when applied to this specific cohort, based on how
+many bona-fide cancer genes reported in the COSMIC Cancer Gene Census
+database (CGC) are highly ranked according to the DIM. Once a
+credibility score has been established, we use a weighted method for combining
+the p-values that each DIM gives for each candidate gene: this
 combination takes the DIMs credibility into account. Based on the
 combined p-values, we conduct FDR correction to conclude a ranking of
 candidate driver genes alongside q-values.
@@ -50,21 +50,17 @@ Weight Estimation by Voting
 The relative credibility for each method is based on the ability of the
 method to give precedence to well-known genes already collected in the
 CGC catalogue of driver genes. As each method yields a ranking of driver
-genes, these lists can be combined using a voting system --based on the
-so-called Schulze’s method. The method allows us to consider each method
-as a voter with some voting rights (weighting) which casts ballots
-containing a list of candidates sorted by precedence. Schulze’s method
-takes precedence information from each individual method and produces a
-new consensus ranking [5]_.
+genes, these lists can be combined using a voting system --Schulze’s voting method.
+The method allows us to consider each method as a voter with some voting rights
+(weighting) which casts ballots containing a list of candidates sorted by precedence.
+Schulze’s method takes information about precedence from each individual method and
+produces a new consensus ranking [5]_.
 
 Instead of conducting balanced voting, we tune the voting rights of the
-methods so that we maximize the enrichment of CGC genes at the top
-positions of the consensus list upon voting. In order to prevent
-degenerate solutions, we impose some constraints so that every method
-contributes with a minimum share. We also limit the combined share of
-coalitions of methods based on similar signals of positive selection.
-The solution voting rights are deemed the relative credibility for each
-method.
+methods so that we the enrichment of CGC genes at the top
+positions of the consensus list is maximized. We limit the share each
+method can attain in the credibility simplex --up to a uniform threshold.
+The resulting voting rights are deemed the relative credibility for each method.
 
 Ranking Score
 ^^^^^^^^^^^^^
@@ -87,20 +83,16 @@ Optimization with constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finally we are bound to find a good candidate for
-:math:`\widehat{w} = \textrm{argmax}(f)`. In order to prevent spurious
-outcomes that could be explained by the concordant detection of driver
-signals by methods with similar underlying assumptions, we impose a set
-of mild ad-hoc constraints. Specifically, we set the following
-constraints: i) all relative weights :math:`\geq` 0.05; ii) w(dNdScv) +
-w(CBaSE) :math:`\leq` 0.5; iii) w(OncodriveCLUSTL) + w(HotMaps3D) +
-w(smRegions) :math:`\leq` 0.5; w(OncodriveFML) :math:`\leq` 0.5.
+:math:`\widehat{w} = \textrm{argmax}(f)`. For each method to have chances
+to contribute in the consensus score, we impose the mild constraint of
+limiting the share of each method up to 0.3.
 
-Optimization is then carried out in two steps. The first step finds a
-candidate :math:`\widehat{w_{0}}` by exhaustive search in a rectangular
-grid satisfying the constraints defined above (grid step=0.05). In the
-second step we take :math:`\widehat{w_{0}}` as the seed for a stochastic
-hill-climbing procedure (using Python’s scipy.optimize “basinhopping”,
-method=SLSQP and stepsize=0.05).
+Optimization is then carried out in two steps: we first find a good
+candidate :math:`\widehat{w_{0}}` by exhaustive search in a rectangular grid
+satisfying the constraints defined above (with grid step=0.05); in the second step
+we take :math:`\widehat{w_{0}}` as the seed for a stochastic hill-climbing
+procedure (we resort to Python’s scipy.optimize “basinhopping”, method=SLSQP
+and stepsize=0.05).
 
 Estimation of combined p-values using weighted Stouffer Z-score
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
