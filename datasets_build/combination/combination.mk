@@ -10,11 +10,18 @@ $(OLFACTORY_RECEPTORS): | $(FOLDER_COMBINATION)
 
 NEGATIVE_GENE_SET = $(FOLDER_COMBINATION)/negative_gene_set.tsv
 NON_EXPRESSED_GENES = $(FOLDER_COMBINATION)/non_expressed_genes_tcga.tsv
-$(NEGATIVE_GENE_SET) $(NON_EXPRESSED_GENES) &: $(OLFACTORY_RECEPTORS) combination/create_negative_set.py | $(FOLDER)
+$(NEGATIVE_GENE_SET): $(OLFACTORY_RECEPTORS) combination/create_negative_set.py | $(FOLDER)
 	@echo Building negative set
 #	python combination/create_negative_set.py \
 #		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
 #		--output_total $(NEGATIVE_GENE_SET) \
 #		--output_non_expressed $(NON_EXPRESSED_GENES)
+#FIXME
+	touch $(NEGATIVE_GENE_SET)
+	touch $(NON_EXPRESSED_GENES)
+
+$(NON_EXPRESSED_GENES): $(NEGATIVE_GENE_SET)
+	# computed above
+	$(NOOP)
 
 ALL_TARGETS += $(OLFACTORY_RECEPTORS) $(NEGATIVE_GENE_SET) $(NON_EXPRESSED_GENES)

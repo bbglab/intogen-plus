@@ -11,6 +11,7 @@ $(CHECKPOINT_CBASE):
 	mv ${FOLDER_CBASE}/CBaSE_v1.1/Auxiliary/*.txt ${FOLDER_CBASE}/
 	rm -r ${FOLDER_CBASE}/__MACOSX/
 	rm ${FOLDER_CBASE}/cbase.zip
+	rm -r ${FOLDER_CBASE}/CBaSE_v1.1
 	touch $@
 
 ALL_TARGETS += $(CHECKPOINT_CBASE)

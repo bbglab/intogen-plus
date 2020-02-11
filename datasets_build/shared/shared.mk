@@ -58,10 +58,14 @@ TRIPLETS_CDS = $(FOLDER_SHARED)/triplets.json.gz
 # TODO this file exists in previous versions as triplets.pickle.gz
 # TODO is it used?
 # TODO avoid the use of bgvep
-$(CONSEQUENCE_CDS) $(TRIPLETS_CDS) &: $(REGIONS_CDS) shared/count.py | $(FOLDER_SHARED)
+$(CONSEQUENCE_CDS): $(REGIONS_CDS) shared/count.py | $(FOLDER_SHARED)
 	@echo Computing CDS triplets and consequences
 	python shared/count.py -r $(REGIONS_CDS) -t ${TRIPLETS_CDS} -c $(CONSEQUENCE_CDS) \
 		-v ${ENSEMBL} -g hg${GENOME}
+
+$(TRIPLETS_CDS): $(CONSEQUENCE_CDS)
+	# computed above
+	$(NOOP)
 
 ALL_TARGETS += $(TRANSCRIPTS) $(BIOMART) $(REGIONS_CDS) $(REGIONS_WG) \
 	$(COUNT_CDS) $(COUNT_WG) $(SOMATIC_PON) \
