@@ -256,7 +256,7 @@ def run(paths, drivers, dndscv, vep, genome, muts, tmp_folder=None):
     df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
     # Compute % of samples per cohort
     df_drivers["%_SAMPLES_COHORT"] = df_drivers.apply(lambda row: row["SAMPLES"] / row["SAMPLES_COHORT"],axis=1)
-    columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","%_SAMPLES_COHORT","QVALUE_COMBINATION","ROLE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
+    columns = ["SYMBOL","TRANSCRIPT","COHORT","CANCER_TYPE","METHODS","MUTATIONS","SAMPLES","%_SAMPLES_COHORT","QVALUE_COMBINATION","ROLE","CGC_GENE","CGC_CANCER_GENE","DOMAIN","2D_CLUSTERS","3D_CLUSTERS","EXCESS_MIS",
                "EXCESS_NON","EXCESS_SPL"]
     df_drivers[columns].sort_values(["SYMBOL","CANCER_TYPE"]).to_csv(drivers, sep="\t", index=False)
 
