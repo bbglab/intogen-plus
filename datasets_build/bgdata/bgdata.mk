@@ -1,17 +1,15 @@
 
+# Configure BGData
+BGDATA_LOCAL=$(DATASETS)/bgdata
+BGDATA_OFFLINE="FALSE"
+export BGDATA_LOCAL
+export BGDATA_OFFLINE
 
-FOLDER ?= bgdata
-
-.PHONY: all
-
-all: | check
+.PHONY: bgdata
+bgdata: | $(DATASETS)
 	@echo Downloading bgdata datasets
 	bgdata get datasets/genomereference/hg${GENOME}
 	bgdata get intogen/expression/tcga_pancanatlas
 	bgdata get intogen/coverage/hg${GENOME}
 
-
-check:
-ifeq ($(GENOME), )
-	$(error GENOME not set)
-endif
+ALL_TARGETS += bgdata
