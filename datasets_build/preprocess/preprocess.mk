@@ -1,6 +1,6 @@
 
 FOLDER_PREPROCESS = $(DATASETS)/preprocess
-$(FOLDER_PREPROCESS):
+$(FOLDER_PREPROCESS): | $(DATASETS)
 	mkdir $@
 
 # TODO: the file is also available in bgdata. Change the point path to it

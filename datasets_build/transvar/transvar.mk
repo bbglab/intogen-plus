@@ -1,6 +1,6 @@
 
 TRANSVAR_FOLDER ?= $(DATASETS)/transvar
-$(TRANSVAR_FOLDER):
+$(TRANSVAR_FOLDER): | $(DATASETS)
 	mkdir $@
 
 # FIXME for other genomes than hg38, the GRCh version may differ

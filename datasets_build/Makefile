@@ -25,25 +25,11 @@ BIOMART_URL = http://${ENSEMBL_ARCHIVE}.archive.ensembl.org/biomart/martservice
 all: alltargets
 
 
+# Use second expansion for mixed dependencies
+.SECONDEXPANSION:
 
-# The include order is important, as variables must be defined
-# before being used
-# The name of the variables is also important. They should not collide
-include bgdata/bgdata.mk
+include */*.mk
 
-include cbase/cbase.mk
-include cgc/cgc.mk
-include mutpanning/mutpanning.mk
-include preprocess/preprocess.mk
-include shared/shared.mk
-
-
-include oncodrivefml/oncodrivefml.mk  # requies shared
-
-# with missing parts
-include smregions/smregions.mk
-include transvar/transvar.mk
-# dnds vep
 
 
 #$(info ${ALL_TARGETS})

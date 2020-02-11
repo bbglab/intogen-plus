@@ -1,6 +1,6 @@
 
 FOLDER_SHARED = $(DATASETS)/shared
-$(FOLDER_SHARED):
+$(FOLDER_SHARED): | $(DATASETS)
 	mkdir $@
 
 # Ensembl transcripts

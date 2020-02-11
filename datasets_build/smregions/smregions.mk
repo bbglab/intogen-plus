@@ -1,6 +1,6 @@
 
 FOLDER_SMREGIONS = $(DATASETS)/smregions
-$(FOLDER_SMREGIONS):
+$(FOLDER_SMREGIONS): | $(DATASETS)
 	mkdir $@
 
 

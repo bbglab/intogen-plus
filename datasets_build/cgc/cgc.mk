@@ -1,6 +1,6 @@
 
 FOLDER_CGC = $(DATASETS)/combination/cgc
-$(FOLDER_CGC):
+$(FOLDER_CGC): | $(DATASETS)
 	mkdir -p $@
 
 CGC = $(FOLDER_CGC)/cancer_gene_census.csv
