@@ -71,8 +71,8 @@ $(COUNT_VARIANTS): $(INFO_DATASETS)
 
 
 COHORT_FILES = $(COUNT_SAMPLES) $(COUNT_VARIANTS) $(INFO_DATASETS)
-$(STATS_COHORTS): $(COHORT_FILES) | $(OUTPUT_FOLDER)
-	python cohorts.py $@ $(INPUTS)
+$(STATS_COHORTS): $(COHORT_FILES) data/dictionary_long_names.json | $(OUTPUT_FOLDER)
+	python cohorts.py $@ data/dictionary_long_names.json $(INPUTS)
 
 
 
