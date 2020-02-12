@@ -1,7 +1,7 @@
 
 import sys
 from os import path
-
+import json
 import pandas as pd
 
 
@@ -20,18 +20,23 @@ def read_files(folder):
     return df
 
 
-def run(paths, output='stats_cohorts.tsv'):
+def run(paths, dict_label_names, output='cohorts.tsv'):
     data = []
     for path_ in paths:
         data.append(read_files(path_))
     df_final = pd.concat(data, sort=True)
+    # read labels
+    with open(dict_label_names,'r') as f:
+        d = json.load(f)
     df_final.columns = map(str.upper, df_final.columns)
-    columns = ["COHORT", "CANCER_TYPE", "SOURCE", "PLATFORM", "PROJECT", "REFERENCE", "TYPE", "TREATED", "AGE",  "SAMPLES", "MUTATIONS", "WEB_SHORT_COHORT_NAME", "WEB_LONG_COHORT_NAME"]
+    df_final["CANCER_TYPE_NAME"] = df_final.apply(lambda row: d[row["CANCER_TYPE"]], axis=1)
+    columns = ["COHORT", "CANCER_TYPE", "CANCER_TYPE_NAME", "SOURCE", "PLATFORM", "PROJECT", "REFERENCE", "TYPE", "TREATED", "AGE",  "SAMPLES", "MUTATIONS", "WEB_SHORT_COHORT_NAME", "WEB_LONG_COHORT_NAME"]
     df_final[columns].sort_values("CANCER_TYPE").to_csv(output, index=False, sep='\t')
 
 
 if __name__ == "__main__":
     output = sys.argv[1]
-    paths = sys.argv[2:]
-    run(paths, output)
+    dict_label_names = sys.argv[2]
+    paths = sys.argv[3:]
+    run(paths, dict_label_names,  output)
 
