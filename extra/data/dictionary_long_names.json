@@ -6,9 +6,8 @@
            "OS":"Osteosarcoma","RCH":"Chromophobe renal cell carcinoma","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal cancer","NB":"Neuroblastoma","UVM":"Uveal melanoma","PAIS":"Pancreatic neuroendocrine cancer",
            "PIA":"Pilocityc astrocytoma","ACC":"Adrenocortical carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell","MM":"Multiple myeloma",
            "PANCREAS":"Cancer of the pancreas","ST":"Stomach adenocarcinoma","CSCC":"Cutaneous squamous cell carcinoma","RB":"Retinoblastoma","HGG":"High-grade Glioma","EPD":"Ependymoma","CPC":"Choroid plexus carcinoma","KIDNEY":"Kidney cancer","R":"Kidney cancer",
-           "SK":"Kidney sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor","SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer","ANGS":"Angiosarcoma","PENILE_CANCER":"Penile cancer",
-            "SPI": "Spiradenocarcinoma", "SBCC": "Skin basal cell carcinoma", "VV": "Vulva Cancer", "LNET": "Lung neuroendocrine cancer", "SSCC": "Skin squamous cell carcinoma",
+           "SK":"Kidney sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor","SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer","ANGS":"Angiosarcoma","PENILE_CANCER":"Penile cancer",   "SPI": "Spiradenocarcinoma", "SBCC": "Skin basal cell carcinoma", "VV": "Vulva Cancer", "LNET": "Lung neuroendocrine cancer", "SSCC": "Skin squamous cell carcinoma",
            "BC": "Bowel cancer", "AN": "Anus cancer", "BCNET": "Bowel cancer neuroendocrine", "NSCLC": "Non-small cell lung cancer", "HBC": "Hepatic blastoma","ATRT":"Atypial teratoid/rhabdoid tumor",
-            "BLY": "Burkitt lymphoma", "NSCLC":"Non small cell lung cancer"
+            "BLY": "Burkitt lymphoma", "NSCLC":"Non small cell lung cancer", "Adenoid cystic": "ACY"}
 
           }
