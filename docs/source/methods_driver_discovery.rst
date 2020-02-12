@@ -5,7 +5,7 @@ The current version of the intOGen pipeline uses six cancer driver
 identification methods (hereinafter DIMs) to identify cancer driver
 genes from somatic point mutations:
 `dNdScv <https://github.com/im3sanger/dndscv>`__ and
-`CBaSE <http://genetics.bwh.harvard.edu/cbase/index.html>`__, which test
+`cBaSE <http://genetics.bwh.harvard.edu/cbase/index.html>`__, which test
 for mutation count bias in genes while correcting for regional genomic
 covariates, mutational processes and coding consequence type;
 `OncodriveCLUSTL <http://bbglab.irbbarcelona.org/oncodriveclustl/home>`__,
@@ -87,10 +87,10 @@ sequence boundaries (e.g., windows overlapping part of an exon and an
 intron were shifted to fit inside the exon). A total number of N = 1,000
 simulations per transcript were performed.
 
-CBaSE
+cBaSE
 ^^^^^
 
-CBaSE [5]_ asserts gene-specific positive and negative selection by
+cBaSE [5]_ asserts gene-specific positive and negative selection by
 measuring mutation count bias with Poisson-based hierarchical models.
 The method allows six different models based on distinct prior
 alternatives for the distribution of the regional mutation rate.
@@ -99,15 +99,25 @@ i) the mutational processes operative in the tumor, with either tri-
 or penta- nucleotide context; ii) the site count per consequence type per gene;
 iii) regional variability of the neutral mutation rate.
 
-We run a modified version of the CBaSE script to fit the specific needs
+We run a modified version of the cBaSE script to fit the specific needs
 of our pipeline. The main modification was adding a rule to automatically
 select a regional mutation rate prior distribution. Based on the total
 mutation burden in the dataset, the method runs either an inverse-gamma
 (mutation count < 12,000), an exponential-inverse-gamma mixture
 (12,000 < mutation count < 65,000) or a gamma-inverse-gamma mixture
 (mutation count > 65,000) as mutation rate prior distributions -- after
-communication with Donate Weghorn, CBaSE’s first author). We also skip the
+communication with Donate Weghorn, cBaSE’s first author). We also skip the
 negative selection analysis part, as it is not needed for downstream analyses.
+
+Mutpanning
+^^^^^^^^^^
+
+Mutpanning [9]_ resorts to a mixture signal of positive selection based on two components:
+i) the mutational recurrence realized as a Poisson-based count model reminiscent to the
+models implemented at dNdScv or cBaSE; ii) a measure of deviance from the characteristic
+tri-nucleotide contexts observed in neutral mutagenesis; specifically, an account of the
+likelihood that a prescribed count of non-synonymous mutations occur in their observed
+given a context-dependent mutational likelihood attributable to the neutral mutagenesis.
 
 HotMaps3D
 ^^^^^^^^^
@@ -205,3 +215,4 @@ pre-defined gene regions.
 
 .. [8] Porta-Pardo E, et al. e-Driver: a novel method to identify protein regions driving cancer. Bioinformatics. 2014;30(21):3109–3114. doi:10.1093/bioinformatics/btu499
 
+.. [9] Dietlein, F., Weghorn, D., Taylor-Weiner, A. et al. Identification of cancer driver genes based on nucleotide context. Nat Genet (2020). https://doi.org/10.1038/s41588-019-0572-y
