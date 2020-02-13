@@ -237,7 +237,7 @@ def run(paths, drivers, dndscv, vep, genome, muts, tmp_folder=None):
 
     df_drivers = pd.read_csv(drivers, sep='\t', dtype={'MUTS': int, 'SAMPLES': int})
     df_drivers = df_drivers.rename(columns={'MUTS': 'MUTATIONS'})
-    df_drivers = df_drivers[['COHORT', 'SAMPLES', 'SYMBOL', 'METHODS', 'CANCER_TYPE', 'QVALUE_COMBINATION', 'SAMPLES_COHORT']]
+    df_drivers = df_drivers[['COHORT', 'SAMPLES', 'SYMBOL', 'METHODS', 'CANCER_TYPE', 'QVALUE_COMBINATION', 'SAMPLES_COHORT', 'CGC_GENE', 'CGC_CANCER_GENE']]
     df_drivers['METHODS'].fillna('combination', inplace=True)
 
     dfs = [
