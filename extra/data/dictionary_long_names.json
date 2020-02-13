@@ -2,12 +2,12 @@
           "UCEC":"Endometrial cancer","CH":"Cholangiocarcinoma","PAAD":"Pancreas adenocarcinoma","RCCC":"Renal clear cell carcinoma","BLCA":"Bladder cancer","OV":"Ovary cancer","ESCA":"Esophageal cancer",
            "LUNG":"Lung cancer","PRAD":"Prostate adenocarcinoma","BRCA":"Breast adenocarcinoma","COREAD":"Colorectal adenocarcinoma","UCS":"Uterine carcinosarcoma","AML":"Acute myeloid leukemia","EWS":"Ewing's sarcoma",
            "ALL":"Acute lymphoblastic leukemia","CLL":"Chronic lymphoblastic leukemia","CESC":"Cervix squamous cancer","LGG":"Lower grade glioma","GBM":"Glioblastoma","MDPS":"Myelodysplastic proliferative","SG":"Salivary glands cancer","NHLY":"Non-hodking lymphoma",
-           "SCLC":"Small-cell lung cancer","CM":"Cutaneous melanoma of the skin","MDS":"Myelodisplasic syndrome","LEIS":"Leiomyosarcoma","LUSC":"Lung squamous cell carcinoma","DLBCL":"Diffuse large B-cell lymphoma","LUAD":"Lung adenocarcinoma","MBL":"Medulloblastoma",
+           "SCLC":"Small-cell lung cancer","CM":"Cutaneous melanoma of the skin","MDS":"Myelodisplasic syndrome neoplasm","LEIS":"Leiomyosarcoma","LUSC":"Lung squamous cell carcinoma","DLBCL":"Diffuse large B-cell lymphoma","LUAD":"Lung adenocarcinoma","MBL":"Medulloblastoma",
            "OS":"Osteosarcoma","RCH":"Chromophobe renal cell carcinoma","RHBDS":"Rhabdomyosarcoma","NSPH":"Nasopharyngeal cancer","NB":"Neuroblastoma","UVM":"Uveal melanoma","PAIS":"Pancreatic neuroendocrine cancer",
-           "PIA":"Pilocityc astrocytoma","ACC":"Adrenocortical carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell","MM":"Multiple myeloma",
+           "PIA":"Pilocityc astrocytoma","ACC":"Adrenocortical carcinoma","PCPG":"Pheochromocytoma and paraganglioma","S":"Sarcoma","RPC":"Renal papillary cell carcinoma","MM":"Multiple myeloma",
            "PANCREAS":"Cancer of the pancreas","ST":"Stomach adenocarcinoma","CSCC":"Cutaneous squamous cell carcinoma","RB":"Retinoblastoma","HGG":"High-grade Glioma","EPD":"Ependymoma","CPC":"Choroid plexus carcinoma","KIDNEY":"Kidney cancer","R":"Kidney cancer",
            "SK":"Kidney sarcoma","MBCL":"Monoclonal B-cell lymphocytosis","WT":"Wilms tumor","SMALL_INTESTINE_CANCER":"Bowel cancer", "NERVOUS_SYSTEM_CANCER":"CNS Cancer","LUNG_CANCER":"Lung cancer","VULVA_CANCER":"Vulva cancer","ANGS":"Angiosarcoma","PENILE_CANCER":"Penile cancer",   "SPI": "Spiradenocarcinoma", "SBCC": "Skin basal cell carcinoma", "VV": "Vulva Cancer", "LNET": "Lung neuroendocrine cancer", "SSCC": "Skin squamous cell carcinoma",
-           "BC": "Bowel cancer", "AN": "Anus cancer", "BCNET": "Bowel cancer neuroendocrine", "NSCLC": "Non-small cell lung cancer", "HBC": "Hepatic blastoma","ATRT":"Atypial teratoid/rhabdoid tumor",
+           "BC": "Bowel cancer", "AN": "Anus cancer", "BCNET": "Small intestine cancer neuroendocrine", "NSCLC": "Non-small cell lung cancer", "HBC": "Hepatic blastoma","ATRT":"Atypical teratoid/rhabdoid tumor",
             "BLY": "Burkitt lymphoma", "NSCLC":"Non small cell lung cancer", "ACY": "Adenoid cystic carcinoma"
 }
 
