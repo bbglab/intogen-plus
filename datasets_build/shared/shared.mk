@@ -1,4 +1,6 @@
 
+SRC_SHARED = ${DATASETS_SOURCE_FOLDER}/shared
+
 FOLDER_SHARED = $(DATASETS)/shared
 $(FOLDER_SHARED): | $(DATASETS)
 	mkdir $@
@@ -13,7 +15,7 @@ $(TRANSCRIPTS): | $(FOLDER_SHARED)
 
 
 # Biomart Query
-BIOMART_CDS_QUERY=`cat shared/biomartQuery.txt`
+BIOMART_CDS_QUERY=`cat ${SRC_SHARED}/biomartQuery.txt`
 BIOMART_CDS_QUERY_ENCODED = $(shell python -c "from urllib.parse import quote_plus; query ='''${BIOMART_CDS_QUERY}'''; print(quote_plus(query.replace('\n', '')))")
 BIOMART_CDS = $(FOLDER_SHARED)/cds_biomart.tsv
 $(BIOMART_CDS): $(TRANSCRIPTS) | $(FOLDER_SHARED)
@@ -32,9 +34,9 @@ $(REGIONS_CDS): $(BIOMART_CDS) | $(FOLDER_SHARED)
 		gzip >> $@
 
 REGIONS_WG = $(FOLDER_SHARED)/wg.regions.gz
-$(REGIONS_WG): shared/create_wg_regions.py | $(FOLDER_SHARED)
+$(REGIONS_WG): ${SRC_SHARED}/create_wg_regions.py | $(FOLDER_SHARED)
 	@echo Building whole-genome regions
-	python shared/create_wg_regions.py hg${GENOME} 3 | gzip > $@
+	python ${SRC_SHARED}/create_wg_regions.py hg${GENOME} 3 | gzip > $@
 
 COUNT_CDS = $(FOLDER_SHARED)/cds.counts.gz
 $(COUNT_CDS): $(REGIONS_CDS) | $(FOLDER_SHARED)
@@ -48,9 +50,9 @@ $(COUNT_WG): $(REGIONS_WG) | $(FOLDER_SHARED)
 
 SOMATIC_PON_URL="https://nc.hartwigmedicalfoundation.nl/index.php/s/a8lgLsUrZI5gndd/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
 SOMATIC_PON = $(FOLDER_SHARED)/somatic_pon_count_filtered.tsv.gz
-$(SOMATIC_PON): shared/somatic_pon_counts.py | $(FOLDER_SHARED)
+$(SOMATIC_PON): ${SRC_SHARED}/somatic_pon_counts.py | $(FOLDER_SHARED)
 	@echo Getting somatic panel of normal counts
-	python shared/somatic_pon_counts.py -u ${SOMATIC_PON_URL} -o $@
+	python ${SRC_SHARED}/somatic_pon_counts.py -u ${SOMATIC_PON_URL} -o $@
 
 CONSEQUENCE_CDS = $(FOLDER_SHARED)/consequences.pickle.gz
 # TODO check for other formats?
@@ -58,9 +60,9 @@ TRIPLETS_CDS = $(FOLDER_SHARED)/triplets.json.gz
 # TODO this file exists in previous versions as triplets.pickle.gz
 # TODO is it used?
 # TODO avoid the use of bgvep
-$(CONSEQUENCE_CDS): $(REGIONS_CDS) shared/count.py | $(FOLDER_SHARED)
+$(CONSEQUENCE_CDS): $(REGIONS_CDS) ${SRC_SHARED}/count.py | $(FOLDER_SHARED)
 	@echo Computing CDS triplets and consequences
-	python shared/count.py -r $(REGIONS_CDS) -t ${TRIPLETS_CDS} -c $(CONSEQUENCE_CDS) \
+	python ${SRC_SHARED}/count.py -r $(REGIONS_CDS) -t ${TRIPLETS_CDS} -c $(CONSEQUENCE_CDS) \
 		-v ${ENSEMBL} -g hg${GENOME}
 
 $(TRIPLETS_CDS): $(CONSEQUENCE_CDS)

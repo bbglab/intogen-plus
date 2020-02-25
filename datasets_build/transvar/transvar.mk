@@ -1,13 +1,15 @@
 
+SRC_TRANSVAR = ${DATASETS_SOURCE_FOLDER}/transvar
+
 TRANSVAR_FOLDER ?= $(DATASETS)/transvar
 $(TRANSVAR_FOLDER): | $(DATASETS)
 	mkdir $@
 
 # FIXME for other genomes than hg38, the GRCh version may differ
 GENOME_FASTA = $(TRANSVAR_FOLDER)/Homo_sapiens.GRCh${GENOME}.fa
-$(GENOME_FASTA): transvar/build_fasta.sh | $(TRANSVAR_FOLDER)
+$(GENOME_FASTA): ${SRC_TRANSVAR}/build_fasta.sh | $(TRANSVAR_FOLDER)
 	@echo Build genome fasta file
-	bash transvar/build_fasta.sh hg${GENOME} $@
+	bash ${SRC_TRANSVAR}/build_fasta.sh hg${GENOME} $@
 
 
 

@@ -1,4 +1,6 @@
 
+SRC_SMREGIONS = ${DATASETS_SOURCE_FOLDER}/smregions
+
 FOLDER_SMREGIONS = $(DATASETS)/smregions
 $(FOLDER_SMREGIONS): | $(DATASETS)
 	mkdir $@
@@ -12,13 +14,13 @@ REGIONS_PFAM = $(FOLDER_SMREGIONS)/regions_pfam.tsv.gz
 
 
 # Biomart Query
-BIOMART_PFAM_QUERY=`cat smregions/biomartQuery.txt`
+BIOMART_PFAM_QUERY=`cat ${SRC_SMREGIONS}/biomartQuery.txt`
 BIOMART_PFAM_QUERY_ENCODED = $(shell python -c "from urllib.parse import quote_plus; query ='''${BIOMART_PFAM_QUERY}'''; print(quote_plus(query.replace('\n', '')))")
 BIOMART_PFAM = $(FOLDER_SMREGIONS)/pfam_biomart.tsv.gz
-$(BIOMART_PFAM): | $(FOLDER_SMREGIONS)
+$(BIOMART_PFAM): $$(TRANSCRIPTS) | $(FOLDER_SMREGIONS)
 	@echo Downloading biomart
 	curl -s "${BIOMART_URL}?query=${BIOMART_PFAM_QUERY_ENCODED}" |\
-		grep -f <(cut -f2 ${TRANSCRIPTS}) |\
+		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
 		awk -F'\t' '($$5!=""){print($$0)}' \
 		| gzip > $@
 

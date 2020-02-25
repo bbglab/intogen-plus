@@ -4,11 +4,13 @@ GENOME = 38
 ENSEMBL ?= 92
 # TODO upgrade CADD version
 CADD ?= 1.4
-DATASETS?=../datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
+DATASETS ?=datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
 CORES ?= 1
 
 # TODO
 # export COSMIC_KEY=$(echo "email@example.com:mycosmicpassword" | base64)
+
+DATASETS_SOURCE_FOLDER = ../datasets_build
 
 .PHONY: all alltargets clean
 
@@ -28,7 +30,7 @@ all: alltargets
 # Use second expansion for mixed dependencies
 .SECONDEXPANSION:
 
-include */*.mk
+include ${DATASETS_SOURCE_FOLDER}/*/*.mk
 
 
 
