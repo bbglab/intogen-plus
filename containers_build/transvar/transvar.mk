@@ -1,7 +1,7 @@
 
-IMAGE_TRANSVAR = $(CONTAINERS)/transvar.simg
+CONTAINER_TRANSVAR = $(CONTAINERS)/transvar.simg
 
-$(IMAGE_TRANSVAR): | $(CONTAINERS)
+$(CONTAINER_TRANSVAR): | $(CONTAINERS)
 	singularity build $@ docker://zhouwanding/transvar
 
-ALL_TARGETS += $(IMAGE_TRANSVAR)
+TARGETS_CONTAINERS += $(CONTAINER_TRANSVAR)
