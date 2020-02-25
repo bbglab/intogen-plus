@@ -4,18 +4,19 @@ GENOME = 38
 ENSEMBL ?= 92
 # TODO upgrade CADD version
 CADD ?= 1.4
-DATASETS ?=datasets/hg${GENOME}_ensembl${ENSEMBL}_$(shell date +%Y%m%d)
+DATASETS ?= datasets/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
+CONTAINERS ?= containers/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
 CORES ?= 1
 
-# TODO
-# export COSMIC_KEY=$(echo "email@example.com:mycosmicpassword" | base64)
-
 DATASETS_SOURCE_FOLDER = ../datasets_build
+CONTAINERS_SOURCE_FOLDER = ../containers_build
 
-.PHONY: all alltargets clean
+.PHONY: all alltargets clean datasets containers sudo-containers
 
 # accumulate all targets
-ALL_TARGETS=
+TARGETS_DATASETS=
+TARGETS_CONTAINERS=
+TARGETS_CONTAINERS_SUDO=
 
 # useful variables
 ENSEMBL_DATABASE="homo_sapiens_core_${ENSEMBL}_${GENOME}"
@@ -31,16 +32,15 @@ all: alltargets
 .SECONDEXPANSION:
 
 include ${DATASETS_SOURCE_FOLDER}/*/*.mk
+include ${CONTAINERS_SOURCE_FOLDER}/*/*.mk
 
 
-
-#$(info ${ALL_TARGETS})
-
-# Ensure DATA_DIR exists before adding files
+# Ensure directories exists before adding files
 $(DATASETS):
-	mkdir $@
+	mkdir -p $@
 
-
+$(CONTAINERS):
+	mkdir -p $@
 
 
 
@@ -85,7 +85,14 @@ $(VEP_FOLDER): | $(DATASETS)
 
 #########################
 
-alltargets: $(ALL_TARGETS) | $(DATASETS)
+
+datasets: $(TARGETS_DATA) | $(DATASETS)
+
+containers: $(TARGETS_CONTAINERS) $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
+
+sudo-containers: $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
+
+alltargets: datasets containers
 #	@echo $(ALL_TARGETS)
 
 clean:

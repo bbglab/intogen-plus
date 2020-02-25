@@ -1,8 +1,8 @@
 
-SRC_SMREGIONS = ${DATASETS_SOURCE_FOLDER}/smregions
+SRC_DATASETS_SMREGIONS = ${DATASETS_SOURCE_FOLDER}/smregions
 
-FOLDER_SMREGIONS = $(DATASETS)/smregions
-$(FOLDER_SMREGIONS): | $(DATASETS)
+DATASETS_SMREGIONS = $(DATASETS)/smregions
+$(DATASETS_SMREGIONS): | $(DATASETS)
 	mkdir $@
 
 
@@ -10,14 +10,14 @@ $(FOLDER_SMREGIONS): | $(DATASETS)
 
 
 # TODO requires transvar
-REGIONS_PFAM = $(FOLDER_SMREGIONS)/regions_pfam.tsv.gz
+REGIONS_PFAM = $(DATASETS_SMREGIONS)/regions_pfam.tsv.gz
 
 
 # Biomart Query
-BIOMART_PFAM_QUERY=`cat ${SRC_SMREGIONS}/biomartQuery.txt`
+BIOMART_PFAM_QUERY=`cat ${SRC_DATASETS_SMREGIONS}/biomartQuery.txt`
 BIOMART_PFAM_QUERY_ENCODED = $(shell python -c "from urllib.parse import quote_plus; query ='''${BIOMART_PFAM_QUERY}'''; print(quote_plus(query.replace('\n', '')))")
-BIOMART_PFAM = $(FOLDER_SMREGIONS)/pfam_biomart.tsv.gz
-$(BIOMART_PFAM): $$(TRANSCRIPTS) | $(FOLDER_SMREGIONS)
+BIOMART_PFAM = $(DATASETS_SMREGIONS)/pfam_biomart.tsv.gz
+$(BIOMART_PFAM): $$(TRANSCRIPTS) | $(DATASETS_SMREGIONS)
 	@echo Downloading biomart
 	curl -s "${BIOMART_URL}?query=${BIOMART_PFAM_QUERY_ENCODED}" |\
 		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
@@ -32,4 +32,4 @@ $(BIOMART_PFAM): $$(TRANSCRIPTS) | $(FOLDER_SMREGIONS)
 #		awk -F'\t' '($$5!=""){gsub("-1", "-", $$10); gsub("1", "+", $$10); print($$4"\t"$$5"\t"$$6"\t"$$10"\t"$$1"\t"$$1"\t"$$2)}' | \
 #		gzip >> $@
 
-ALL_TARGETS += $(BIOMART_PFAM)
+TARGETS_DATASETS += $(BIOMART_PFAM)

@@ -1,20 +1,20 @@
 
-SRC_COMBINATION = ${DATASETS_SOURCE_FOLDER}/combination
+SRC_DATASETS_COMBINATION = ${DATASETS_SOURCE_FOLDER}/combination
 
-FOLDER_COMBINATION = $(DATASETS)/combination
-$(FOLDER_COMBINATION): | $(DATASETS)
+DATASETS_COMBINATION = $(DATASETS)/combination
+$(DATASETS_COMBINATION): | $(DATASETS)
 	mkdir $@
 
-OLFACTORY_RECEPTORS = $(FOLDER_COMBINATION)/olfactory_receptors.tsv
-$(OLFACTORY_RECEPTORS): | $(FOLDER_COMBINATION)
+OLFACTORY_RECEPTORS = $(DATASETS_COMBINATION)/olfactory_receptors.tsv
+$(OLFACTORY_RECEPTORS): | $(DATASETS_COMBINATION)
 	wget https://genome.weizmann.ac.il/horde/download/genes.csv \
 		-O $(OLFACTORY_RECEPTORS)
 
-NEGATIVE_GENE_SET = $(FOLDER_COMBINATION)/negative_gene_set.tsv
-NON_EXPRESSED_GENES = $(FOLDER_COMBINATION)/non_expressed_genes_tcga.tsv
-$(NEGATIVE_GENE_SET): $(OLFACTORY_RECEPTORS) ${SRC_COMBINATION}/create_negative_set.py | $(FOLDER)
+NEGATIVE_GENE_SET = $(DATASETS_COMBINATION)/negative_gene_set.tsv
+NON_EXPRESSED_GENES = $(DATASETS_COMBINATION)/non_expressed_genes_tcga.tsv
+$(NEGATIVE_GENE_SET): $(OLFACTORY_RECEPTORS) ${SRC_DATASETS_COMBINATION}/create_negative_set.py | $(FOLDER)
 	@echo Building negative set
-	python ${SRC_COMBINATION}/create_negative_set.py \
+	python ${SRC_DATASETS_COMBINATION}/create_negative_set.py \
 		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
 		--output_total $(NEGATIVE_GENE_SET) \
 		--output_non_expressed $(NON_EXPRESSED_GENES)
@@ -25,4 +25,4 @@ $(NON_EXPRESSED_GENES): $(NEGATIVE_GENE_SET)
 	# computed above
 	$(NOOP)
 
-ALL_TARGETS += $(OLFACTORY_RECEPTORS) $(NEGATIVE_GENE_SET) $(NON_EXPRESSED_GENES)
+TARGETS_DATASETS += $(OLFACTORY_RECEPTORS) $(NEGATIVE_GENE_SET) $(NON_EXPRESSED_GENES)

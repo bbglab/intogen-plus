@@ -23,4 +23,4 @@ $(ENSEMBL_GTF): | $(TRANSVAR_FOLDER)
 
 # TODO index fasta and ensembl and configure ensemble. Requies transvar image
 
-ALL_TARGETS += $(GENOME_FASTA)
+TARGETS_DATASETS += $(GENOME_FASTA)

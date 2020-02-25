@@ -12,4 +12,4 @@ bgdata: | $(DATASETS)
 	bgdata get intogen/expression/tcga_pancanatlas
 	bgdata get intogen/coverage/hg${GENOME}
 
-ALL_TARGETS += bgdata
+TARGETS_DATASETS += bgdata

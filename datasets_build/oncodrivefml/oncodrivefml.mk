@@ -1,12 +1,12 @@
 
-FOLDER_ONCODRIVEFML = $(DATASETS)/oncodrivefml
-$(FOLDER_ONCODRIVEFML): | $(DATASETS)
+DATASETS_FML = $(DATASETS)/oncodrivefml
+$(DATASETS_FML): | $(DATASETS)
 	mkdir $@
 
 # FIXME for other genomes than hg38, the GRCh version may differ
 CADD_URL = http://krishna.gs.washington.edu/download/CADD/v${CADD}/GRCh${GENOME}/whole_genome_SNVs.tsv.gz
-CADD_SCORES = ${FOLDER_ONCODRIVEFML}/cadd.tsv.gz
-$(CADD_SCORES): $$(REGIONS_CDS) | $(FOLDER_ONCODRIVEFML)
+CADD_SCORES = ${DATASETS_FML}/cadd.tsv.gz
+$(CADD_SCORES): $$(REGIONS_CDS) | $(DATASETS_FML)
 	@echo Building OncodriveFML datasets
 	zcat $(REGIONS_CDS) | tail -n +2 |\
 		awk -v cadd="${CADD_URL}" '{system("tabix "cadd" "$$1":"$$2"-"$$3)}' |\
@@ -19,8 +19,8 @@ $(CADD_SCORES): $$(REGIONS_CDS) | $(FOLDER_ONCODRIVEFML)
 
 # TODO set a oneliner
 
-CADD_SCORES_INDEX = $(FOLDER_ONCODRIVEFML)/cadd.tsv.gz.tbi
-$(CADD_SCORES_INDEX): $(CADD_SCORES) | $(FOLDER_ONCODRIVEFML)
+CADD_SCORES_INDEX = $(DATASETS_FML)/cadd.tsv.gz.tbi
+$(CADD_SCORES_INDEX): $(CADD_SCORES) | $(DATASETS_FML)
 	tabix -s 1 -b 2 -e 2 $(CADD_SCORES)
 
-ALL_TARGETS += $(CADD_SCORES) $(CADD_SCORES_INDEX)
+TARGETS_DATASETS += $(CADD_SCORES) $(CADD_SCORES_INDEX)
