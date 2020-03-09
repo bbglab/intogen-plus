@@ -1,7 +1,7 @@
 Methods for cancer driver gene identification
 ---------------------------------------------
 
-The current version of the intOGen pipeline uses six cancer driver
+The current version of the intOGen pipeline uses seven cancer driver
 identification methods (hereinafter DIMs) to identify cancer driver
 genes from somatic point mutations:
 `dNdScv <https://github.com/im3sanger/dndscv>`__ and
