@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: python:3.6
+
+%environment
+    export LC_ALL=C.UTF-8
+
+%runscript
+    exec "/combination/schulze.sh" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/combination
+    cp -r src/* ${SINGULARITY_ROOTFS}/combination/
+    chmod -R a+rwx ${SINGULARITY_ROOTFS}/combination/
+
+%post
+
+    # Load environment
+    export LC_ALL=C.UTF-8
+
+	# Clean up Cython code
+	rm /combination/schulze_strongest_path_cython.pyx
+	rm /combination/setup.py
+
+    # Install Python dependencies
+    pip install pandas==0.23 numpy==1.15 click==7.0 statsmodels==0.9 scipy==1.2 tqdm==4.29 configobj==5.0
+    #/opt/conda/bin/conda install -y -c conda-forge python=3.6 pandas=0.23 numpy=1.15 click=7.0 statsmodels=0.9 cython=0.29 scipy=1.2 tqdm=4.29 configobj=5.0
+	#cd /combination && /opt/conda/bin/python setup.py build_ext --inplace
