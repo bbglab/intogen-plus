@@ -8,6 +8,14 @@ DATASETS ?= datasets/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
 CONTAINERS ?= containers/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
 CORES ?= 1
 
+# TODO use bash scripts when needed
+
+# TODO combine datasets and containers in the folder.
+# one folder hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD} and inside container and datasets
+
+# TODO create a file .hg38 that forces rebuild of all the thing that need it if we change the version
+# shame thing with cadd and ensembl version
+
 DATASETS_SOURCE_FOLDER = ../datasets_build
 CONTAINERS_SOURCE_FOLDER = ../containers_build
 
@@ -45,21 +53,6 @@ $(CONTAINERS):
 
 
 
-####### DNDSCV #######
-DNDSCV_FOLDER ?= $(DATASETS)/dndscv
-$(DNDSCV_FOLDER):
-	mkdir $@
-
-REF_RDA = $(DNDSCV_FOLDER)/RefCDS.rda
-$(REF_RDA): $(GENOME_FASTA) | $(DNDSCV_FOLDER)
-	@echo Building dNdSCV reference
-
-# TODO this guy requires the dnds image
-
-
-
-
-
 ####### VEP #######
 VEP_FOLDER = $(DATASETS)/vep
 $(VEP_FOLDER): | $(DATASETS)
@@ -86,14 +79,14 @@ $(VEP_FOLDER): | $(DATASETS)
 #########################
 
 
-datasets: $(TARGETS_DATA) | $(DATASETS)
+datasets: $(TARGETS_DATASETS) | $(DATASETS)
 
 containers: $(TARGETS_CONTAINERS) $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
 
-sudo-containers: $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
+sudo: $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
 
-alltargets: datasets containers
+alltargets: containers datasets
 #	@echo $(ALL_TARGETS)
 
 clean:
-	rm -rf $(DATASETS)
+	rm -rf $(DATASETS) $(CONTAINERS)
