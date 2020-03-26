@@ -10,7 +10,8 @@ From: continuumio/miniconda3:4.5.12
 %setup
     mkdir ${SINGULARITY_ROOTFS}/combination
     cp -r src/* ${SINGULARITY_ROOTFS}/combination/
-    chmod -R a+rx ${SINGULARITY_ROOTFS}/combination/
+    chmod -R a+rw ${SINGULARITY_ROOTFS}/combination/
+    #chmod -R a+rwx ${SINGULARITY_ROOTFS}/combination/
 
 %post
 
@@ -24,3 +25,4 @@ From: continuumio/miniconda3:4.5.12
 
     # Install Python dependencies
     /opt/conda/bin/conda install -y -c conda-forge python=3.6 pandas=0.23 numpy=1.15 click=7.0 statsmodels=0.9 cython=0.29 scipy=1.2 tqdm=4.29 configobj=5.0
+	#cd /combination && /opt/conda/bin/python setup.py build_ext --inplace
