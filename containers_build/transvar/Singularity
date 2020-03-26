@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: debian:buster-slim
+From: zhouwanding/transvar
 
 %environment
     LC_ALL=C.UTF-8
@@ -11,14 +11,7 @@ From: debian:buster-slim
     exec "/usr/local/bin/transvar" "$@"
 
 %post
-
-    # Load environment
-    export LC_ALL=C.UTF-8
-
-    # Install dependencies
-    apt update
-    apt install -y python3.6 python3-pip libz-dev samtools tabix 
-    pip3 --no-cache-dir install https://github.com/zwdzwd/transvar/archive/v2.4.3.20181231.tar.gz
+	rm -rf /anno
     mkdir /data
     
 %test
