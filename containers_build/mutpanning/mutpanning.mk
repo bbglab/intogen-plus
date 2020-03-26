@@ -4,6 +4,7 @@ CONTAINER_MUTPANNING = $(CONTAINERS)/MutPanning.simg
 
 SRC_CONTAINER_MUTPANNING = ${CONTAINERS_SOURCE_FOLDER}/mutpanning
 
+# TODO remove jar file from repo and add instructions
 
 $(CONTAINER_MUTPANNING): ${SRC_CONTAINER_MUTPANNING}/Singularity ${SRC_CONTAINER_MUTPANNING}/MutPanning.jar | $(CONTAINERS)
 	@echo Building MutPanning container

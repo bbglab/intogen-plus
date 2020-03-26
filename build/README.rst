@@ -28,6 +28,9 @@ parallel build:
 
 	$ make -j 4
 
+Moreover, there is a special target (``sudo-containers``) that
+can be used to build the containers that require superuser privileges.
+
 
 Requirements
 ************
@@ -36,9 +39,12 @@ Requires a working Internet connection
 and the following software:
 
 awk
+cut
+xz
 curl
 make
 mysql
+sqlite3
 singularity (version 2.6.1)
 tabix
 python
@@ -53,3 +59,8 @@ python
 
 This software (except singularity) can be installed with
 `conda <https://docs.conda.io/en/latest/>`_.
+
+
+.. important:: The MutPanning jar file needs to be downloaded
+   from their website (http://www.cancer-genes.org/ )
+   extracted and placed in the ``containers_build/mutpanning`` folder.
