@@ -12,7 +12,7 @@ $(CADD_SCORES): $$(REGIONS_CDS) | $(DATASETS_FML)
 	@echo Building OncodriveFML datasets
 	zcat $(REGIONS_CDS) | tail -n +2 |\
 		awk -v cadd="${CADD_URL}" '{system("tabix "cadd" "$$1":"$$2"-"$$3)}' |\
-		awk 'BEGIN {FS="\t";OFS = FS};{ $$5=""; print }' |\
+		awk 'BEGIN {FS="\t";OFS = FS};{print $$1,$$2,$$3,$$4,$$6}' |\
 		gzip > $@.tmp
 	zcat $@.tmp |\
 		sort --parallel=${CORES} -S 4G -k1,1 -k2,2n |\
