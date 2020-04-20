@@ -12,6 +12,7 @@ CONTAINERS ?= ${build_dir}/containers
 
 # hg version
 genome = 38
+# TODO remove ensemble limitation due to BGVEP
 ensmebl ?= 92
 # TODO upgrade CADD version
 cadd ?= 1.4
@@ -30,7 +31,7 @@ src_containers = ../containers_build
 tmpdir=`mktemp -d`
 
 # accumulate all targets
-ALL_DATASETS =
+DATASETS_TARGETS =
 CONTAINERS_SUDO =
 CONTAINERS_USER =
 
@@ -71,7 +72,7 @@ include ${src_containers}/*/*.mk
 #########################
 .PHONY: datasets containers sudo
 
-datasets: $(ALL_DATASETS) | $(DATASETS)
+datasets: $(DATASETS_TARGETS) | $(DATASETS)
 
 containers: $(CONTAINERS_USER) $(CONTAINERS_SUDO) | $(CONTAINERS)
 

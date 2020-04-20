@@ -1,5 +1,6 @@
 
 # Configure BGData
+# Note that this configuration is applied to all datasets
 BGDATA_LOCAL=$(DATASETS)/bgdata
 BGDATA_OFFLINE="FALSE"
 export BGDATA_LOCAL
@@ -12,4 +13,4 @@ bgdata: $$(GENOME) | $(DATASETS)
 	bgdata get intogen/expression/tcga_pancanatlas
 	bgdata get intogen/coverage/hg${genome}
 
-ALL_DATASETS += bgdata
+DATASETS_TARGETS += bgdata

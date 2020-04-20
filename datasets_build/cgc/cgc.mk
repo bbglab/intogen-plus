@@ -1,32 +1,40 @@
 
-SRC_CGC = ${DATASETS_SOURCE_FOLDER}/cgc
-DATASETS_CGC = $(DATASETS)/combination/cgc
-$(DATASETS_CGC): | $(DATASETS)
+cgc_datasets_srcdir = ${src_datasets}/cgc
+
+cgc_dir = $(DATASETS)/combination/cgc
+$(cgc_dir): | $(DATASETS)
 	mkdir -p $@
 
-CGC = $(DATASETS_CGC)/cancer_gene_census.csv
-$(CGC): ${SRC_CGC}/download.py | $(DATASETS_CGC) check-cosmic-key
+
+CGC = $(cgc_dir)/cancer_gene_census.csv
+
+$(CGC): ${cgc_datasets_srcdir}/download.py | $(cgc_dir) check-cosmic-key
 	@echo Download CGC
-	python ${SRC_CGC}/download.py --download $(DATASETS_CGC)
+	python $< --download $(cgc_dir)
+
 
 # TODO why 2 mappings
-CGC_MAP = $(DATASETS_CGC)/mapping_cgc_ttypes.json
-CGC_MAP_INTOGEN = $(DATASETS_CGC)/mapping_cgc_ttypes_intogen.json
-$(DATASETS_CGC)/%.json: ${SRC_CGC}/%.json | $(DATASETS_CGC)
+CGC_MAP = $(cgc_dir)/mapping_cgc_ttypes.json
+CGC_MAP_INTOGEN = $(cgc_dir)/mapping_cgc_ttypes_intogen.json
+
+$(cgc_dir)/%.json: ${cgc_datasets_srcdir}/%.json | $(cgc_dir)
 	cp -f $< $@
 
-CGC_PARSED = $(DATASETS_CGC)/cancer_gene_census_parsed.tsv
-$(CGC_PARSED): $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) ${SRC_CGC}/parse.py | $(DATASETS_CGC)
+
+CGC_PARSED = $(cgc_dir)/cancer_gene_census_parsed.tsv
+
+$(CGC_PARSED): ${cgc_datasets_srcdir}/parse.py $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) | $(cgc_dir)
 	@echo Parsing CGC dataframe
-	python ${SRC_CGC}/parse.py \
+	python $< \
 		--path_cgc_original $(CGC) \
 		--dict_mapping_cgc $(CGC_MAP) \
 		--dict_mapping_cgc_intogen $(CGC_MAP_INTOGEN) \
-		--path_output $(DATASETS_CGC)
+		--path_output $(cgc_dir)
 
-TARGETS_DATASETS += $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) $(CGC_PARSED)
+
+DATASETS_TARGETS += $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) $(CGC_PARSED)
 
 check-cosmic-key:
-ifeq ($(COSMIC_KEY), )
-	$(error COSMIC_KEY not set)
-endif
+	ifeq ($(COSMIC_KEY), )
+		$(error COSMIC_KEY not set)
+	endif

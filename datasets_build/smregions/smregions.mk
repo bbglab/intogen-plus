@@ -1,8 +1,8 @@
 
 smregions_data_srcdir = ${src_datasets}/smregions
 
-SMREGIONS_DIR = $(DATASETS)/smregions
-$(SMREGIONS_DIR): | $(DATASETS)
+smregions_dir = $(DATASETS)/smregions
+$(smregions_dir): | $(DATASETS)
 	mkdir $@
 
 
@@ -10,8 +10,9 @@ $(SMREGIONS_DIR): | $(DATASETS)
 biomart_pfram_query_file = ${smregions_data_srcdir}/biomartQuery.txt
 biomart_pfram_query = `cat ${biomart_pfram_query_file}`
 biomart_pfram_query_encoded = $(shell python -c "from urllib.parse import quote_plus; query ='''${biomart_pfram_query}'''; print(quote_plus(query.replace('\n', '')))")
-BIOMART_PFAM = $(SMREGIONS_DIR)/pfam_biomart.tsv.gz
-$(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(SMREGIONS_DIR)
+BIOMART_PFAM = $(smregions_dir)/pfam_biomart.tsv.gz
+
+$(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(smregions_dir)
 	@echo Downloading biomart
 	@echo ${biomart_pfram_query}
 	curl -s "${biomart_url}?query=${biomart_pfram_query_encoded}" |\
@@ -20,8 +21,9 @@ $(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(SMR
 		| gzip > $@
 
 
-REGIONS_PFAM = $(SMREGIONS_DIR)/regions_pfam.tsv
-$(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(CONTAINER_TRANSVAR) $$(TRANSCRIPTS) $$(TRANSVAR_FILES) | $(SMREGIONS_DIR)
+REGIONS_PFAM = $(smregions_dir)/regions_pfam.tsv
+
+$(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(CONTAINER_TRANSVAR) $$(TRANSCRIPTS) $$(TRANSVAR_FILES) | $(smregions_dir)
 	@echo Building CDS annotations
 	echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT_ID\tSEGMENT\tSYMBOL" \
 		> $@
@@ -29,4 +31,5 @@ $(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(CONTAINER_
 		awk '{system("$< "$$2" "$$5" "$$3" "$$4" $(CONTAINER_TRANSVAR) $(DATASETS_TRANSVAR) $(TRANSCRIPTS)")}' \
 		| grep -v "^\s" >> $@
 
-ALL_DATASETS += $(BIOMART_PFAM) $(REGIONS_PFAM)
+
+DATASETS_TARGETS += $(BIOMART_PFAM) $(REGIONS_PFAM)

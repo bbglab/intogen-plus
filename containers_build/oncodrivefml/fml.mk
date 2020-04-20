@@ -4,6 +4,7 @@ FML_CONTAINER = $(CONTAINERS)/oncodrivefml.simg
 fml_container_srcdir = ${src_containers}/oncodrivefml
 
 # TODO put config file as dataset
+# TODO make reference genome as variable in the config
 
 fml_container_src = ${fml_container_srcdir}/oncodrivefml_v2.conf \
 	${fml_container_srcdir}/Singularity

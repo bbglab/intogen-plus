@@ -1,4 +1,4 @@
-# TODO rename as deconstructsigs (last s)
+# TODO rename as deconstructsigs (last "s")
 
 DECONSTRUCTSIGS_CONTAINER = $(CONTAINERS)/deconstructsig.simg
 
