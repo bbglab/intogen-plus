@@ -1,39 +1,33 @@
 
-SRC_PREPROCESS = ${DATASETS_SOURCE_FOLDER}/preprocess
+preprocess_data_srcdir = ${src_datasets}/preprocess
 
-DATASETS_PREPROCESS = $(DATASETS)/preprocess
-$(DATASETS_PREPROCESS): | $(DATASETS)
+PREPROCESS_DIR = $(DATASETS)/preprocess
+$(PREPROCESS_DIR): | $(DATASETS)
 	mkdir $@
 
 # TODO: the file is also available in bgdata. Change the point path to it
-COVERAGE_FILENAME = hg${GENOME}_100bp.coverage.regions.gz
-COVERAGE = $(DATASETS_PREPROCESS)/${COVERAGE_FILENAME}
-$(COVERAGE): | $(DATASETS_PREPROCESS)
-	cp -f ${SRC_PREPROCESS}/${COVERAGE_FILENAME} $@
+coverage_filename = hg${genome}_100bp.coverage.regions.gz
+coverage_file = ${preprocess_data_srcdir}/${coverage_filename}
+COVERAGE = $(PREPROCESS_DIR)/${coverage_filename}
+$(COVERAGE): $(coverage_file) $$(GENOME) | $(PREPROCESS_DIR)
+	cp -f $(coverage_file) $@
 
 # TODO remove (this is just here to be able to reproduce the current version, but I think is not needed)
-COVERAGE2 = $(DATASETS_PREPROCESS)/hg19_100bp.coverage.regions.gz
-$(COVERAGE2): | $(DATASETS_PREPROCESS)
-	cp -f ${SRC_PREPROCESS}/hg19_100bp.coverage.regions.gz $@
+COVERAGE2 = $(PREPROCESS_DIR)/hg19_100bp.coverage.regions.gz
+$(COVERAGE2): | $(PREPROCESS_DIR)
+	cp -f ${preprocess_data_srcdir}/hg19_100bp.coverage.regions.gz $@
 
-#LIFTOVER = $(shell awk -v genome=hg${GENOME} '{if ($$1 == genome) {print $$2}}' ${SRC_PREPROCESS}/liftover.txt)
-#LIFTOVER_FILE = $(addprefix $(DATASETS_PREPROCESS)/, ${LIFTOVER})
-#$(DATASETS_PREPROCESS)/%ToHg${GENOME}.over.chain.gz: | $(DATASETS_PREPROCESS)
-#	wget -c http://hgdownload.soe.ucsc.edu/goldenPath/$*/liftOver/$*ToHg${GENOME}.over.chain.gz \
-#		-O $@
-
-LIFTOVER38TO19 = hg38ToHg19.over.chain.gz
-LIFTOVER38TO19_FILE = $(addprefix $(DATASETS_PREPROCESS)/, ${LIFTOVER38TO19})
-$(LIFTOVER38TO19_FILE): | $(DATASETS_PREPROCESS)
+liftover_38_19 = hg38ToHg19.over.chain.gz
+LIFTOVER38TO19 = $(PREPROCESS_DIR)/${liftover_38_19}
+$(LIFTOVER38TO19): | $(PREPROCESS_DIR)
 	wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/hg38ToHg19.over.chain.gz \
 		-O $@
 
-LIFTOVER19TO38 = hg19ToHg38.over.chain.gz
-LIFTOVER19TO38_FILE = $(addprefix $(DATASETS_PREPROCESS)/, ${LIFTOVER19TO38})
-$(LIFTOVER19TO38_FILE): | $(DATASETS_PREPROCESS)
+liftover_19_38 = hg19ToHg38.over.chain.gz
+LIFTOVER19TO38 = $(PREPROCESS_DIR)/${liftover_19_38}
+$(LIFTOVER19TO38): | $(PREPROCESS_DIR)
 	wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz \
 		-O $@
 
-LIFTOVER_FILE = $(LIFTOVER38TO19_FILE) $(LIFTOVER19TO38_FILE)
 
-TARGETS_DATASETS += $(COVERAGE) $(LIFTOVER_FILE) $(COVERAGE2)
+ALL_DATASETS += $(COVERAGE) $(LIFTOVER19TO38) $(LIFTOVER38TO19) $(COVERAGE2)

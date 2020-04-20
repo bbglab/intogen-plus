@@ -6,10 +6,10 @@ export BGDATA_LOCAL
 export BGDATA_OFFLINE
 
 .PHONY: bgdata
-bgdata: | $(DATASETS)
+bgdata: $$(GENOME) | $(DATASETS)
 	@echo Downloading bgdata datasets
-	bgdata get datasets/genomereference/hg${GENOME}
+	bgdata get datasets/genomereference/hg${genome}
 	bgdata get intogen/expression/tcga_pancanatlas
-	bgdata get intogen/coverage/hg${GENOME}
+	bgdata get intogen/coverage/hg${genome}
 
-TARGETS_DATASETS += bgdata
+ALL_DATASETS += bgdata

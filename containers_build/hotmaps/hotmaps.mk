@@ -1,16 +1,15 @@
 
+HOTMAPS_CONTAINER = $(CONTAINERS)/hotmaps.simg
 
-CONTAINER_HOTMAPS = $(CONTAINERS)/hotmaps.simg
+hotmaps_container_srcdir = ${src_containers}/hotmaps
 
-SRC_CONTAINER_HOTMAPS = ${CONTAINERS_SOURCE_FOLDER}/hotmaps
+hotmaps_container_src = $(wildcard ${hotmaps_container_srcdir}/*)
 
-CONTAINER_HOTMAPS_FILES = $(wildcard ${SRC_CONTAINER_HOTMAPS}/*)
-
-$(CONTAINER_HOTMAPS): ${CONTAINER_HOTMAPS_FILES} | $(CONTAINERS)
-	@echo Building deconstructsig container
-	cd ${SRC_CONTAINER_HOTMAPS} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_HOTMAPS}/$$(basename $@) $@
+$(HOTMAPS_CONTAINER): $(hotmaps_container_src) | $(CONTAINERS)
+	@echo Building HotMAPS container
+	cd ${hotmaps_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_HOTMAPS)
+CONTAINERS_SUDO += $(HOTMAPS_CONTAINER)

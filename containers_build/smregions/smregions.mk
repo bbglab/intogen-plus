@@ -1,18 +1,19 @@
+# TODO remove cpus from config file, or maybe move config file to datasets
 
+SMREGIONS_CONTAINER = $(CONTAINERS)/smregions.simg
 
-CONTAINER_SMREGIONS = $(CONTAINERS)/smregions.simg
+smregions_container_srcdir = ${src_containers}/smregions
 
-SRC_CONTAINER_SMREGIONS = ${CONTAINERS_SOURCE_FOLDER}/smregions
+smregions_container_src = $(wildcard ${smregions_container_srcdir}/src/*) \
+	 $(wildcard ${smregions_container_srcdir}/src/smregions/*) \
+	 ${smregions_container_srcdir}/smregions.conf \
+	 ${smregions_container_srcdir}/Singularity
 
-CONTAINER_SMREGIONS_FILES = $(wildcard ${SRC_CONTAINER_SMREGIONS}/src/*) \
-	 $(wildcard ${SRC_CONTAINER_SMREGIONS}/src/smregions/*) \
-	 ${SRC_CONTAINER_SMREGIONS}/smregions.conf
-
-$(CONTAINER_SMREGIONS): ${SRC_CONTAINER_SMREGIONS}/Singularity ${CONTAINER_SMREGIONS_FILES} | $(CONTAINERS)
-	@echo Building SMREGIONS container
-	cd ${SRC_CONTAINER_SMREGIONS} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_SMREGIONS}/$$(basename $@) $@
+$(SMREGIONS_CONTAINER): $(smregions_container_src) | $(CONTAINERS)
+	@echo Building SMRegions container
+	cd ${smregions_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_SMREGIONS)
+CONTAINERS_SUDO += $(SMREGIONS_CONTAINER)

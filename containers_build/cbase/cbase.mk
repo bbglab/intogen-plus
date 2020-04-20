@@ -1,14 +1,17 @@
 
 
-CONTAINER_CBASE = $(CONTAINERS)/cbase.simg
+CBASE_CONTAINER = $(CONTAINERS)/cbase.simg
 
-SRC_CONTAINER_CBASE = ${CONTAINERS_SOURCE_FOLDER}/cbase
+cbase_container_srcdir = ${src_containers}/cbase
 
-$(CONTAINER_CBASE): ${SRC_CONTAINER_CBASE}/Singularity ${SRC_CONTAINER_CBASE}/cbase.py | $(CONTAINERS)
+cbase_container_src = ${cbase_container_srcdir}/cbase.py \
+	${cbase_container_srcdir}/Singularity
+
+$(CBASE_CONTAINER): $(cbase_container_src) | $(CONTAINERS)
 	@echo Building CBaSE container
-	cd ${SRC_CONTAINER_CBASE} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_CBASE}/$$(basename $@) $@
+	cd ${cbase_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_CBASE)
+CONTAINERS_SUDO += $(CBASE_CONTAINER)

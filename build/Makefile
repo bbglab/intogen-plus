@@ -1,47 +1,44 @@
 SHELL := /bin/bash
 
-GENOME = 38
-ENSEMBL ?= 92
+.PHONY: all clean
+# trick to make all the first target
+# and set it to the end once all variables are defined
+all: containers datasets
+
+# hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
+build_dir = ../../intogen_build
+DATASETS ?= ${build_dir}/datasets
+CONTAINERS ?= ${build_dir}/containers
+
+# hg version
+genome = 38
+ensmebl ?= 92
 # TODO upgrade CADD version
-CADD ?= 1.4
-DATASETS ?= datasets/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
-CONTAINERS ?= containers/hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
-CORES ?= 1
+cadd ?= 1.4
+# number of cores to use in steps that allow them
+cores ?= 1
+
+
 
 # TODO use bash scripts when needed
 
-# TODO combine datasets and containers in the folder.
-# one folder hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD} and inside container and datasets
+src_datasets = ../datasets_build
+src_containers = ../containers_build
 
-# TODO create a file .hg38 that forces rebuild of all the thing that need it if we change the version
-# shame thing with cadd and ensembl version
-
-DATASETS_SOURCE_FOLDER = ../datasets_build
-CONTAINERS_SOURCE_FOLDER = ../containers_build
-
-.PHONY: all alltargets clean datasets containers sudo-containers
+# tmp directory used during build
+# must be an absolute path
+tmpdir=`mktemp -d`
 
 # accumulate all targets
-TARGETS_DATASETS=
-TARGETS_CONTAINERS=
-TARGETS_CONTAINERS_SUDO=
+ALL_DATASETS =
+CONTAINERS_SUDO =
+CONTAINERS_USER =
 
 # useful variables
-ENSEMBL_DATABASE="homo_sapiens_core_${ENSEMBL}_${GENOME}"
-ENSEMBL_ARCHIVE = $(shell awk -v release=${ENSEMBL} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
-BIOMART_URL = http://${ENSEMBL_ARCHIVE}.archive.ensembl.org/biomart/martservice
-
-# trick to make all the first target
-# and set it to the end once all variables are defined
-all: alltargets
-
-
-# Use second expansion for mixed dependencies
-.SECONDEXPANSION:
-
-include ${DATASETS_SOURCE_FOLDER}/*/*.mk
-include ${CONTAINERS_SOURCE_FOLDER}/*/*.mk
-
+ensembl_db = "homo_sapiens_core_${ensmebl}_${genome}"
+ensembl_archive = $(shell awk -v release=${ensmebl} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
+biomart_url = http://${ensembl_archive}.archive.ensembl.org/biomart/martservice
+grch = GRCh${genome}
 
 # Ensure directories exists before adding files
 $(DATASETS):
@@ -50,43 +47,35 @@ $(DATASETS):
 $(CONTAINERS):
 	mkdir -p $@
 
+# Create checkpoints files so that if versions are changed
+# proper files are rebuild
+GENOME = $(DATASETS)/.hg${genome}
+ENSEMBL = $(DATASETS)/.ensembl${ensmebl}
+CADD = $(DATASETS)/.cadd${cadd}
+
+$(GENOME): | $(DATASETS)
+	touch $@
+$(ENSEMBL): | $(DATASETS)
+	touch $@
+$(CADD): | $(DATASETS)
+	touch $@
 
 
 
-####### VEP #######
-VEP_FOLDER = $(DATASETS)/vep
-$(VEP_FOLDER): | $(DATASETS)
-	mkdir $@
+# Use second expansion for mixed dependencies
+.SECONDEXPANSION:
 
-# TODO what is vep_install??
-
-
-### Boostdm
-
-#include mutrate/mutrate.mk  # requires shared
-
-####### PTMS #######
-# TODO not required?
-
-####### BOOSTDM #######
-# TODO not required?
-
-
-
-
-
+include ${src_datasets}/*/*.mk
+include ${src_containers}/*/*.mk
 
 #########################
+.PHONY: datasets containers sudo
 
+datasets: $(ALL_DATASETS) | $(DATASETS)
 
-datasets: $(TARGETS_DATASETS) | $(DATASETS)
+containers: $(CONTAINERS_USER) $(CONTAINERS_SUDO) | $(CONTAINERS)
 
-containers: $(TARGETS_CONTAINERS) $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
-
-sudo: $(TARGETS_CONTAINERS_SUDO) | $(CONTAINERS)
-
-alltargets: containers datasets
-#	@echo $(ALL_TARGETS)
+sudo: $(CONTAINERS_SUDO) | $(CONTAINERS)
 
 clean:
 	rm -rf $(DATASETS) $(CONTAINERS)

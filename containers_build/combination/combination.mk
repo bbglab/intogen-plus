@@ -1,20 +1,21 @@
 
 
-CONTAINER_COMBINATION = $(CONTAINERS)/combination.simg
+COMBINATION_CONTAINER = $(CONTAINERS)/combination.simg
 
-SRC_CONTAINER_COMBINATION = ${CONTAINERS_SOURCE_FOLDER}/combination
+combination_container_srcdir = ${src_containers}/combination
 
-CONTAINER_COMBINATION_FILES = $(wildcard ${SRC_CONTAINER_COMBINATION}/src/*) \
-	 $(wildcard ${SRC_CONTAINER_COMBINATION}/src/config/*) \
-	 $(wildcard ${SRC_CONTAINER_COMBINATION}/src/evaluation/*) \
-	 $(wildcard ${SRC_CONTAINER_COMBINATION}/src/qc/*)
+combination_container_src = $(wildcard ${combination_container_srcdir}/src/*) \
+	 $(wildcard ${combination_container_srcdir}/src/config/*) \
+	 $(wildcard ${combination_container_srcdir}/src/evaluation/*) \
+	 $(wildcard ${combination_container_srcdir}/src/qc/*) \
+	 ${combination_container_srcdir}/Singularity
 
 
-$(CONTAINER_COMBINATION): ${SRC_CONTAINER_COMBINATION}/Singularity ${CONTAINER_COMBINATION_FILES} | $(CONTAINERS)
+$(COMBINATION_CONTAINER): $(combination_container_src) | $(CONTAINERS)
 	@echo Building combination container
-	cd ${SRC_CONTAINER_COMBINATION} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_COMBINATION}/$$(basename $@) $@
+	cd ${combination_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_COMBINATION)
+CONTAINERS_SUDO += $(COMBINATION_CONTAINER)

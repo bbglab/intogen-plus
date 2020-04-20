@@ -1,15 +1,14 @@
 
-DATASETS_MUTPANNING = $(DATASETS)/mutpanning
-CHECKPOINT_MUTPANNING = ${DATASETS_MUTPANNING}/.checkpoint
-$(CHECKPOINT_MUTPANNING):
+MUTPANNING_DIR = $(DATASETS)/mutpanning
+MUTPANNING_DATA = $(MUTPANNING_DIR)/.mutpanning
+$(MUTPANNING_DATA):
 	@echo Building MutPanning datasets
-	mkdir -p ${DATASETS_MUTPANNING}
+	mkdir -p $(MUTPANNING_DIR)
 	wget https://datasets.genepattern.org/data/module_support_files/MutPanning/Hg19.zip \
-		-O ${DATASETS_MUTPANNING}/mutpanning.zip
-	unzip -d ${DATASETS_MUTPANNING} ${DATASETS_MUTPANNING}/mutpanning.zip
-	rm -r ${DATASETS_MUTPANNING}/__MACOSX/
-	rm ${DATASETS_MUTPANNING}/mutpanning.zip
-	chmod -R g+r ${DATASETS_MUTPANNING}/Hg19
+		-O ${tmpdir}/mutpanning.zip
+	unzip -d ${tmpdir} ${tmpdir}/mutpanning.zip
+	mv ${tmpdir}/Hg19 ${MUTPANNING_DIR}/
+	chmod -R g+r ${MUTPANNING_DIR}/Hg19
 	touch $@
 
-TARGETS_DATASETS += $(CHECKPOINT_MUTPANNING)
+ALL_DATASETS += $(MUTPANNING_DATA)

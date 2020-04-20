@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/miniconda3:4.5.12
+From: continuumio/miniconda3:4.8.2
 
 %environment
     export LC_ALL=C.UTF-8
@@ -10,7 +10,7 @@ From: continuumio/miniconda3:4.5.12
 %setup
     mkdir ${SINGULARITY_ROOTFS}/combination
     cp -r src/* ${SINGULARITY_ROOTFS}/combination/
-    chmod -R a+rw ${SINGULARITY_ROOTFS}/combination/
+    chmod -R a+rx ${SINGULARITY_ROOTFS}/combination/
     #chmod -R a+rwx ${SINGULARITY_ROOTFS}/combination/
 
 %post

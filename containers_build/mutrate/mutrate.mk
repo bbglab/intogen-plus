@@ -1,17 +1,18 @@
 
+MUTRATE_CONTAINER = $(CONTAINERS)/mutrate.simg
 
-CONTAINER_MUTRATE = $(CONTAINERS)/mutrate.simg
+mutrate_container_srcdir = ${src_containers}/mutrate
 
-SRC_CONTAINER_MUTRATE = ${CONTAINERS_SOURCE_FOLDER}/mutrate
+mutrate_container_src = $(wildcard ${mutrate_container_srcdir}/*.py) \
+	$(wildcard ${mutrate_container_srcdir}/*.sh) \
+	${mutrate_container_srcdir}/Singularity
 
-CONTAINER_MUTRATE_FILES = $(wildcard ${SRC_CONTAINER_MUTRATE}/*.py) $(wildcard ${SRC_CONTAINER_MUTRATE}/*.sh)
 
-
-$(CONTAINER_MUTRATE): ${SRC_CONTAINER_MUTRATE}/Singularity ${CONTAINER_MUTRATE_FILES} | $(CONTAINERS)
+$(MUTRATE_CONTAINER): $(mutrate_container_src) | $(CONTAINERS)
 	@echo Building mutrate container
-	cd ${SRC_CONTAINER_MUTRATE} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_MUTRATE}/$$(basename $@) $@
+	cd ${mutrate_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_MUTRATE)
+CONTAINERS_SUDO += $(MUTRATE_CONTAINER)

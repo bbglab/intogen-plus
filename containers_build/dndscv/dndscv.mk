@@ -1,16 +1,15 @@
 
+DNDSCV_CONTAINER = $(CONTAINERS)/dndscv.simg
 
-CONTAINER_DNDSCV = $(CONTAINERS)/dndscv.simg
+dnds_container_srcdir = ${src_containers}/dndscv
 
-SRC_CONTAINER_DNDSCV = ${CONTAINERS_SOURCE_FOLDER}/dndscv
+dnds_container_src = $(wildcard ${dnds_container_srcdir}/*)
 
-CONTAINER_DNDSCV_FILES = $(wildcard ${SRC_CONTAINER_DNDSCV}/*)
-
-$(CONTAINER_DNDSCV): ${CONTAINER_DNDSCV_FILES} | $(CONTAINERS)
-	@echo Building deconstructsig container
-	cd ${SRC_CONTAINER_DNDSCV} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_DNDSCV}/$$(basename $@) $@
+$(DNDSCV_CONTAINER): $(dnds_container_src) | $(CONTAINERS)
+	@echo Building dNdScv container
+	cd ${dnds_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_DNDSCV)
+CONTAINERS_SUDO += $(DNDSCV_CONTAINER)

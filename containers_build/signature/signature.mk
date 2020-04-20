@@ -1,13 +1,17 @@
+# TODO remove run script and use that in the nexflow file
 
-CONTAINER_SIGNATURE = $(CONTAINERS)/signature.simg
+SIGNATURE_CONTAINER = $(CONTAINERS)/signature.simg
 
-SRC_CONTAINER_SIGNATURE = ${CONTAINERS_SOURCE_FOLDER}/signature
+signature_container_srcdir = ${src_containers}/signature
 
-$(CONTAINER_SIGNATURE): ${SRC_CONTAINER_SIGNATURE}/Singularity ${SRC_CONTAINER_SIGNATURE}/run.sh | $(CONTAINERS)
-	@echo Building SIGNATURE container
-	cd ${SRC_CONTAINER_SIGNATURE} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_SIGNATURE}/$$(basename $@) $@
+signature_container_src = ${signature_container_srcdir}/run.sh \
+	${signature_container_srcdir}/Singularity
+
+$(SIGNATURE_CONTAINER): $(signature_container_src) | $(CONTAINERS)
+	@echo Building Signature container
+	cd ${signature_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_SIGNATURE)
+CONTAINERS_SUDO += $(SIGNATURE_CONTAINER)

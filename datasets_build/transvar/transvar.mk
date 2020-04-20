@@ -1,40 +1,42 @@
 
-SRC_DATASETS_TRANSVAR = ${DATASETS_SOURCE_FOLDER}/transvar
+transvar_data_srcdir = ${src_datasets}/transvar
 
-DATASETS_TRANSVAR ?= $(DATASETS)/transvar
-$(DATASETS_TRANSVAR): | $(DATASETS)
+TRANSVAR_DIR ?= $(DATASETS)/transvar
+$(TRANSVAR_DIR): | $(DATASETS)
 	mkdir $@
 
 # FIXME for other genomes than hg38, the GRCh version may differ
-GENOME_FASTA = $(DATASETS_TRANSVAR)/Homo_sapiens.GRCh${GENOME}.fa
-$(GENOME_FASTA): ${SRC_DATASETS_TRANSVAR}/build_fasta.sh | $(DATASETS_TRANSVAR)
+genome_fasta_script = ${transvar_data_srcdir}/build_fasta.sh
+GENOME_FASTA = $(TRANSVAR_DIR)/Homo_sapiens.${grch}.fa
+$(GENOME_FASTA): $(genome_fasta_script) $$(GENOME) | $(TRANSVAR_DIR)
 	@echo Build genome fasta file
-	bash ${SRC_DATASETS_TRANSVAR}/build_fasta.sh hg${GENOME} $@
+	bash $< hg${genome} $@
 
 
 GENOME_FASTA_INDEX = $(GENOME_FASTA).fai
-$(GENOME_FASTA_INDEX): $(GENOME_FASTA) $$(CONTAINER_TRANSVAR) | $(DATASETS_TRANSVAR)
+$(GENOME_FASTA_INDEX): $(GENOME_FASTA) $$(TRANSVAR_CONTAINER) | $(TRANSVAR_DIR)
 	@echo Indexing genome fasta file
-	singularity run -B $(DATASETS_TRANSVAR):/data $(CONTAINER_TRANSVAR) \
-		index --reference /data/$$(basename $<)
-	singularity run -B $(DATASETS_TRANSVAR):/data $(CONTAINER_TRANSVAR) \
-		config -k reference -v /data/Homo_sapiens.GRCh${GENOME}.fa \
-		--refversion GRCh${GENOME}
+	singularity run -B $(TRANSVAR_DIR):/data $(TRANSVAR_CONTAINER) \
+		index --reference /data/$(notdir $<)
+	singularity run -B $(TRANSVAR_DIR):/data $(TRANSVAR_CONTAINER) \
+		config -k reference -v /data/Homo_sapiens.${grch}.fa \
+		--refversion ${grch}
 
-ENSEMBL_GTF = $(DATASETS_TRANSVAR)/Homo_sapiens.GRCh${GENOME}.${ENSEMBL}.gtf.gz
-$(ENSEMBL_GTF): | $(DATASETS_TRANSVAR)
+ENSEMBL_GTF = $(TRANSVAR_DIR)/Homo_sapiens.${grch}.${ensmebl}.gtf.gz
+$(ENSEMBL_GTF): $$(GENOME) $$(ENSEMBL) | $(TRANSVAR_DIR)
 	@echo Downloading ENSEMBL GTF
-	wget "ftp://ftp.ensembl.org/pub/release-${ENSEMBL}/gtf/homo_sapiens/Homo_sapiens.GRCh${GENOME}.${ENSEMBL}.gtf.gz" \
+	wget "ftp://ftp.ensembl.org/pub/release-${ensmebl}/gtf/homo_sapiens/Homo_sapiens.${grch}.${ensmebl}.gtf.gz" \
 		-O $@
+	touch $@
 
 ENSEMBL_INDEX = $(ENSEMBL_GTF).transvardb
-$(ENSEMBL_INDEX): $(ENSEMBL_GTF) $(GENOME_FASTA_INDEX) $$(CONTAINER_TRANSVAR) | $(DATASETS_TRANSVAR)
+$(ENSEMBL_INDEX): $(ENSEMBL_GTF) $(GENOME_FASTA_INDEX) $$(TRANSVAR_CONTAINER) | $(TRANSVAR_DIR)
 	@echo Configure genome reference
-	singularity run -B $(DATASETS_TRANSVAR):/data $(CONTAINER_TRANSVAR) \
-		index --ensembl /data/$$(basename $(ENSEMBL_GTF))
-	singularity run -B $(DATASETS_TRANSVAR):/data $(CONTAINER_TRANSVAR) \
-		config -k ensembl -v /data/$$(basename $(ENSEMBL_INDEX)) \
-		--refversion GRCh${GENOME}
+	singularity run -B $(TRANSVAR_DIR):/data $(TRANSVAR_CONTAINER) \
+		index --ensembl /data/$(notdir $(ENSEMBL_GTF))
+	singularity run -B $(TRANSVAR_DIR):/data $(TRANSVAR_CONTAINER) \
+		config -k ensembl -v /data/$(notdir $(ENSEMBL_INDEX)) \
+		--refversion ${grch}
 
-DATASETS_TRANSVAR_FILES = $(GENOME_FASTA) $(GENOME_FASTA_INDEX) $(ENSEMBL_GTF) $(ENSEMBL_INDEX)
-TARGETS_DATASETS += $(GENOME_FASTA) $(GENOME_FASTA_INDEX) $(ENSEMBL_GTF) $(ENSEMBL_INDEX)
+TRANSVAR_FILES = $(GENOME_FASTA) $(GENOME_FASTA_INDEX) $(ENSEMBL_GTF) $(ENSEMBL_INDEX)
+TARGETS_DATASETS += $(TRANSVAR_FILES)

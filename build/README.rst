@@ -15,11 +15,11 @@ or container.
 
 Currently there are several variables that can be defined:
 
-- ``ENSEMBL``: specifies the ensembl version
-- ``CADD``: specifies the CADD version
 - ``DATASETS``: path where to store the datasets
 - ``CONTAINERS``: path where to store the containers
-- ``CORES``: amount of cores to use by processes that can be parallelized
+- ``ensembl``: specifies the ensembl version
+- ``cadd``: specifies the CADD version
+- ``cores``: amount of cores to use by processes that can be parallelized
 
 In addition, you can make use of other Make features, such as
 parallel build:
@@ -28,7 +28,7 @@ parallel build:
 
 	$ make -j 4
 
-Moreover, there is a special target (``sudo-containers``) that
+Moreover, there is a special target (``sudo``) that
 can be used to build the containers that require superuser privileges.
 
 
@@ -64,3 +64,13 @@ This software (except singularity) can be installed with
 .. important:: The MutPanning jar file needs to be downloaded
    from their website (http://www.cancer-genes.org/ )
    extracted and placed in the ``containers_build/mutpanning`` folder.
+
+
+Version
+~~~~~~~
+
+This is the list of the versions of the above mentioned
+software that have been used during the datasets and containers
+construction.
+
+TODO list

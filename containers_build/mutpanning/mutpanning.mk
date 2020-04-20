@@ -1,16 +1,19 @@
 
-# TODO lowercase name
-CONTAINER_MUTPANNING = $(CONTAINERS)/MutPanning.simg
+# TODO lowercase name of image
+MUTPANNING_CONTAINER = $(CONTAINERS)/MutPanning.simg
 
-SRC_CONTAINER_MUTPANNING = ${CONTAINERS_SOURCE_FOLDER}/mutpanning
+mutpanning_container_srcdir = ${src_containers}/mutpanning
+
+mutpanning_container_src = ${mutpanning_container_srcdir}/MutPanning.jar \
+	${mutpanning_container_srcdir}/Singularity
 
 # TODO remove jar file from repo and add instructions
 
-$(CONTAINER_MUTPANNING): ${SRC_CONTAINER_MUTPANNING}/Singularity ${SRC_CONTAINER_MUTPANNING}/MutPanning.jar | $(CONTAINERS)
+$(MUTPANNING_CONTAINER): $(mutpanning_container_src) | $(CONTAINERS)
 	@echo Building MutPanning container
-	cd ${SRC_CONTAINER_MUTPANNING} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_MUTPANNING}/$$(basename $@) $@
+	cd ${mutpanning_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_MUTPANNING)
+CONTAINERS_SUDO += $(MUTPANNING_CONTAINER)

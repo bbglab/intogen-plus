@@ -1,30 +1,32 @@
 
-SRC_DATASETS_SMREGIONS = ${DATASETS_SOURCE_FOLDER}/smregions
+smregions_data_srcdir = ${src_datasets}/smregions
 
-DATASETS_SMREGIONS = $(DATASETS)/smregions
-$(DATASETS_SMREGIONS): | $(DATASETS)
+SMREGIONS_DIR = $(DATASETS)/smregions
+$(SMREGIONS_DIR): | $(DATASETS)
 	mkdir $@
 
 
 # Biomart Query
-BIOMART_PFAM_QUERY=`cat ${SRC_DATASETS_SMREGIONS}/biomartQuery.txt`
-BIOMART_PFAM_QUERY_ENCODED = $(shell python -c "from urllib.parse import quote_plus; query ='''${BIOMART_PFAM_QUERY}'''; print(quote_plus(query.replace('\n', '')))")
-BIOMART_PFAM = $(DATASETS_SMREGIONS)/pfam_biomart.tsv.gz
-$(BIOMART_PFAM): $$(TRANSCRIPTS) | $(DATASETS_SMREGIONS)
+biomart_pfram_query_file = ${smregions_data_srcdir}/biomartQuery.txt
+biomart_pfram_query = `cat ${biomart_pfram_query_file}`
+biomart_pfram_query_encoded = $(shell python -c "from urllib.parse import quote_plus; query ='''${biomart_pfram_query}'''; print(quote_plus(query.replace('\n', '')))")
+BIOMART_PFAM = $(SMREGIONS_DIR)/pfam_biomart.tsv.gz
+$(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(SMREGIONS_DIR)
 	@echo Downloading biomart
-	curl -s "${BIOMART_URL}?query=${BIOMART_PFAM_QUERY_ENCODED}" |\
+	@echo ${biomart_pfram_query}
+	curl -s "${biomart_url}?query=${biomart_pfram_query_encoded}" |\
 		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
 		awk -F'\t' '($$5!=""){print($$0)}' \
 		| gzip > $@
 
 
-REGIONS_PFAM = $(DATASETS_SMREGIONS)/regions_pfam.tsv
-$(REGIONS_PFAM): $(BIOMART_PFAM) ${SRC_DATASETS_SMREGIONS}/panno.sh $$(CONTAINER_TRANSVAR) $$(TRANSCRIPTS) $$(DATASETS_TRANSVAR_FILES) | $(FOLDER)
+REGIONS_PFAM = $(SMREGIONS_DIR)/regions_pfam.tsv
+$(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(CONTAINER_TRANSVAR) $$(TRANSCRIPTS) $$(TRANSVAR_FILES) | $(SMREGIONS_DIR)
 	@echo Building CDS annotations
 	echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT_ID\tSEGMENT\tSYMBOL" \
 		> $@
 	zcat $(BIOMART_PFAM) | \
-		awk '{system("${SRC_DATASETS_SMREGIONS}/panno.sh "$$2" "$$5" "$$3" "$$4" $(CONTAINER_TRANSVAR) $(DATASETS_TRANSVAR) $(TRANSCRIPTS)")}' \
+		awk '{system("$< "$$2" "$$5" "$$3" "$$4" $(CONTAINER_TRANSVAR) $(DATASETS_TRANSVAR) $(TRANSCRIPTS)")}' \
 		| grep -v "^\s" >> $@
 
-TARGETS_DATASETS += $(BIOMART_PFAM) $(REGIONS_PFAM)
+ALL_DATASETS += $(BIOMART_PFAM) $(REGIONS_PFAM)

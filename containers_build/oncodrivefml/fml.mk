@@ -1,13 +1,18 @@
 
-CONTAINER_FML = $(CONTAINERS)/oncodrivefml.simg
+FML_CONTAINER = $(CONTAINERS)/oncodrivefml.simg
 
-SRC_CONTAINER_FML = ${CONTAINERS_SOURCE_FOLDER}/oncodrivefml
+fml_container_srcdir = ${src_containers}/oncodrivefml
 
-$(CONTAINER_FML): ${SRC_CONTAINER_FML}/Singularity ${SRC_CONTAINER_FML}/oncodrivefml_v2.conf | $(CONTAINERS)
-	@echo Building FML container
-	cd ${SRC_CONTAINER_FML} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_FML}/$$(basename $@) $@
+# TODO put config file as dataset
+
+fml_container_src = ${fml_container_srcdir}/oncodrivefml_v2.conf \
+	${fml_container_srcdir}/Singularity
+
+$(FML_CONTAINER): $(fml_container_src) | $(CONTAINERS)
+	@echo Building OncodriveFML container
+	cd ${fml_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_FML)
+CONTAINERS_SUDO += $(FML_CONTAINER)

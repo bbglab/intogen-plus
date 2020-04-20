@@ -1,13 +1,16 @@
+# TODO use python as base image
 
-CONTAINER_CLUSTL = $(CONTAINERS)/oncodriveclustl.simg
+CLUSTL_CONTAINER = $(CONTAINERS)/oncodriveclustl.simg
 
-SRC_CONTAINER_CLUSTL = ${CONTAINERS_SOURCE_FOLDER}/oncodriveclustl
+clustl_container_srcdir = ${src_containers}/oncodriveclustl
 
-$(CONTAINER_CLUSTL): ${SRC_CONTAINER_CLUSTL}/Singularity | $(CONTAINERS)
-	@echo Building CLUSTL container
-	cd ${SRC_CONTAINER_CLUSTL} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_CLUSTL}/$$(basename $@) $@
+clustl_container_src = ${clustl_container_srcdir}/Singularity
+
+$(CLUSTL_CONTAINER): $(clustl_container_src) | $(CONTAINERS)
+	@echo Building OncodriveCLUSTL container
+	cd ${clustl_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_CLUSTL)
+CONTAINERS_SUDO += $(CLUSTL_CONTAINER)

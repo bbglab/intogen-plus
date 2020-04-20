@@ -1,21 +1,19 @@
 
-#CONTAINER_TRANSVAR = $(CONTAINERS)/transvar.simg
-#
 #$(CONTAINER_TRANSVAR): | $(CONTAINERS)
 #	singularity build $@ docker://zhouwanding/transvar
-#
-#TARGETS_CONTAINERS += $(CONTAINER_TRANSVAR)
 
 
-CONTAINER_TRANSVAR = $(CONTAINERS)/transvar.simg
+TRANSVAR_CONTAINER = $(CONTAINERS)/transvar.simg
 
-SRC_CONTAINER_TRANSVAR = ${CONTAINERS_SOURCE_FOLDER}/transvar
+transvar_container_srcdir = ${src_containers}/transvar
 
-$(CONTAINER_TRANSVAR): ${SRC_CONTAINER_TRANSVAR}/Singularity | $(CONTAINERS)
-	@echo Building TRANSVAR container
-	cd ${SRC_CONTAINER_TRANSVAR} && \
-		sudo singularity build $$(basename $@) Singularity
-	mv ${SRC_CONTAINER_TRANSVAR}/$$(basename $@) $@
+transvar_container_src = ${transvar_container_srcdir}/Singularity
+
+$(TRANSVAR_CONTAINER): $(transvar_container_src) | $(CONTAINERS)
+	@echo Building TransVar container
+	cd ${transvar_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity
+	mv ${tmpdir}/$(@F) $@
 	sudo chown ${USER}: $@
 
-TARGETS_CONTAINERS_SUDO += $(CONTAINER_TRANSVAR)
+CONTAINERS_SUDO += $(TRANSVAR_CONTAINER)

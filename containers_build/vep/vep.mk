@@ -1,12 +1,13 @@
 
 # Docs on the VEP docker image: https://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker
 
-CONTAINER_VEP = $(CONTAINERS)/vep.simg
+VEP_CONTAINER = $(CONTAINERS)/vep.simg
 
-VEP_RELEASES_FILE = ${CONTAINERS_SOURCE_FOLDER}/vep/releases.txt
-VEP_RELEASE_VERSION = `grep "^${ENSEMBL}" ${VEP_RELEASES_FILE}`
+vep_container_releases_file = ${src_containers}/vep/releases.txt
+vep_container_version = `grep "^${ensmebl}" ${vep_container_releases_file}`
 
-$(CONTAINER_VEP): ${VEP_RELEASES_FILE} | $(CONTAINERS)
-	singularity build $@ docker://ensemblorg/ensembl-vep:release_${VEP_RELEASE_VERSION}
+$(VEP_CONTAINER): $(vep_container_releases_file) $$(ENSEMBL) | $(CONTAINERS)
+	@echo Building VEP container
+	singularity build $@ docker://ensemblorg/ensembl-vep:release_${vep_container_version}
 
-TARGETS_CONTAINERS += $(CONTAINER_VEP)
+CONTAINERS_USER += $(VEP_CONTAINER)
