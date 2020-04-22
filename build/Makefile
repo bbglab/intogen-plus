@@ -13,7 +13,7 @@ CONTAINERS ?= ${build_dir}/containers
 # hg version
 genome = 38
 # TODO remove ensemble limitation due to BGVEP
-ensmebl ?= 92
+ensembl ?= 92
 # TODO upgrade CADD version
 cadd ?= 1.4
 # number of cores to use in steps that allow them
@@ -36,8 +36,8 @@ CONTAINERS_SUDO =
 CONTAINERS_USER =
 
 # useful variables
-ensembl_db = "homo_sapiens_core_${ensmebl}_${genome}"
-ensembl_archive = $(shell awk -v release=${ensmebl} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
+ensembl_db = "homo_sapiens_core_${ensembl}_${genome}"
+ensembl_archive = $(shell awk -v release=${ensembl} '{if ($$1 == release) {print $$2}}' ensembl_archive.txt)
 biomart_url = http://${ensembl_archive}.archive.ensembl.org/biomart/martservice
 grch = GRCh${genome}
 
@@ -51,7 +51,7 @@ $(CONTAINERS):
 # Create checkpoints files so that if versions are changed
 # proper files are rebuild
 GENOME = $(DATASETS)/.hg${genome}
-ENSEMBL = $(DATASETS)/.ensembl${ensmebl}
+ENSEMBL = $(DATASETS)/.ensembl${ensembl}
 CADD = $(DATASETS)/.cadd${cadd}
 
 $(GENOME): | $(DATASETS)

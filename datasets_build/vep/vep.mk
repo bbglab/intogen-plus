@@ -1,7 +1,7 @@
 
 
 vep_dir = $(DATASETS)/vep
-VEP_CACHE = $(vep_dir)/.vep${ensmebl}_cache
+VEP_CACHE = $(vep_dir)/.vep${ensembl}_cache
 
 $(VEP_CACHE): $$(VEP_CONTAINER) $$(GENOME)
 	@echo Building VEP datasets

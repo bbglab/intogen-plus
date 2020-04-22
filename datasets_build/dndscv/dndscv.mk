@@ -9,10 +9,10 @@ $(dndscv_dir): | $(DATASETS)
 
 REF_RDA = $(dndscv_dir)/RefCDS.rda
 
-$(REF_RDA): $$(BIOMART_CDS) $$(GENOME_FASTA) $$(CONTAINER_DNDSCV) | $(dndscv_dir)
+$(REF_RDA): $$(BIOMART_CDS) $$(GENOME_FASTA) $$(DNDSCV_CONTAINER) | $(dndscv_dir)
 	@echo Building dNdSCV reference
 	echo "library(dndscv); buildref(\"$(BIOMART_CDS)\", \"$(GENOME_FASTA)\", outfile = \"$@\")" | \
-		singularity exec $(CONTAINER_DNDSCV) R --no-save
+		singularity exec $(DNDSCV_CONTAINER) R --no-save
 
 
 DATASETS_TARGETS += $(REF_RDA)

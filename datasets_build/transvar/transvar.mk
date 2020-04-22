@@ -25,11 +25,11 @@ $(GENOME_FASTA_INDEX): $(GENOME_FASTA) $$(TRANSVAR_CONTAINER) $$(GENOME) | $(tra
 		config -k reference -v /data/Homo_sapiens.${grch}.fa \
 		--refversion ${grch}
 
-ENSEMBL_GTF = $(transvar_dir)/Homo_sapiens.${grch}.${ensmebl}.gtf.gz
+ENSEMBL_GTF = $(transvar_dir)/Homo_sapiens.${grch}.${ensembl}.gtf.gz
 
 $(ENSEMBL_GTF): $$(GENOME) $$(ENSEMBL) | $(transvar_dir)
 	@echo Downloading ENSEMBL GTF
-	wget "ftp://ftp.ensembl.org/pub/release-${ensmebl}/gtf/homo_sapiens/Homo_sapiens.${grch}.${ensmebl}.gtf.gz" \
+	wget "ftp://ftp.ensembl.org/pub/release-${ensembl}/gtf/homo_sapiens/Homo_sapiens.${grch}.${ensmebl}.gtf.gz" \
 		-O $@
 	touch $@
 

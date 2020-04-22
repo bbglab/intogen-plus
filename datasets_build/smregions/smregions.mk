@@ -23,12 +23,12 @@ $(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(smr
 
 REGIONS_PFAM = $(smregions_dir)/regions_pfam.tsv
 
-$(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(CONTAINER_TRANSVAR) $$(TRANSCRIPTS) $$(TRANSVAR_FILES) | $(smregions_dir)
+$(REGIONS_PFAM): ${smregions_data_srcdir}/panno.sh $(BIOMART_PFAM) $$(TRANSVAR_CONTAINER) $$(TRANSCRIPTS) $$(TRANSVAR_FILES) | $(smregions_dir)
 	@echo Building CDS annotations
 	echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT_ID\tSEGMENT\tSYMBOL" \
 		> $@
 	zcat $(BIOMART_PFAM) | \
-		awk '{system("$< "$$2" "$$5" "$$3" "$$4" $(CONTAINER_TRANSVAR) $(DATASETS_TRANSVAR) $(TRANSCRIPTS)")}' \
+		awk '{system("$< "$$2" "$$5" "$$3" "$$4" $(TRANSVAR_CONTAINER) $(transvar_dir) $(TRANSCRIPTS)")}' \
 		| grep -v "^\s" >> $@
 
 

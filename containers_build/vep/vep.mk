@@ -4,7 +4,7 @@
 VEP_CONTAINER = $(CONTAINERS)/vep.simg
 
 vep_container_releases_file = ${src_containers}/vep/releases.txt
-vep_container_version = `grep "^${ensmebl}" ${vep_container_releases_file}`
+vep_container_version = `grep "^${ensembl}" ${vep_container_releases_file}`
 
 $(VEP_CONTAINER): $(vep_container_releases_file) $$(ENSEMBL) | $(CONTAINERS)
 	@echo Building VEP container

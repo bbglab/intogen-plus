@@ -61,7 +61,7 @@ $(COUNT_WG): $(REGIONS_WG) $$(GENOME) | $(shared_dir)
 	bgsignature count -r $(REGIONS_WG) -s 3 -g hg${genome} --cores ${cores} --collapse --exclude-N -o $@
 
 
-somatic_pon_url = "https://nc.hartwigmedicalfoundation.nl/index.php/s/a8lgLsUrZI5gndd/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
+somatic_pon_url = "https://nextcloud.hartwigmedicalfoundation.nl/s/LTiKTd8XxBqwaiC/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
 SOMATIC_PON = $(shared_dir)/somatic_pon_count_filtered.tsv.gz
 
 $(SOMATIC_PON): ${shared_data_srcdir}/somatic_pon_counts.py | $(shared_dir)

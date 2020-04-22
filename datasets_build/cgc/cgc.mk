@@ -8,8 +8,11 @@ $(cgc_dir): | $(DATASETS)
 
 CGC = $(cgc_dir)/cancer_gene_census.csv
 
-$(CGC): ${cgc_datasets_srcdir}/download.py | $(cgc_dir) check-cosmic-key
+$(CGC): ${cgc_datasets_srcdir}/download.py | $(cgc_dir)
 	@echo Download CGC
+ifeq ($(COSMIC_KEY), )
+	$(error COSMIC_KEY not set)
+endif
 	python $< --download $(cgc_dir)
 
 
@@ -33,8 +36,3 @@ $(CGC_PARSED): ${cgc_datasets_srcdir}/parse.py $(CGC) $(CGC_MAP) $(CGC_MAP_INTOG
 
 
 DATASETS_TARGETS += $(CGC) $(CGC_MAP) $(CGC_MAP_INTOGEN) $(CGC_PARSED)
-
-check-cosmic-key:
-	ifeq ($(COSMIC_KEY), )
-		$(error COSMIC_KEY not set)
-	endif
