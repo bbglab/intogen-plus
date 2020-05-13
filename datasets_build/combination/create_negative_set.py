@@ -10,9 +10,7 @@ Regarding the expression of the genes:
 """
 
 # Import modules
-import os
 import random
-from glob import glob
 
 import click
 import pandas as pd

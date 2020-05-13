@@ -2,11 +2,11 @@ import operator
 import numpy as np
 
 # Cython version
-import pyximport; pyximport.install()
-from schulze_strongest_path_cython import strongest_path
+#import pyximport; pyximport.install()
+#from schulze_strongest_path_cython import strongest_path
 
 # Python version
-# from schulze_strongest_path import strongest_path
+from schulze_strongest_path import strongest_path
 
 def combination_ranking(ballot_dict, weights):
 
