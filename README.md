@@ -8,8 +8,12 @@
 2. Install [singularity](https://sylabs.io/singularity/) (the pipeline has been tested 
 with version 2.x. You can use `conda install -c bioconda singularity`)
 3. Install nextflow  (You can use `conda install nextflow`)
+4. Clone this repository
 
-### Download and build datasets
+### Download and build prerequisites
+
+The IntOGen pipeline requires a collection of datasets and
+Singularity containers in order to run.
 
 > :warning: The pipeline has been tested with **hg38** and **vep92**
 
@@ -19,45 +23,14 @@ before running this script.
 
 First, make sure you have all the required libraries listed in `REQUIREMENTS.txt`
 
+All the images will be stored into the `containers` folder, if you want to use a 
+different folder you must create a symbolic link before running this script. 
+
 Then you can build all the datasets from the original sources. 
 Note that this process can take a very long time and it might fail if the 
 original sources had changed.
 
-```bash
-cd datasets_build
-./build_datasets.sh hg38 vep92 stable
-```
 
-where:
-```bash
-INTOGEN_GENOME is the release of the genome (such as hg38)
-INTOGEN_VEP is the release of VEP (such as vep92)
-INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
-```
-
-
-
-
-### Download and build singularity images
-
-> :warning: The pipeline has been tested with **hg38** and **vep92**
-
-All the images will be stored into the `containers` folder, if you want to use a 
-different folder you must create a symbolic link before running this script. 
-
-You can build all the singularity images using this command:
-
-```bash
-cd containers_build
-./build_containers.sh <INTOGEN_GENOME> <INTOGEN_VEP> <INTOGEN_RELEASE>
-```
-
-where:
-```bash
-INTOGEN_GENOME is the release of the genome (such as hg19, hg38)
-INTOGEN_VEP is the release of VEP (such as vep88, vep92)
-INTOGEN_RELEASE is the release of the intogen build (such as develop or stable)
-```
 
 ### Run the pipeline
 

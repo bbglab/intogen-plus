@@ -1,6 +1,5 @@
 
-# TODO lowercase name of image
-MUTPANNING_CONTAINER = $(CONTAINERS)/MutPanning.simg
+MUTPANNING_CONTAINER = $(CONTAINERS)/mutpanning.simg
 
 mutpanning_container_srcdir = ${src_containers}/mutpanning
 

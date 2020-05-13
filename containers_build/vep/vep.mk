@@ -11,3 +11,17 @@ $(VEP_CONTAINER): $(vep_container_releases_file) $$(ENSEMBL) | $(CONTAINERS)
 	singularity build $@ docker://ensemblorg/ensembl-vep:release_${vep_container_version}
 
 CONTAINERS_USER += $(VEP_CONTAINER)
+
+# TODO remove
+VEP_CONTAINER2 = $(CONTAINERS)/vep${ensembl}.simg
+
+vep_container_srcdir = ${src_containers}/vep
+
+$(VEP_CONTAINER2): ${vep_container_srcdir}/Singularity.vep${ensembl} | $(CONTAINERS)
+	@echo Building VEP container 2
+	cd ${vep_container_srcdir} && \
+		sudo singularity build ${tmpdir}/$(@F) Singularity.vep${ensembl}
+	mv ${tmpdir}/$(@F) $@
+	sudo chown ${USER}: $@
+
+CONTAINERS_SUDO += $(VEP_CONTAINER2)

@@ -6,9 +6,14 @@ SHELL := /bin/bash
 all: containers datasets
 
 # hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
-build_dir = ../../intogen_build
-DATASETS ?= ${build_dir}/datasets
-CONTAINERS ?= ${build_dir}/containers
+# TODO set the other paths
+#build_dir = ../../intogen_build
+#DATASETS ?= ${build_dir}/datasets
+#CONTAINERS ?= ${build_dir}/containers
+
+build_dir = ../
+DATASETS ?= ${build_dir}/datasets/hg38_vep92_v0.1
+CONTAINERS ?= ${build_dir}/containers/hg38_vep92_v0.1
 
 # hg version
 genome = 38

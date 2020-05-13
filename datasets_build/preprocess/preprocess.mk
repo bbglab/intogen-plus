@@ -38,5 +38,4 @@ $(LIFTOVER19TO38): | $(preprocess_dir)
 	wget -c http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz \
 		-O $@
 
-DATASETS_COMPUTE += $(COVERAGE) $(COVERAGE2)
-DATASETS_DOWNLOAD += $(LIFTOVER19TO38) $(LIFTOVER38TO19)
+DATASETS_TARGETS += $(COVERAGE) $(LIFTOVER19TO38) $(LIFTOVER38TO19) $(COVERAGE2)
