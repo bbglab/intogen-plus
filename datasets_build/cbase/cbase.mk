@@ -1,5 +1,5 @@
 
-cbase_dir = $(DATASETS)/cbase
+cbase_dir = $(INTOGEN_DATASETS)/cbase
 
 CBASE_DATA = ${cbase_dir}/.checkpoint
 

@@ -1,8 +1,8 @@
 
 transvar_data_srcdir = ${src_datasets}/transvar
 
-transvar_dir ?= $(DATASETS)/transvar
-$(transvar_dir): | $(DATASETS)
+transvar_dir ?= $(INTOGEN_DATASETS)/transvar
+$(transvar_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

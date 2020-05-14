@@ -5,8 +5,8 @@ tmpdir := $(shell mktemp -d)
 
 hotpmaps_datasets_srcdir = ${src_datasets}/hotmaps
 
-hotmaps_dir = $(DATASETS)/hotmaps
-$(hotmaps_dir): | $(DATASETS)
+hotmaps_dir = $(INTOGEN_DATASETS)/hotmaps
+$(hotmaps_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 # TODO use this file in the code if possible

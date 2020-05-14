@@ -2,8 +2,8 @@
 preprocess_data_srcdir = ${src_datasets}/preprocess
 
 
-preprocess_dir = $(DATASETS)/preprocess
-$(preprocess_dir): | $(DATASETS)
+preprocess_dir = $(INTOGEN_DATASETS)/preprocess
+$(preprocess_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

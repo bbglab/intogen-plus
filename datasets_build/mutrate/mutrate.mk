@@ -2,9 +2,9 @@
 
 mutrate_data_srcdir = ${src_datasets}/mutrate
 
-mutrate_dir = $(DATASETS)/mutrate
+mutrate_dir = $(INTOGEN_DATASETS)/mutrate
 
-$(mutrate_dir): | $(DATASETS)
+$(mutrate_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

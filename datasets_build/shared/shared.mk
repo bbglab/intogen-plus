@@ -1,8 +1,8 @@
 
 shared_data_srcdir = ${src_datasets}/shared
 
-shared_dir = $(DATASETS)/shared
-$(shared_dir): | $(DATASETS)
+shared_dir = $(INTOGEN_DATASETS)/shared
+$(shared_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

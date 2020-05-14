@@ -1,11 +1,11 @@
 
-HOTMAPS_CONTAINER = $(CONTAINERS)/hotmaps.simg
+HOTMAPS_CONTAINER = $(INTOGEN_CONTAINERS)/hotmaps.simg
 
 hotmaps_container_srcdir = ${src_containers}/hotmaps
 
 hotmaps_container_src = $(wildcard ${hotmaps_container_srcdir}/*)
 
-$(HOTMAPS_CONTAINER): $(hotmaps_container_src) | $(CONTAINERS)
+$(HOTMAPS_CONTAINER): $(hotmaps_container_src) | $(INTOGEN_CONTAINERS)
 	@echo Building HotMAPS container
 	cd ${hotmaps_container_srcdir} && \
 		sudo singularity build ${tmpdir}/$(@F) Singularity

@@ -1,8 +1,8 @@
 
 cgc_datasets_srcdir = ${src_datasets}/cgc
 
-cgc_dir = $(DATASETS)/combination/cgc
-$(cgc_dir): | $(DATASETS)
+cgc_dir = $(INTOGEN_DATASETS)/combination/cgc
+$(cgc_dir): | $(INTOGEN_DATASETS)
 	mkdir -p $@
 
 

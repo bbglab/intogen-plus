@@ -2,8 +2,8 @@
 fml_data_srcdir = ${src_datasets}/oncodrivefml
 
 
-fml_dir = $(DATASETS)/oncodrivefml
-$(fml_dir): | $(DATASETS)
+fml_dir = $(INTOGEN_DATASETS)/oncodrivefml
+$(fml_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

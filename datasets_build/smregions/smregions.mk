@@ -1,8 +1,8 @@
 
 smregions_data_srcdir = ${src_datasets}/smregions
 
-smregions_dir = $(DATASETS)/smregions
-$(smregions_dir): | $(DATASETS)
+smregions_dir = $(INTOGEN_DATASETS)/smregions
+$(smregions_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

@@ -1,5 +1,5 @@
 
-mutpanning_dir = $(DATASETS)/mutpanning
+mutpanning_dir = $(INTOGEN_DATASETS)/mutpanning
 
 MUTPANNING_DATA = $(mutpanning_dir)/.mutpanning
 

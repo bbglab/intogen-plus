@@ -1,9 +1,9 @@
 
 dndscv_datasets_srcdir = ${src_datasets}/dndscv
 
-dndscv_dir = $(DATASETS)/dndscv
+dndscv_dir = $(INTOGEN_DATASETS)/dndscv
 
-$(dndscv_dir): | $(DATASETS)
+$(dndscv_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

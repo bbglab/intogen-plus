@@ -1,9 +1,9 @@
 
 combination_datasets_srcdir = ${src_datasets}/combination
 
-combination_dir = $(DATASETS)/combination
+combination_dir = $(INTOGEN_DATASETS)/combination
 
-$(combination_dir): | $(DATASETS)
+$(combination_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 

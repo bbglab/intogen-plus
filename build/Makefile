@@ -5,15 +5,13 @@ SHELL := /bin/bash
 # and set it to the end once all variables are defined
 all: containers datasets
 
-# hg${GENOME}_ensembl${ENSEMBL}_cadd${CADD}
-# TODO set the other paths
-#build_dir = ../../intogen_build
-#DATASETS ?= ${build_dir}/datasets
-#CONTAINERS ?= ${build_dir}/containers
+build_dir = ..
+INTOGEN_DATASETS ?= ${build_dir}/datasets
+INTOGEN_CONTAINERS ?= ${build_dir}/containers
 
-build_dir = ../
-DATASETS ?= ${build_dir}/datasets/hg38_vep92_v0.1
-CONTAINERS ?= ${build_dir}/containers/hg38_vep92_v0.1
+
+
+$(error "oh no")
 
 # hg version
 genome = 38

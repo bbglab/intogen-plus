@@ -1,6 +1,6 @@
 
 
-vep_dir = $(DATASETS)/vep
+vep_dir = $(INTOGEN_DATASETS)/vep
 VEP_CACHE = $(vep_dir)/.vep${ensembl}_cache
 
 $(VEP_CACHE): $$(VEP_CONTAINER) $$(GENOME)
