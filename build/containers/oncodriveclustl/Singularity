@@ -1,0 +1,14 @@
+Bootstrap: docker
+From: python:3
+
+%environment
+
+%runscript
+
+%setup
+
+%post
+
+    # Install OncodriveCLUSTL
+    # TODO make appropriate releases
+    pip3 --no-cache-dir install git+https://bitbucket.org/bbglab/oncodriveclustl.git@master

@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: python:3
+
+%environment
+
+%runscript
+
+%setup
+	cp -r ../../../core ${SINGULARITY_ROOTFS}/core/
+
+%post
+
+    # Install bgparsers
+    # TODO make a release and install it
+    pip --no-cache-dir install https://bitbucket.org/bgframework/bgparsers/get/master.tar.gz
+	pip install /core
+
+    # Clean unused things
+    rm -rf /var/lib/apt/lists/*

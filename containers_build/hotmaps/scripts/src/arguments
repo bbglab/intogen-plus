@@ -1,3 +1,0 @@
--s /home/fran/Documents/clusters3D/coordinates/full_proteins.txt -o /home/fran/Documents/clusters3D/coordinates/coordinates.txt
--s /home/fran/Documents/clusters3D/coordinates/t -o /home/fran/Documents/clusters3D/coordinates/o
--m /home/fran/Documents/clusters3D/1e96_example/mutations_1e96.txt -a /home/fran/Documents/clusters3D/1e96_example/pdb_info.txt  -n 1000 -o /home/fran/Documents/clusters3D/1e96_example/test_out.txt

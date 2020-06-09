@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: python:3
+
+%environment
+    export BBGLAB_HOME=/smregions
+
+%runscript
+    exec "/usr/local/bin/smregions" "$@"
+
+%setup
+    mkdir ${SINGULARITY_ROOTFS}/smregions
+    cp -r ../../../smregions ${SINGULARITY_ROOTFS}/smregionscode/
+    cp smregions.conf ${SINGULARITY_ROOTFS}/smregions/
+
+%post
+
+    # Install SMRegions
+    pip install /smregionscode
+
+    # Clean unused things
+    rm -rf /var/lib/apt/lists/*

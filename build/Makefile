@@ -10,9 +10,6 @@ INTOGEN_DATASETS ?= ${build_dir}/datasets
 INTOGEN_CONTAINERS ?= ${build_dir}/containers
 
 
-
-$(error "oh no")
-
 # hg version
 genome = 38
 # TODO remove ensemble limitation due to BGVEP
@@ -20,21 +17,18 @@ ensembl ?= 92
 # TODO upgrade CADD version
 cadd ?= 1.4
 # number of cores to use in steps that allow them
-cores ?= 1
+# FIXME set cores to 1
+cores ?= 54
 
 
+src_datasets = datasets
+src_containers = containers
 
-# TODO use bash scripts when needed
+container_builder = ${src_containers}/build.sh
 
-src_datasets = ../datasets_build
-src_containers = ../containers_build
-
-# tmp directory used during build
-# must be an absolute path
-tmpdir=`mktemp -d`
 
 # accumulate all targets
-DATASETS_TARGETS =
+DATASETS =
 CONTAINERS_SUDO =
 CONTAINERS_USER =
 
@@ -45,23 +39,23 @@ biomart_url = http://${ensembl_archive}.archive.ensembl.org/biomart/martservice
 grch = GRCh${genome}
 
 # Ensure directories exists before adding files
-$(DATASETS):
+$(INTOGEN_DATASETS):
 	mkdir -p $@
 
-$(CONTAINERS):
+$(INTOGEN_CONTAINERS):
 	mkdir -p $@
 
 # Create checkpoints files so that if versions are changed
 # proper files are rebuild
-GENOME = $(DATASETS)/.hg${genome}
-ENSEMBL = $(DATASETS)/.ensembl${ensembl}
-CADD = $(DATASETS)/.cadd${cadd}
+GENOME = $(INTOGEN_DATASETS)/.hg${genome}
+ENSEMBL = $(INTOGEN_DATASETS)/.ensembl${ensembl}
+CADD = $(INTOGEN_DATASETS)/.cadd${cadd}
 
-$(GENOME): | $(DATASETS)
+$(GENOME): | $(INTOGEN_DATASETS)
 	touch $@
-$(ENSEMBL): | $(DATASETS)
+$(ENSEMBL): | $(INTOGEN_DATASETS)
 	touch $@
-$(CADD): | $(DATASETS)
+$(CADD): | $(INTOGEN_DATASETS)
 	touch $@
 
 
@@ -69,17 +63,18 @@ $(CADD): | $(DATASETS)
 # Use second expansion for mixed dependencies
 .SECONDEXPANSION:
 
+include ${src_datasets}/*.mk
 include ${src_datasets}/*/*.mk
 include ${src_containers}/*/*.mk
 
 #########################
 .PHONY: datasets containers sudo
 
-datasets: $(DATASETS_TARGETS) | $(DATASETS)
+datasets: $(DATASETS) | $(INTOGEN_DATASETS)
 
-containers: $(CONTAINERS_USER) $(CONTAINERS_SUDO) | $(CONTAINERS)
+containers: $(CONTAINERS_USER) $(CONTAINERS_SUDO) | $(INTOGEN_CONTAINERS)
 
-sudo: $(CONTAINERS_SUDO) | $(CONTAINERS)
+sudo: $(CONTAINERS_SUDO) | $(INTOGEN_CONTAINERS)
 
 clean:
-	rm -rf $(DATASETS) $(CONTAINERS)
+	rm -rf $(INTOGEN_DATASETS) $(INTOGEN_CONTAINERS)
