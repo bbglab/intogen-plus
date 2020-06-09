@@ -1,0 +1,3 @@
+
+class IntogenError(Exception):
+    pass

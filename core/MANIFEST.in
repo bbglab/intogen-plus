@@ -1,0 +1,5 @@
+# Files to be included in the distribution
+include MANIFEST.in
+include requirements.txt
+include README.rst
+include LICENSE
