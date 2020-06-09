@@ -15,16 +15,11 @@ from intogen_core.parsers import DatasetError
 from intogen_core.readers import TSVReader
 from intogen_core.utils import out_open
 
-# TODO get rid of the hg19, as POSITION_HG19 is not used at all
-GENOMES = ['hg19', 'hg38']
-
 CHROMOSOMES = set([str(c) for c in range(1, 23)] + ['X', 'Y'])
 
 CHR_MAX= {}
-for genome in GENOMES:
-    CHR_MAX[genome] = {}
-    for chr_ in CHROMOSOMES:
-        CHR_MAX[genome][chr_] = len(refseq(genome, chr_, 1, -1))
+for chr_ in CHROMOSOMES:
+    CHR_MAX[chr_] = len(refseq('hg38', chr_, 1, -1))
 
 
 class _NoLiftOver:
@@ -112,7 +107,7 @@ def filter_(file, genome, cutoff, stats):
             line = tuple(line.strip().split('\t'))
             somatic_pon.add(line)
 
-    liftovers = [(g, liftover_factory(genome, g)) for g in ('hg19', 'hg38')]
+    lo = liftover_factory(genome, 'hg38')
     # TODO only hg19 and 38 are supported
 
     skipped = defaultdict(int)
@@ -172,7 +167,6 @@ def filter_(file, genome, cutoff, stats):
         strand = '+' if 'STRAND' not in v else v['STRAND']
 
         # TODO rewrite this part to make it more meaningful
-        g, lo = liftovers[0]
         lo_pos = lo.convert_coordinate(f"chr{v['CHROMOSOME']}", v['POSITION'] - 1, strand)
 
         if lo_pos is None or len(lo_pos) != 1:
@@ -182,30 +176,14 @@ def filter_(file, genome, cutoff, stats):
         lo_pos = lo_pos[0][1] + 1
         # check the position in in the chromosome
         # TODO check, because the old version compares against the other genome
-        if lo_pos < 1 or lo_pos > CHR_MAX[g][v['CHROMOSOME']]:
+        if lo_pos < 1 or lo_pos > CHR_MAX[v['CHROMOSOME']]:
             skipped['noliftover'] += 1
             continue
 
-        v[f'POSITION_{g.upper()}'] = lo_pos
-
-        g, lo = liftovers[1]
-        lo_pos = lo.convert_coordinate(f"chr{v['CHROMOSOME']}", v['POSITION'] - 1, strand)
-
-        if lo_pos is None or len(lo_pos) != 1:
-            skipped['noliftover'] += 1
-            continue
-
-        lo_pos = lo_pos[0][1] + 1
-        # check the position in in the chromosome
-        # TODO check, because the old version compares against the other genome
-        if lo_pos < 1 or lo_pos > CHR_MAX[g][v['CHROMOSOME']]:
-            skipped['noliftover'] += 1
-            continue
-
-        v[f'POSITION_{g.upper()}'] = lo_pos
+        v['POSITION'] = lo_pos
 
         # Skip variants that are in the somatic_pon_count_filtered.tsv.gz file
-        var_value = (v['CHROMOSOME'], str(v['POSITION_HG38']), v['REF'], v['ALT'])
+        var_value = (v['CHROMOSOME'], str(v['POSITION']), v['REF'], v['ALT'])
         if var_value in somatic_pon:
             skipped['somatic_pon'] += 1
             continue

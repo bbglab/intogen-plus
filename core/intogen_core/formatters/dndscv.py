@@ -10,7 +10,7 @@ def parse(file):
         fields = [
             m['SAMPLE'],
             m['CHROMOSOME'],
-            m['POSITION_HG38'],
+            m['POSITION'],
             m['REF'],
             m['ALT']
         ]

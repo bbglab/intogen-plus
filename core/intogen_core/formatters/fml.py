@@ -9,7 +9,7 @@ def parse(file):
     for m in TSVReader(file):
         fields = [
             m['CHROMOSOME'],
-            m['POSITION_HG38'],
+            m['POSITION'],
             m['REF'],
             m['ALT'],
             m['SAMPLE']
