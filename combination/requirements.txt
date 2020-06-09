@@ -1,0 +1,6 @@
+click
+configobj
+numpy
+pandas
+statsmodels
+scipy
