@@ -17,8 +17,7 @@ ensembl ?= 92
 # TODO upgrade CADD version
 cadd ?= 1.4
 # number of cores to use in steps that allow them
-# FIXME set cores to 1
-cores ?= 54
+cores ?= 1
 
 
 src_datasets = datasets
@@ -70,7 +69,7 @@ include ${src_containers}/*/*.mk
 #########################
 .PHONY: datasets containers sudo
 
-datasets: $(DATASETS) | $(INTOGEN_DATASETS)
+datasets: bgdata $(DATASETS) | $(INTOGEN_DATASETS)
 
 containers: $(CONTAINERS_USER) $(CONTAINERS_SUDO) | $(INTOGEN_CONTAINERS)
 
