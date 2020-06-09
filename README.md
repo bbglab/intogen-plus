@@ -62,3 +62,13 @@ cd test/pipeline
 conda activate <NAME_OF_YOUR_VIRTUALENVIRONMENT>
 ./run_hg38.sh
 ```
+
+
+### Licensing
+
+IntoGEn uses a variety of software tools and datasets that
+are released under a variety of licenses.
+
+If you are using it for research/academic purposes it should be
+fine. For commercial usage, you need to revise the license of the
+different projects and datasets used.
