@@ -14,7 +14,7 @@ then
 else
 	divisor=$((${CORES}-1))
 	zcat ${REGIONS} | tail -n +2 > ${tmpdir}/input
-	lines=`zcat ${tmpdir}/input |wc -l`
+	lines=`cat ${tmpdir}/input | wc -l`
 	split -l$((${lines}/${divisor})) ${tmpdir}/input \
 		${tmpdir}/split. -d
 fi
