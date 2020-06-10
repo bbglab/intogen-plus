@@ -1,8 +1,6 @@
 Bootstrap: docker
 From: debian:buster-slim
 
-# TODO use a python 2 base image
-
 %environment
     export LC_ALL=C.UTF-8
 

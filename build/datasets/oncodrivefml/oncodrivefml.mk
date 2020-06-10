@@ -9,10 +9,9 @@ $(fml_dir): | $(INTOGEN_DATASETS)
 
 #CADD_URL = http://krishna.gs.washington.edu/download/CADD/v${CADD}/GRCh${GENOME}/whole_genome_SNVs.tsv.gz
 # FIXME fix this
-#CADD_URL = /workspace/datasets/CADD/v${cadd}/hg${genome}/whole_genome_SNVs.tsv.gz
-CADD_URL = "/home/ireyes/tmp/scores/score.tsv.gz"
+CADD_URL = /workspace/datasets/CADD/v${cadd}/hg${genome}/whole_genome_SNVs.tsv.gz
 FML_SCORES = $(fml_dir)/scores.tsv.gz
-$(FML_SCORES): ${fml_data_srcdir}/cadd.sh $$(REGIONS_CDS) $$(CADD)  $$(GENOME) | $(fml_dir)
+$(FML_SCORES): ${fml_data_srcdir}/cadd.sh $$(REGIONS_CDS) $$(CADD) $$(GENOME) | $(fml_dir)
 	@echo Building OncodriveFML datasets
 	$< $(REGIONS_CDS) $(CADD_URL) ${cores} $@
 
@@ -21,5 +20,5 @@ FML_SCORES_INDEX = $(FML_SCORES).tbi
 $(FML_SCORES_INDEX): $(CADD_SCORES) | $(fml_dir)
 	tabix -f -s 1 -b 2 -e 2 $(FML_SCORES)
 
-# FIXME check this works (I just copy the files)
-#DATASETS += $(FML_SCORES) $(FML_SCORES_INDEX)
+
+DATASETS += $(FML_SCORES) $(FML_SCORES_INDEX)

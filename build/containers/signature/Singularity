@@ -1,14 +1,5 @@
 Bootstrap: docker
 From: python:3
 
-# TODO clean empty fields
-
-%environment
-
-%runscript
-
-%setup
-
 %post
 	pip install bgsignature
-
