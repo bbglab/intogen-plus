@@ -35,9 +35,9 @@ setup(
                 'format-variants = intogen_core.formatters.main:cli',
                 'parse-vep = intogen_core.parsers.vep:cli',
                 'parse-nonsynonymous = intogen_core.parsers.nonsynonymous:cli',
-                'summarize-mutations = intogen_core.postprocess.mutations:cli',
-                'drivers-discovery = intogen_core.postprocess.drivers:cli',
-                'drivers-summary = intogen_core.postprocess.summary:cli'
+                'mutations-summary = intogen_core.postprocess.mutations:cli',
+                'drivers-discovery = intogen_core.postprocess.drivers.discovery:cli',
+                'drivers-summary = intogen_core.postprocess.drivers.summary:cli'
             ]
         },
 )
