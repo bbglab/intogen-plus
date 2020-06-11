@@ -16,4 +16,4 @@ def parse(file):
         ]
         yield fields
 
-# TODO can dnds work on any genome?
+# FIXME can dnds work on any genome?

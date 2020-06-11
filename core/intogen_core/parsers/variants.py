@@ -108,7 +108,7 @@ def filter_(file, genome, cutoff, stats):
             somatic_pon.add(line)
 
     lo = liftover_factory(genome, 'hg38')
-    # TODO only hg19 and 38 are supported
+    # TODO add to docs that only hg19 and 38 are supported
 
     skipped = defaultdict(int)
     skip_chromosome, skip_chromosome_names = 0, set()

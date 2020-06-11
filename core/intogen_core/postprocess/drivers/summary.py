@@ -8,8 +8,7 @@ import pandas as pd
 def load_cohorts(cohorts):
     df = pd.read_csv(cohorts, sep='\t')
     df.rename(columns={"SAMPLES": "SAMPLES_COHORT", "MUTATIONS": "MUTATIONS_COHORT"}, inplace=True)
-    # FIXME get only COHORT-CANCER_TYPE
-    return df
+    return df[['COHORT', 'CANCER_TYPE']]
 
 
 def load_mutations(mutations):
@@ -41,8 +40,7 @@ def run(mutations, cohorts, files):
     # check if the number of mutations is np.nan then discard it
     df = df[~np.isnan(df["MUTATIONS"])]
 
-    # FIXME add CANCER_TYPE in the sort (coming form cohort file) and filter extra columns
-    df.sort_values(["SYMBOL"]).to_csv('drivers.tsv', sep="\t", index=False)
+    df.sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('drivers.tsv', sep="\t", index=False)
 
     # Unique drivers
     drivers = df["SYMBOL"].unique()

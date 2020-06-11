@@ -47,8 +47,6 @@ def run(combination, mutations, sig_likelihood,
         smregions, clustl_clusters, hotmaps, dndscv,
             output, muts=3):
 
-    # TODO read cohort and ctype from cohort_info file
-
     df = pd.read_csv(mutations, sep="\t")
 
     # 1. Samples with more than 2 mutations in a gene are likely an artifact
