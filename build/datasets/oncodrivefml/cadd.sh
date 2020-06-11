@@ -23,7 +23,7 @@ for f in ${tmpdir}/split*
 do
 	name=${f##*.}
 	awk -v cadd="${CADD_FILE}" '{system("tabix "cadd" "$1":"$2"-"$3)}' $f |\
-		awk 'BEGIN {FS="\t";OFS = FS};{print $1,$2,$3,$4,$6}' |\
+		awk 'BEGIN {FS="\t";OFS = FS};{print $1,$2,$3,$4,$6}' \
 		> ${tmpdir}/${name}.tsv &
 done
 
