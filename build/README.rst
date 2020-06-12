@@ -5,18 +5,19 @@ Build
 This directory contains a Makefile to build
 the datasets and containers (as
 `Singularity <https://sylabs.io/docs/>`_
-images).
+images). To run it:
 
-Although you can find many ``*.mk`` files,
-they are meant to be called form the Makefile in this directory
-and not directly, as paths, or variables might not be properly defined.
-However, you can get an idea of what is the build process for each dataset
-or container.
+.. code:: bash
 
-Currently there are several variables that can be defined:
+   cd build
+   make
 
-- ``INTOGEN_DATASETS``: path where to store the datasets
-- ``INTOGEN_CONTAINERS``: path where to store the containers
+Currently there are several environment variables that can be defined:
+
+- ``INTOGEN_DATASETS``: path where to store the datasets.
+  Default ``../datasets``.
+- ``INTOGEN_CONTAINERS``: path where to store the containers.
+  Default ``../containers``.
 - ``ensembl``: specifies the ensembl version
 - ``cadd``: specifies the CADD version (used for OncodriveFML)
 - ``cores``: amount of cores to use by processes that can be parallelized
@@ -25,7 +26,7 @@ Currently there are several variables that can be defined:
    might work. At least, they need to be compatible with the working reference
    genome (currently hg38).
 
-Moreover, there is a special target (``sudo``) that
+Moreover, there is a special make target (``sudo``) that
 can be used to build the containers that require superuser privileges
 (singularity containers build by recipe).
 
@@ -43,6 +44,15 @@ The process can be significantly faster and less error prone
 if you download it first and replace the ``CADD_URL`` variable
 in ``datasets/oncodriverfml/fml.mk`` with the full path where
 you have downloaded the CADD scores.
+
+Less important notes
+********************
+
+Although you can find many ``*.mk`` files,
+they are meant to be called form the Makefile in this directory
+and not directly, as paths, or variables might not be properly defined.
+However, you can get an idea of what is the build process for each dataset
+or container.
 
 We are providing two files for HotMAPS to avoid recomputing them;
 however we suggest you to recompute them. These files are:
@@ -83,4 +93,3 @@ This software (except singularity) can be installed with
 `conda <https://docs.conda.io/en/latest/>`_.
 
 We have tested it with Singularity version 2.6.1
-
