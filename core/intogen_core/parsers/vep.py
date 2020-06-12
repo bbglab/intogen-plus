@@ -21,7 +21,7 @@ VALID_CONSEQUENCES = {
 TRANSCRIPTS = set()
 GENES = set()
 
-transcripts_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'shared', 'ensembl_canonical_transcripts.tsv')
+transcripts_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'ensembl_canonical_transcripts.tsv')
 with open(transcripts_file) as fd:
     for r in csv.reader(fd, delimiter='\t'):
         TRANSCRIPTS.add(r[1])

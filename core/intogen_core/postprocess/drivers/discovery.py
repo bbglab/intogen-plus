@@ -2,16 +2,15 @@ import json
 import os
 
 import click
-import numpy as np
 import pandas as pd
 
-from intogen_core.postprocess.bw_list import check_black_white_lists
-from intogen_core.postprocess.data import significative_domains, \
+from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
+from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
-from intogen_core.postprocess.filters import filter_samples_by_nmuts, \
+from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
     filter_by_expression, filter_by_polymorphism, filter_by_olfactory_receptors
-from intogen_core.postprocess.signature import analysis_signatures_gene
-from intogen_core.postprocess.vetting import vet
+from intogen_core.postprocess.drivers.signature import analysis_signatures_gene
+from intogen_core.postprocess.drivers.vetting import vet
 
 
 def get_ratio_indels(df_combined):

@@ -190,7 +190,7 @@ def filter_(file, genome, cutoff, stats):
 
         if v['ALT_TYPE'] == 'snp':
             # Compute signature and count mismatch
-            ref = refseq(genome, v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
+            ref = refseq('hg38', v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
             alt = ''.join([ref[0], v['ALT'], ref[2]])
             if ref[1] != v['REF']:
                 skipped['mismatch'] += 1
