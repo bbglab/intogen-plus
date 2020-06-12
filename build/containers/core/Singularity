@@ -7,6 +7,8 @@ From: python:3
 
 %setup
 	cp -r ../../../core ${SINGULARITY_ROOTFS}/core/
+	cp get_field.sh ${SINGULARITY_ROOTFS}/usr/local/bin/get_field.sh
+	chmod a+rx ${SINGULARITY_ROOTFS}/usr/local/bin/get_field.sh
 
 %post
 

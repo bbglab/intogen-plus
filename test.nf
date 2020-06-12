@@ -1,40 +1,26 @@
 
 // TODO add in the docs the option to set here a list of values
-// Set here a list of files or directories to use as ["/path/*", "/path2/file"]
+// Set here a list of files or directories to use. E.g. Channel.fromPath(["/path/*", "/path2/file"], type: 'any')
 INPUT = Channel.fromPath(params.input)
-//INPUT = Channel.fromPath(["test/*", "test/pipeline"], type: 'any')
 OUTPUT = file(params.output)
 DEBUG_FOLDER = file(params.debugFolder)
 // TODO add in the docs
 ANNOTATIONS = Channel.value(params.annotations)
 REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
 
-/* TODO remove
-process test {
-	input:
-		path p from INPUT
 
-
-	script:
-		"""
-		echo $BGDATA_LOCAL
-		"""
-}*/
-
-
-process parseInput {
+process ParseInput {
 	tag "Parse input ${input}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/inputs", mode: "symlink", enabled: params.debug
+	errorStrategy 'finish'
 
 	input:
 		path input from INPUT
 		path annotations from ANNOTATIONS
 
 	output:
-	// TODO remove .parsed if possible
-		// mode flatten?
-		path("*.parsed.tsv.gz") into PARSED_INPUT
+		path("*.parsed.tsv.gz") into COHORTS
 
 	script:
 		// TODO only bginfo
@@ -47,35 +33,89 @@ process parseInput {
 		else
 			// filename used as dataset name
 			// TODO: create a .tsv.gz with the output and names as DATASET
+			cohort = input.baseName.split('\\.')[0]
 			"""
-			bgvariants cat -a ${annotations} ${input}
+			bgvariants cat -a ${annotations} ${input} > ${cohort}.parsed.tsv.gz
 			"""
 }
 
-PARSED_INPUT.flatten().into{ PARSED_INPUT1; PARSED_INPUT2; PARSED_INPUT3 }
 
+COHORTS
+	.flatten()
+	.map{it -> [it.baseName.split('\\.')[0], it]}
+	.into{ COHORTS1; COHORTS2; COHORTS3; COHORTS4; COHORTS5 }
+
+process LoadCancer {
+	tag "Load cancer type ${cohort}"
+	label "core"
+
+	input:
+		tuple val(cohort), path(input) from COHORTS1
+
+	output:
+		tuple val(cohort), stdout into CANCERS
+
+	script:
+		"""
+		get_field.sh ${input} CANCER
+		"""
+}
+
+CANCERS.into { CANCERS1; CANCERS2; CANCERS3 }
+
+
+process LoadPlatform {
+	tag "Load sequencing platform ${cohort}"
+	label "core"
+
+	input:
+		tuple val(cohort), path(input) from COHORTS2
+
+	output:
+		tuple val(cohort), stdout into PLATFORMS
+
+	script:
+		"""
+		get_field.sh ${input} PLATFORM
+		"""
+}
+
+PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3 }
+
+process LoadGenome {
+	tag "Load reference genome ${cohort}"
+	label "core"
+
+	input:
+		tuple val(cohort), path(input) from COHORTS3
+
+	output:
+		tuple val(cohort), stdout into GENOMES
+
+	script:
+		"""
+		get_field.sh ${input} GENOMEREF
+		"""
+}
 
 CUTOFFS = ['WXS': 1000, 'WGS': 10000]
 
-process processVariants {
+process ProcessVariants {
 	tag "Process variants ${cohort}"
 	label "core"
 	errorStrategy 'ignore'  // if a cohort does not pass the filters, do not proceed with it
 	publishDir "${DEBUG_FOLDER}/variants", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from PARSED_INPUT1
+		tuple val(cohort), path(input), val(platform), val(genome) from COHORTS4.join(PLATFORMS1).join(GENOMES)
 
 	output:
-		path output into VARIANTS
+		tuple val(cohort), path(output) into VARIANTS
 		tuple val(cohort), path("${output}.stats.json") into STATS_VARIANTS
-		// FIXME create separate channels for platform and cancer type
-		tuple val(cohort), val(platform) into PLATFORMS
 
 	script:
-		(cohort, cancer, platform, genome) = input.baseName.split('\\.')
 		cutoff = CUTOFFS[platform]
-		output = "${cohort}.${platform}.tsv.gz"
+		output = "${cohort}.tsv.gz"
 		if (cutoff)
 			"""
 			parse-variants --input ${input} --output ${output} \
@@ -87,24 +127,22 @@ process processVariants {
 
 }
 
-// TODO rename lowercases
-VARIANTS.into{ VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5 }
+VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5 }
 
 
-process formatSignature {
+process FormatSignature {
 	tag "Prepare for signatures ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from VARIANTS1
+		tuple val(cohort), path(input), val(platform) from VARIANTS1.join(PLATFORMS2)
 
 	output:
-		path output into VARIANTS_SIG
+		tuple val(cohort), path(output) into VARIANTS_SIG
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
-		output = "${cohort}.${platform}.in.tsv.gz"
+		output = "${cohort}.in.tsv.gz"
 		"""
 		format-variants --input ${input} --output ${output} \
 			--format signature
@@ -120,13 +158,12 @@ process Signature {
 	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from VARIANTS_SIG
+		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
 
 	output:
 		tuple val(cohort), path(output) into SIGNATURES
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
 		prefix = REGIONS_PREFIX[platform]
 		output = "${cohort}.sig.json"
 		if (prefix)
@@ -146,20 +183,19 @@ process Signature {
 SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4 }
 
 
-process formatFML {
+process FormatFML {
 	tag "Prepare for FML ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/oncodrivefml", mode: "symlink", enabled: params.debug
 
 
 	input:
-		path input from VARIANTS2
+		tuple val(cohort), path(input) from VARIANTS2
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_FML
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
 		output = "${cohort}.in.tsv.gz"
 		"""
 		format-variants --input ${input} --output ${output} \
@@ -181,7 +217,7 @@ process OncodriveFML {
 
 	script:
 		// TODO add --debug in debug mode
-		// TODO is the -c needed? We already have the
+		// TODO is the -c needed? We already have the BBGLAB variable exported
 		"""
 		oncodrivefml -i ${input} -e ${regions} --signature ${signature} \
 			-c /oncodrivefml/oncodrivefml_v2.conf  --cores ${task.cpus} \
@@ -190,19 +226,18 @@ process OncodriveFML {
 }
 
 
-process formatCLUSTL {
+process FormatCLUSTL {
 	tag "Prepare for CLUSTL ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/oncodriveclustl", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from VARIANTS3
+		tuple val(cohort), path(input) from VARIANTS3
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_CLUSTL
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
 		output = "${cohort}.in.tsv.gz"
 		"""
 		format-variants --input ${input} --output ${output} \
@@ -216,7 +251,7 @@ process OncodriveCLUSTL {
     publishDir "${DEBUG_FOLDER}/oncodriveclustl", mode: "symlink", enabled: params.debug
 
     input:
-        tuple val(cohort), path(input), path(signature)  from VARIANTS_CLUSTL.join(SIGNATURES2)
+        tuple val(cohort), path(input), path(signature), val(cancer)  from VARIANTS_CLUSTL.join(SIGNATURES2).join(CANCERS1)
         path regions from REGIONS
 
     output:
@@ -226,13 +261,23 @@ process OncodriveCLUSTL {
 	script:
 		// TODO change kmer and other options for SKCM cancer type
 		// TODO add --debug in debug mode
-		"""
-		oncodriveclustl -i ${input} -r ${regions} \
-			-g hg38 -sim region_restricted -n 1000 -kmer 3 \
-			-sig ${signature} --concatenate \
-			-c ${task.cpus} \
-			-o out
-		"""
+		if (cancer == 'SKCM')
+			"""
+			oncodriveclustl -i ${input} -r ${regions} \
+				-g hg38 -sim region_restricted -n 1000 -kmer 5 \
+				-sigcalc region_normalized \
+				--concatenate \
+				-c ${task.cpus} \
+				-o out
+			"""
+		else
+			"""
+			oncodriveclustl -i ${input} -r ${regions} \
+				-g hg38 -sim region_restricted -n 1000 -kmer 3 \
+				-sig ${signature} --concatenate \
+				-c ${task.cpus} \
+				-o out
+			"""
 		// TODO is this needed ?
 		//(cat {self.output_folder}/{self.name}/elements_results.txt | gzip > {self.out_file}) &&
         //    (cat {self.output_folder}/{self.name}/clusters_results.tsv | gzip > {self.output_folder}/{self.name}.clusters.gz) &&
@@ -241,19 +286,18 @@ process OncodriveCLUSTL {
 }
 
 
-process formatDNDSCV {
+process FormatDNDSCV {
 	tag "Prepare for DNDSCV ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/dndscv", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from VARIANTS4
+		tuple val(cohort), path(input) from VARIANTS4
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_DNDSCV
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
 		output = "${cohort}.in.tsv.gz"
 		"""
 		format-variants --input ${input} --output ${output} \
@@ -282,19 +326,18 @@ process dNdScv {
 
 OUT_DNDSCV.into{ OUT_DNDSCV1; OUT_DNDSCV2 }
 
-process formatVEP {
+process FormatVEP {
 	tag "Prepare for VEP ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/vep", mode: "symlink", enabled: params.debug
 
 	input:
-		path input from VARIANTS5
+		tuple val(cohort), path(input) from VARIANTS5
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_VEP
 
 	script:
-		(cohort, platform) = input.baseName.split('\\.')
 		output = "${cohort}.in.tsv.gz"
 		"""
 		format-variants --input ${input} --output ${output} \
@@ -325,7 +368,7 @@ process VEP {
 }
 
 
-process processVEPoutput {
+process ProcessVEPoutput {
 	tag "Process vep output ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/vep", mode: "symlink", enabled: params.debug
@@ -347,7 +390,7 @@ process processVEPoutput {
 
 PARSED_VEP.into { PARSED_VEP1; PARSED_VEP2; PARSED_VEP3; PARSED_VEP4; PARSED_VEP5; PARSED_VEP6 }
 
-process filterNonSynonymous {
+process FilterNonSynonymous {
 	tag "Filter non synonymus ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/nonsynonymous", mode: "symlink", enabled: params.debug
@@ -366,7 +409,7 @@ process filterNonSynonymous {
 }
 
 
-process formatSMRegions {
+process FormatSMRegions {
 	tag "Prepare for SMRegions ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/smregions", mode: "symlink", enabled: params.debug
@@ -410,7 +453,7 @@ process SMRegions {
 OUT_SMREGIONS.into { OUT_SMREGIONS1; OUT_SMREGIONS2 }
 
 
-process formatCBaSE {
+process FormatCBaSE {
 	tag "Prepare for CBaSE ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/cbase", mode: "symlink", enabled: params.debug
@@ -447,11 +490,10 @@ process CBaSE {
 		"""
 }
 
-process formatMutPanning {
+process FormatMutPanning {
 	tag "Prepare for MutPanning ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/mutpanning", mode: "symlink", enabled: params.debug
-	errorStrategy 'ignore' // TODO remove
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP3
@@ -493,7 +535,7 @@ process MutPanning {
 }
 
 
-process formatHotMAPS {
+process FormatHotMAPS {
 	tag "Prepare for HotMAPS ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/hotmaps", mode: "symlink", enabled: params.debug
@@ -559,7 +601,7 @@ process Combination {
 }
 
 
-process formatdeconstructSigs {
+process FormatdeconstructSigs {
 	tag "Prepare for deconstructSigs ${cohort}"
 	label "core"
 	publishDir "${DEBUG_FOLDER}/deconstructSigs", mode: "symlink", enabled: params.debug
@@ -611,19 +653,16 @@ process CohortCounts {
 	tag "Count variants ${cohort}"
 
     input:
-        path(input) from PARSED_INPUT2
+        tuple val(cohort), path(input), val(cancer), val(platform) from COHORTS5.join(CANCERS2).join(PLATFORM)
 
     output:
 		tuple val(cohort), path("*.counts") into COHORT_COUNTS
 
 	script:
-		// TODO add cancer type
-		(cohort, platform, genome) = input.baseName.split('\\.')
 		"""
 		variants=`zcat ${input} |tail -n+2 |wc -l`
-		#C=1; for i in \$(head ${input} -n 1) ; do if [ \$i == "SAMPLE" ] ; then break ; else C=\$(( \$C + 1 )) ; fi ; done
 		samples=`zcat ${input} |tail -n+2 |cut -f1 |uniq |sort -u| wc -l`
-		echo "${cohort}\t${platform}\t\$variants\t\$samples" > ${cohort}.counts
+		echo "${cohort}\t${cancer}\t${platform}\t\$variants\t\$samples" > ${cohort}.counts
 		"""
 }
 
@@ -643,7 +682,7 @@ process CohortSummary {
 	script:
 		output="cohorts.tsv"
 		"""
-		echo 'COHORT\tPLATFORM\tMUTATIONS\tSAMPLES' > ${output}
+		echo 'COHORT\tCANCER_TYPE\tPLATFORM\tMUTATIONS\tSAMPLES' > ${output}
 		cat ${input} >> ${output}
 		"""
 }
@@ -669,21 +708,21 @@ process MutationsSummary {
 			${input}
 		"""
 }
-//FIXME remove 2 from name
-process DriverDiscovery2 {
+
+
+process DriverDiscovery {
 	tag "Driver discovery ${cohort}"
 	publishDir "${DEBUG_FOLDER}/drivers", mode: "symlink", enabled: params.debug
 	label "core"
 
     input:
-        tuple val(cohort), path(combination), path(deconstruct_in), path(sig_likelihood), path(smregions), path(clustl_clusters), path(hotmaps_clusters), path(dndscv) from OUT_COMBINATION.join(VARIANTS_DECONSTRUCTSIGS2).join(OUT_DECONSTRUCTSIGS_SIGLIKELIHOOD).join(OUT_SMREGIONS2).join(OUT_ONCODRIVECLUSTL_CLUSTERS).join(OUT_HOTMAPS_CLUSTERS).join(OUT_DNDSCV2)
+        tuple val(cohort), path(combination), path(deconstruct_in), path(sig_likelihood), path(smregions), path(clustl_clusters), path(hotmaps_clusters), path(dndscv), val(cancer) from OUT_COMBINATION.join(VARIANTS_DECONSTRUCTSIGS2).join(OUT_DECONSTRUCTSIGS_SIGLIKELIHOOD).join(OUT_SMREGIONS2).join(OUT_ONCODRIVECLUSTL_CLUSTERS).join(OUT_HOTMAPS_CLUSTERS).join(OUT_DNDSCV2).join(CANCERS3)
 
     output:
 		path(output) into DRIVERS
 
 	script:
 		output = "${cohort}.drivers.tsv"
-		// FIXME get tumor type
 		"""
 		drivers-discovery --output ${output} \
 			--combination ${combination} \
@@ -693,11 +732,11 @@ process DriverDiscovery2 {
 			--clustl_clusters ${clustl_clusters} \
 			--hotmaps ${hotmaps_clusters} \
 			--dndscv ${dndscv} \
-			--ctype ACC --cohort ${cohort}
+			--ctype ${cancer} --cohort ${cohort}
 		"""
 }
-//FIXME remove 2 from name
-process DriverSummary2 {
+
+process DriverSummary {
 	tag "Driver summary"
 	publishDir "${OUTPUT}", mode: "copy"
 	label "core"
@@ -705,17 +744,16 @@ process DriverSummary2 {
     input:
         path (input) from DRIVERS.collect()
         path (mutations) from MUTATIONS_SUMMARY
-        path (cohort) from COHORT_SUMMARY
+        path (cohortsSummary) from COHORT_SUMMARY
 
     output:
 		path("*.tsv") into DRIVERS_SUMMARY
 
 	script:
-		// FIXME get tumor type
 		"""
 		drivers-summary \
 			--mutations ${mutations} \
-			--cohorts ${cohort} \
+			--cohorts ${cohortsSummary} \
 			${input}
 		"""
 }
