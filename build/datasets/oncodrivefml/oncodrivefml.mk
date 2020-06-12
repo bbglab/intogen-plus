@@ -17,7 +17,7 @@ $(FML_SCORES): ${fml_data_srcdir}/cadd.sh $$(REGIONS_CDS) $$(CADD) $$(GENOME) | 
 
 
 FML_SCORES_INDEX = $(FML_SCORES).tbi
-$(FML_SCORES_INDEX): $(CADD_SCORES) | $(fml_dir)
+$(FML_SCORES_INDEX): $(FML_SCORES) | $(fml_dir)
 	tabix -f -s 1 -b 2 -e 2 $(FML_SCORES)
 
 
