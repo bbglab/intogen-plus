@@ -14,6 +14,6 @@ From: alpine:3.8
     chmod -R a+r ${SINGULARITY_ROOTFS}/hotmaps/
 
 %post
-    apk add --no-cache python-dev py-pip py-curl zlib-dev make ncurses-dev g++ bash
+    apk add --no-cache python-dev py-pip py-curl zlib-dev make ncurses-dev g++ bash procps
     pip --no-cache-dir install numpy==1.16.5 
     pip --no-cache-dir install pandas==0.24.2 tqdm futures bgreference biopython==1.76 pyliftover

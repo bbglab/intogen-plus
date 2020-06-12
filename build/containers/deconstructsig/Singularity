@@ -17,7 +17,7 @@ From: debian:buster-slim
 
 %post
     apt-get update
-    apt-get install -y python3-pandas python3-click r-bioc-bsgenome r-cran-gplots
+    apt-get install -y python3-pandas python3-click r-bioc-bsgenome r-cran-gplots procps
     rm -rf /var/lib/apt/lists/*
     echo "install.packages(\"BiocManager\", repos=\"https://cran.r-project.org\")" | R --no-save
     echo "BiocManager::install(\"BSgenome.Hsapiens.UCSC.hg19\")" | R --no-save
