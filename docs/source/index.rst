@@ -16,6 +16,7 @@ Welcome to IntOGen's documentation
    drivers_combination
    postprocessing
    mutational_features
+   usage
 
 
 Indices and tables
