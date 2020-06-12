@@ -4,5 +4,6 @@ recursive = False
 [annotations]
 PLATFORM = WXS
 CANCER = PRAD
+GENOMEREF = HG19
 DATASET = "('dirname', '(.*)', lambda v: 'CBIOP_{{PLATFORM}}_{}'.format(v.upper()))"
 DONOR = "('internal', 'SAMPLE')"
