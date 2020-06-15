@@ -24,7 +24,7 @@ BIOMART_CDS = $(regions_dir)/cds_biomart.tsv
 
 $(BIOMART_CDS): $(TRANSCRIPTS) $(biomart_cds_query_file) $$(ENSEMBL) | $(regions_dir)
 	@echo Downloading biomart
-	curl -s "${biomart_url}?query=${biomart_cds_query_encoded}" |\
+	curl -L -s "${biomart_url}?query=${biomart_cds_query_encoded}" |\
 		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
 		awk -F'\t' '($$5!=""){print($$0)}' > $@
 

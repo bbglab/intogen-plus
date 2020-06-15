@@ -15,7 +15,7 @@ BIOMART_PFAM = $(smregions_dir)/pfam_biomart.tsv.gz
 $(BIOMART_PFAM): $$(TRANSCRIPTS) $(biomart_pfram_query_file) $$(ENSEMBL) | $(smregions_dir)
 	@echo Downloading biomart
 	@echo ${biomart_pfram_query}
-	curl -s "${biomart_url}?query=${biomart_pfram_query_encoded}" |\
+	curl -L -s "${biomart_url}?query=${biomart_pfram_query_encoded}" |\
 		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
 		awk -F'\t' '($$5!=""){print($$0)}' \
 		| gzip > $@
