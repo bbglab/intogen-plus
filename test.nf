@@ -24,19 +24,18 @@ process ParseInput {
 
 	script:
 		// TODO only bginfo
-		if ( input.toRealPath().toFile().isDirectory() || input.endsWith(".bginfo" ))
+		if ( input.toRealPath().toFile().isDirectory() || input.endsWith(".bginfo" )) {
 			// TODO explain that dataset is required
 			"""
 			bgvariants groupby --cores ${task.cpus} -s 'gzip > \${GROUP_KEY}.parsed.tsv.gz' --headers -g DATASET -a ${annotations} ${input}
 			"""
-
-		else
-			// filename used as dataset name
-			// TODO: create a .tsv.gz with the output and names as DATASET
+		}
+		else {
 			cohort = input.baseName.split('\\.')[0]
 			"""
-			bgvariants cat -a ${annotations} ${input} > ${cohort}.parsed.tsv.gz
+			bgvariants cat -a ${annotations} ${input} | gzip > ${cohort}.parsed.tsv.gz
 			"""
+		}
 }
 
 
@@ -48,6 +47,7 @@ COHORTS
 process LoadCancer {
 	tag "Load cancer type ${cohort}"
 	label "core"
+	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS1
@@ -67,6 +67,7 @@ CANCERS.into { CANCERS1; CANCERS2; CANCERS3 }
 process LoadPlatform {
 	tag "Load sequencing platform ${cohort}"
 	label "core"
+	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS2
@@ -80,11 +81,12 @@ process LoadPlatform {
 		"""
 }
 
-PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3 }
+PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3; PLATFORMS4 }
 
 process LoadGenome {
 	tag "Load reference genome ${cohort}"
 	label "core"
+	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS3
@@ -653,7 +655,7 @@ process CohortCounts {
 	tag "Count variants ${cohort}"
 
     input:
-        tuple val(cohort), path(input), val(cancer), val(platform) from COHORTS5.join(CANCERS2).join(PLATFORM)
+        tuple val(cohort), path(input), val(cancer), val(platform) from COHORTS5.join(CANCERS2).join(PLATFORMS4)
 
     output:
 		tuple val(cohort), path("*.counts") into COHORT_COUNTS
