@@ -21,7 +21,7 @@ def check_expression(row, ctype, d_expression_tcga):
 def filter_by_expression(df, ctype):
     """Filter dataframe df by expression of genes"""
     # Load expression from TCGA
-    expresison_file_tcga = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'non_expressed_genes_tcga.tsv')
+    expresison_file_tcga = os.path.join(os.environ['INTOGEN_DATASETS'], 'others', 'non_expressed_genes_tcga.tsv')
     df_expression_tcga = pd.read_csv(expresison_file_tcga, sep="\t", names=["Cancer_Type", "GENES"])
     d_expression_tcga = {}
     for index, row in df_expression_tcga.drop_duplicates().iterrows():
@@ -45,7 +45,7 @@ def filter_by_polymorphism(df):
 
 def filter_by_olfactory_receptors(df):
     """Check whether is an olfactory receptor"""
-    of_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'olfactory_receptors.tsv')
+    of_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'others', 'olfactory_receptors.tsv')
     df_blacklisted = pd.read_csv(of_file, sep="\t")
     orfs = list(df_blacklisted["Symbol"].unique())
     df["OR_Warning"] = df.apply(lambda row: True if row["GENE"] in orfs else False,axis=1)

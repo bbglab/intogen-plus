@@ -8,7 +8,7 @@ import pandas as pd
 def load_cohorts(cohorts):
     df = pd.read_csv(cohorts, sep='\t')
     df.rename(columns={"SAMPLES": "SAMPLES_COHORT", "MUTATIONS": "MUTATIONS_COHORT"}, inplace=True)
-    return df[['COHORT', 'CANCER_TYPE']]
+    return df[['COHORT', 'CANCER_TYPE', 'SAMPLES_COHORT']]
 
 
 def load_mutations(mutations):
@@ -39,7 +39,7 @@ def run(mutations, cohorts, files):
     df["%_SAMPLES_COHORT"] = df.apply(lambda row: row["SAMPLES"] / row["SAMPLES_COHORT"], axis=1)
     # check if the number of mutations is np.nan then discard it
     df = df[~np.isnan(df["MUTATIONS"])]
-
+    df.drop
     df.sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('drivers.tsv', sep="\t", index=False)
 
     # Unique drivers
