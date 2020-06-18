@@ -28,7 +28,6 @@ MUTATIONS = $(OUTPUT_FOLDER)/mutations.tsv.gz
 # Other intermediate files
 OUTPUT_FOLDER_DRIVERS = $(OUTPUT_FOLDER)/drivers
 
-# FIXME add cohorts
 all: check-env cohorts cancers genes drivers mutations
 
 cancers: $(CANCERS)

@@ -125,7 +125,7 @@ def run(combination, mutations, sig_likelihood,
     # Add drivers data
 
     df_drivers = df.rename(columns={'MUTS': 'MUTATIONS'})
-    # FIXME missing SAMPLES_COHORT
+
     df_drivers = df_drivers[['SAMPLES', 'SYMBOL',
                              'METHODS', 'QVALUE_COMBINATION',
                              'CGC_GENE', 'CGC_CANCER_GENE']]
