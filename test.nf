@@ -342,8 +342,9 @@ process FormatVEP {
 	script:
 		output = "${cohort}.in.tsv.gz"
 		"""
-		format-variants --input ${input} --output ${output} \
+		format-variants --input ${input} --output ${output}.tmp \
 			--format vep
+		sort -k1V -k2n -k3n ${output}.tmp |gzip > ${output}
 		"""
 
 }
