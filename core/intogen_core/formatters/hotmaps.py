@@ -38,7 +38,7 @@ def parse(file):
             m['SYMBOL'],
             chromosome,
             position,
-            position,  # TODO for indels?
+            position,
             ref,
             alt,
             sample,
