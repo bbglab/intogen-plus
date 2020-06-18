@@ -18,18 +18,17 @@ def parse(file):
         _, sample, ref, alt = m['#Uploaded_variation'].split('__')
         chromosome, position = m['Location'].split(':')
 
-        # FIXME variant type is always false
         variant_type = None
         if ref == '-':
-            variant_type == "INS"
+            variant_type = "INS"
         elif alt == '-':
-            variant_type == "DEL"
+            variant_type = "DEL"
         elif len(ref) == len(alt) and len(ref) == 1:
-            variant_type == "SNP"
+            variant_type = "SNP"
         elif len(ref) == len(alt) and len(ref) == 2:
-            variant_type == "DNP"
+            variant_type = "DNP"
         elif len(ref) == len(alt) and len(ref) == 2:
-            variant_type == "TNP"
+            variant_type = "TNP"
         else:
             continue
 
@@ -44,7 +43,7 @@ def parse(file):
             chromosome,
             str(position),
             str(position),  # TODO should we change for indels?
-            m['STRAND'],  # TODO as everything is in positive strand, does it matter? Does VEP change the strand?
+            m['STRAND'],
             m['Consequence'],
             variant_type,
             ref,
