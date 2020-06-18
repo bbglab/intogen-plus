@@ -1,0 +1,7 @@
+
+# Default dataset is filename
+# TODO this default is not working
+#DATASET = "('filename', '(.*)', lambda v: v.split('.')[0])"
+PLATFORM = WGS
+GENOMEREF = HG38
+CANCER = UNKNOWN
