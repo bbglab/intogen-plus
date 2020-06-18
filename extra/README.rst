@@ -12,19 +12,20 @@ The Makefile will execute all this postprocessing of the data.
 
 Requirements:
 
-bgparsers
+bgvep
 numpy
 pandas
 pytabix
 
-
-Note that the count_samples.txt and count_variants.txt files
-do not have dependencies, as it is not that easy to track all the files.
-Those files must be manually deleted if you want them to be updated.
-
 The following environment variables need to be defined:
 
-INTOGEN_DATASETS_FOLDERS
-INTOGEN_DNDSCV_PAN_RUN
-INTOGEN_INPUTS
-INTOGEN_RUNS
+- :envvar:`INTOGEN_DNDSCV_PAN_RUN`:
+- :envvar:`INTOGEN_INPUTS`: path to the inf_datasets.csv files
+- :envvar:`INTOGEN_RESULTS`: path to the output of the run of
+  the pipeline
+
+Optionally, this variable can also be defined:
+
+- :envvar:`INTOGEN_DATASETS`: path to the datasets used in the
+  pipeline. Defaults to :file:`../datasets`
+
