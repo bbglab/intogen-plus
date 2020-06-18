@@ -67,6 +67,9 @@ the pipeline is prepared to work with multiple cohorts at the same time.
 Each cohort must contain, at least, the chromosome, position, ref, alt
 and sample. Files are expected to be TSV files with a header line.
 
+.. important:: All mutations should be mapped to the positive strand.
+   The strand value is ignored.
+
 In addition, each cohort must be associated with:
 
 - cohort ID (``DATASET``): a unique identifier for each cohort.

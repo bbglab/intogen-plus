@@ -162,8 +162,7 @@ def filter_(file, genome, cutoff, stats):
             skipped['n_sequence'] += 1
             continue
 
-        # Liftover to hg38 and hg19
-        # TODO useless because strand is forced to be +
+        # Liftover to hg38
         strand = '+' if 'STRAND' not in v else v['STRAND']
 
         # TODO rewrite this part to make it more meaningful
