@@ -69,7 +69,10 @@ def filter_(file, genome, cutoff, stats):
     if len(snp_per_sample) < 1:
         raise DatasetError('No samples with SNPs')
 
-    stats['donors'] = {__none_to_string(d): list(sorted(s)) for d, s in donors.items()}
+    for d in donors:
+        donors[d] = list(sorted(donors[d]))
+
+    stats['donors'] = {__none_to_string(d): s for d, s in donors.items()}
 
     if None in donors:
         stats['warning_no_donor_id'] = "There is no donor ID"
