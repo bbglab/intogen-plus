@@ -8,9 +8,6 @@ DNDSCV_PAN_RUN = ${INTOGEN_DNDSCV_PAN_RUN}
 INPUTS = ${INTOGEN_INPUTS}
 PIPELINE = ${INTOGEN_RESULTS}
 
-# FIXME
-CORES = 54
-
 
 CGC = ${INTOGEN_DATASETS}/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/regions/cds_biomart.tsv

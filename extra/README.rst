@@ -15,7 +15,6 @@ Requirements:
 bgvep
 numpy
 pandas
-pytabix
 
 The following environment variables need to be defined:
 
