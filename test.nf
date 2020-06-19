@@ -220,10 +220,12 @@ process OncodriveFML {
 	script:
 		// TODO add --debug in debug mode
 		// TODO is the -c needed? We already have the BBGLAB variable exported
+		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
+		debugOpt =  (params.debug)? '--debug': ''
 		"""
 		oncodrivefml -i ${input} -e ${regions} --signature ${signature} \
 			-c /oncodrivefml/oncodrivefml_v2.conf  --cores ${task.cpus} \
-			-o out --debug
+			-o out ${seedOpt} ${debugOpt}
 		"""
 }
 
@@ -262,7 +264,8 @@ process OncodriveCLUSTL {
 
 	script:
 		// TODO change kmer and other options for SKCM cancer type
-		// TODO add --debug in debug mode
+		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
+		debugOpt =  (params.debug)? '--log-level debug': ''
 		if (cancer == 'SKCM')
 			"""
 			oncodriveclustl -i ${input} -r ${regions} \
@@ -270,7 +273,7 @@ process OncodriveCLUSTL {
 				-sigcalc region_normalized \
 				--concatenate \
 				-c ${task.cpus} \
-				-o out
+				-o out ${seedOpt} ${debugOpt}
 			"""
 		else
 			"""
@@ -278,13 +281,8 @@ process OncodriveCLUSTL {
 				-g hg38 -sim region_restricted -n 1000 -kmer 3 \
 				-sig ${signature} --concatenate \
 				-c ${task.cpus} \
-				-o out
+				-o out ${seedOpt} ${debugOpt}
 			"""
-		// TODO is this needed ?
-		//(cat {self.output_folder}/{self.name}/elements_results.txt | gzip > {self.out_file}) &&
-        //    (cat {self.output_folder}/{self.name}/clusters_results.tsv | gzip > {self.output_folder}/{self.name}.clusters.gz) &&
-        //    (cat {self.output_folder}/{self.name}/oncohortdrive_results.out | gzip > {self.output_folder}/{self.name}.oncohortdrive.gz)
-
 }
 
 
@@ -445,11 +443,13 @@ process SMRegions {
 	script:
 		// TODO add --debug in debug mode
 		output = "${cohort}.smregions.tsv.gz"
+		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
+		debugOpt =  (params.debug)? '--debug': ''
 		"""
 		smregions -m ${input} -e ${regions} \
 			-r ${params.datasets}/smregions/regions_pfam.tsv \
 			-s ${signature} --cores ${task.cpus} \
-			-o ${output} --debug
+			-o ${output} ${seedOpt} ${debugOpt}
 		"""
 }
 
