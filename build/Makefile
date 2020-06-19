@@ -12,9 +12,9 @@ INTOGEN_CONTAINERS ?= ${build_dir}/containers
 
 # hg version
 genome = 38
-# FIXME remove ensemble limitation due to BGVEP
+# FIXME update ensembl version 100
 ensembl ?= 92
-# FIXME upgrade CADD version
+# FIXME upgrade CADD version 1.6
 cadd ?= 1.4
 # number of cores to use in steps that allow them
 cores ?= 1
