@@ -4,7 +4,6 @@
 INPUT = Channel.fromPath(params.input)
 OUTPUT = file(params.output)
 DEBUG_FOLDER = file(params.debugFolder)
-// TODO add in the docs
 ANNOTATIONS = Channel.value(params.annotations)
 REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
 
@@ -23,9 +22,7 @@ process ParseInput {
 		path("*.parsed.tsv.gz") into COHORTS
 
 	script:
-		// TODO only bginfo
 		if ( input.toRealPath().toFile().isDirectory() || input.endsWith(".bginfo" )) {
-			// TODO explain that dataset is required
 			"""
 			bgvariants groupby --cores ${task.cpus} -s 'gzip > \${GROUP_KEY}.parsed.tsv.gz' --headers -g DATASET -a ${annotations} ${input}
 			"""
@@ -218,7 +215,6 @@ process OncodriveFML {
         tuple val(cohort), path("out/*.tsv.gz") into OUT_ONCODRIVEFML
 
 	script:
-		// TODO add --debug in debug mode
 		// TODO is the -c needed? We already have the BBGLAB variable exported
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
 		debugOpt =  (params.debug)? '--debug': ''
@@ -263,7 +259,6 @@ process OncodriveCLUSTL {
         tuple val(cohort), path("out/clusters_results.tsv") into OUT_ONCODRIVECLUSTL_CLUSTERS
 
 	script:
-		// TODO change kmer and other options for SKCM cancer type
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
 		debugOpt =  (params.debug)? '--log-level debug': ''
 		if (cancer == 'SKCM')
@@ -441,7 +436,6 @@ process SMRegions {
         tuple val(cohort), path(output) into OUT_SMREGIONS
 
 	script:
-		// TODO add --debug in debug mode
 		output = "${cohort}.smregions.tsv.gz"
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
 		debugOpt =  (params.debug)? '--debug': ''
@@ -570,7 +564,6 @@ process HotMAPS {
         tuple val(cohort), path("*.clusters.gz") into OUT_HOTMAPS_CLUSTERS
 
 	script:
-		// TODO add --debug in debug mode
 		"""
 		/bin/sh /hotmaps/hotmaps.sh ${input} . ${signatures} \
 			${params.datasets}/hotmaps ${task.cpus}
@@ -589,7 +582,6 @@ process Combination {
         tuple val(cohort), path("${cohort}.05.out.gz") into OUT_COMBINATION
 
 	script:
-		// TODO add --debug in debug mode
 		"""
 		intogen-combine -o ${cohort} \
 			--oncodrivefml ${fml} \
