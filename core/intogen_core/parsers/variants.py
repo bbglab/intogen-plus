@@ -17,7 +17,7 @@ from intogen_core.utils import out_open
 
 CHROMOSOMES = set([str(c) for c in range(1, 23)] + ['X', 'Y'])
 
-CHR_MAX= {}
+CHR_MAX = {}
 for chr_ in CHROMOSOMES:
     CHR_MAX[chr_] = len(refseq('hg38', chr_, 1, -1))
 
@@ -63,11 +63,14 @@ def filter_(file, genome, cutoff, stats):
             indel_per_sample[s] += 1
 
         mut_per_sample[s] += 1
-        if 'DONOR' in m:
-            donors[m['DONOR']].add(s)
+        donors[m['DONOR']].add(s)
 
     if len(snp_per_sample) < 1:
         raise DatasetError('No samples with SNPs')
+
+    if len(donors) == 1 and "None" in donors:
+        # assume donor was not provided to bgparsers before
+        donors = {}
 
     for d in donors:
         donors[d] = list(sorted(donors[d]))
