@@ -16,8 +16,13 @@ def parse(file):
 
     for m in TSVReader(file):
 
-        _, sample, ref, alt = m['#Uploaded_variation'].split('__')
-        chromosome, position = m['Location'].split(':')
+        _, sample, ref, alt, position = m['#Uploaded_variation'].split('__')
+        chromosome, _ = m['Location'].split(':')
+
+        if ref not in "ACGT" or alt not in "ACGT":
+            # insertion, deletion or MNV
+            continue
+
         consequence = m['Consequence'].split(',')[0].replace('missense_variant', 'Missense_Mutation')
         if consequence == "Missense_Mutation":
             try:

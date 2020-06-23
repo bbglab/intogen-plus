@@ -7,9 +7,9 @@ import pandas as pd
 
 
 def get_info(variation, mut):
-    #I0000000000__00493087-9d9d-40ca-86d5-936f1b951c93__C__A	1:1787655
-    id_mut, sample_id, ref, alt = variation.split("__")
-    chr_, pos = mut.split(":")
+    #I0000000000__00493087-9d9d-40ca-86d5-936f1b951c93__C__A__1787655	1:1787655
+    id_mut, sample_id, ref, alt, pos = variation.split("__")
+    chr_, _ = mut.split(":")
     output = pd.Series([str(chr_), int(pos), ref, alt, sample_id])
     return output
 

@@ -15,34 +15,42 @@ LIFTOVER = LiftOver('hg38', to_db='hg19', search_dir=os.environ['INTOGEN_DATASET
 def parse(file):
 
     for m in TSVReader(file):
-        _, sample, ref, alt = m['#Uploaded_variation'].split('__')
-        chromosome, position = m['Location'].split(':')
+        _, sample, ref, alt, position = m['#Uploaded_variation'].split('__')
+        chromosome, _ = m['Location'].split(':')
+
+        start = int(position)
 
         variant_type = None
+        diff = 0
         if ref == '-':
             variant_type = "INS"
+            start = start
+            diff = 1
         elif alt == '-':
             variant_type = "DEL"
+            diff = len(ref) - 1
         elif len(ref) == len(alt) and len(ref) == 1:
             variant_type = "SNP"
         elif len(ref) == len(alt) and len(ref) == 2:
             variant_type = "DNP"
-        elif len(ref) == len(alt) and len(ref) == 2:
+            diff = 1
+        elif len(ref) == len(alt) and len(ref) == 3:
             variant_type = "TNP"
+            diff = 2
         else:
             continue
 
         strand = '-' if m['STRAND'] == '-1' else '+'
-        hg19_position = LIFTOVER.convert_coordinate("chr{}".format(chromosome), int(position) - 1, strand)
+        hg19_position = LIFTOVER.convert_coordinate("chr{}".format(chromosome), start - 1, strand)
         if hg19_position is None or len(hg19_position) != 1:
             continue
-        position = hg19_position[0][1] + 1
+        start = hg19_position[0][1] + 1
 
         fields = [
             m['SYMBOL'],
             chromosome,
-            str(position),
-            str(position),  # TODO should we change for indels?
+            f"{start}",
+            f"{start+diff}",
             m['STRAND'],
             m['Consequence'],
             variant_type,

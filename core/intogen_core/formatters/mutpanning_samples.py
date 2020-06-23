@@ -13,7 +13,7 @@ def parse(file):
 
     samples = set()
     for m in TSVReader(file):
-        _, sample, ref, alt = m['#Uploaded_variation'].split('__')
+        _, sample, ref, alt, pos = m['#Uploaded_variation'].split('__')
         samples.add(sample)
 
     for i, sample in enumerate(samples):

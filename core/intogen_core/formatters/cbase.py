@@ -50,12 +50,14 @@ def parse(file):
         if mut_eff is None:
             continue
 
-        _, _, _, mut_nuc = m['#Uploaded_variation'].split('__')
+        _, _, ref_nuc, mut_nuc, position = m['#Uploaded_variation'].split('__')
 
-        if mut_nuc not in "ACGT":
+        if mut_nuc not in "ACGT" or ref_nuc not in "ACGT":
+            # insertion, deletion or MNV
             continue
 
-        chromosome, position = m['Location'].split(':')
+        chromosome, _ = m['Location'].split(':')
+
         gene = m['SYMBOL']
 
         ref = refseq('hg38', chromosome, int(position) - 1, size=3).upper()
