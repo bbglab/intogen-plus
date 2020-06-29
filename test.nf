@@ -1,6 +1,7 @@
 
 // TODO add in the docs the option to set here a list of values
 // Set here a list of files or directories to use. E.g. Channel.fromPath(["/path/*", "/path2/file"], type: 'any')
+// INPUT = Channel.fromPath(["/workspace/datasets/intogen_datasets/genomes", "/workspace/datasets/hartwig/20200117/somatics", "/workspace/datasets/stjude/20180716/preprocess"])
 INPUT = Channel.fromPath(params.input)
 OUTPUT = file(params.output)
 DEBUG_FOLDER = file(params.debugFolder)
@@ -44,7 +45,6 @@ COHORTS
 process LoadCancer {
 	tag "Load cancer type ${cohort}"
 	label "core"
-	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS1
@@ -64,7 +64,6 @@ CANCERS.into { CANCERS1; CANCERS2; CANCERS3 }
 process LoadPlatform {
 	tag "Load sequencing platform ${cohort}"
 	label "core"
-	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS2
@@ -83,7 +82,6 @@ PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3; PLATFORMS4 }
 process LoadGenome {
 	tag "Load reference genome ${cohort}"
 	label "core"
-	errorStrategy 'finish'
 
 	input:
 		tuple val(cohort), path(input) from COHORTS3
