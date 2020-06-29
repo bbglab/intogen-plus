@@ -215,7 +215,6 @@ process OncodriveFML {
         tuple val(cohort), path("out/*.tsv.gz") into OUT_ONCODRIVEFML
 
 	script:
-		// TODO is the -c needed? We already have the BBGLAB variable exported
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
 		debugOpt =  (params.debug)? '--debug': ''
 		"""
@@ -443,6 +442,7 @@ process SMRegions {
 		smregions -m ${input} -e ${regions} \
 			-r ${params.datasets}/smregions/regions_pfam.tsv \
 			-s ${signature} --cores ${task.cpus} \
+			-c /smregions/smregions.conf \
 			-o ${output} ${seedOpt} ${debugOpt}
 		"""
 }
