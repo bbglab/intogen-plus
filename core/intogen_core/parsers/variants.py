@@ -68,7 +68,7 @@ def filter_(file, genome, cutoff, stats):
     if len(snp_per_sample) < 1:
         raise DatasetError('No samples with SNPs')
 
-    if len(donors) == 1 and "None" in donors:
+    if len(donors) == 1 and ("None" in donors or "" in donors):
         # assume donor was not provided to bgparsers before
         donors = {}
 
