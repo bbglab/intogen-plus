@@ -8,4 +8,4 @@ wget https://datasets.genepattern.org/data/module_support_files/MutPanning/Hg19.
 	-O ${tmpdir}/mutpanning.zip
 unzip -d ${tmpdir} ${tmpdir}/mutpanning.zip
 mv ${tmpdir}/Hg19 ${FOLDER}/
-chmod -R g+r ${FOLDER}/Hg19
+chmod -R g+rx ${FOLDER}/Hg19
