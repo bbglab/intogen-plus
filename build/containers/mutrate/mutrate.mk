@@ -10,9 +10,6 @@ mutrate_container_src = $(wildcard ${mutrate_container_srcdir}/*.py) \
 
 $(MUTRATE_CONTAINER): $(mutrate_container_src) | $(INTOGEN_CONTAINERS)
 	@echo Building mutrate container
-	cd ${mutrate_container_srcdir} && \
-		sudo singularity build ${tmpdir}/$(@F) Singularity
-	mv ${tmpdir}/$(@F) $@
-	sudo chown ${USER}: $@
+	${container_builder} ${hotmaps_container_srcdir} $@
 
 CONTAINERS_SUDO += $(MUTRATE_CONTAINER)
