@@ -39,8 +39,14 @@ def run(mutations, cohorts, files):
     df["%_SAMPLES_COHORT"] = df.apply(lambda row: row["SAMPLES"] / row["SAMPLES_COHORT"], axis=1)
     # check if the number of mutations is np.nan then discard it
     df = df[~np.isnan(df["MUTATIONS"])]
-    df.drop
-    df.sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('drivers.tsv', sep="\t", index=False)
+
+    columns = ["SYMBOL", "TRANSCRIPT", "COHORT", "CANCER_TYPE", "METHODS",
+               "MUTATIONS", "SAMPLES", "%_SAMPLES_COHORT",
+               "QVALUE_COMBINATION", "ROLE", "CGC_GENE", "CGC_CANCER_GENE",
+               "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
+               "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL"]
+
+    df[columns].sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('drivers.tsv', sep="\t", index=False)
 
     # Unique drivers
     drivers = df["SYMBOL"].unique()

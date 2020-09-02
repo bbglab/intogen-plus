@@ -9,6 +9,7 @@ from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
 from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
     filter_by_expression, filter_by_polymorphism, filter_by_olfactory_receptors
+from intogen_core.postprocess.drivers.role import role
 from intogen_core.postprocess.drivers.signature import analysis_signatures_gene
 from intogen_core.postprocess.drivers.vetting import vet
 
@@ -135,7 +136,8 @@ def run(combination, mutations, sig_likelihood,
         significative_domains(smregions),
         clusters_2D(clustl_clusters),
         clusters_3D(hotmaps),
-        excess(dndscv)
+        excess(dndscv),
+        role()
     ]
 
     for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
@@ -146,7 +148,7 @@ def run(combination, mutations, sig_likelihood,
     columns = ["SYMBOL", "COHORT", "METHODS", "SAMPLES",
                "QVALUE_COMBINATION", "CGC_GENE", "CGC_CANCER_GENE",
                "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
-               "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL"]
+               "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL", "ROLE"]
     df_drivers[columns].sort_values(["SYMBOL"]).to_csv(output, sep="\t", index=False)
     # FIXME TRANSCRIPT
 

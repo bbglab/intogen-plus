@@ -2,8 +2,7 @@
 
 # The following environment variables must be defined
 INTOGEN_DATASETS ?= ../datasets
-export INTOGEN_DATASETS
-DNDSCV_PAN_RUN = ${INTOGEN_DNDSCV_PAN_RUN}
+export INTOGEN_DATASETS=
 # FOLDERS with input datasets
 INPUTS = ${INTOGEN_INPUTS}
 PIPELINE = ${INTOGEN_RESULTS}
@@ -11,7 +10,6 @@ PIPELINE = ${INTOGEN_RESULTS}
 
 CGC = ${INTOGEN_DATASETS}/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/regions/cds_biomart.tsv
-DNDSCV_PAN = ${DNDSCV_PAN_RUN}
 
 # OUTPUTS
 OUTPUT_FOLDER = output
@@ -25,7 +23,7 @@ MUTATIONS = $(OUTPUT_FOLDER)/mutations.tsv.gz
 # Other intermediate files
 OUTPUT_FOLDER_DRIVERS = $(OUTPUT_FOLDER)/drivers
 
-all: check-env cohorts cancers genes drivers mutations
+all: cohorts cancers genes drivers mutations
 
 cancers: $(CANCERS)
 cohorts: $(STATS_COHORTS)
@@ -58,9 +56,8 @@ $(GENES)::  $(_GENES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVERS)
 		$(OUTPUT_FOLDER_DRIVERS)
 
 
-DRIVER_GENES_FILES = $(DNDSCV_PAN) data/gene_MoA.tsv
-$(DRIVER_GENES): $(PIPELINE)/drivers.tsv $(DRIVER_GENES_FILES) | $(OUTPUT_FOLDER)
-	python drivers.py $@ $(PIPELINE)/drivers.tsv $(DNDSCV_PAN) 92 hg38
+$(DRIVER_GENES): $(PIPELINE)/drivers.tsv | $(OUTPUT_FOLDER)
+	python drivers.py $@ $(PIPELINE)/drivers.tsv 92 hg38
 
 
 $(MUTATIONS): $(PIPELINE)/mutations.tsv
@@ -72,12 +69,3 @@ clean:
 	#rm -rf $(COUNT_SAMPLES) $(COUNT_VARIANTS)
 	rm $(STATS_COHORTS) $(DRIVER_GENES) $(GENES) $(MUTATIONS)
 	rm -rf $(OUTPUT_FOLDER_DRIVERS)
-
-check-env: check-env-dndscv
-
-
-check-env-dndscv:
-ifndef DNDSCV_PAN_RUN
-	$(error DNDSCV_PAN_RUN is undefined)
-endif
-
