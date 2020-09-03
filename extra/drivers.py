@@ -135,8 +135,7 @@ class TabixAAReader:
         tb = tabix.open(self.file)
         for row in self.tb.query("{}".format(chr_), pos, pos):
             # it was this: for row in super().get("{}".format(chr_), pos, pos):
-            canonical_vep = (row[4] == gene)
-            if canonical_vep:
+            if row[4] == gene:
                 return row[10] # column where the aa change is? it was column 10, in my VEP output file it's column 13
 
     def __enter__(self):
