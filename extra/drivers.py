@@ -123,19 +123,6 @@ SEQUENCE_NAME_MAPS = {
     'hg18': GENOME_SEQUENCE_MAPS
 }
 
-
-## method get from Tabix class
-def get(self, chromosome, start, stop):
-    chr_ = self.map.get(chromosome, chromosome)
-    try:
-        for row in self.tb.query("{}".format(chr_), start, stop):
-            yield row
-    except tabix.TabixError:
-        raise ReaderError('Tabix error in {}: {}-{}'.format(chromosome, start, stop))
-
-
-##
-
 class TabixAAReader:
 
     def __init__(self, genome):  # , vep_build):
