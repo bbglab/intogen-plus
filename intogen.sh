@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
-set -e
+set -ex
+
+# This helper script is meant to be used by BBGLab member only
+
+SRC_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 
 function run() {
-	nextflow run intogen.nf "$@"
+	nextflow run intogen.nf --input "$@" --output intogen_{today} --debug true -profile bbglab -resume --containers {SRC_FOLDER}/containers --datasets {SRC_FOLDER}/datasets
 }
 
 function test() {
-	nextflow run test.nf --input ${PWD}/test/pipeline/input/cbioportal_prad_broad --output test/output --debug true -profile local -resume
+	# Must be executed within this directory
+	#nextflow run intogen.nf --input /workspace/datasets/intogen_datasets/test/input/ --output test_output --debug true -profile bbglab -resume
+	nextflow run intogen.nf --input ${PWD}/test/pipeline/input/cbioportal_prad_broad --output test/output --debug true -profile bbglab -resume
 }
 
 
@@ -18,11 +24,23 @@ function clean() {
 	rm timeline.html*
 }
 
+function prepare() {
+	folder=${1:-.}  # use current folder if not present
+	mkdir -p ${folder}
+	cp -R ${SRC_FOLDER}/config ${folder}
+	cp ${SRC_FOLDER}/intogen.nf ${folder}
+	cp ${SRC_FOLDER}/nextflow.config ${folder}
+	cp ${SRC_FOLDER}/intogen.sh ${folder}
+	sed -e "s@{SRC_FOLDER}@${SRC_FOLDER}@g" -i ${folder}/intogen.sh
+	today=`date +%Y%m%d`
+	sed -e "s@{today}@${today}@g" -i ${folder}/intogen.sh
+}
+
 function usage()
 {
     echo "-h | --help"
     echo ""
-    echo "clean|run|test"
+    echo "clean|run|test|prepare"
 }
 
 
@@ -34,7 +52,7 @@ do
             exit
             ;;
         run)
-            run "${@:1}"
+            run "${@:2}"
             exit
             ;;
 		test)
@@ -45,6 +63,10 @@ do
 			clean
 			exit
 			;;
+		prepare)
+            prepare "${@:2}"
+            exit
+            ;;
         *)
             echo "ERROR: unknown parameter \"$1\""
             usage
