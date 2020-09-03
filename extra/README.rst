@@ -12,13 +12,12 @@ The Makefile will execute all this postprocessing of the data.
 
 Requirements:
 
-bgvep
+pytabix
 numpy
 pandas
 
 The following environment variables need to be defined:
 
-- :envvar:`INTOGEN_DNDSCV_PAN_RUN`:
 - :envvar:`INTOGEN_INPUTS`: path to the inf_datasets.csv files
 - :envvar:`INTOGEN_RESULTS`: path to the output of the run of
   the pipeline
