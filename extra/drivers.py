@@ -1,14 +1,12 @@
-import math
 import os
 import sys
 from os import path
 
 import pandas as pd
-from bgvep.readers import Tabix
+import tabix
 
 
 FOLDER = path.dirname(path.abspath(__file__))
-
 
 
 def load_chromosomes_genes():
@@ -21,15 +19,26 @@ GENOME_SEQUENCE_MAPS = {'chr{}'.format(c): '{}'.format(c) for c in range(1, 23)}
 GENOME_SEQUENCE_MAPS.update({'chrX': 'X', '23': 'X', 'chr23': 'X', 'chrY': 'Y', '24': 'Y', 'chr24': 'Y'})
 GENOME_SEQUENCE_MAPS.update({'chrM': 'M', 'MT': 'M', 'chrMT': 'M'})
 
+class TabixAAReader:
 
-class TabixAAReader(Tabix):
+    def __init__(self, vep):
+        self.file = vep
+        self.tb = None
+
 
     def get(self, chromosome, pos, gene):
         chr_ = GENOME_SEQUENCE_MAPS.get(chromosome, chromosome)
-        for row in super().get("{}".format(chr_), pos, pos):
-            canonical_vep = ((row[-2] == 'YES') and (row[4] == gene))
-            if canonical_vep:
+        self.tb = tabix.open(self.file)
+        for row in self.tb.query("{}".format(chr_), pos, pos):
+            if row[4] == gene:
                 return row[10]
+
+    def __enter__(self):
+        self.tb = tabix.open(self.file)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return False
 
 
 def get_position_aa(reader, gene_id, chr_, start, end):
@@ -53,15 +62,14 @@ def aa_pos(x, reader):
     return ','.join(l)
 
 
-def run(output, drivers, vep_version, genome_version):
-
-    df_drivers = pd.read_csv(drivers, sep='\t')
+def run(output, drivers, vep):
+    df_drivers = pd.read_csv(drivers, sep='\t', low_memory=False)
     df_drivers['2D_CLUSTERS'].fillna('', inplace=True)
 
     chr_df = load_chromosomes_genes()
     df_drivers = df_drivers.merge(chr_df, how='left')
 
-    with TabixAAReader(genome_version, vep_version) as reader:
+    with TabixAAReader(vep) as reader:
         df_drivers["2D_CLUSTERS"] = df_drivers.apply(aa_pos, axis=1, reader=reader)
 
     columns = ["SYMBOL", "TRANSCRIPT", "COHORT", "CANCER_TYPE", "METHODS",
@@ -76,5 +84,5 @@ if __name__ == "__main__":
     output = sys.argv[1]
     drivers = sys.argv[2]
     vep = sys.argv[3]
-    genome = sys.argv[4]
-    run(output, drivers, vep, genome)
+    run(output, drivers, vep)
+
