@@ -117,18 +117,12 @@ GENOME_SEQUENCE_MAPS = {'chr{}'.format(c): '{}'.format(c) for c in range(1, 23)}
 GENOME_SEQUENCE_MAPS.update({'chrX': 'X', '23': 'X', 'chr23': 'X', 'chrY': 'Y', '24': 'Y', 'chr24': 'Y'})
 GENOME_SEQUENCE_MAPS.update({'chrM': 'M', 'MT': 'M', 'chrMT': 'M'})
 
-SEQUENCE_NAME_MAPS = {
-    'hg19': GENOME_SEQUENCE_MAPS,
-    'hg38': GENOME_SEQUENCE_MAPS,
-    'hg18': GENOME_SEQUENCE_MAPS
-}
-
 class TabixAAReader:
 
-    def __init__(self, genome):  # , vep_build):
+    def __init__(self):
         self.file = vep   # I have put the vep file , it was this: bgdata.get_path('vep', 'wgs_tabix', '{}_{}'.format(genome, vep_build))
         self.tb = None
-        self.map = SEQUENCE_NAME_MAPS.get(genome, {})
+
 
     def get(self, chromosome, pos, gene):
         chr_ = GENOME_SEQUENCE_MAPS.get(chromosome, chromosome)
@@ -136,7 +130,7 @@ class TabixAAReader:
         for row in self.tb.query("{}".format(chr_), pos, pos):
             # it was this: for row in super().get("{}".format(chr_), pos, pos):
             if row[4] == gene:
-                return row[10] # column where the aa change is? it was column 10, in my VEP output file it's column 13
+                return row[10]
 
     def __enter__(self):
         self.tb = tabix.open(self.file)
@@ -168,7 +162,7 @@ def aa_pos(x, reader):
 
 
 # def run(output, drivers, dndscv, vep_version, genome_version):
-def run(output, drivers, genome_version):
+def run(output, drivers):
     df_drivers = pd.read_csv(drivers, sep='\t', low_memory=False)
     df_drivers['2D_CLUSTERS'].fillna('', inplace=True)
 
@@ -178,7 +172,7 @@ def run(output, drivers, genome_version):
     chr_df = load_chromosomes_genes()
     df_drivers = df_drivers.merge(chr_df, how='left')
     # with TabixAAReader(genome_version, vep_version) as reader:
-    with TabixAAReader(genome_version) as reader:
+    with TabixAAReader() as reader:
         df_drivers["2D_CLUSTERS"] = df_drivers.apply(aa_pos, axis=1, reader=reader)
 
     #df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
@@ -202,9 +196,9 @@ if __name__ == "__main__":
     drivers = sys.argv[2]
     # dndscv = sys.argv[3]
     vep = sys.argv[3]  # not necessary
-    genome = sys.argv[4]  # not necessary
+    #genome = sys.argv[4]  # not necessary
     # run(output, drivers, dndscv, vep, genome)
-    run(output, drivers, genome)
+    run(output, drivers)
 
 # how to run?
-# python drivers.py drivers.out drivers.tsv VEP_canonical_transcripts.out.gz hg38
+# python drivers.py drivers.out drivers.tsv VEP_canonical_transcripts.out.gz 
