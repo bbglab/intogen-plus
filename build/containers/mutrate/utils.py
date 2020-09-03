@@ -1,6 +1,8 @@
-from itertools import product
 from collections import defaultdict
+from itertools import product
+
 import numpy as np
+
 
 CB = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
 

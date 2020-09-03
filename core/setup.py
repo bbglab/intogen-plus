@@ -37,7 +37,7 @@ setup(
                 'parse-nonsynonymous = intogen_core.parsers.nonsynonymous:cli',
                 'mutations-summary = intogen_core.postprocess.mutations:cli',
                 'drivers-discovery = intogen_core.postprocess.drivers.discovery:cli',
-                'drivers-summary = intogen_core.postprocess.drivers.summary:cli'
+                'drivers-summary = intogen_core.postprocess.drivers.summary:cli',
             ]
         },
 )

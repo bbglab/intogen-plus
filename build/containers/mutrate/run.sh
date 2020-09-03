@@ -23,8 +23,6 @@ OUTPUT=$5
                         --cores ${CORES} \
                         --output ${OUTPUT}
 
-# Tar the directory into a single file
-tar czf ${OUTPUT}.tar.gz ${OUTPUT}
 
 
 FOLDER=`dirname ${WEIGHTS}`

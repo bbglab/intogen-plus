@@ -81,6 +81,7 @@ singularity
 tabix
 python
 	bgdata
+	bgparsers
 	bgsignature
 	bgreference
 	bgvep

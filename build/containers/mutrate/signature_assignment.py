@@ -1,11 +1,11 @@
-import pandas as pd
-import os
-import click
 
+import click
+import pandas as pd
+
+from config import Values
 
 # global variables
-
-COSMIC_EXOME = os.path.join(os.environ['INTOGEN_DATASETS'], 'deconstructsig', 'signatures.cosmic.exome.tsv')
+COSMIC_EXOME = Values.COSMIC_EXOME
 
 
 # run functions
@@ -79,5 +79,4 @@ def run_assign(input_file, assignment_path):
 
 
 if __name__ == '__main__':
-
     run_assign()

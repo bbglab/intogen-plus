@@ -1,27 +1,47 @@
 #!/usr/bin/env bash
-
 set -e
 
-if [ -z "${INTOGEN_RELEASE}" ]
+CDS=$1
+VEP_CONTAINER=$2
+VEP_CACHE_DIR=$3
+OUT=$4
+CORES=$5
+
+tmpdir=`mktemp -d`
+echo $tmpdir
+
+SCRIPT_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+python ${SCRIPT_FOLDER}/mutations.py -r ${CDS} -o ${tmpdir}/mutations.tsv
+
+sort -k1,1 -k2n,2 -k3n,3 ${tmpdir}/mutations.tsv | uniq > ${tmpdir}/muts.tsv
+
+if [[ "${CORES}" -eq 1 ]]
 then
-      echo "ERROR: Define the INTOGEN_RELEASE variable"
-      exit -1
+	mv ${tmpdir}/muts.tsv ${tmpdir}/split.0
+else
+	divisor=$((${CORES}-1))
+	lines=`cat ${tmpdir}/muts.tsv | wc -l`
+	split -l$((${lines}/${divisor})) ${tmpdir}/muts.tsv \
+		${tmpdir}/split. -d
 fi
 
-if [ -z "${INTOGEN_VEP}" ]
-then
-      echo "ERROR: Define the INTOGEN_VEP variable"
-      exit -1
-fi
+for f in ${tmpdir}/split*
+do
+	name=${f##*.}
+	singularity exec ${VEP_CONTAINER} vep -i ${f} \
+		-o ${tmpdir}/split_${name}.vep.out --assembly GRCh38 \
+		--no_stats --cache --offline --symbol \
+		--protein --tab --canonical --numbers \
+		--no_headers \
+		--dir ${VEP_CACHE_DIR} &
+done
 
-if [ -z "${INTOGEN_GENOME}" ]
-then
-      echo "ERROR: Define the INTOGEN_GENOME variable"
-      exit -1
-fi
+wait
 
-
-# Answer 'n' to this question: Do you wish to exit so you can get updates (y) or continue (n)
-DATASETS=../../datasets/${INTOGEN_GENOME}_${INTOGEN_VEP}_${INTOGEN_RELEASE}/vep
-mkdir -p ${DATASETS}
-vep_install -a cf -s homo_sapiens -y GRCh38 -c ${DATASETS} --CONVERT
+# Get only canonical transcripts and most severe consequence types
+cat ${tmpdir}/split_*vep.out |\
+	grep -w YES |\
+	awk -F'[\t_/]' '{print($1"\t"$2"\t"$3"\t"$4"\t"$0)}' |\
+	cut -f-4,8- |\
+	bgzip > ${OUT}

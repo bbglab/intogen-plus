@@ -1,5 +1,7 @@
 # TODO where are the files coming from
 
+# FIXME merge this with signature.mk into a single folder as this is used also by mutrate
+
 deconstructsigs_data_srcdir = ${src_datasets}/deconstructsigs
 
 deconstructsigs_dir = $(INTOGEN_DATASETS)/deconstructsigs

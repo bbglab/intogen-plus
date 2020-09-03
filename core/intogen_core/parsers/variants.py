@@ -25,7 +25,7 @@ for chr_ in CHROMOSOMES:
 class _NoLiftOver:
 
     def convert_coordinate(self, chr_, pos, strand):
-        return [(None, pos-1)]
+        return [(None, pos)]
 
 
 def liftover_factory(from_, to):

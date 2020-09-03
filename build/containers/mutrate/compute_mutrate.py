@@ -1,23 +1,21 @@
+
 import os
 import json
-import click
-import numpy as np
 from functools import partial
-from tqdm import tqdm
+
 import pickle
 import gzip
-
-import pandas as pd
-# from pathos.multiprocessing import Pool
 from multiprocessing import Pool
 
-from utils import complementary, mut_key_generator, normalize_profile, shortkey_to_lex
+import click
+import pandas as pd
+from tqdm import tqdm
+
 from config import Values
+from utils import complementary, mut_key_generator, normalize_profile, shortkey_to_lex
 
 
 # global variables
-
-folder = os.environ.get("INTOGEN_DATASETS")  # './'
 
 SITE_COUNTS_PATH = Values.SITE_COUNTS_PATH
 
@@ -54,6 +52,7 @@ class dNdSOut:
     @property
     def catalogue(self):
         """matrix with counts per sample and pyr-context"""
+        # FIXME remove?
 
         df = self.annotmuts[(self.annotmuts['ref'].isin(list('ACGT'))) & (self.annotmuts['alt'].isin(list('ACGT')))]
         df['context'] = df.apply(self.pyr_context, axis=1)
@@ -63,6 +62,7 @@ class dNdSOut:
     @property
     def burden(self):
         """dict mutation count per sample"""
+        # FIXME remove?
 
         dg = self.annotmuts.groupby('sampleID').count()
         burden = dict(zip(dg.index.tolist(), dg.values.flatten()))
@@ -80,7 +80,7 @@ class dNdSOut:
     @property
     def relative_syn(self):
         """dict of proportion of syn mutations per sample"""
-
+        # FIXME precompute this to get it only once
         df = self.annotmuts
         samples = df['sampleID'].unique()
         syn_burden = {s: len(df[(df['sampleID'] == s) & (df['impact'] == 'Synonymous')]) for s in samples}
@@ -152,6 +152,7 @@ def combine_signatures(weights, sig_labels, scope='exome'):
 
 def genewise_run(gene, weights, annotmuts, genemuts):
 
+    # FIXME this DF is already loaded
     dndsout = dNdSOut(annotmuts, genemuts)
     syn_sites = SiteCounts().get(gene, 'synonymous_variant')  # counts per context
     exp = dndsout.expected_syn(gene)  # expected syn count at gene
@@ -171,75 +172,14 @@ def genewise_run(gene, weights, annotmuts, genemuts):
     return {gene: mutrate}
 
 
-def normalization_constant(mutrate_output_folder, output_json):
-    """
-    computes the normalization constant for each sample
-    this is a necessary first step in function normalization()
-
-    mutrate_output_folder: folder where mutrate results are kept for each gene
-    output_json: json file with dict with normalization constant per sample
-
-    Example
-    -------
-    normalization_constant('./mutrate_output', './constants.json')
-    """
-
-    site_counts = SiteCounts()
-    res = {}
-    for fn in tqdm(os.listdir(mutrate_output_folder)):
-        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
-            d = json.load(f)
-        gene = next(iter(d.keys()))
-        context_count = site_counts.context_per_gene(gene)
-        context_count = np.array(context_count)
-        for sample in d[gene]:
-            arr = np.array(d[gene][sample])
-            res[sample] = res.get(sample, 0) + np.dot(context_count, arr)
-    with open(output_json, 'wt') as f:
-        json.dump(res, f)
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command(context_settings={'help_option_names': ['-h', '--help']})
-@click.option('--mutrate_output_folder', type=click.Path(), help='results folder')
-@click.option('--constants_path', type=click.Path(), help='json file for constants dict')
-def normalization(mutrate_output_folder, constants_path):
-    """
-    computes a normalized version of mutrate, i.e.:
-    conditioning on the observation of a single mutation, what is the per-site probability
-    for the mutation to occur across all possible coding mutation sites
-
-    Example
-    -------
-    normalization('./mutrate_output', './constants.json')
-    """
-
-    normalization_constant(mutrate_output_folder, constants_path)
-    with open(constants_path, 'rt') as f:
-        constants = json.load(f)
-    for fn in tqdm(os.listdir(mutrate_output_folder)):
-        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
-            d = json.load(f)
-        gene = next(iter(d.keys()))
-        norm_d = {gene: {}}
-        for sample in d[gene]:
-            norm_d[gene][sample] = [x / constants[sample] if constants[sample] != 0 else 0 for x in d[gene][sample]]
-        with open(os.path.join(mutrate_output_folder, 'norm_' + fn), 'wt') as g:
-            json.dump(norm_d, g)
-
-
-@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+@click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--annotmuts', type=click.Path(), help='path to dndsout$annotmuts')
 @click.option('--genemuts', type=click.Path(), help='path to dndsout$genemuts')
 @click.option('--weights', type=click.Path(), help='path to signature weights upon fitting')
 @click.option('--cores', default=os.cpu_count(), help='Max processes to run multiprocessing', type=click.INT)
-@click.option('--output', required=True, type=click.Path(), help='file folder for outputs')
+@click.option('--output', required=True, type=click.Path())
 @click.option('--test', is_flag=True, help='test flag to run a reduced number of genes')
-def compute_mutrate(annotmuts, genemuts, weights, cores, output, test):
+def cli(annotmuts, genemuts, weights, cores, output, test):
     """
     Requirements
     ------------
@@ -258,6 +198,8 @@ def compute_mutrate(annotmuts, genemuts, weights, cores, output, test):
     dg = dndsout.annotmuts[dndsout.annotmuts['mut'].isin(list('ACGT'))]
     gene_set = dg['gene'].unique()
 
+    # FIXME: do it only for driver genes and load that as a JSON in boostdm
+
     if test:
         gene_set = gene_set[:1]
 
@@ -265,26 +207,16 @@ def compute_mutrate(annotmuts, genemuts, weights, cores, output, test):
 
     task = partial(genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts)
 
-    # prepare output dir
-    if not os.path.exists(output):
-        os.makedirs(output)
-
     # loop task through gene_set
     with Pool(cores) as pool:
+        result = {}
         for res in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
+            result.update()
 
-            # dump to separate json files, one per each gene
-
-            with open(os.path.join(output, '{0}.out.json'.format(next(iter(res.keys())))), 'wt') as f_output:
-                json.dump(res, f_output)
+    with gzip.open(output, 'wt') as f_output:
+        json.dump(res, f_output)
 
 
 if __name__ == '__main__':
-
     cli()
-
-    # tests
-    # -----
-    # normalization_constant('./mutrate_output', './constants.json')
-    # normalization('./mutrate_output', './normalizing_constant.json')
 
