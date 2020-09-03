@@ -5,8 +5,9 @@ from os import path
 
 import numpy as np
 import pandas as pd
-from bgvep.readers import Tabix
+import tabix
 
+# from bgvep.readers import Tabix
 
 FOLDER = path.dirname(path.abspath(__file__))
 
@@ -85,15 +86,14 @@ def set_consensous_role(row):
 
 
 def role(dndscv, threshold=0.1):
-
     # read drivers
-    df_drivers_role = pd.read_csv(dndscv, sep="\t")
+    df_drivers_role = pd.read_csv(dndscv, sep="\t" ,low_memory=False)
     df_drivers_role = add_excess(df_drivers_role)
     df_drivers_role["ROLE_INTOGEN"] = df_drivers_role.apply(lambda row: set_role(row, distance_threshold=threshold),
                                                             axis=1)
     # read mode of action
     moa = path.join(FOLDER, 'data', 'gene_MoA.tsv')
-    df_moa = pd.read_csv(moa, sep="\t")
+    df_moa = pd.read_csv(moa, sep="\t" ,low_memory=False)
     df_moa.rename(columns={"gene_MoA": "ROLE_CGI"}, inplace=True)
     # Combine both roles
     df_combined_role = pd.merge(df_drivers_role[["gene_name", "ROLE_INTOGEN"]], df_moa, how="left",
@@ -109,7 +109,7 @@ def role(dndscv, threshold=0.1):
 
 def load_chromosomes_genes():
     regions_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'cds.regions.gz')
-    df = pd.read_csv(regions_file, sep="\t")
+    df = pd.read_csv(regions_file, sep="\t", low_memory=False)
     return df[["SYMBOL", "CHROMOSOME", "ELEMENT"]].drop_duplicates()
 
 
@@ -117,15 +117,47 @@ GENOME_SEQUENCE_MAPS = {'chr{}'.format(c): '{}'.format(c) for c in range(1, 23)}
 GENOME_SEQUENCE_MAPS.update({'chrX': 'X', '23': 'X', 'chr23': 'X', 'chrY': 'Y', '24': 'Y', 'chr24': 'Y'})
 GENOME_SEQUENCE_MAPS.update({'chrM': 'M', 'MT': 'M', 'chrMT': 'M'})
 
+SEQUENCE_NAME_MAPS = {
+    'hg19': GENOME_SEQUENCE_MAPS,
+    'hg38': GENOME_SEQUENCE_MAPS,
+    'hg18': GENOME_SEQUENCE_MAPS
+}
 
-class TabixAAReader(Tabix):
+
+## method get from Tabix class
+def get(self, chromosome, start, stop):
+    chr_ = self.map.get(chromosome, chromosome)
+    try:
+        for row in self.tb.query("{}".format(chr_), start, stop):
+            yield row
+    except tabix.TabixError:
+        raise ReaderError('Tabix error in {}: {}-{}'.format(chromosome, start, stop))
+
+
+##
+
+class TabixAAReader:
+
+    def __init__(self, genome):  # , vep_build):
+        self.file = vep   # I have put the vep file , it was this: bgdata.get_path('vep', 'wgs_tabix', '{}_{}'.format(genome, vep_build))
+        self.tb = None
+        self.map = SEQUENCE_NAME_MAPS.get(genome, {})
 
     def get(self, chromosome, pos, gene):
         chr_ = GENOME_SEQUENCE_MAPS.get(chromosome, chromosome)
-        for row in super().get("{}".format(chr_), pos, pos):
-            canonical_vep = ((row[-2] == 'YES') and (row[4] == gene))
+        tb = tabix.open(self.file)
+        for row in self.tb.query("{}".format(chr_), pos, pos):
+            # it was this: for row in super().get("{}".format(chr_), pos, pos):
+            canonical_vep = (row[4] == gene)
             if canonical_vep:
-                return row[10]
+                return row[10] # column where the aa change is? it was column 10, in my VEP output file it's column 13
+
+    def __enter__(self):
+        self.tb = tabix.open(self.file)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return False
 
 
 def get_position_aa(reader, gene_id, chr_, start, end):
@@ -149,34 +181,44 @@ def aa_pos(x, reader):
     return ','.join(l)
 
 
-def run(output, drivers, dndscv, vep_version, genome_version):
-
-    df_drivers = pd.read_csv(drivers, sep='\t')
+# def run(output, drivers, dndscv, vep_version, genome_version):
+def run(output, drivers, genome_version):
+    df_drivers = pd.read_csv(drivers, sep='\t', low_memory=False)
     df_drivers['2D_CLUSTERS'].fillna('', inplace=True)
 
-    df_role = role(dndscv)
-    df_drivers = df_drivers.merge(df_role, how='left')
+    # df_role = role(dndscv)
+    # df_drivers = df_drivers.merge(df_role, how='left')
 
     chr_df = load_chromosomes_genes()
     df_drivers = df_drivers.merge(chr_df, how='left')
-
-    with TabixAAReader(genome_version, vep_version) as reader:
+    # with TabixAAReader(genome_version, vep_version) as reader:
+    with TabixAAReader(genome_version) as reader:
         df_drivers["2D_CLUSTERS"] = df_drivers.apply(aa_pos, axis=1, reader=reader)
 
-    df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
+    #df_drivers.rename(columns={"COMBINED_ROLE": "ROLE"}, inplace=True)
 
+    #columns = ["SYMBOL", "TRANSCRIPT", "COHORT", "CANCER_TYPE", "METHODS",
+     #          "MUTATIONS", "SAMPLES", "%_SAMPLES_COHORT",
+      #         "QVALUE_COMBINATION", "ROLE", "CGC_GENE", "CGC_CANCER_GENE",
+       #        "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
+        #       "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL"]
     columns = ["SYMBOL", "TRANSCRIPT", "COHORT", "CANCER_TYPE", "METHODS",
                "MUTATIONS", "SAMPLES", "%_SAMPLES_COHORT",
-               "QVALUE_COMBINATION", "ROLE", "CGC_GENE", "CGC_CANCER_GENE",
+               "QVALUE_COMBINATION", "CGC_GENE", "CGC_CANCER_GENE",
                "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
                "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL"]
+
     df_drivers[columns].sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv(output, sep="\t", index=False)
 
 
 if __name__ == "__main__":
     output = sys.argv[1]
     drivers = sys.argv[2]
-    dndscv = sys.argv[3]
-    vep = sys.argv[4]
-    genome = sys.argv[5]
-    run(output, drivers, dndscv, vep, genome)
+    # dndscv = sys.argv[3]
+    vep = sys.argv[3]  # not necessary
+    genome = sys.argv[4]  # not necessary
+    # run(output, drivers, dndscv, vep, genome)
+    run(output, drivers, genome)
+
+# how to run?
+# python drivers.py drivers.out drivers.tsv VEP_canonical_transcripts.out.gz hg38
