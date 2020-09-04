@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 # This helper script is meant to be used by BBGLab member only
 
@@ -7,7 +7,7 @@ SRC_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 
 function run() {
-	nextflow run intogen.nf --input "$@" --output intogen_{today} --debug true -profile bbglab -resume --containers {SRC_FOLDER}/containers --datasets {SRC_FOLDER}/datasets
+	nextflow run {SRC_FOLDER}/intogen.nf --input "$@" --output intogen_{today} --debug true -profile bbglab -resume --containers {SRC_FOLDER}/containers --datasets {SRC_FOLDER}/datasets --annotations ${PWD}/annotations.txt
 }
 
 function test() {
@@ -27,9 +27,7 @@ function clean() {
 function prepare() {
 	folder=${1:-.}  # use current folder if not present
 	mkdir -p ${folder}
-	cp -R ${SRC_FOLDER}/config ${folder}
-	cp ${SRC_FOLDER}/intogen.nf ${folder}
-	cp ${SRC_FOLDER}/nextflow.config ${folder}
+	cp ${SRC_FOLDER}/config/annotations.txt ${folder}
 	cp ${SRC_FOLDER}/intogen.sh ${folder}
 	sed -e "s@{SRC_FOLDER}@${SRC_FOLDER}@g" -i ${folder}/intogen.sh
 	today=`date +%Y%m%d`
