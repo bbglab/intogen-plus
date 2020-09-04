@@ -10,6 +10,7 @@ PIPELINE = ${INTOGEN_RESULTS}
 
 CGC = ${INTOGEN_DATASETS}/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/regions/cds_biomart.tsv
+VEP = ${INTOGEN_DATASETS}/vep/vep.tsv.gz
 
 # OUTPUTS
 OUTPUT_FOLDER = output
@@ -56,8 +57,8 @@ $(GENES)::  $(_GENES) | $(OUTPUT_FOLDER) $(OUTPUT_FOLDER_DRIVERS)
 		$(OUTPUT_FOLDER_DRIVERS)
 
 
-$(DRIVER_GENES): $(PIPELINE)/drivers.tsv | $(OUTPUT_FOLDER)
-	python drivers.py $@ $(PIPELINE)/drivers.tsv 92 hg38
+$(DRIVER_GENES): $(PIPELINE)/drivers.tsv $(VEP) | $(OUTPUT_FOLDER)
+	python drivers.py $@ $(PIPELINE)/drivers.tsv $(VEP)
 
 
 $(MUTATIONS): $(PIPELINE)/mutations.tsv
