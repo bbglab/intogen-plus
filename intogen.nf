@@ -152,6 +152,7 @@ process Signature {
 	label "bgsignature"
 	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
 
+
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
 
@@ -250,8 +251,8 @@ process OncodriveCLUSTL {
         path regions from REGIONS
 
     output:
-        tuple val(cohort), path("out/elements_results.txt") into OUT_ONCODRIVECLUSTL
-        tuple val(cohort), path("out/clusters_results.tsv") into OUT_ONCODRIVECLUSTL_CLUSTERS
+        tuple val(cohort), path("${cohort}/elements_results.txt") into OUT_ONCODRIVECLUSTL
+        tuple val(cohort), path("${cohort}/clusters_results.tsv") into OUT_ONCODRIVECLUSTL_CLUSTERS
 
 	script:
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
@@ -263,7 +264,7 @@ process OncodriveCLUSTL {
 				-sigcalc region_normalized \
 				--concatenate \
 				-c ${task.cpus} \
-				-o out ${seedOpt} ${debugOpt}
+				-o ${cohort} ${seedOpt} ${debugOpt}
 			"""
 		else
 			"""
