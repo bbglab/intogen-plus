@@ -152,6 +152,9 @@ process Signature {
 	label "bgsignature"
 	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
 
+	memory { task.memory * task.attempt }
+	errorStrategy 'retry'
+	maxRetries 2
 
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
