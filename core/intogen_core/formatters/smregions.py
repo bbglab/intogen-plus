@@ -10,7 +10,7 @@ def parse(file):
         _, sample, ref, alt, position = m['#Uploaded_variation'].split('__')
         chromosome, _ = m['Location'].split(':')
 
-        if ref not in "ACGT" or alt not in "ACGT":
+        if ref not in "ACGT" or alt not in "ACGT" or len(alt) > 1:
             # insertion, deletion or MNV
             continue
 

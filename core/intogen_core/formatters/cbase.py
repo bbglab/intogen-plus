@@ -52,7 +52,7 @@ def parse(file):
 
         _, _, ref_nuc, mut_nuc, position = m['#Uploaded_variation'].split('__')
 
-        if mut_nuc not in "ACGT" or ref_nuc not in "ACGT":
+        if mut_nuc not in "ACGT" or ref_nuc not in "ACGT" or len(mut_nuc) > 1:
             # insertion, deletion or MNV
             continue
 
