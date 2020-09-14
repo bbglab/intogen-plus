@@ -1,6 +1,7 @@
 
 from bgreference import refseq
 
+from intogen_core.formatters.utils import NUCLEOTIDES
 from intogen_core.readers import TSVReader
 
 HEADER = ["Gene", "mut_eff", "mut_nuc", "context"]
@@ -52,7 +53,7 @@ def parse(file):
 
         _, _, ref_nuc, mut_nuc, position = m['#Uploaded_variation'].split('__')
 
-        if mut_nuc not in "ACGT" or ref_nuc not in "ACGT" or len(mut_nuc) > 1:
+        if mut_nuc not in NUCLEOTIDES or ref_nuc not in NUCLEOTIDES:
             # insertion, deletion or MNV
             continue
 

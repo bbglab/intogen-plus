@@ -1,0 +1,2 @@
+
+NUCLEOTIDES = set('ACGT')

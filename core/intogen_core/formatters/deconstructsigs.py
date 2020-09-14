@@ -1,6 +1,7 @@
 
 from bgreference import refseq
 
+from intogen_core.formatters.utils import NUCLEOTIDES
 from intogen_core.readers import TSVReader
 
 HEADER = ["CHROMOSOME", "POSITION", "REF", "ALT", "SAMPLE", "ID", "GENE", "CONTEXT", "MUTATION_TYPE"]
@@ -15,7 +16,7 @@ def parse(file):
         identifier, sample, ref, alt, position = m['#Uploaded_variation'].split('__')
         chromosome, _ = m['Location'].split(':')
 
-        if ref not in "ACGT" or alt not in "ACGT" or len(alt) > 1:
+        if ref not in NUCLEOTIDES or alt not in NUCLEOTIDES:
             # insertion, deletion or MNV
             continue
 
