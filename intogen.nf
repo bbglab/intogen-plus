@@ -275,7 +275,7 @@ process OncodriveCLUSTL {
 				-g hg38 -sim region_restricted -n 1000 -kmer 3 \
 				-sig ${signature} --concatenate \
 				-c ${task.cpus} \
-				-o out ${seedOpt} ${debugOpt}
+				-o ${cohort} ${seedOpt} ${debugOpt}
 			"""
 }
 
