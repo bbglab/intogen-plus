@@ -154,7 +154,7 @@ process Signature {
 
 	memory { task.memory * task.attempt }
 	errorStrategy 'retry'
-	maxRetries 2
+	maxRetries 3
 
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
