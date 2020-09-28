@@ -77,11 +77,16 @@ def vet(df_vetting, combination, ctype):
     df = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen", "Tier_CGC"]],
                   left_on="SYMBOL", right_on="Gene Symbol", how="left")
     df["CGC_GENE"].fillna(False, inplace=True)
-    df["driver"] = df.apply(lambda row: get_drivers(row), axis=1)
+    if len(df) == 0:
+        # Simply add the column
+        df['driver'] = None
+    else:
+        df["driver"] = df.apply(lambda row: get_drivers(row), axis=1)
     df_drivers = df[df["driver"]]
     print("Number of drivers pre-vetting:" + str(len(df_drivers["SYMBOL"].unique())))
 
     if len(df_drivers["SYMBOL"].unique()) == 0:
+        # Simply add the columns
         df_drivers["CGC_CANCER_GENE"] = None
         df_drivers["MUTS/SAMPLE"] = None
     else:
