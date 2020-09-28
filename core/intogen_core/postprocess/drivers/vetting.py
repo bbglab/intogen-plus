@@ -80,12 +80,17 @@ def vet(df_vetting, combination, ctype):
     df["driver"] = df.apply(lambda row: get_drivers(row), axis=1)
     df_drivers = df[df["driver"]]
     print("Number of drivers pre-vetting:" + str(len(df_drivers["SYMBOL"].unique())))
-    # Include cgc
-    df_drivers["CGC_CANCER_GENE"] = df_drivers.apply(lambda row: get_cancer_genes(row, ctype), axis=1)
-    df_drivers.drop(["Gene Symbol", "cancer_type_intogen"], inplace=True, axis=1)
-    # Include average number of mutations per sample
-    df_drivers["MUTS/SAMPLE"] = df_drivers.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
-    # Include the number of cohorts per gene
+
+    if len(df_drivers["SYMBOL"].unique()) == 0:
+        df_drivers["CGC_CANCER_GENE"] = None
+        df_drivers["MUTS/SAMPLE"] = None
+    else:
+        # Include cgc
+        df_drivers["CGC_CANCER_GENE"] = df_drivers.apply(lambda row: get_cancer_genes(row, ctype), axis=1)
+        df_drivers.drop(["Gene Symbol", "cancer_type_intogen"], inplace=True, axis=1)
+        # Include average number of mutations per sample
+        df_drivers["MUTS/SAMPLE"] = df_drivers.apply(lambda row: row["MUTS"] / row["SAMPLES"], axis=1)
+        # Include the number of cohorts per gene
 
     # Perform the vetting
     df_vetting.rename(columns={"GENE": "SYMBOL"}, inplace=True)
