@@ -3,6 +3,8 @@ import os
 
 import pandas as pd
 
+from intogen_core.exceptions import IntogenError
+
 
 def get_drivers(row):
     if row["TIER"] <= 3 and row["CGC_GENE"]:     # Tier 1 and tier 2 if cgc no bidders needed
@@ -67,6 +69,8 @@ def vet(df_vetting, combination, ctype):
     """Compute the driver list from the output of intogen and the vetting information"""
 
     df = pd.read_csv(combination, sep="\t")
+    if len(df) == 0:
+        raise IntogenError('No drivers in combination to perform vetting')
 
     # load cgc
     cgc_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'cgc', 'cancer_gene_census_parsed.tsv')
@@ -77,12 +81,9 @@ def vet(df_vetting, combination, ctype):
     df = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen", "Tier_CGC"]],
                   left_on="SYMBOL", right_on="Gene Symbol", how="left")
     df["CGC_GENE"].fillna(False, inplace=True)
-    if len(df) == 0:
-        # Simply add the column
-        df['driver'] = None
-    else:
-        df["driver"] = df.apply(lambda row: get_drivers(row), axis=1)
+    df["driver"] = df.apply(lambda row: get_drivers(row), axis=1)
     df_drivers = df[df["driver"]]
+    print(df_drivers)
     print("Number of drivers pre-vetting:" + str(len(df_drivers["SYMBOL"].unique())))
 
     if len(df_drivers["SYMBOL"].unique()) == 0:
