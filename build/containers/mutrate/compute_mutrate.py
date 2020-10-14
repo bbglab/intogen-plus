@@ -1,21 +1,25 @@
-
 import os
 import json
+import click
+import numpy as np
 from functools import partial
-
+from tqdm import tqdm
 import pickle
 import gzip
+import csv
+import itertools
+from bgoncotree.main import BGOncoTree
+
+import pandas as pd
+# from pathos.multiprocessing import Pool
 from multiprocessing import Pool
 
-import click
-import pandas as pd
-from tqdm import tqdm
-
-from config import Values
 from utils import complementary, mut_key_generator, normalize_profile, shortkey_to_lex
-
+from config import Values
 
 # global variables
+
+folder = os.environ.get("INTOGEN_DATASETS")  # './'
 
 SITE_COUNTS_PATH = Values.SITE_COUNTS_PATH
 
@@ -35,7 +39,6 @@ signatures = {sign: signatures.loc[sign, :].values.tolist() for sign in signatur
 class dNdSOut:
 
     def __init__(self, annotmuts, genemuts):
-
         self.annotmuts = pd.read_csv(annotmuts, sep='\t')
         self.genemuts = pd.read_csv(genemuts, sep='\t')
         self.samples = self.annotmuts['sampleID'].unique()
@@ -52,7 +55,6 @@ class dNdSOut:
     @property
     def catalogue(self):
         """matrix with counts per sample and pyr-context"""
-        # FIXME remove?
 
         df = self.annotmuts[(self.annotmuts['ref'].isin(list('ACGT'))) & (self.annotmuts['alt'].isin(list('ACGT')))]
         df['context'] = df.apply(self.pyr_context, axis=1)
@@ -62,7 +64,6 @@ class dNdSOut:
     @property
     def burden(self):
         """dict mutation count per sample"""
-        # FIXME remove?
 
         dg = self.annotmuts.groupby('sampleID').count()
         burden = dict(zip(dg.index.tolist(), dg.values.flatten()))
@@ -80,7 +81,7 @@ class dNdSOut:
     @property
     def relative_syn(self):
         """dict of proportion of syn mutations per sample"""
-        # FIXME precompute this to get it only once
+
         df = self.annotmuts
         samples = df['sampleID'].unique()
         syn_burden = {s: len(df[(df['sampleID'] == s) & (df['impact'] == 'Synonymous')]) for s in samples}
@@ -151,8 +152,6 @@ def combine_signatures(weights, sig_labels, scope='exome'):
 
 
 def genewise_run(gene, weights, annotmuts, genemuts):
-
-    # FIXME this DF is already loaded
     dndsout = dNdSOut(annotmuts, genemuts)
     syn_sites = SiteCounts().get(gene, 'synonymous_variant')  # counts per context
     exp = dndsout.expected_syn(gene)  # expected syn count at gene
@@ -172,14 +171,78 @@ def genewise_run(gene, weights, annotmuts, genemuts):
     return {gene: mutrate}
 
 
-@click.command(context_settings={'help_option_names': ['-h', '--help']})
+def normalization_constant(mutrate_output_folder, output_json):
+    """
+    computes the normalization constant for each sample
+    this is a necessary first step in function normalization()
+
+    mutrate_output_folder: folder where mutrate results are kept for each gene
+    output_json: json file with dict with normalization constant per sample
+
+    Example
+    -------
+    normalization_constant('./mutrate_output', './constants.json')
+    """
+
+    site_counts = SiteCounts()
+    res = {}
+    for fn in tqdm(os.listdir(mutrate_output_folder)):
+        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
+            d = json.load(f)
+        gene = next(iter(d.keys()))
+        context_count = site_counts.context_per_gene(gene)
+        context_count = np.array(context_count)
+        for sample in d[gene]:
+            arr = np.array(d[gene][sample])
+            res[sample] = res.get(sample, 0) + np.dot(context_count, arr)
+    with open(output_json, 'wt') as f:
+        json.dump(res, f)
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+@click.option('--mutrate_output_folder', type=click.Path(), help='results folder')
+@click.option('--constants_path', type=click.Path(), help='json file for constants dict')
+def normalization(mutrate_output_folder, constants_path):
+    """
+    computes a normalized version of mutrate, i.e.:
+    conditioning on the observation of a single mutation, what is the per-site probability
+    for the mutation to occur across all possible coding mutation sites
+
+    Example
+    -------
+    normalization('./mutrate_output', './constants.json')
+    """
+
+    normalization_constant(mutrate_output_folder, constants_path)
+    with open(constants_path, 'rt') as f:
+        constants = json.load(f)
+    for fn in tqdm(os.listdir(mutrate_output_folder)):
+        with open(os.path.join(mutrate_output_folder, fn), 'rt') as f:
+            d = json.load(f)
+        gene = next(iter(d.keys()))
+        norm_d = {gene: {}}
+        for sample in d[gene]:
+            norm_d[gene][sample] = [x / constants[sample] if constants[sample] != 0 else 0 for x in d[gene][sample]]
+        with open(os.path.join(mutrate_output_folder, 'norm_' + fn), 'wt') as g:
+            json.dump(norm_d, g)
+
+
+@cli.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('--annotmuts', type=click.Path(), help='path to dndsout$annotmuts')
 @click.option('--genemuts', type=click.Path(), help='path to dndsout$genemuts')
 @click.option('--weights', type=click.Path(), help='path to signature weights upon fitting')
+@click.option('--drivers', type=click.Path(), help='path to the drivers file')
+@click.option('--oncotree', type=click.Path(), help='path to oncotree file')
+@click.option('--cohorts', type=click.Path(), help='path to cohorts file')
 @click.option('--cores', default=os.cpu_count(), help='Max processes to run multiprocessing', type=click.INT)
-@click.option('--output', required=True, type=click.Path())
+@click.option('--output', required=True, type=click.Path(), help='file folder for outputs')
 @click.option('--test', is_flag=True, help='test flag to run a reduced number of genes')
-def cli(annotmuts, genemuts, weights, cores, output, test):
+def compute_mutrate(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, output, test):
     """
     Requirements
     ------------
@@ -188,35 +251,151 @@ def cli(annotmuts, genemuts, weights, cores, output, test):
     Example
     -------
     python compute_mutrate.py compute-mutrate --annotmuts <annotmuts_path> --genemuts <genemuts_path> \\
-                                              --weights <deconstructSigs_path> --cores <multiprocessing_cores> \\
+                                              --weights <deconstructSigs_path> --drivers <drivers_path>
+                                              -- oncotree <oncotree_path> --cohorts <stats_cohorts_path> cores <multiprocessing_cores> \\
                                               --output <output_folder>
     """
     dndsout = dNdSOut(annotmuts, genemuts)
 
     # Define the geneset: minimal set required to annotate MAF with expected mutations per bp
 
-    dg = dndsout.annotmuts[dndsout.annotmuts['mut'].isin(list('ACGT'))]
-    gene_set = dg['gene'].unique()
+    # filter only the driver genes (using the gene symbol) from a list of cohorts and output a stingle JSON file with the genes
 
-    # FIXME: do it only for driver genes and load that as a JSON in boostdm
+    # example of annotmuts value: "./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts"
+    file_name = annotmuts.split("/")[-1]
+    cohort_str = file_name.split(".")[0]
+    tree = BGOncoTree(oncotree, "\t")
+
+    driver_genes_dict = dict()
+    # drivers.tsv
+    # SYMBOL	TRANSCRIPT	COHORT	CANCER_TYPE	METHODS	MUTATIONS	SAMPLES	%_SAMPLES_COHORT	QVALUE_COMBINATION	ROLE	CGC_GENE	CGC_CANCER_GENE	DOMAIN	2D_CLUSTERS	3D_CLUSTERS	EXCESS_MIS	EXCESS_NON	EXCESS_SPL
+    # ABCB1	ENST00000622132	ICGC_WGS_ESAD_UK	ESAD	dndscv,cbase	16.0	14.0	0.09333333333333334	2.1848643389296567e-05	Act	False	False		87520818:87520818		0.9721893272234644	0.0	0.0
+    with open(drivers, newline='') as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter="\t")
+        for row in csv_reader:
+            if row['COHORT'] in driver_genes_dict.keys():
+                driver_genes_dict[row['COHORT']].append(row['SYMBOL'])
+            else:
+                array = [row['SYMBOL']]
+                driver_genes_dict[row['COHORT']] = array
+
+    tumor_type = get_tumor_type_by_cohort(cohort_str, cohorts)
+    cohorts_list = get_cohorts_by_tumor_type_with_children(cohorts, tree, tumor_type)  # includes also the current cohort
+
+    ## We want to include more driver genes. Genes that are not drivers in this cohort but in others that are related to each other via the cancer type (oncotree)
+    drivers_from_cohorts = get_driver_genes_from_cohort_list(cohorts_list, driver_genes_dict)
+    #print("\n list of cohorts\n", cohorts_list)
+    #print("\n list of drivers from all cohorts:\n", drivers_from_cohorts)
+
+    dg = dndsout.annotmuts[dndsout.annotmuts['mut'].isin(list('ACGT'))]
+    dg = dndsout.annotmuts[dndsout.annotmuts['gene'].isin(drivers_from_cohorts)]
+
+    gene_set = dg['gene'].unique()
 
     if test:
         gene_set = gene_set[:1]
 
     # instantiate a partial of genewise_run that encapsulates the main task
-
     task = partial(genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts)
 
-    # loop task through gene_set
-    with Pool(cores) as pool:
-        result = {}
-        for res in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
-            result.update()
+    # prepare output dir
+    if not os.path.exists(output):
+        os.makedirs(output)
 
-    with gzip.open(output, 'wt') as f_output:
-        json.dump(res, f_output)
+    # example of annotmuts value: "./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts"
+    output_file_name = cohort_str + ".out.json.gz"
+
+    whole_res = dict()
+    with Pool(cores) as pool:
+        for res in tqdm(pool.imap(task, gene_set), total=len(gene_set)):
+            whole_res.update(res)
+
+    # dump to 1 zipped
+    # json file per cohort with all genes , KEY:gene , VALUE:list of values
+    with gzip.open(os.path.join(output, output_file_name), 'wt') as f_output:
+        json.dump(whole_res, f_output)
+
+
+
+def get_driver_genes_from_cohort_list(cohort_list, drivers_dict):
+    list_of_drivers = []
+    for cohort in cohort_list:
+        if cohort in drivers_dict.keys():
+            list_of_drivers.append(drivers_dict[cohort])
+
+    flattened_list_of_drivers = list(itertools.chain(*list_of_drivers))
+    return flattened_list_of_drivers
+
+
+# stats_cohorts.tsv
+# AGE	COHORT	MUTATIONS	PLATFORM	SAMPLES	TREATED	TYPE	CANCER_TYPE	SOURCE	LEGEND
+# Adult	CBIOP_WXS_BRCA_MBCPROJECT_2018_PRY_TREAT	349	WXS	6	Treated	Primary	BRCA	CBIOP	Breast Adeno
+def get_tumor_type_by_cohort(cohort, cohorts_file):
+    stats_cohorts_df = pd.read_csv(cohorts_file, sep="\t")
+    tumor_types = stats_cohorts_df[stats_cohorts_df["COHORT"] == cohort]["CANCER_TYPE"].unique()
+    if len(tumor_types) > 0:
+        return tumor_types[0]
+    else:
+        print("No cohort ", cohort, " found in the cohorts file")
+        return None
+
+
+# oncotree_boostDM.tsv
+# ID	PARENT	NAMES	TAGS
+# ACC	SOLID	Adrenocortical carcinoma
+def get_descendant_string_list(tree, node_str):
+    # given a tumor type (string) it returns a list (of strings) with all its children and children of children
+    list_of_descendants = []
+    dictionary_descendants = dict()
+    children = tree.descendants(node_str) # it returns a list of node objects with the full tree path ex. CANCER/NON_SOLID/L/LY/DLBCL  , CANCER/NON_SOLID/L/LY/BLY  when node_str is LY (So, the parents will be removed to keep only the children)
+    for child in children:
+        index_of_node = str(child).find(node_str)
+        break
+    pos_in_string = index_of_node + len(str(node_str)) + 1
+    for child in children:
+        descendant = str(child)[pos_in_string:] # from string CANCER/NON_SOLID/L/LY/DLBCL I want to keep only string DLBCL (it could have more levels, from DLBCL onwards.. all children after LY)
+        list_of_descendants.append(descendant)
+
+    for strings_tree in list_of_descendants:
+        nodes = strings_tree.split("/")
+        for node in nodes:
+            dictionary_descendants[node] = 1
+
+    return list(dictionary_descendants.keys())
+
+
+def get_cohorts_by_tumor_type_with_children(cohorts_file, tree, ttype):
+    # given a tumor type (string) it returns all cohorts found with the tumor type in the stats_cohort.tsv PLUS the cohorts of the children of the tumor
+    stats_cohorts = pd.read_csv("stats_cohorts.tsv", sep="\t")
+    children_ttypes = get_descendant_string_list(tree, ttype)
+    cohorts = stats_cohorts[stats_cohorts["CANCER_TYPE"] == ttype]["COHORT"].unique()
+    all_cohorts = cohorts
+    if children_ttypes is None:
+        return all_cohorts
+    else:  # if there are children
+        for child_tumor in children_ttypes:
+            child_cohorts = get_cohorts_by_tumor_type(cohorts_file , child_tumor)
+            all_cohorts = np.concatenate((child_cohorts, all_cohorts))
+
+        return all_cohorts
+
+
+def get_cohorts_by_tumor_type(cohorts_file, ttype):
+    # given a tumor type it returns all cohorts found with the tumor type in the stats_cohort.tsv PLUS the cohorts of the children of the tumor
+    stats_cohorts = pd.read_csv(cohorts_file, sep="\t")
+    cohorts = stats_cohorts[stats_cohorts["CANCER_TYPE"] == ttype]["COHORT"].unique()
+    return cohorts
+
 
 
 if __name__ == '__main__':
     cli()
 
+    # tests
+    # -----
+    # normalization_constant('./mutrate_output', './constants.json')
+    # normalization('./mutrate_output', './normalizing_constant.json')
+
+# HOW TO DO A TEST RUN:
+# export INTOGEN_DATASETS="./hg38_vep92_develop"
+# python compute_mutrate.py compute-mutrate --annotmuts ./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts --genemuts  ./genemuts/CBIOP_WGS_PRAD_EURUROL_2017.genemuts --weights ./CBIOP_WGS_PRAD_EURUROL_2017.out  --cores 3 --output ./CBIOP_WGS_PRAD_EURUROL_2017_outs --drivers drivers.tsv --cohorts stats_cohorts.tsv --oncotree oncotree_boostDM.tsv
