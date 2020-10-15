@@ -213,8 +213,7 @@ def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, test):
 
     cohorts_df = pd.read_csv(cohorts, sep="\t")
     tumor_type = get_tumor_type_by_cohort(cohort_str, cohorts_df)
-    cohorts_list = get_cohorts_by_tumor_type_with_children(cohorts_df, tree,
-                                                           tumor_type)  # includes also the current cohort
+    cohorts_list = get_cohorts_by_tumor_type_with_children(cohorts_df, tree,tumor_type)  # includes also the current cohort
 
     # We want to include more driver genes. Genes that are not drivers in this cohort but in others that are related to each other via the cancer type (oncotree)
     drivers_from_cohorts = get_driver_genes_from_cohort_list(cohorts_list, driver_genes_dict)
