@@ -260,7 +260,7 @@ def get_tumor_type_by_cohort(cohort, cohorts_df):
     tumor_types = cohorts_df[cohorts_df["COHORT"] == cohort]["CANCER_TYPE"].unique()
     if len(tumor_types) > 0:
         if len(tumor_types) > 1:
-            print("in the cohorts file found more than 1 tumor type for cohort ", cohort, tumor_types)
+            raise NameError("in the cohorts file found more than 1 tumor type for cohort ", cohort, tumor_types)
         return tumor_types[0]
     else:
         raise NameError("No cohort ", cohort, "found in the cohorts file")
@@ -289,15 +289,6 @@ def get_cohorts_by_tumor_type_with_children(cohorts_df, tree, ttype):
     children_ttypes = get_descendant_ttype_list(tree, ttype)
     all_cohorts = cohorts_df[cohorts_df["CANCER_TYPE"].isin(children_ttypes)]["COHORT"].unique()
     return all_cohorts
-
-
-def get_cohorts_by_tumor_type(cohorts_df, ttype):
-    """
-    given a tumor type it returns all cohorts found with the tumor type in the stats_cohort.tsv
-    """
-    cohorts = cohorts_df[cohorts_df["CANCER_TYPE"] == ttype]["COHORT"].unique()
-    return cohorts
-
 
 if __name__ == '__main__':
     cli()
