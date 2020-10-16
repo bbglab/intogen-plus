@@ -269,15 +269,14 @@ def get_tumor_type_by_cohort(cohort, cohorts_df):
 # oncotree_boostDM.tsv
 # ID	PARENT	NAMES	TAGS
 # ACC	SOLID	Adrenocortical carcinoma
-def get_descendant_string_list(tree, node_str):
+def get_descendant_ttype_list(tree, ttype):
     """
     given a tumor type (string) it returns a list (of strings) with all its children and children of children
     """
-    list_of_descendants = []
-    children = tree.descendants(
-        node_str)  # it returns a list of node objects with the full tree path ex. CANCER/NON_SOLID/L/LY/DLBCL  , CANCER/NON_SOLID/L/LY/BLY  when node_str is LY (So, the parents will be removed to keep only the children)
+    list_of_descendants = [ttype]
+    children = tree.descendants(ttype)  # it returns a list of node objects, doesn't include the parent ttype
     for child in children:
-        if child.id != node_str:
+        if child.id != ttype:
             list_of_descendants.append(child.id)
 
     return list_of_descendants
@@ -287,8 +286,7 @@ def get_cohorts_by_tumor_type_with_children(cohorts_df, tree, ttype):
     """
     given a tumor type (string) it returns all cohorts found with the tumor type in the stats_cohort.tsv PLUS the cohorts of the children of the tumor
     """
-    children_ttypes = get_descendant_string_list(tree, ttype)
-    children_ttypes.append(ttype)
+    children_ttypes = get_descendant_ttype_list(tree, ttype)
     all_cohorts = cohorts_df[cohorts_df["CANCER_TYPE"].isin(children_ttypes)]["COHORT"].unique()
     return all_cohorts
 
