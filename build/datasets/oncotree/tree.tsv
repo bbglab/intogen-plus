@@ -1,0 +1,79 @@
+ID	PARENT	NAMES	TAGS
+ACC	SOLID	Adrenocortical carcinoma	
+ACY	SOLID	Adenoid cystic carcinoma	
+ALL	LK	Acute lymphoblastic leukemia	
+AML	LK	Acute myeloid leukemia	
+AN	SOLID	Anus cancer	
+ANGS	S	Angiosarcoma	
+ATRT	CNS	Atypical teratoid/rhabdoid tumor	
+BC	SOLID	Bowel cancer	
+BCNET	SOLID	Small intestine cancer neuroendocrine	
+BLCA	SOLID	Bladder cancer	
+BLY	LY	Burkitt lymphoma	
+BRCA	SOLID	Breast adenocarcinoma	
+CANCER		Cancer,Any cancer type	
+CESC	SOLID	Cervix squamous cancer	
+CH	SOLID	Cholangiocarcinoma	
+CLL	LK	Chronic lymphoblastic leukemia	
+CM	SKIN	Cutaneous melanoma of the skin	
+CNS	SOLID	Central nervous system cancer	
+COREAD	SOLID	Colorectal adenocarcinoma	
+DLBCL	LY	Diffuse large B-cell lymphoma	
+EPD	CNS	Ependymoma	
+ESCA	SOLID	Esophageal cancer	
+EWS	S	Ewing's sarcoma	
+G	CNS	Glioma	
+GBM	G	Glioblastoma	
+HBC	LIVER	Hepatic blastoma	
+HC	LIVER	Hepatic cancer	
+HGG	G	High-grade Glioma	
+HNSC	SOLID	Head and neck squamous cell carcinoma	
+L	NON_SOLID	Lymphoid cancer	
+LEIS	S	Leiomyosarcoma	
+LGG	G	Lower grade glioma	
+LIVER	SOLID		
+LK	L	Leukemia	
+LNET	LUNG_CANCER	Lung neuroendocrine cancer	
+LUAD	NSCLC	Lung adenocarcinoma	
+LUNG_CANCER	SOLID	Lung cancer	
+LUSC	NSCLC	Lung squamous cell carcinoma	
+LY	L	Lymphoma	
+MBL	CNS	Medulloblastoma	
+MDPS	NON_SOLID	Myelodysplastic syndrome neoplasm	
+MESO	SOLID	Mesothelioma	
+MGCT	SOLID	Male germ cell tumor	
+MM	NON_SOLID	Multiple myeloma	
+NB	SOLID	Neuroblastoma	
+NHLY	LY	Non-hodking lymphoma	
+NON_SOLID	CANCER	Non-Solid cancer	
+NSCLC	LUNG_CANCER	Non small cell lung cancer	
+NSPH	SOLID	Nasopharyngeal cancer	
+OS	S	Osteosarcoma	
+OV	SOLID	Ovary cancer	
+PA	SOLID	Pancreatic cancer	
+PAAD	PA	Pancreas adenocarcinoma	
+PAIS	PA	Pancreatic neuroendocrine cancer	
+PCPG	G	Pheochromocytoma and paraganglioma	
+PIA	G	Pilocityc astrocytoma	
+PRAD	SOLID	Prostate adenocarcinoma	
+R	SOLID	Kidney cancer	
+RB	SOLID	Retinoblastoma	
+RCCC	R	Renal clear cell carcinoma	
+RCH	R	Chromophobe renal cell carcinoma	
+RHBDS	S	Rhabdomyosarcoma	
+RPC	R	Renal papillary cell carcinoma	
+S	SOLID	Sarcoma	
+SBCC	SKIN	Skin basal cell carcinoma	
+SCLC	LUNG_CANCER	Small-cell lung cancer	
+SG	SOLID	Salivary glands cancer	
+SKIN	SOLID	Skin cancer	
+SOLID	CANCER	Solid tumour	
+SSCC	SKIN	Skin squamous cell carcinoma	
+ST	SOLID	Stomach adenocarcinoma	
+THCA	SOLID	Thyroid adenocarcinoma	
+THYM	SOLID	Thymic carcinoma	
+UCEC	SOLID	Endometrial cancer	
+UCS	S	Uterine carcinosarcoma	
+UVM	SOLID	Uveal melanoma	
+VV	SOLID	Vulva Cancer	
+WT	R	Wilms tumor
