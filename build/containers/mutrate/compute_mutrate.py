@@ -178,8 +178,9 @@ def genewise_run(gene, weights, annotmuts, genemuts):
 @click.option('--oncotree', type=click.Path(), help='path to oncotree file')
 @click.option('--cohorts', type=click.Path(), help='path to cohorts file')
 @click.option('--cores', default=os.cpu_count(), help='Max processes to run multiprocessing', type=click.INT)
+@click.option('--output', type=click.Path(), help='name of the output file')
 @click.option('--test', is_flag=True, help='test flag to run a reduced number of genes')
-def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, test):
+def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, output, test):
     """
     Requirements
     ------------
@@ -230,7 +231,7 @@ def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, test):
     task = partial(genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts)
 
     # example of annotmuts value: "./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts"
-    output_file_name = cohort_str + "_mutrate.out.json.gz"
+    output_file_name = "./" + output
 
     whole_res = dict()
     with Pool(cores) as pool:
@@ -295,4 +296,4 @@ if __name__ == '__main__':
 
 # HOW TO DO A TEST RUN:
 # export INTOGEN_DATASETS="./hg38_vep92_develop"
-# python compute_mutrate.py --annotmuts ./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts --genemuts  ./genemuts/CBIOP_WGS_PRAD_EURUROL_2017.genemuts --weights ./CBIOP_WGS_PRAD_EURUROL_2017.out  --cores 3  --drivers drivers.tsv --cohorts stats_cohorts.tsv --oncotree oncotree_boostDM.tsv
+# python compute_mutrate.py --annotmuts ./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts --genemuts  ./genemuts/CBIOP_WGS_PRAD_EURUROL_2017.genemuts --weights ./CBIOP_WGS_PRAD_EURUROL_2017.out  --cores 3  --drivers drivers.tsv --cohorts stats_cohorts.tsv --oncotree oncotree_boostDM.tsv --output CBIOP_WGS_PRAD_EURUROL_2017_mutrate_output.json.gz
