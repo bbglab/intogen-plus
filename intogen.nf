@@ -1,10 +1,11 @@
 
 // Set here a list of files or directories to use. E.g. Channel.fromPath(["/path/*", "/path2/file"], type: 'any')
-INPUT = Channel.fromPath(params.input.tokenize())
+INPUT = file(params.output)
 OUTPUT = file(params.output)
 DEBUG_FOLDER = file(params.debugFolder)
 ANNOTATIONS = Channel.value(params.annotations)
 REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
+
 
 
 process ParseInput {
@@ -750,30 +751,41 @@ process DriverSummary {
 		"""
 }
 
-/*
+
+OUT_DECONSTRUCTSIGS = DECONSTRUCTSIGS.map{it -> [it.baseName.split('\\.')[0], it]}
+OUT_DNDSCV_ANNOTMUTS = DNDSCV_ANNOTMUTS.map{it -> [it.baseName.split('\\.')[0], it]}
+OUT_DNDSCV_GENEMUTS = DNDSCV_GENEMUTS.map{it -> [it.baseName.split('\\.')[0], it]}
+
 process Mutrate {
 	tag "Mutrate ${cohort}"
 	publishDir "${DEBUG_FOLDER}/mutrate", mode: "symlink", enabled: params.debug
 
     input:
         tuple val(cohort), path(weights), path(annotmuts), path(genemuts) from OUT_DECONSTRUCTSIGS.join(OUT_DNDSCV_ANNOTMUTS).join(OUT_DNDSCV_GENEMUTS)
+        path(drivers) from DRIVERS_SUMMARY
+		path(stats_cohorts) from COHORT_SUMMARY
 
     output:
-        tuple val(cohort), path(output) into OUT_MUTRATE
+	tuple val(cohort), path(output) into OUT_MUTRATE
+
 
 	script:
-		output = "${cohort}.mutrate.json"
+		output = "${cohort}_mutrate.out.json.gz"
 		"""
-		/usr/bin/python3 /mutrate/compute_mutrate.py \
+		/usr/local/bin/python /mutrate/compute_mutrate.py \
 			--annotmuts ${annotmuts} \
 			--genemuts ${genemuts} \
 			--weights ${weights} \
-			--cores ${task.cpus} \
-			--output ${output}
+            --drivers ${drivers} \
+            --oncotree /workspace/datasets/transfer/test_mutrate/build/containers/mutrate/oncotree_boostDM.tsv \
+            --cohorts ${stats_cohorts} \
+			--output ${cohort}_mutrate.out.json.gz \
+			--cores ${task.cpus}
 		"""
 
 }
 
+/*
 
 process CreateBoostDMDatasets {
 	tag "BoostDM datasets "
@@ -797,3 +809,4 @@ process CreateBoostDMDatasets {
 		"""
 }
 */
+
