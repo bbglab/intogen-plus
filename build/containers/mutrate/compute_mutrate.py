@@ -178,7 +178,7 @@ def genewise_run(gene, weights, annotmuts, genemuts):
 @click.option('--oncotree', type=click.Path(), help='path to oncotree file')
 @click.option('--cohorts', type=click.Path(), help='path to cohorts file')
 @click.option('--cores', default=os.cpu_count(), help='Max processes to run multiprocessing', type=click.INT)
-@click.option('--output', type=click.Path(), help='name of the output file')
+@click.option('--output', type=click.Path(), help='path of the output file')
 @click.option('--test', is_flag=True, help='test flag to run a reduced number of genes')
 def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, output, test):
     """
