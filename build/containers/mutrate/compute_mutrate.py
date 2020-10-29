@@ -231,7 +231,7 @@ def cli(annotmuts, genemuts, weights, drivers, oncotree, cohorts, cores, output,
     task = partial(genewise_run, weights=weights, annotmuts=annotmuts, genemuts=genemuts)
 
     # example of annotmuts value: "./annotmuts_files/CBIOP_WGS_PRAD_EURUROL_2017.annotmuts"
-    output_file_name = "./" + output
+    output_file_name = output
 
     whole_res = dict()
     with Pool(cores) as pool:
