@@ -17,4 +17,4 @@ From: python:3
     chmod -R a+rx ${SINGULARITY_ROOTFS}/mutrate/
 
 %post
-    pip install numpy pandas click tqdm
+    pip install numpy pandas click tqdm bgoncotree
