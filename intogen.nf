@@ -1,6 +1,6 @@
 
 // Set here a list of files or directories to use. E.g. Channel.fromPath(["/path/*", "/path2/file"], type: 'any')
-INPUT = file(params.output)
+INPUT = Channel.fromPath(params.input.tokenize())
 OUTPUT = file(params.output)
 DEBUG_FOLDER = file(params.debugFolder)
 ANNOTATIONS = Channel.value(params.annotations)
@@ -751,11 +751,7 @@ process DriverSummary {
 		"""
 }
 
-
-OUT_DECONSTRUCTSIGS = DECONSTRUCTSIGS.map{it -> [it.baseName.split('\\.')[0], it]}
-OUT_DNDSCV_ANNOTMUTS = DNDSCV_ANNOTMUTS.map{it -> [it.baseName.split('\\.')[0], it]}
-OUT_DNDSCV_GENEMUTS = DNDSCV_GENEMUTS.map{it -> [it.baseName.split('\\.')[0], it]}
-
+/*
 process Mutrate {
 	tag "Mutrate ${cohort}"
 	publishDir "${DEBUG_FOLDER}/mutrate", mode: "symlink", enabled: params.debug
@@ -784,7 +780,7 @@ process Mutrate {
 		"""
 
 }
-
+*/
 /*
 
 process CreateBoostDMDatasets {
