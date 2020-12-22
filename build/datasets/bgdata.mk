@@ -14,5 +14,3 @@ bgdata: | $(INTOGEN_DATASETS)
 	bgdata get intogen/coverage/hg19
 	bgdata get intogen/coverage/hg38
 	bgdata get intogen/dndscv/pan
-
-# TODO bgdata only if user is interested in offline mode

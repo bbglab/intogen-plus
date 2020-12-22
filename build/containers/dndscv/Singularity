@@ -1,4 +1,3 @@
-# TODO use an R image as base (3.5.2?)
 Bootstrap: docker
 From: debian:buster-slim
 

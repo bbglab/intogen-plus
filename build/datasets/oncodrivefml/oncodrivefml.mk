@@ -7,9 +7,8 @@ $(fml_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 
-#CADD_URL = http://krishna.gs.washington.edu/download/CADD/v${CADD}/GRCh${GENOME}/whole_genome_SNVs.tsv.gz
-# FIXME fix this
-CADD_URL = /workspace/datasets/CADD/v${cadd}/hg${genome}/whole_genome_SNVs.tsv.gz
+CADD_URL = http://krishna.gs.washington.edu/download/CADD/v${CADD}/GRCh${GENOME}/whole_genome_SNVs.tsv.gz
+#CADD_URL = /workspace/datasets/CADD/v${cadd}/hg${genome}/whole_genome_SNVs.tsv.gz
 FML_SCORES = $(fml_dir)/scores.tsv.gz
 $(FML_SCORES): ${fml_data_srcdir}/cadd.sh $$(REGIONS_CDS) $$(CADD) $$(GENOME) | $(fml_dir)
 	@echo Building OncodriveFML datasets

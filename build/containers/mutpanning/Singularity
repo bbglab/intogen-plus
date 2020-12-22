@@ -1,9 +1,6 @@
 Bootstrap: docker
 From: debian:stretch
 
-# TODO use another image
-# TODO include the DB in the image?
-
 %environment
     export LC_ALL=C.UTF-8
 
