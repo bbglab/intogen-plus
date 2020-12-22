@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: python:3
+From: python:3.6
 
 %environment
     export BBGLAB_HOME=/oncodrivefml
