@@ -54,11 +54,18 @@ you have downloaded the CADD scores.
 Less important notes
 ********************
 
-Although you can find many ``*.mk`` files,
+Although you can find many ``*.mk`` files (*makefiles*),
 they are meant to be called form the Makefile in this directory
 and not directly, as paths, or variables might not be properly defined.
 However, you can get an idea of what is the build process for each dataset
 or container.
+
+The structure of most of these ``*.mk`` files is very similar.
+This hints may help you reading the makefiles:
+
+- ``$$(VAR)``: ``VAR`` is defined in another makefile but required for this one
+- ``$@``: file to be created (the *target*)
+- ``$<``: first prerequisite
 
 We are providing two files for HotMAPS to avoid recomputing them;
 however we suggest you to recompute them. These files are:
