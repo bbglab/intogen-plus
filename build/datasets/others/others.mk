@@ -6,11 +6,16 @@ $(others_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 
-somatic_pon_url = "https://nextcloud.hartwigmedicalfoundation.nl/s/LTiKTd8XxBqwaiC/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
+#somatic_pon_url = "https://nextcloud.hartwigmedicalfoundation.nl/s/LTiKTd8XxBqwaiC/download?path=%2FHMFTools-Resources%2FSage&files=SOMATIC_PON.vcf.gz"
+#SOMATIC_PON = $(others_dir)/somatic_pon_count_filtered.tsv.gz
+#$(SOMATIC_PON): ${others_data_srcdir}/somatic_pon_counts.py | $(others_dir)
+#	@echo Getting somatic panel of normal counts
+#	python $< -i ${somatic_pon_url} -o $@
+
+# This is a temporal hack because the original file has been deleted
 SOMATIC_PON = $(others_dir)/somatic_pon_count_filtered.tsv.gz
-$(SOMATIC_PON): ${others_data_srcdir}/somatic_pon_counts.py | $(others_dir)
-	@echo Getting somatic panel of normal counts
-	python $< -i ${somatic_pon_url} -o $@
+$(SOMATIC_PON): ${others_data_srcdir}/bgdata_copy.sh | $(others_dir)
+	$< $(others_dir)
 
 
 OLFACTORY_RECEPTORS = $(others_dir)/olfactory_receptors.tsv
