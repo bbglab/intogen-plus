@@ -12,10 +12,8 @@ INTOGEN_CONTAINERS ?= ${build_dir}/containers
 
 # hg version
 genome = 38
-# FIXME update ensembl version 101
-ensembl ?= 92
-# FIXME upgrade CADD version 1.6
-cadd ?= 1.4
+ensembl ?= 101
+cadd ?= 1.6
 # number of cores to use in steps that allow them
 cores ?= 1
 
