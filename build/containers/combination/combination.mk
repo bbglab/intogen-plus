@@ -5,8 +5,6 @@ combination_container_srcdir = ${src_containers}/combination
 
 combination_code_folder = ${src_containers}/../../combination
 
-# FIXME set up a separate repo for the combination?
-
 combination_container_src = ${combination_container_srcdir}/Singularity \
 	${combination_code_folder}/setup.py \
 	$(wildcard ${combination_code_folder}/intogen_combination/*) \

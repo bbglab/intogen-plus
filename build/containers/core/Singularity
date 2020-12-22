@@ -13,7 +13,6 @@ From: python:3
 %post
 
     # Install bgparsers
-    # TODO make a release and install it
     pip --no-cache-dir install https://bitbucket.org/bgframework/bgparsers/get/master.tar.gz
 	pip install /core
 
