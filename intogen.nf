@@ -76,7 +76,7 @@ process LoadPlatform {
 		"""
 }
 
-PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3; PLATFORMS4 }
+PLATFORMS.into { PLATFORMS1; PLATFORMS2; PLATFORMS3 }
 
 process LoadGenome {
 	tag "Load reference genome ${cohort}"
@@ -132,7 +132,7 @@ process FormatSignature {
 	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
 	input:
-		tuple val(cohort), path(input), val(platform) from VARIANTS1.join(PLATFORMS2)
+		tuple val(cohort), path(input) from VARIANTS1
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_SIG
@@ -154,7 +154,7 @@ process Signature {
 	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
 	input:
-		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
+		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS2)
 
 	output:
 		tuple val(cohort), path(output) into SIGNATURES
@@ -645,7 +645,7 @@ process CohortCounts {
 	tag "Count variants ${cohort}"
 
     input:
-        tuple val(cohort), path(input), val(cancer), val(platform) from COHORTS5.join(CANCERS2).join(PLATFORMS4)
+        tuple val(cohort), path(input), val(cancer), val(platform) from COHORTS5.join(CANCERS2).join(PLATFORMS3)
 
     output:
 		tuple val(cohort), path("*.counts") into COHORT_COUNTS
