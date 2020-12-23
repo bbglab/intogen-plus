@@ -2,7 +2,7 @@
 // Set here a list of files or directories to use. E.g. Channel.fromPath(["/path/*", "/path2/file"], type: 'any')
 INPUT = Channel.fromPath(params.input.tokenize())
 OUTPUT = file(params.output)
-DEBUG_FOLDER = file(params.debugFolder)
+STEPS_FOLDER = file(params.stepsFolder)
 ANNOTATIONS = Channel.value(params.annotations)
 REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
 
@@ -11,7 +11,7 @@ REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
 process ParseInput {
 	tag "Parse input ${input}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/inputs", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/inputs", mode: "copy"
 	errorStrategy 'finish'
 
 	input:
@@ -100,7 +100,7 @@ process ProcessVariants {
 	tag "Process variants ${cohort}"
 	label "core"
 	errorStrategy 'ignore'  // if a cohort does not pass the filters, do not proceed with it
-	publishDir "${DEBUG_FOLDER}/variants", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/variants", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input), val(platform), val(genome) from COHORTS4.join(PLATFORMS1).join(GENOMES)
@@ -129,7 +129,7 @@ VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5 }
 process FormatSignature {
 	tag "Prepare for signatures ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS1.join(PLATFORMS2)
@@ -151,7 +151,7 @@ REGIONS_PREFIX = ['WXS': 'cds', 'WGS': 'wg']
 process Signature {
 	tag "Signatures ${cohort}"
 	label "bgsignature"
-	publishDir "${DEBUG_FOLDER}/signature", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS3)
@@ -182,8 +182,7 @@ SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4 }
 process FormatFML {
 	tag "Prepare for FML ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/oncodrivefml", mode: "symlink", enabled: params.debug
-
+	publishDir "${STEPS_FOLDER}/oncodrivefml", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from VARIANTS2
@@ -202,7 +201,7 @@ process FormatFML {
 
 process OncodriveFML {
     tag "OncodriveFML ${cohort}"
-    publishDir "${DEBUG_FOLDER}/oncodrivefml", mode: "symlink", enabled: params.debug
+    publishDir "${STEPS_FOLDER}/oncodrivefml", mode: "copy"
 
     input:
         tuple val(cohort), path(input), path(signature)  from VARIANTS_FML.join(SIGNATURES1)
@@ -225,7 +224,7 @@ process OncodriveFML {
 process FormatCLUSTL {
 	tag "Prepare for CLUSTL ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/oncodriveclustl", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/oncodriveclustl", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from VARIANTS3
@@ -244,10 +243,10 @@ process FormatCLUSTL {
 
 process OncodriveCLUSTL {
     tag "OncodriveCLUSTL ${cohort}"
-    publishDir "${DEBUG_FOLDER}/oncodriveclustl", mode: "symlink", enabled: params.debug
+    publishDir "${STEPS_FOLDER}/oncodriveclustl", mode: "copy"
 
     input:
-        tuple val(cohort), path(input), path(signature), val(cancer)  from VARIANTS_CLUSTL.join(SIGNATURES2).join(CANCERS1)
+        tuple val(cohort), path(input), path(signature), val(cancer) from VARIANTS_CLUSTL.join(SIGNATURES2).join(CANCERS1)
         path regions from REGIONS
 
     output:
@@ -280,7 +279,7 @@ process OncodriveCLUSTL {
 process FormatDNDSCV {
 	tag "Prepare for DNDSCV ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/dndscv", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/dndscv", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from VARIANTS4
@@ -298,7 +297,7 @@ process FormatDNDSCV {
 
 process dNdScv {
     tag "dNdScv ${cohort}"
-    publishDir "${DEBUG_FOLDER}/dndscv", mode: "symlink", enabled: params.debug
+    publishDir "${STEPS_FOLDER}/dndscv", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from VARIANTS_DNDSCV
@@ -322,7 +321,7 @@ OUT_DNDSCV.into{ OUT_DNDSCV1; OUT_DNDSCV2 }
 process FormatVEP {
 	tag "Prepare for VEP ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/vep", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/vep", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from VARIANTS5
@@ -342,7 +341,7 @@ process FormatVEP {
 
 process VEP {
 	tag "VEP ${cohort}"
-	publishDir "${DEBUG_FOLDER}/vep", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/vep", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from VARIANTS_VEP
@@ -365,7 +364,7 @@ process VEP {
 process ProcessVEPoutput {
 	tag "Process vep output ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/vep", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/vep", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from OUT_VEP
@@ -387,7 +386,7 @@ PARSED_VEP.into { PARSED_VEP1; PARSED_VEP2; PARSED_VEP3; PARSED_VEP4; PARSED_VEP
 process FilterNonSynonymous {
 	tag "Filter non synonymus ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/nonsynonymous", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/nonsynonymous", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from PARSED_VEP1
@@ -406,7 +405,7 @@ process FilterNonSynonymous {
 process FormatSMRegions {
 	tag "Prepare for SMRegions ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/smregions", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/smregions", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP_NONSYNONYMOUS
@@ -424,7 +423,7 @@ process FormatSMRegions {
 
 process SMRegions {
 	tag "SMRegions ${cohort}"
-	publishDir "${DEBUG_FOLDER}/smregions", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/smregions", mode: "copy"
 
     input:
         tuple val(cohort), path(input), path(signature)  from VARIANTS_SMREGIONS.join(SIGNATURES3)
@@ -452,7 +451,7 @@ OUT_SMREGIONS.into { OUT_SMREGIONS1; OUT_SMREGIONS2 }
 process FormatCBaSE {
 	tag "Prepare for CBaSE ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/cbase", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/cbase", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP2
@@ -470,7 +469,7 @@ process FormatCBaSE {
 
 process CBaSE {
 	tag "CBaSE ${cohort}"
-	publishDir "${DEBUG_FOLDER}/cbase", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/cbase", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from VARIANTS_CBASE
@@ -489,7 +488,7 @@ process CBaSE {
 process FormatMutPanning {
 	tag "Prepare for MutPanning ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/mutpanning", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/mutpanning", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP3
@@ -510,7 +509,7 @@ process FormatMutPanning {
 
 process MutPanning {
 	tag "MutPanning ${cohort}"
-	publishDir "${DEBUG_FOLDER}/mutpanning", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/mutpanning", mode: "copy"
 
     input:
         tuple val(cohort), path(mutations), path(samples) from VARIANTS_MUTPANNING
@@ -534,7 +533,7 @@ process MutPanning {
 process FormatHotMAPS {
 	tag "Prepare for HotMAPS ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/hotmaps", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/hotmaps", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP4
@@ -552,7 +551,7 @@ process FormatHotMAPS {
 
 process HotMAPS {
 	tag "HotMAPS ${cohort}"
-	publishDir "${DEBUG_FOLDER}/hotmaps", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/hotmaps", mode: "copy"
 
     input:
         tuple val(cohort), path(input), path(signatures) from VARIANTS_HOTMAPS.join(SIGNATURES4)
@@ -572,7 +571,7 @@ process HotMAPS {
 
 process Combination {
 	tag "Combination ${cohort}"
-	publishDir "${DEBUG_FOLDER}/combination", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/combination", mode: "copy"
 
     input:
         tuple val(cohort), path(fml), path(clustl), path(dndscv), path(smregions), path(cbase), path(mutpanning), path(hotmaps) from OUT_ONCODRIVEFML.join(OUT_ONCODRIVECLUSTL).join(OUT_DNDSCV1).join(OUT_SMREGIONS1).join(OUT_CBASE).join(OUT_MUTPANNING).join(OUT_HOTMAPS)
@@ -598,7 +597,7 @@ process Combination {
 process FormatdeconstructSigs {
 	tag "Prepare for deconstructSigs ${cohort}"
 	label "core"
-	publishDir "${DEBUG_FOLDER}/deconstructSigs", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/deconstructSigs", mode: "copy"
 
 	input:
 		tuple val(cohort), path(input) from PARSED_VEP5
@@ -618,7 +617,7 @@ VARIANTS_DECONSTRUCTSIGS.into{ VARIANTS_DECONSTRUCTSIGS1; VARIANTS_DECONSTRUCTSI
 
 process deconstructSigs {
 	tag "deconstructSigs ${cohort}"
-	publishDir "${DEBUG_FOLDER}/deconstructSigs", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/deconstructSigs", mode: "copy"
 
     input:
         tuple val(cohort), path(input) from VARIANTS_DECONSTRUCTSIGS1
@@ -705,7 +704,7 @@ process MutationsSummary {
 
 process DriverDiscovery {
 	tag "Driver discovery ${cohort}"
-	publishDir "${DEBUG_FOLDER}/drivers", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/drivers", mode: "copy"
 	label "core"
 
     input:
@@ -754,7 +753,7 @@ process DriverSummary {
 /*
 process Mutrate {
 	tag "Mutrate ${cohort}"
-	publishDir "${DEBUG_FOLDER}/mutrate", mode: "symlink", enabled: params.debug
+	publishDir "${STEPS_FOLDER}/mutrate", mode: "copy"
 
     input:
         tuple val(cohort), path(weights), path(annotmuts), path(genemuts) from OUT_DECONSTRUCTSIGS.join(OUT_DNDSCV_ANNOTMUTS).join(OUT_DNDSCV_GENEMUTS)
