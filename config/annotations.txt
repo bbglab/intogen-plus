@@ -2,3 +2,4 @@
 # Default dataset is filename
 PLATFORM = WGS
 GENOMEREF = HG38
+CANCER = UNKNOWN
