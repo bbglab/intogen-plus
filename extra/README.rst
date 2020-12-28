@@ -18,7 +18,7 @@ pandas
 
 The following environment variables need to be defined:
 
-- :envvar:`INTOGEN_INPUTS`: path to the inf_datasets.csv files
+- :envvar:`INTOGEN_INPUTS`: path to the info_datasets.csv files (folders that contain them)
 - :envvar:`INTOGEN_RESULTS`: path to the output of the run of
   the pipeline
 

@@ -51,9 +51,7 @@ There are a number of parameters and options that can be added.
      See the input section for more details.
 
    **--debug true**
-     Show intermediate results and do not halt the execution on error.
-     This is useful when dealing with many cohorts in which some
-     are likely to fail.
+     Ask methods for a more verbose output if the option is available.
 
 Input & output
 --------------
