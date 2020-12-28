@@ -14,7 +14,4 @@ From: python:3.6
 %post
 
     # Install OncodriveFML
-    # TODO make appropriate releases
-    # TODO oncodrive check to update bokeh version to 2
-    pip --no-cache-dir install https://bitbucket.org/bgframework/bgconfig/get/develop.tar.gz
-    pip --no-cache-dir install https://bitbucket.org/bbglab/oncodrivefml/get/test.tar.gz
+    pip --no-cache-dir install oncodrivefml
