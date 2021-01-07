@@ -13,6 +13,7 @@ ttype=args[1]
 x<-read.table(paste(ttype, sep=""), header=T, sep="\t", colClasses=c(NA,NA,NA,NA,NA,"NULL"))
 colnames(x) <- c("chr", "pos", "ref", "alt", "Sample")
 x$chr <- as.factor(x$chr)
+x$Sample <- as.factor(x$Sample)
 
 # read genome build as 2nd argument
 
