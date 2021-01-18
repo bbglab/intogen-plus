@@ -168,6 +168,13 @@ def filter_(file, genome, cutoff, stats):
             skipped['n_sequence'] += 1
             continue
 
+        if v['ALT_TYPE'] == 'snp':
+            # Compute signature and count mismatch
+            ref = refseq(genome, v['CHROMOSOME'], v['POSITION'], size=1).upper()
+            if ref != v['REF']:
+                skipped['mismatch'] += 1
+                continue
+
         # Liftover to hg38
         strand = '+' if 'STRAND' not in v else v['STRAND']
 
@@ -178,13 +185,20 @@ def filter_(file, genome, cutoff, stats):
             skipped['noliftover'] += 1
             continue
 
+        lo_chr = lo_pos[0][0].replace('chr', '')
+        if lo_chr not in CHROMOSOMES:
+            skip_chromosome_names.add(lo_chr)
+            skip_chromosome += 1
+            continue
+
         lo_pos = lo_pos[0][1] + 1
         # check the position in in the chromosome
         # TODO check, because the old version compares against the other genome
-        if lo_pos < 1 or lo_pos > CHR_MAX[v['CHROMOSOME']]:
+        if lo_pos < 1 or lo_pos > CHR_MAX[lo_chr]:
             skipped['noliftover'] += 1
             continue
 
+        v['CHROMOSOME'] = lo_chr
         v['POSITION'] = lo_pos
 
         # Skip variants that are in the somatic_pon_count_filtered.tsv.gz file
@@ -198,7 +212,7 @@ def filter_(file, genome, cutoff, stats):
             ref = refseq('hg38', v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
             alt = ''.join([ref[0], v['ALT'], ref[2]])
             if ref[1] != v['REF']:
-                skipped['mismatch'] += 1
+                skipped['liftover_mismatch'] += 1
                 continue
             signature_key = "{}>{}".format(ref, alt)
             signature[signature_key] = signature.get(signature_key, 0) + 1
@@ -232,6 +246,11 @@ def filter_(file, genome, cutoff, stats):
     same_alt = stats['skip']['same_alt']
     if same_alt > 0:
         stats["warning_same_alternate"] = f"There are {same_alt} entries with same reference and alternate"
+
+    lo_mismatches = stats['skip']['liftover_mismatch']
+    ratio_lo_mismatch = (lo_mismatches / snps) if snps > 0 else 0
+    if ratio_lo_mismatch > 0.3:
+        raise DatasetError(f'There are {lo_mismatches} of {snps} genome reference mismatches after liftover. More than 30%.')
 
     count_after = stats['count']['after']
     if count_after == 0:
