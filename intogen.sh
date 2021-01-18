@@ -12,7 +12,6 @@ function run() {
 
 function test() {
 	# Must be executed within this directory
-	#nextflow run intogen.nf --input /workspace/datasets/intogen_datasets/test/input/ --output test_output --debug true -profile bbglab -resume
 	nextflow run intogen.nf --input ${PWD}/test/pipeline/input/cbioportal_prad_broad --output test/output --debug true -profile bbglab -resume
 }
 
