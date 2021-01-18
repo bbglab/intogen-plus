@@ -109,6 +109,15 @@ This software (except singularity) can be installed with
 We have tested it with Singularity version 2.6.1
 
 
+The ``env.yml`` file is provided for reproducibility reason.
+It contains the dependencies installed with conda in the
+*build* environment. Some of them were already available at
+machine level, like ``make`` or ``awk``.
+It is recommended to build a new environment from scratch and
+only use the versions in the YAML file if needed.
+
+
+
 Updating versions
 *****************
 

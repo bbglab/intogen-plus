@@ -5,7 +5,7 @@
 ### Install requirements
 
 1. Install [singularity](https://sylabs.io/singularity/) (the pipeline has been tested 
-with version 2.x. You can use `conda install -c bioconda singularity`)
+with version 2.x)
 2. Install nextflow  (You can use `conda install nextflow`)
 3. Clone this repository
 
@@ -14,7 +14,7 @@ with version 2.x. You can use `conda install -c bioconda singularity`)
 The IntOGen pipeline requires a collection of datasets and
 Singularity containers in order to run.
 
-> :warning: The pipeline has been tested with **hg38** and **vep92**
+> :warning: The pipeline has been tested with **hg38** and **vep92** and **vep101**
 
 See the README.rst file in the ``build`` folder for further details.
 
@@ -35,16 +35,21 @@ In order to execute the pipeline, you only need to execute:
 nextflow run intogen.nf -resume -profile local --input test/ --output ./output
 ```
 
-For further details, please check our documentation.
+For further details, please check our documentation: http://intogen.rtfd.io/
 
 [comment]: <> (FIXME add example in test)
+
+To avoid stopping the pipeline execution for one or a few incorrect
+input, we have decided to ignore the errors of the steps by default.
+However, we advise to review each of them carefully to 
+understand the underlying reasons.
 
 
 ### Licensing
 
 IntoGEn uses a variety of software tools and datasets that
 are released under a variety of licenses.
-In order to accomadate all of them, the pipeline itself is released
+In order to accommodate all of them, the pipeline itself is released
 under GNU General Public License version 3.
 
 If you are using it for research/academic purposes it should be
