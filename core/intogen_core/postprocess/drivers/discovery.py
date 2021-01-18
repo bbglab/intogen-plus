@@ -4,6 +4,7 @@ import os
 import click
 import pandas as pd
 
+from intogen_core.exceptions import IntogenError
 from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
 from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
@@ -12,6 +13,12 @@ from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
 from intogen_core.postprocess.drivers.role import role
 from intogen_core.postprocess.drivers.signature import analysis_signatures_gene
 from intogen_core.postprocess.drivers.vetting import vet
+
+
+OUT_COLUMNS = ["SYMBOL", "COHORT", "METHODS", "SAMPLES",
+               "QVALUE_COMBINATION", "CGC_GENE", "CGC_CANCER_GENE",
+               "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
+               "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL", "ROLE"]
 
 
 def get_ratio_indels(df_combined):
@@ -86,9 +93,17 @@ def run(combination, mutations, sig_likelihood,
     prepared_file = os.path.join(os.path.dirname(output), 'information_vetting_genes.tsv')
     df.to_csv(prepared_file, sep="\t", index=False)
 
-
     # Perform vetting
-    df = vet(df, combination, ctype)
+    try:
+        df = vet(df, combination, ctype)
+    except IntogenError as e:
+        # NO drivers to perform the vetting
+        print(str(e))
+        # Create and empty dataframe and exit without error
+        df = pd.DataFrame(columns=OUT_COLUMNS)
+        df.to_csv(output, sep="\t", index=False)
+        return
+
     df.rename(
         columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
                  "Significant_Bidders": "METHODS",
@@ -122,7 +137,6 @@ def run(combination, mutations, sig_likelihood,
     drivers_file = os.path.join(os.path.dirname(output), f'drivers.tsv')
     df.to_csv(drivers_file, sep="\t", index=False)
 
-
     # Add drivers data
 
     df_drivers = df.rename(columns={'MUTS': 'MUTATIONS'})
@@ -145,11 +159,7 @@ def run(combination, mutations, sig_likelihood,
     # Compute % of samples per cohort
     df_drivers["COHORT"] = cohort
 
-    columns = ["SYMBOL", "COHORT", "METHODS", "SAMPLES",
-               "QVALUE_COMBINATION", "CGC_GENE", "CGC_CANCER_GENE",
-               "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
-               "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL", "ROLE"]
-    df_drivers[columns].sort_values(["SYMBOL"]).to_csv(output, sep="\t", index=False)
+    df_drivers[OUT_COLUMNS].sort_values(["SYMBOL"]).to_csv(output, sep="\t", index=False)
     # FIXME TRANSCRIPT
 
 
