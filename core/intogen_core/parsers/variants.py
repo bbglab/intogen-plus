@@ -25,7 +25,7 @@ for chr_ in CHROMOSOMES:
 class _NoLiftOver:
 
     def convert_coordinate(self, chr_, pos, strand):
-        return [(None, pos)]
+        return [(chr_, pos)]
 
 
 def liftover_factory(from_, to):
@@ -181,7 +181,7 @@ def filter_(file, genome, cutoff, stats):
         # TODO rewrite this part to make it more meaningful
         lo_pos = lo.convert_coordinate(f"chr{v['CHROMOSOME']}", v['POSITION'] - 1, strand)
 
-        if lo_pos is None or len(lo_pos) != 1:
+        if lo_pos is None or len(lo_pos) != 1 or lo_pos[0][0] is None:
             skipped['noliftover'] += 1
             continue
 
