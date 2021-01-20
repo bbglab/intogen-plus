@@ -256,7 +256,7 @@ process OncodriveCLUSTL {
 	script:
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
 		debugOpt =  (params.debug)? '--log-level debug': ''
-		if (cancer == 'SKCM')
+		if (['CM', 'SBCC', 'SSCC'].contains(cancer))
 			"""
 			oncodriveclustl -i ${input} -r ${regions} \
 				-g hg38 -sim region_restricted -n 1000 -kmer 5 \
