@@ -15,6 +15,7 @@ Requirements:
 pytabix
 numpy
 pandas
+bgoncotree
 
 The following environment variables need to be defined:
 
