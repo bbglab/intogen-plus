@@ -23,7 +23,8 @@ EPD	CNS	Ependymoma
 ESCA	SOLID	Esophageal cancer	
 EWS	S	Ewing's sarcoma	
 G	CNS	Glioma	
-GBM	G	Glioblastoma	
+GBM	G	Glioblastoma
+GCT	CANCER	Germ cell tumor
 HBC	LIVER	Hepatic blastoma	
 HC	LIVER	Hepatic cancer	
 HGG	G	High-grade Glioma	
@@ -41,12 +42,14 @@ LY	L	Lymphoma
 MBL	CNS	Medulloblastoma	
 MDPS	NON_SOLID	Myelodysplastic syndrome neoplasm	
 MESO	SOLID	Mesothelioma	
-MGCT	SOLID	Male germ cell tumor	
+MGCT	GCT	Male germ cell tumor
 MM	NON_SOLID	Multiple myeloma	
 NB	SOLID	Neuroblastoma	
 NHLY	LY	Non-hodking lymphoma	
 NON_SOLID	CANCER	Non-Solid cancer	
-NSCLC	LUNG_CANCER	Non small cell lung cancer	
+NSCLC	LUNG_CANCER	Non small cell lung cancer
+NSGCT	GCT	Nonseminomatous germ cell tumor
+NSGCTHM	GCT	Nonseminomatous germ cell tumor hematopoietic malignancy
 NSPH	SOLID	Nasopharyngeal cancer	
 OS	S	Osteosarcoma	
 OV	SOLID	Ovary cancer	
