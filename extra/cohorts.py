@@ -17,6 +17,7 @@ def run(paths, cohorts, dict_label_names, output='cohorts.tsv'):
     for path_ in paths:
         data.append(read_info(path_))
     df_info = pd.concat(data, sort=True)
+    df_info.drop('cancer_type', axis=1, inplace=True)  # use cancer type directly from the pipeline
     df_info.columns = map(str.upper, df_info.columns)
 
     df = pd.read_csv(cohorts, sep='\t')
@@ -27,7 +28,7 @@ def run(paths, cohorts, dict_label_names, output='cohorts.tsv'):
         d = json.load(f)
 
     tree = BGOncoTree(file=path.join(environ['INTOGEN_DATASETS'], 'oncotree', 'tree.tsv'))
-    d = {node.id: node.name for node in tree.descendants()}
+    d = {node.id: node.name for node in tree.descendants('CANCER')}
 
     df_final["CANCER_TYPE_NAME"] = df_final["CANCER_TYPE"].map(d)
     columns = ["COHORT", "CANCER_TYPE", "CANCER_TYPE_NAME", "SOURCE", "PLATFORM", "PROJECT", "REFERENCE", "TYPE", "TREATED", "AGE",  "SAMPLES", "MUTATIONS", "WEB_SHORT_COHORT_NAME", "WEB_LONG_COHORT_NAME"]

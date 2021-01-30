@@ -2,7 +2,7 @@
 
 # The following environment variables must be defined
 INTOGEN_DATASETS ?= ../datasets
-export INTOGEN_DATASETS=
+export INTOGEN_DATASETS
 # FOLDERS with input datasets
 INPUTS = ${INTOGEN_INPUTS}
 PIPELINE = ${INTOGEN_RESULTS}
