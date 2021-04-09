@@ -50,4 +50,4 @@ Act (resp. LoF) if its corresponding point sits above (resp. below) the
 diagonal (\ :math:`x = y`\ ) up to an uncertainty threshold of 0.1. Genes
 within the uncertainty area as well as genes with
 :math:`\omega_{\text{non}} < \ 1` and :math:`\omega_{\text{mis}} < \ 1`
-were deemed “ambiguous”.
+were deemed "ambiguous".
