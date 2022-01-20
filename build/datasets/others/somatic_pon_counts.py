@@ -18,7 +18,7 @@ def somatic_filter(input_url, output_file):
                 continue
             chrom, pos, _id, ref, alt, qual, _filter, info = line.split('\t')
             info = dict([j.split('=') for j in [i for i in info.split(';')]])
-            if int(info.get('SOMATIC_PON_COUNT', 0)) > 5:
+            if int(info.get('PON_COUNT', 0)) > 5:
                 fo.write(f'{chrom}\t{pos}\t{ref}\t{alt}\n')
 
     temp.close()
