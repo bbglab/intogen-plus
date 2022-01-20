@@ -28,12 +28,19 @@ $(OLFACTORY_RECEPTORS): | $(others_dir)
 NEGATIVE_GENE_SET = $(others_dir)/negative_gene_set.tsv
 NON_EXPRESSED_GENES = $(others_dir)/non_expressed_genes_tcga.tsv
 
+#Add mapping files
+TTYPES_MAP = $(others_dir)/mapping_oncotree_ttypes.json
+SYMBOLS_MAP = $(others_dir)/mapping_new_hugo_symbols.json
+
+
 $(NEGATIVE_GENE_SET): ${others_data_srcdir}/create_negative_set.py $(OLFACTORY_RECEPTORS) | $(others_dir)
 	@echo Building negative set
 	python $< \
 		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
 		--output_total $(NEGATIVE_GENE_SET) \
 		--output_non_expressed $(NON_EXPRESSED_GENES)
+		--dict_mapping_ttypes $(TTYPES_MAP)
+		--dict_mapping_symbols $(SYMBOLS_MAP)
 	touch $(NEGATIVE_GENE_SET)
 	touch $(NON_EXPRESSED_GENES)
 

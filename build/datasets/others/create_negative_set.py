@@ -7,6 +7,9 @@ Creates a negative set of genes. A gene is not considered cancer-related if:
 Regarding the expression of the genes:
     * samples are considered not expressed if their log2(RSEM) <= 0
     * genes are considered not expressed if 80% of the samples are not expressed
+
+Tumor types (ttypes) are updated to new oncotree version (Nov 2021).
+Gene names (symbols) are updated to new ensembl/vep release (101)
 """
 
 # Import modules
@@ -15,11 +18,12 @@ import random
 import click
 import pandas as pd
 import bgdata
+import json
 
 
 class NegativeSet:
 
-    def __init__(self, olfactory_receptors):  # path_expression_data):
+    def __init__(self, olfactory_receptors,dict_mapping_ttypes,dict_mapping_symbols):  # path_expression_data):
         """Initialize the class
         :param olfactory_receptors: path, file with a list of olfactory receptors
         :return: None
@@ -27,7 +31,11 @@ class NegativeSet:
         df_olfactory_receptors = pd.read_csv(olfactory_receptors, sep='\t', header=0)
         self.olfactory_receptors = set(df_olfactory_receptors['Symbol'].tolist())
         self.path_expression_data = bgdata.get('intogen/expression/tcga_pancanatlas')  # path_expression_data
-        self.negative_set, self.not_expressed = self.create_negative_set()
+        with open(dict_mapping_ttypes) as json_file:
+            self.oncotree_dict = json.load(json_file)
+        with open(dict_mapping_symbols) as json_file:
+            self.symbols_dict = json.load(json_file)
+        self.negative_set, self.not_expressed = self.create_negative_set()    
 
     def create_negative_set(self):
         """Create a negative set of genes
@@ -35,13 +43,18 @@ class NegativeSet:
         """
         results = {}
         long_genes = set([
-            'HMCN1', 'TTN', 'OBSCN', 'GPR98',  'RYR2', 'RYR3'
+            'HMCN1', 'TTN', 'OBSCN', 'ADGRV1',  'RYR2', 'RYR3'
         ])
         not_expressed_pancancer = {}
         # for input_file in glob(os.path.join(self.path_expression_data, '*.txt')):
         #     if 'samplecorr' in input_file:
         #         continue
         data = pd.read_csv(self.path_expression_data, header=0, sep='\t', compression='infer')
+
+        #Change ttypes to new oncotree types and gene names to new hugo symbols        
+        data['TUMOR_TYPE'] = data['TUMOR_TYPE'].apply(lambda x: self.oncotree_dict[x] if x in self.oncotree_dict.keys() else x)
+        data['GENE'] = data['GENE'].apply(lambda x: self.symbols_dict[x] if x in self.symbols_dict.keys() else x)
+        
         tumors = data.groupby(by='TUMOR_TYPE')
         for tumor, df in tumors:
             # tumor = os.path.splitext(os.path.basename(input_file))[0]
@@ -116,8 +129,10 @@ class NegativeSet:
 # @click.option('--path_expression_data', 'path_expression_data', help='Path to the expression data')
 @click.option('--output_total', 'output_total', help='Output file of the total file')
 @click.option('--output_non_expressed', 'output_non_expressed', help='Output file of the non-expressed genes')
-def cmdline(olfactory_receptors, output_total, output_non_expressed):  # path_expression_data
-    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors)  # path_expression_data=path_expression_data)
+@click.option('--dict_mapping_ttypes','dict_mapping_ttypes', help='Mapping file of tumor type to new oncotree code')
+@click.option('--dict_mapping_symbols','dict_mapping_symbols',help='Mapping file of gene symbols to new HUGO symbols')
+def cmdline(olfactory_receptors, output_total, output_non_expressed, dict_mapping_ttypes, dict_mapping_symbols):  # path_expression_data
+    negative_set = NegativeSet(olfactory_receptors=olfactory_receptors,dict_mapping_ttypes=dict_mapping_ttypes,dict_mapping_symbols=dict_mapping_symbols)  # path_expression_data=path_expression_data)
     negative_set.save(output=output_total, output_expression=output_non_expressed)
 
 
