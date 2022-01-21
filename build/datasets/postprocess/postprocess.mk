@@ -17,7 +17,8 @@ $(ARTIFACTS): ${postprocess_datasets_srcdir}/artifacts.json | $(postprocess_dir)
 
 CANCERMINE = $(postprocess_dir)/cancermine_sentences.tsv
 $(CANCERMINE): | $(postprocess_dir)
-	wget -O $@ https://zenodo.org/record/2662509/files/cancermine_sentences.tsv
+	wget -O $@ https://zenodo.org/record/5764207/files/cancermine_sentences.tsv #updated link (release 7/12/21)
+	#https://zenodo.org/record/2662509/files/cancermine_sentences.tsv previous link
 
 
 GENES_BLACKLIST = $(postprocess_dir)/black_listed.txt
