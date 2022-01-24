@@ -5,7 +5,7 @@ import click
 import pandas as pd
 
 from intogen_core.exceptions import IntogenError
-from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
+# from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
 from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
 from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
@@ -28,11 +28,11 @@ def get_ratio_indels(df_combined):
     df_agg.columns = df_agg.columns.droplevel()
     if df_numbers[df_numbers["TYPE_MUT"] == "INDEL"].shape[0] == 0:
         df_agg["INDEL"] = 0.0
-        df_agg.columns = ["GENE", "SNP", "INDEL"]
+        df_agg.columns = ["GENE", "SNV", "INDEL"]
     else:
-        df_agg.columns = ["GENE", "INDEL", "SNP"]
+        df_agg.columns = ["GENE", "INDEL", "SNV"]
 
-    df_agg["INDEL/SNP"] = df_agg.apply(lambda row: row["INDEL"] / (row["SNP"] + row["INDEL"]), axis=1)
+    df_agg["INDEL/SNV"] = df_agg.apply(lambda row: row["INDEL"] / (row["SNV"] + row["INDEL"]), axis=1)
 
     return df_agg
 
@@ -57,43 +57,56 @@ def run(combination, mutations, sig_likelihood,
     df = pd.read_csv(mutations, sep="\t")
 
     # 1. Samples with more than 2 mutations in a gene are likely an artifact
+    print('1. Samples with more than 2 mutations in a gene are likely an artifact')
     genes_warning_samples = filter_samples_by_nmuts(df, muts)
 
-    # 2. Analysis of signatures
+    # 2. Analysis of signatures: to detect samples with hypermutated behaviour
+    print('2. Analysis of signatures: to detect samples with hypermutated behaviour')
     df_genes, df_combined = analysis_signatures_gene(sig_likelihood, df)
 
-    # 3. Ratio Ratio indels SNP
+    # 3. Ratio Ratio indels SNV
+    print('3. Ratio indels SNV')
     df_agg = get_ratio_indels(df_combined)
 
     # 4. Combine all information
+    print('4. Combine all information')
     df = pd.merge(df_agg, df_genes, how="outer")
     df = pd.merge(df, genes_warning_samples, how="left")
     df.fillna(0.0, inplace=True)
 
-    # Filter by expression
+    # 5. Add expression info
+    print('5. Add expression info')
     df = filter_by_expression(df, ctype)
 
-    # Filter by Polymorphism
+    # 6. Add Polymorphism info
+    print('6. Add Polymorphism info')
     df = filter_by_polymorphism(df)
 
-     # Add filter by olfactory receptors
+    # 7. Add filter by olfactory receptor
+    print('7. Add filter by olfactory receptors')
     df = filter_by_olfactory_receptors(df)
 
-    # Add filter by known artifacts
+    # 8. Add filter by known artifacts and black listed
+    print('8. Add filter by known artifacts and black listed')
     artifacts_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'artifacts.json')
     with open(artifacts_file) as f:
         artifacts = json.load(f)
-    df["Warning_Artifact"] = df.apply(lambda row: row["GENE"] in artifacts["suspects"], axis=1)
+    black_listed_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'black_listed.txt')
+    black_listed = read_file(black_listed_file)
+
+    df["Warning_Artifact"] = df.apply(lambda row: (row["GENE"] in artifacts["suspects"]) or (row['GENE'] in black_listed), axis=1)
     df["Known_Artifact"] = df.apply(lambda row: row["GENE"] in artifacts["known"], axis=1)
 
-    # Add filter by literature
+    # 9. Add filter by literature (cancermine) and white listed
+    print('9. Add filter by literature (cancermine) and white listed')
     df = include_literature(df)
 
-    # Checkpoint
-    prepared_file = os.path.join(os.path.dirname(output), 'information_vetting_genes.tsv')
-    df.to_csv(prepared_file, sep="\t", index=False)
+    # # Checkpoint #This may not be necessary
+    # prepared_file = os.path.join(os.path.dirname(output), 'information_vetting_genes.tsv')
+    # df.to_csv(prepared_file, sep="\t", index=False)
 
-    # Perform vetting
+    # 10. Perform vetting
+    print('10. Perform vetting')
     try:
         df = vet(df, combination, ctype)
     except IntogenError as e:
@@ -104,24 +117,8 @@ def run(combination, mutations, sig_likelihood,
         df.to_csv(output, sep="\t", index=False)
         return
 
-    df.rename(
-        columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
-                 "Significant_Bidders": "METHODS",
-                 "n_papers": "NUM_PAPERS",
-                 "cancer_type": "CANCER_TYPE"}, inplace=True)
-    df.columns = map(str.upper, df.columns)
-
-    # Checkpoint
-    vet_file = os.path.join(os.path.dirname(output), 'all_drivers.tsv')
-    columns = ["SYMBOL", "METHODS", "QVALUE_COMBINATION", "TIER",
-               "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
-               "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
-               "SAMPLES_3MUTS", "OR_WARNING",
-               "KNOWN_ARTIFACT", "NUM_PAPERS", "FILTER"]
-    df[columns].sort_values(["SYMBOL"]).to_csv(vet_file, sep="\t", index=False)
-
-    df = check_black_white_lists(df)
-
+    # 11. Check number of ENSEMBL transcripts per gene
+    print('11. Check number of ENSEMBL transcripts per gene')
     ensembl = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'cds_biomart.tsv')
     df_biomart = pd.read_csv(ensembl, sep="\t", index_col=False, usecols=[1, 10],
                              names=["SYMBOL", "TRANSCRIPT"],
@@ -133,19 +130,45 @@ def run(combination, mutations, sig_likelihood,
     if any(x in symbols for x in duplicated):
         raise Exception('A CGC symbol appears mapped to 2+ transcripts')
 
-    # Checkpoint
-    drivers_file = os.path.join(os.path.dirname(output), f'drivers.tsv')
-    df.to_csv(drivers_file, sep="\t", index=False)
+    # 12. Prepare file with arranged columns
+    print('12. Prepare file with arranged columns')
+    df.rename(
+        columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
+                 "All_Bidders": "ALL_METHODS",
+                 "SIgnificant_Bidders":"SIG_METHODS",
+                 "n_papers": "NUM_PAPERS",
+                 "cancer_type": "CANCER_TYPE",
+                 "MUTS":"MUTATIONS",
+                 "QVALUE_CGC_stouffer_w":"QVALUE_CGC_COMBINATION"}, inplace=True)
+    df.columns = map(str.upper, df.columns)
 
-    # Add drivers data
+    # 13. Checkpoint: save file with vetting info
+    print('13. Checkpoint: save file with vetting info')
+    
+    vet_file = os.path.join(os.path.dirname(output), 'vet.tsv')
+    columns = ["SYMBOL", "ALL_METHODS", "SIG_METHODS", "QVALUE_COMBINATION", "QVALUE_CGC_COMBINATION",
+               "RANKING","TIER", "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
+               "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
+               "SAMPLES_3MUTS", "OR_WARNING",
+               "KNOWN_ARTIFACT", "NUM_PAPERS", "DRIVER", "FILTER"]
+    df['SIG_METHODS'].fillna('combination', inplace=True)
+    df[columns].sort_values(["SYMBOL"]).to_csv(vet_file, sep="\t", index=False)
 
-    df_drivers = df.rename(columns={'MUTS': 'MUTATIONS'})
+    # 14. Filter drivers
+
+    df_drivers = df[df['FILTER']=='PASS']
+    
+    df_drivers = df_drivers.rename(columns={'SIG_METHODS':'METHODS'})
 
     df_drivers = df_drivers[['SAMPLES', 'SYMBOL',
                              'METHODS', 'QVALUE_COMBINATION',
-                             'CGC_GENE', 'CGC_CANCER_GENE']]
-    df_drivers['METHODS'].fillna('combination', inplace=True)
+                             'CGC_GENE', 'CGC_CANCER_GENE','ROLE']]
 
+    # drivers_file = os.path.join(os.path.dirname(output), f'drivers.tsv')
+    # df.to_csv(drivers_file, sep="\t", index=False)
+
+    # 15. Add mutational features
+    print('15. Add mutational features')
     dfs = [
         significative_domains(smregions),
         clusters_2D(clustl_clusters),

@@ -14,7 +14,7 @@ def assign_type_mut(value):
     if len(nts[0]) != len(nts[1]):
         return "INDEL"
     else:
-        return "SNP"
+        return "SNV"
 
 
 def count_percentage_signature(grp):
@@ -50,7 +50,7 @@ def analysis_signatures_gene(signature, df):
     df_combined["TYPE_MUT"] = df_combined.apply(lambda row: assign_type_mut(row["MUTATION_TYPE"]), axis=1)
 
     # Assign % of signatures per gene
-    df_genes = df_combined[df_combined["TYPE_MUT"] == "SNP"].groupby("GENE", as_index=False).agg(
+    df_genes = df_combined[df_combined["TYPE_MUT"] == "SNV"].groupby("GENE", as_index=False).agg(
         {"signature_max": count_percentage_signature, "POSITION": "count"}).sort_values("POSITION",
                                                                                         ascending=False)
     df_genes["Signature9"] = df_genes.apply(lambda row: row["signature_max"][0], axis=1)
