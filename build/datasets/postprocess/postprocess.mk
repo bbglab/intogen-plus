@@ -27,11 +27,13 @@ $(postprocess_dir)/%_listed.txt: ${postprocess_datasets_srcdir}/%_listed.txt | $
 	cp -f $< $@
 
 
-GENES_MOA = $(postprocess_dir)/gene_MoA.tsv
-$(GENES_MOA): ${postprocess_datasets_srcdir}/gene_MoA.tsv | $(postprocess_dir)
-	cp -f $< $@
+#Exclude MoA. This is automatically calculated from the cancer_gene_census_parsed.tsv file in the postprocessing step.
+# GENES_MOA = $(postprocess_dir)/gene_MoA.tsv
+# $(GENES_MOA): ${postprocess_datasets_srcdir}/gene_MoA.tsv | $(postprocess_dir)
+	# cp -f $< $@
 
 
 DATASETS += $(EXACT) $(ARTIFACTS) $(CANCERMINE) \
-	$(GENES_BLACKLIST) $(GENES_WHITELIST) $(GENES_MOA)
+	$(GENES_BLACKLIST) $(GENES_WHITELIST) 
+	#$(GENES_MOA)
 	
