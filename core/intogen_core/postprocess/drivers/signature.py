@@ -7,7 +7,7 @@ import pandas as pd
 
 
 def assign_type_mut(value):
-    # C[C>T]G SNP; T[C>-]A INDEL; T[C>CA]A INDEL
+    # C[C>T]G SNV; T[C>-]A INDEL; T[C>CA]A INDEL
     muts = value[2:-2]
     muts = muts.replace("-", "")
     nts = muts.split(">")
