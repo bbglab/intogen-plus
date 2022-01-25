@@ -1,0 +1,88 @@
+pattern:
+- 'data_mutations_extended.txt'
+recursive: false
+format: tsv
+columns:
+- SAMPLE
+- DONOR
+- CHROMOSOME
+- POSITION
+- REF
+- ALT
+- STRAND
+- ALT_TYPE
+- PLATFORM
+- GENOMEREF
+- CANCER
+annotation:
+- type: internal
+  field: CHROMOSOME
+  fieldSource:
+  - Chromosome
+  - Chr
+  - Chrom
+  - Chromosome_Name
+  - '#chrom'
+  - '#CHROM'
+  - chromosome
+  function: 'lambda c: c.upper().replace(''CHR'', '''').replace(''23'', ''X'').replace(''24'', ''Y'')'
+- type: internal
+  field: POSITION
+  fieldSource:
+  - Position
+  - Start
+  - Start_Position
+  - Pos
+  - Chromosome_Start
+  - POS
+  - chromosome_start
+- type: internal
+  field: STRAND
+  fieldSource:
+  - Strand
+  - Chromosome_Strand
+  - chromosome_strand
+  - ''
+  function: 'lambda s: ''-'' if s in [''-'', ''0'', ''-1''] else ''+'' if s in [''+'', ''1'', ''+1''] else ''+'''
+- type: internal
+  field: REF
+  fieldSource:
+  - Ref
+  - Reference_Allele
+  - Reference
+  - Reference_Genome_Allele
+  - REF
+  - reference_genome_allele
+- type: internal
+  field: ALT
+  fieldSource:
+  - Alt
+  - Tumor_Seq_Allele2
+  - Variant
+  - Alternative
+  - Mutated_To_Allele
+  - ALT
+  - mutated_to_allele
+- type: internal
+  field: SAMPLE
+  fieldSource:
+  - icgc_specimen_id
+  - Tumor_Sample_Barcode
+- type: static
+  field: DONOR
+  value: '{SAMPLE}'
+- type: static
+  field: CANCER
+  value: PRAD
+- type: static
+  field: PLATFORM
+  value: WXS
+- type: static
+  field: GENOMEREF
+  value: hg19
+- type: static
+  field: DATASET
+  value: CBIOP_{PLATFORM}_{CANCER}_BROAD
+- type: plugin
+  plugin: alteration_type
+  field: ALT_TYPE
