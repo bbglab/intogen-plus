@@ -88,7 +88,7 @@ def set_consensous_role(row):
         return row["ROLE_CGI"]
 
 
-def role(df_drivers_role, threshold=0.1):
+def role(df_drivers_role): #, threshold=0.1):
 
     # # read drivers
     # dndscv_pan_run = bgdata.get('intogen/dndscv/pan')

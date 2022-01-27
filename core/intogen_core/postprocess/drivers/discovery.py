@@ -6,7 +6,7 @@ import pandas as pd
 
 from intogen_core.exceptions import IntogenError
 # from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
-from intogen_core.postprocess.drivers.bw_list import read_file
+#from intogen_core.postprocess.drivers.bw_list import read_file
 from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
 from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
@@ -49,6 +49,14 @@ def include_literature(df):
     df["n_papers"].fillna(0, inplace=True)
     return df
 
+def read_file(filein):
+    f = open(filein, 'r')
+    genes = set()
+    for line in f.readlines():
+        line = line.strip()
+        genes.add(line)
+    f.close()
+    return genes
 
 def run(combination, mutations, sig_likelihood,
         cohort, ctype,
