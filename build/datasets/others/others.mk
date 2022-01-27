@@ -38,8 +38,8 @@ $(NEGATIVE_GENE_SET): ${others_data_srcdir}/create_negative_set.py $(OLFACTORY_R
 	python $< \
 		--olfactory_receptors $(OLFACTORY_RECEPTORS) \
 		--output_total $(NEGATIVE_GENE_SET) \
-		--output_non_expressed $(NON_EXPRESSED_GENES)
-		--dict_mapping_ttypes $(TTYPES_MAP)
+		--output_non_expressed $(NON_EXPRESSED_GENES) \
+		--dict_mapping_ttypes $(TTYPES_MAP) \
 		--dict_mapping_symbols $(SYMBOLS_MAP)
 	touch $(NEGATIVE_GENE_SET)
 	touch $(NON_EXPRESSED_GENES)

@@ -7,9 +7,9 @@ $(postprocess_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 
-EXACT = $(postprocess_dir)/constraint.txt.gz
-$(EXACT): | $(postprocess_dir)
-	wget -O $@ https://storage.googleapis.com/gnomad-public/release/2.1/ht/constraint/constraint.txt.bgz
+# EXACT = $(postprocess_dir)/constraint.txt.gz
+# $(EXACT): | $(postprocess_dir)
+# 	wget -O $@ https://storage.googleapis.com/gnomad-public/release/2.1/ht/constraint/constraint.txt.bgz
 
 ARTIFACTS = $(postprocess_dir)/artifacts.json
 $(ARTIFACTS): ${postprocess_datasets_srcdir}/artifacts.json | $(postprocess_dir)

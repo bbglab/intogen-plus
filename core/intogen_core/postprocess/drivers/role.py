@@ -112,7 +112,7 @@ def role(df_drivers_role, threshold=0.1):
     role_df['ROLE_CGI'] = role_df['Role in Cancer'].apply(lambda role_cgc: get_role_cgc(role_cgc) )    
 
     # Combine both roles
-    df_combined_role = pd.merge(df_drivers_role[["SYMBOL", "ROLE_INTOGEN"]], df_moa, how="left",
+    df_combined_role = pd.merge(df_drivers_role[["SYMBOL", "ROLE_INTOGEN"]], role_df, how="left",
                                 left_on=["SYMBOL"], right_on=["Gene Symbol"])
     df_combined_role.drop("Gene Symbol", axis=1, inplace=True)
     df_combined_role.fillna("Unknown", inplace=True)

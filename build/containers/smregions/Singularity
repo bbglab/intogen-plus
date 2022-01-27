@@ -10,6 +10,7 @@ From: python:3
 %setup
     mkdir ${SINGULARITY_ROOTFS}/smregions
     cp smregions.conf ${SINGULARITY_ROOTFS}/smregions/
+    chmod -R a+r,a+x ${SINGULARITY_ROOTFS}/smregions/
 
 %post
 

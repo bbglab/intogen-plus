@@ -6,6 +6,7 @@ import pandas as pd
 
 from intogen_core.exceptions import IntogenError
 # from intogen_core.postprocess.drivers.bw_list import check_black_white_lists
+from intogen_core.postprocess.drivers.bw_list import read_file
 from intogen_core.postprocess.drivers.data import significative_domains, \
     clusters_2D, clusters_3D, excess
 from intogen_core.postprocess.drivers.filters import filter_samples_by_nmuts, \
@@ -52,7 +53,7 @@ def include_literature(df):
 def run(combination, mutations, sig_likelihood,
         cohort, ctype,
         smregions, clustl_clusters, hotmaps, dndscv,
-            output, muts=3):
+            output, outputvet, muts=3):
 
     df = pd.read_csv(mutations, sep="\t")
 
@@ -135,7 +136,7 @@ def run(combination, mutations, sig_likelihood,
     df.rename(
         columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
                  "All_Bidders": "ALL_METHODS",
-                 "SIgnificant_Bidders":"SIG_METHODS",
+                 "Significant_Bidders":"SIG_METHODS",
                  "n_papers": "NUM_PAPERS",
                  "cancer_type": "CANCER_TYPE",
                  "MUTS":"MUTATIONS",
@@ -145,14 +146,14 @@ def run(combination, mutations, sig_likelihood,
     # 13. Checkpoint: save file with vetting info
     print('13. Checkpoint: save file with vetting info')
     
-    vet_file = os.path.join(os.path.dirname(output), 'vet.tsv')
+    #vet_file = os.path.join(os.path.dirname(output), 'vet.tsv')
     columns = ["SYMBOL", "ALL_METHODS", "SIG_METHODS", "QVALUE_COMBINATION", "QVALUE_CGC_COMBINATION",
                "RANKING","TIER", "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
                "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
                "SAMPLES_3MUTS", "OR_WARNING",
                "KNOWN_ARTIFACT", "NUM_PAPERS", "DRIVER", "FILTER"]
     df['SIG_METHODS'].fillna('combination', inplace=True)
-    df[columns].sort_values(["SYMBOL"]).to_csv(vet_file, sep="\t", index=False)
+    df[columns].sort_values(["SYMBOL"]).to_csv(outputvet, sep="\t", index=False)
 
     # 14. Filter drivers
 
@@ -174,7 +175,7 @@ def run(combination, mutations, sig_likelihood,
         clusters_2D(clustl_clusters),
         clusters_3D(hotmaps),
         excess(dndscv),
-        role()
+        role(df_drivers)
     ]
 
     for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
@@ -197,6 +198,7 @@ def run(combination, mutations, sig_likelihood,
 @click.option('--ctype', type=str, required=True)
 @click.option('--cohort', type=str, required=True)
 @click.option('--output', type=click.Path(), required=True)
+@click.option('--outputvet', type=click.Path(), required=True)
 def cli(**kwargs):
     run(**kwargs)
 

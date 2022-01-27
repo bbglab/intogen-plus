@@ -11,9 +11,10 @@ From: python:3
 	chmod a+rx ${SINGULARITY_ROOTFS}/usr/local/bin/get_field.sh
 
 %post
-
+	# Install openVariant
+    pip install open-variant
     # Install bgparsers
-    pip --no-cache-dir install https://bitbucket.org/bgframework/bgparsers/get/master.tar.gz
+    #pip --no-cache-dir install https://bitbucket.org/bgframework/bgparsers/get/master.tar.gz
 	pip install /core
 
     # Clean unused things

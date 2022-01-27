@@ -24,13 +24,13 @@ process ParseInput {
 	script:
 		if ( input.toRealPath().toFile().isDirectory() || input.endsWith(".bginfo" )) {
 			"""
-			bgvariants groupby --cores ${task.cpus} -s 'gzip > \${GROUP_KEY}.parsed.tsv.gz' --headers -g DATASET -a ${annotations} ${input}
+			openvar groupby ${input} --header -g DATASET -q -s 'gzip > \${GROUP_KEY}.parsed.tsv.gz'
 			"""
 		}
 		else {
 			cohort = input.baseName.split('\\.')[0]
 			"""
-			bgvariants cat -a ${annotations} ${input} | gzip > ${cohort}.parsed.tsv.gz
+			openvar cat ${input} --header | gzip > ${cohort}.parsed.tsv.gz
 			"""
 		}
 }
@@ -712,11 +712,14 @@ process DriverDiscovery {
 
     output:
 		path(output) into DRIVERS
+		path(outputvet) into VET
 
 	script:
 		output = "${cohort}.drivers.tsv"
+		outputvet = "${cohort}.vet.tsv"
 		"""
 		drivers-discovery --output ${output} \
+			--outputvet ${outputvet} \
 			--combination ${combination} \
 			--mutations ${deconstruct_in} \
 			--sig_likelihood ${sig_likelihood} \
@@ -724,7 +727,8 @@ process DriverDiscovery {
 			--clustl_clusters ${clustl_clusters} \
 			--hotmaps ${hotmaps_clusters} \
 			--dndscv ${dndscv} \
-			--ctype ${cancer} --cohort ${cohort}
+			--ctype ${cancer} \
+			--cohort ${cohort}
 		"""
 }
 

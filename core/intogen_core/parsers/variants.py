@@ -41,32 +41,32 @@ def __none_to_string(value):
     return value
 
 
-def hypermutators_cutoff(snp_per_sample, cutoff):
-    vals = list(snp_per_sample.values())
+def hypermutators_cutoff(snv_per_sample, cutoff):
+    vals = list(snv_per_sample.values())
     iqr = np.subtract(*np.percentile(vals, [75, 25]))
     q3 = np.percentile(vals, 75)
     computed_cutoff = (q3 + 1.5 * iqr)
     cutoff = max(cutoff, computed_cutoff)
-    return cutoff, computed_cutoff, set([k for k, v in snp_per_sample.items() if v > cutoff])
+    return cutoff, computed_cutoff, set([k for k, v in snv_per_sample.items() if v > cutoff])
 
 
 def filter_(file, genome, cutoff, stats):
 
     # Compute global stats
-    donors, mut_per_sample, snp_per_sample, indel_per_sample = \
+    donors, mut_per_sample, snv_per_sample, indel_per_sample = \
         defaultdict(set), defaultdict(int), defaultdict(int), defaultdict(int)
     for m in TSVReader(file):
         s = m['SAMPLE']
-        if m['ALT_TYPE'] == 'snp':
-            snp_per_sample[s] += 1
+        if m['ALT_TYPE'] == 'snv':
+            snv_per_sample[s] += 1
         elif m['ALT_TYPE'] == 'indel':
             indel_per_sample[s] += 1
 
         mut_per_sample[s] += 1
         donors[m['DONOR']].add(s)
 
-    if len(snp_per_sample) < 1:
-        raise DatasetError('No samples with SNPs')
+    if len(snv_per_sample) < 1:
+        raise DatasetError('No samples with SNVs')
 
     if len(donors) == 1 and ("None" in donors or "" in donors):
         # assume donor was not provided to bgparsers before
@@ -90,7 +90,7 @@ def filter_(file, genome, cutoff, stats):
         multiple_donor_samples += donors[d][1:]
     multiple_donor_samples = set(multiple_donor_samples)
 
-    cutoff, theorical_cutoff, hypermutators = hypermutators_cutoff(snp_per_sample, cutoff)
+    cutoff, theorical_cutoff, hypermutators = hypermutators_cutoff(snv_per_sample, cutoff)
     stats['hypermutators'] = {
         'cutoff': cutoff,
         'computed_cutoff': theorical_cutoff,
@@ -168,7 +168,7 @@ def filter_(file, genome, cutoff, stats):
             skipped['n_sequence'] += 1
             continue
 
-        if v['ALT_TYPE'] == 'snp':
+        if v['ALT_TYPE'] == 'snv':
             # Compute signature and count mismatch
             ref = refseq(genome, v['CHROMOSOME'], v['POSITION'], size=1).upper()
             if ref != v['REF']:
@@ -207,7 +207,7 @@ def filter_(file, genome, cutoff, stats):
             skipped['somatic_pon'] += 1
             continue
 
-        if v['ALT_TYPE'] == 'snp':
+        if v['ALT_TYPE'] == 'snv':
             # Compute signature and count mismatch
             ref = refseq('hg38', v['CHROMOSOME'], v['POSITION'] - 1, size=3).upper()
             alt = ''.join([ref[0], v['ALT'], ref[2]])
@@ -217,7 +217,7 @@ def filter_(file, genome, cutoff, stats):
             signature_key = "{}>{}".format(ref, alt)
             signature[signature_key] = signature.get(signature_key, 0) + 1
 
-            counts['snp'] += 1
+            counts['snv'] += 1
         elif v['ALT_TYPE'] == 'indel':
             counts['indel'] += 1
         counts['after'] += 1
@@ -237,20 +237,20 @@ def filter_(file, genome, cutoff, stats):
         stats['probabilities'] = signature
 
     mismatches = stats['skip']['mismatch']
-    snps = stats['count']['snp']
-    ratio_mismatch = (mismatches / snps) if snps > 0 else 0
+    snvs = stats['count']['snv']
+    ratio_mismatch = (mismatches / snvs) if snvs > 0 else 0
     if ratio_mismatch > 0.1:
-        raise DatasetError(f'There are {mismatches} of {snps} genome reference mismatches. More than 10%.')
+        raise DatasetError(f'There are {mismatches} of {snvs} genome reference mismatches. More than 10%.')
     elif ratio_mismatch > 0.05:
-        stats["warning_genome_reference_mismatch"] = f"There are {mismatches} of {snps} genome reference mismatches."
+        stats["warning_genome_reference_mismatch"] = f"There are {mismatches} of {snvs} genome reference mismatches."
     same_alt = stats['skip']['same_alt']
     if same_alt > 0:
         stats["warning_same_alternate"] = f"There are {same_alt} entries with same reference and alternate"
 
     lo_mismatches = stats['skip']['liftover_mismatch']
-    ratio_lo_mismatch = (lo_mismatches / snps) if snps > 0 else 0
+    ratio_lo_mismatch = (lo_mismatches / snvs) if snvs > 0 else 0
     if ratio_lo_mismatch > 0.3:
-        raise DatasetError(f'There are {lo_mismatches} of {snps} genome reference mismatches after liftover. More than 30%.')
+        raise DatasetError(f'There are {lo_mismatches} of {snvs} genome reference mismatches after liftover. More than 30%.')
 
     count_after = stats['count']['after']
     if count_after == 0:

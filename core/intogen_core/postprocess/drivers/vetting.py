@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 from intogen_core.exceptions import IntogenError
+from intogen_core.postprocess.drivers.bw_list import read_file
 
 
 def get_drivers(row):
@@ -69,7 +70,7 @@ def vet(df_vetting, combination, ctype):
     df_drivers = pd.merge(df, cgc[["Gene Symbol", "CGC_GENE", "cancer_type_intogen", "Tier_CGC"]],
                   left_on="SYMBOL", right_on="Gene Symbol", how="left")
     df_drivers["CGC_GENE"].fillna(False, inplace=True)
-    df_drivers["DRIVER"] = df.apply(lambda row: get_drivers(row), axis=1)
+    df_drivers["DRIVER"] = df_drivers.apply(lambda row: get_drivers(row), axis=1)
     print("Number of drivers pre-vetting:" + str(len(df_drivers["SYMBOL"][df_drivers["DRIVER"]==True].unique())))
 
     if len(df_drivers["SYMBOL"][df_drivers["DRIVER"]==True].unique()) == 0:
