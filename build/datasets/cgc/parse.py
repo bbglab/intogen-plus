@@ -16,7 +16,7 @@ def load_data(path_cgc, dict_mapping_cgc, dict_mapping_cgc_intogen):
     :return:
     """
     # Read data
-    cgc_dataset = pd.read_csv(path_cgc, sep=',', header=0)
+    cgc_dataset = pd.read_csv(path_cgc, sep=',', header=0,encoding='latin-1')
     mapping = json.load(open(dict_mapping_cgc, "rb"))
     mapping_cgc_intogen = json.load(open(dict_mapping_cgc_intogen, 'rb'))
     return cgc_dataset, mapping, mapping_cgc_intogen
