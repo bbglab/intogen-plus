@@ -139,6 +139,8 @@ def run(combination, mutations, sig_likelihood,
     if any(x in symbols for x in duplicated):
         raise Exception('A CGC symbol appears mapped to 2+ transcripts')
 
+    df['WARNING_ENSEMBL_TRANSCRIPTS'] = df['SYMBOL'].apply(lambda x: x in duplicated)
+
     # 12. Prepare file with arranged columns
     print('12. Prepare file with arranged columns')
     df.rename(
@@ -159,7 +161,7 @@ def run(combination, mutations, sig_likelihood,
                "RANKING","TIER", "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
                "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
                "SAMPLES_3MUTS", "OR_WARNING",
-               "KNOWN_ARTIFACT", "NUM_PAPERS", "DRIVER", "FILTER"]
+               "KNOWN_ARTIFACT", "NUM_PAPERS", "WARNING_ENSEMBL_TRANSCRIPTS", "DRIVER", "FILTER"]
     df['SIG_METHODS'].fillna('combination', inplace=True)
     df[columns].sort_values(["SYMBOL"]).to_csv(outputvet, sep="\t", index=False)
 
