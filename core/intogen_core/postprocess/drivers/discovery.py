@@ -16,7 +16,13 @@ from intogen_core.postprocess.drivers.signature import analysis_signatures_gene
 from intogen_core.postprocess.drivers.vetting import vet
 
 
-OUT_COLUMNS = ["SYMBOL", "COHORT", "METHODS", "SAMPLES",
+VET_COLUMNS = ["SYMBOL", "ALL_METHODS", "SIG_METHODS", "QVALUE_COMBINATION", "QVALUE_CGC_COMBINATION", 
+           "RANKING", "TIER", "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
+           "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
+           "SAMPLES_3MUTS", "OR_WARNING",
+           "KNOWN_ARTIFACT", "NUM_PAPERS","WARNING_ENSEMBL_TRANSCRIPTS","DRIVER", "FILTER"]
+
+DRIVERS_COLUMNS = ["SYMBOL", "COHORT", "METHODS", "SAMPLES",
                "QVALUE_COMBINATION", "CGC_GENE", "CGC_CANCER_GENE",
                "DOMAIN", "2D_CLUSTERS", "3D_CLUSTERS",
                "EXCESS_MIS", "EXCESS_NON", "EXCESS_SPL", "ROLE"]
@@ -61,7 +67,7 @@ def read_file(filein):
 def run(combination, mutations, sig_likelihood,
         cohort, ctype,
         smregions, clustl_clusters, hotmaps, dndscv,
-            output, outputvet, muts=3):
+            output_drivers, output_vet, muts=3):
 
     df = pd.read_csv(mutations, sep="\t")
 
@@ -110,91 +116,85 @@ def run(combination, mutations, sig_likelihood,
     print('9. Add filter by literature (cancermine) and white listed')
     df = include_literature(df)
 
-    # # Checkpoint #This may not be necessary
-    # prepared_file = os.path.join(os.path.dirname(output), 'information_vetting_genes.tsv')
-    # df.to_csv(prepared_file, sep="\t", index=False)
-
     # 10. Perform vetting
     print('10. Perform vetting')
-    try:
-        df = vet(df, combination, ctype)
-    except IntogenError as e:
-        # NO drivers to perform the vetting
-        print(str(e))
-        # Create and empty dataframe and exit without error
-        df = pd.DataFrame(columns=OUT_COLUMNS)
-        df.to_csv(output, sep="\t", index=False)
-        return
+    # try:
+    df = vet(df, combination, ctype)
+    # except IntogenError as e:
+        # # NO drivers to perform the vetting
+        # print(str(e))
+        # # Create and empty dataframe and exit without error
+        # df = pd.DataFrame(columns=OUT_COLUMNS)
+        # df.to_csv(output, sep="\t", index=False)
+        # return
+    if len(df) == 0:
+        vetting_df = pd.DataFrame(columns = VET_COLUMNS)
+        vetting_df.to_csv(output_vet, sep="\t", index=False)
+        
+        drivers_df = pd.DataFrame(columns = DRIVER_COLUMNS)
+        drivers_df.to_csv(output_drivers, sep="\t", index=False)       
 
-    # 11. Check number of ENSEMBL transcripts per gene
-    print('11. Check number of ENSEMBL transcripts per gene')
-    ensembl = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'cds_biomart.tsv')
-    df_biomart = pd.read_csv(ensembl, sep="\t", index_col=False, usecols=[1, 10],
-                             names=["SYMBOL", "TRANSCRIPT"],
-                             header=None)
-    df_biomart.drop_duplicates(inplace=True)
-    duplicated = df_biomart[df_biomart.duplicated(subset='SYMBOL', keep=False)]['SYMBOL'].unique()
+    else:
+        # 11. Check number of ENSEMBL transcripts per gene
+        print('11. Check number of ENSEMBL transcripts per gene')
+        ensembl = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'cds_biomart.tsv')
+        df_biomart = pd.read_csv(ensembl, sep="\t", index_col=False, usecols=[1, 10],
+                                 names=["SYMBOL", "TRANSCRIPT"],
+                                 header=None)
+        df_biomart.drop_duplicates(inplace=True)
+        duplicated = df_biomart[df_biomart.duplicated(subset='SYMBOL', keep=False)]['SYMBOL'].unique()
 
-    symbols = df['SYMBOL'].values
-    if any(x in symbols for x in duplicated):
-        raise Exception('A CGC symbol appears mapped to 2+ transcripts')
+        symbols = df['SYMBOL'].values
+        if any(x in symbols for x in duplicated):
+            raise Exception('A CGC symbol appears mapped to 2+ transcripts')
 
-    df['WARNING_ENSEMBL_TRANSCRIPTS'] = df['SYMBOL'].apply(lambda x: x in duplicated)
+        df['WARNING_ENSEMBL_TRANSCRIPTS'] = df['SYMBOL'].apply(lambda x: x in duplicated)
 
-    # 12. Prepare file with arranged columns
-    print('12. Prepare file with arranged columns')
-    df.rename(
-        columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
-                 "All_Bidders": "ALL_METHODS",
-                 "Significant_Bidders":"SIG_METHODS",
-                 "n_papers": "NUM_PAPERS",
-                 "cancer_type": "CANCER_TYPE",
-                 "MUTS":"MUTATIONS",
-                 "QVALUE_CGC_stouffer_w":"QVALUE_CGC_COMBINATION"}, inplace=True)
-    df.columns = map(str.upper, df.columns)
+        # 12. Prepare file with arranged columns
+        print('12. Prepare file with arranged columns')
+        df.rename(
+            columns={"QVALUE_stouffer_w": "QVALUE_COMBINATION",
+                     "All_Bidders": "ALL_METHODS",
+                     "Significant_Bidders":"SIG_METHODS",
+                     "n_papers": "NUM_PAPERS",
+                     "cancer_type": "CANCER_TYPE",
+                     "MUTS":"MUTATIONS",
+                     "QVALUE_CGC_stouffer_w":"QVALUE_CGC_COMBINATION"}, inplace=True)
+        df.columns = map(str.upper, df.columns)
 
-    # 13. Checkpoint: save file with vetting info
-    print('13. Checkpoint: save file with vetting info')
-    
-    #vet_file = os.path.join(os.path.dirname(output), 'vet.tsv')
-    columns = ["SYMBOL", "ALL_METHODS", "SIG_METHODS", "QVALUE_COMBINATION", "QVALUE_CGC_COMBINATION",
-               "RANKING","TIER", "ROLE", "CGC_GENE", "TIER_CGC", "CGC_CANCER_GENE",
-               "SIGNATURE9", "WARNING_EXPRESSION", "WARNING_GERMLINE",
-               "SAMPLES_3MUTS", "OR_WARNING",
-               "KNOWN_ARTIFACT", "NUM_PAPERS", "WARNING_ENSEMBL_TRANSCRIPTS", "DRIVER", "FILTER"]
-    df['SIG_METHODS'].fillna('combination', inplace=True)
-    df[columns].sort_values(["SYMBOL"]).to_csv(outputvet, sep="\t", index=False)
+        # 13. Checkpoint: save file with vetting info
+        print('13. Checkpoint: save file with vetting info')
+        
+        df['SIG_METHODS'].fillna('combination', inplace=True)
+        df[columns].sort_values(["SYMBOL"]).to_csv(output_vet, sep="\t", index=False)
 
-    # 14. Filter drivers
+        # 14. Filter drivers
 
-    df_drivers = df[df['FILTER']=='PASS']
-    
-    df_drivers = df_drivers.rename(columns={'SIG_METHODS':'METHODS'})
+        df_drivers = df[df['FILTER']=='PASS']
+        
+        df_drivers = df_drivers.rename(columns={'SIG_METHODS':'METHODS'})
 
-    df_drivers = df_drivers[['SAMPLES', 'SYMBOL',
-                             'METHODS', 'QVALUE_COMBINATION',
-                             'CGC_GENE', 'CGC_CANCER_GENE','ROLE']]
+        df_drivers = df_drivers[['SAMPLES', 'SYMBOL',
+                                 'METHODS', 'QVALUE_COMBINATION',
+                                 'CGC_GENE', 'CGC_CANCER_GENE','ROLE']]
 
-    # drivers_file = os.path.join(os.path.dirname(output), f'drivers.tsv')
-    # df.to_csv(drivers_file, sep="\t", index=False)
+        # 15. Add mutational features
+        print('15. Add mutational features')
+        dfs = [
+            significative_domains(smregions),
+            clusters_2D(clustl_clusters),
+            clusters_3D(hotmaps),
+            excess(dndscv),
+            role(df_drivers)
+        ]
 
-    # 15. Add mutational features
-    print('15. Add mutational features')
-    dfs = [
-        significative_domains(smregions),
-        clusters_2D(clustl_clusters),
-        clusters_3D(hotmaps),
-        excess(dndscv),
-        role(df_drivers)
-    ]
+        for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
+            df_drivers = df_drivers.merge(df, how='left')
+        # Compute % of samples per cohort
+        df_drivers["COHORT"] = cohort
 
-    for df in dfs:  # expected sig. domains, 2D clusters, 3D clusters and excess
-        df_drivers = df_drivers.merge(df, how='left')
-    # Compute % of samples per cohort
-    df_drivers["COHORT"] = cohort
-
-    df_drivers[OUT_COLUMNS].sort_values(["SYMBOL"]).to_csv(output, sep="\t", index=False)
-    # FIXME TRANSCRIPT
+        df_drivers[OUT_COLUMNS].sort_values(["SYMBOL"]).to_csv(output_drivers, sep="\t", index=False)
+        # FIXME TRANSCRIPT
 
 
 @click.command()
@@ -207,8 +207,8 @@ def run(combination, mutations, sig_likelihood,
 @click.option('--dndscv', type=click.Path(exists=True), required=True)
 @click.option('--ctype', type=str, required=True)
 @click.option('--cohort', type=str, required=True)
-@click.option('--output', type=click.Path(), required=True)
-@click.option('--outputvet', type=click.Path(), required=True)
+@click.option('--output_drivers', type=click.Path(), required=True)
+@click.option('--output_vet', type=click.Path(), required=True)
 def cli(**kwargs):
     run(**kwargs)
 
