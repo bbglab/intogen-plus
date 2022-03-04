@@ -131,7 +131,7 @@ def run(combination, mutations, sig_likelihood,
         vetting_df = pd.DataFrame(columns = VET_COLUMNS)
         vetting_df.to_csv(output_vet, sep="\t", index=False)
         
-        drivers_df = pd.DataFrame(columns = DRIVER_COLUMNS)
+        drivers_df = pd.DataFrame(columns = DRIVERS_COLUMNS)
         drivers_df.to_csv(output_drivers, sep="\t", index=False)       
 
     else:
@@ -166,7 +166,7 @@ def run(combination, mutations, sig_likelihood,
         print('13. Checkpoint: save file with vetting info')
         
         df['SIG_METHODS'].fillna('combination', inplace=True)
-        df[columns].sort_values(["SYMBOL"]).to_csv(output_vet, sep="\t", index=False)
+        df[VET_COLUMNS].sort_values(["SYMBOL"]).to_csv(output_vet, sep="\t", index=False)
 
         # 14. Filter drivers
 
@@ -193,7 +193,7 @@ def run(combination, mutations, sig_likelihood,
         # Compute % of samples per cohort
         df_drivers["COHORT"] = cohort
 
-        df_drivers[OUT_COLUMNS].sort_values(["SYMBOL"]).to_csv(output_drivers, sep="\t", index=False)
+        df_drivers[DRIVERS_COLUMNS].sort_values(["SYMBOL"]).to_csv(output_drivers, sep="\t", index=False)
         # FIXME TRANSCRIPT
 
 
