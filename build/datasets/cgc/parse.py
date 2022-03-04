@@ -91,9 +91,10 @@ def map_acronyms_into_intogen(acronyms, mapping_cgc_intogen):
 @click.option('--dict_mapping_cgc', help='mapping of text of cgc to acronyms', type=click.Path(), required=True)
 @click.option('--dict_mapping_cgc_intogen', help='mapping cancer types cgc to intogen',
               type=click.Path(), required=True)
+@click.option('--dict_mapping_hugo_symbols', help='mapping hugo symbols to the last symbol update', type=click.Path(), required=True)
 @click.option('--path_output', help='path to the output directory', type=click.Path(), required=True)
 @click.option('--debug', is_flag=True)
-def cmdline(path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen, path_output, debug=False):
+def cmdline(path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen, dict_mapping_hugo_symbols, path_output, debug=False):
     bglogs.configure(debug=debug)
     cgc_dataset, mapping, mapping_cgc_intogen = load_data(
         path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen
@@ -105,6 +106,12 @@ def cmdline(path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen, path_
         info = map_acronyms_into_intogen(row["acronym_cgc"], mapping_cgc_intogen)
         intogen_ttypes.append(",".join(info))
     cgc_dataset["cancer_type"] = intogen_ttypes
+
+    # Update Hugo Symbols
+    inv_hugo_dict = json.load(open(dict_mapping_hugo_symbols, "rb"))
+    cgc_dataset['Gene Symbol'] = cgc_dataset['Gene Symbol'].apply(lambda gene: inv_hugo_dict[gene] if gene in inv_hugo_dict.keys() else gene)
+
+
     # Save the output
     os.makedirs(path_output, exist_ok=True)
     output_file = os.path.join(path_output, 'cancer_gene_census_parsed.tsv')
