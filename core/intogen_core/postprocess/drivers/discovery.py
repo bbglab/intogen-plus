@@ -109,8 +109,8 @@ def run(combination, mutations, sig_likelihood,
     black_listed_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'black_listed.txt')
     black_listed = read_file(black_listed_file)
 
-    df["Warning_Artifact"] = df.apply(lambda row: (row["GENE"] in artifacts["suspects"]) or (row['GENE'] in black_listed), axis=1)
-    df["Known_Artifact"] = df.apply(lambda row: row["GENE"] in artifacts["known"], axis=1)
+    df["Warning_Artifact"] = df.apply(lambda row: (row["GENE"] in artifacts["suspects"]), axis=1)
+    df["Known_Artifact"] = df.apply(lambda row: row["GENE"] in artifacts["known"] or (row['GENE'] in black_listed), axis=1)
 
     # 9. Add filter by literature (cancermine) and white listed
     print('9. Add filter by literature (cancermine) and white listed')

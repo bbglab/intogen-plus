@@ -26,7 +26,7 @@ def get_cancer_genes(row, ctype):
 
 def perform_vetting(row, ctype):
 
-    germ_center = ["AML","LYMPHOID","CLLSLL","MDS","DLBCLNOS","NHL"]
+    germ_center = ["LYMPHOID","CLLSLL","DLBCLNOS","NHL","ALL","LNM","TLL","BLL","HL"] #all lymphoid cancer types
 
     #Add white list for literature vetting; 
     white_listed_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'postprocess', 'white_listed.txt')
@@ -40,13 +40,13 @@ def perform_vetting(row, ctype):
         out = "Warning Signature9"
     elif row["Samples_3muts"] >= 1 and not(row["CGC_GENE"]):
         out = "Samples with more than 2 mutations"
-    elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"] and not(row["Tier_CGC"]==1):
+    elif row["MUTS/SAMPLE"] > 1.0 and row["Warning_Germline"] and not(row["CGC_GENE"]==True):
         out = "Germline Warning"
     elif row["OR_Warning"]:
         out = "Olfactory Receptor"
     elif row["Known_Artifact"]:
         out = "Known artifact"
-    elif row["n_papers"]== 0 and not(row["Tier_CGC"]==1) and (row['SYMBOL'] not in white_listed):
+    elif row["n_papers"]== 0 and not(row["CGC_GENE"]==True) and (row['SYMBOL'] not in white_listed):
         out = "Lack of literature evidence"
     else:
         out = "PASS"
