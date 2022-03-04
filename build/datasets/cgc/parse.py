@@ -111,6 +111,8 @@ def cmdline(path_cgc_original, dict_mapping_cgc, dict_mapping_cgc_intogen, dict_
     inv_hugo_dict = json.load(open(dict_mapping_hugo_symbols, "rb"))
     cgc_dataset['Gene Symbol'] = cgc_dataset['Gene Symbol'].apply(lambda gene: inv_hugo_dict[gene] if gene in inv_hugo_dict.keys() else gene)
 
+    #Select CGC genes from Tier 1
+    cgc_dataset = cgc_dataset[cgc_dataset['Tier']==1]
 
     # Save the output
     os.makedirs(path_output, exist_ok=True)
