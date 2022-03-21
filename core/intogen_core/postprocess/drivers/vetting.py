@@ -46,6 +46,8 @@ def perform_vetting(row, ctype):
         out = "Olfactory Receptor"
     elif row["Known_Artifact"]:
         out = "Known artifact"
+    elif row["Warning_Artifact"]:
+        out = "Warning artifact"
     elif row["n_papers"]== 0 and not(row["CGC_GENE"]) and (row['SYMBOL'] not in white_listed):
         out = "Lack of literature evidence"
     else:
