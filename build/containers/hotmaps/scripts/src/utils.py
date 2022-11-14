@@ -154,9 +154,10 @@ def read_mutations(mut_path):
             mcount = [[int(lines[i][2].split(':')[0]), int(lines[i][3])]
                        for i in good_ixs]
             mutation_chains = [lines[i][2].split(':')[1] for i in good_ixs]  # get chain for pdb
+            samples = [lines[i][4].split(', ') for i in good_ixs]
 
             # reformat output
-            mut_info = [[ttype[i], mcount[i][0], mcount[i][1], mutation_chains[i]]
+            mut_info = [[ttype[i], mcount[i][0], mcount[i][1], mutation_chains[i], samples[i]]
                         for i in range(len(mcount))]
 
             # save mutations for specific structure
@@ -192,7 +193,7 @@ def read_structure(pdb_path, structure_id, quiet=True):
     try:
         # handle gziped or uncompressed reading
         if pdb_path.endswith('.gz'):
-            with gzip.open(pdb_path, 'rb') as handle:
+            with gzip.open(pdb_path, 'r') as handle:
                 structure = pdb_parser.get_structure(structure_id, handle)
         else:
             structure = pdb_parser.get_structure(structure_id, pdb_path)

@@ -88,7 +88,7 @@ def reverse_complement(sequence):
     return ''.join([COMPLEMENTS.get(i, i) for i in seq])
 
 
-def simulate(items, cancer_type=None, simulations=1, cores=1):
+def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
     """Read the regions' coordinates and retrieve the corresponding DNA sequence. Then simulates
     missense mutations in accordance with the signature
 
@@ -101,7 +101,7 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
     geneid, regions = items
     cancer_type = cancer_type if cancer_type is not None else ','.join([str(i) for i in mutations[geneid].keys()])
     changes = []
-    prob = []
+    prob = dict()
     sequence = ''
     positions = []
     chains = []
@@ -180,7 +180,18 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
                     pdb_id=geneid, chain=chain,
                 )
             )
-            prob.append(signatures['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0)
+            ## Edit. Check if type is tuple, otherwise it won't iterate.
+            if type(sample_list) is tuple:
+                sample_list = list(set(list(sum(sample_list, []))))
+
+            ## Edit. Add sample list to get info for samples.
+            for sample in sample_list:
+                if sample not in prob:
+                    prob[sample] = [signatures[sample]['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0]
+                else:
+                    prob[sample].append(signatures[sample]['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0)
+
+            #prob.append(signatures['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0)
 
     # Assumes the length of the sequence is a multiple of 3
     if len(codons) % 3 != 0:
@@ -195,9 +206,6 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
 
     logger.debug('{} - length: {} - missense variants: {}'.format(geneid, len(codons), len(changes) // 3))
 
-    np_prob = np.array(prob)
-    p_normalized = np_prob / np.sum(np_prob)
-    simulated_mutations = []
     # with Pool(cores) as pool:
     #     fx = partial(
     #         randomize, num_mutations=num_mutations,
@@ -205,17 +213,24 @@ def simulate(items, cancer_type=None, simulations=1, cores=1):
     #     )
     #     for simulated_mutations_ in pool.map(fx, range(simulations), chunksize=100):
     #         simulated_mutations.append(simulated_mutations_)
-    try:
-        simulated_mutations = np.random.choice(
-            a=changes,
-            size=(simulations, num_mutations),
-            p=p_normalized,
-            replace=True
-        ).flatten().tolist()
-    except ValueError:
-        return geneid, list()
+    simulated_mutations = []
+    for sample in sample_list:         
+        np_prob = np.array(prob[sample])
+        p_normalized = np_prob / np.sum(np_prob)
+        try:
+            simulated_mutations_sample = np.random.choice(
+                a=changes,
+                size=(simulations, num_mutations),
+                p=p_normalized,
+                replace=True
+            ).flatten().tolist()
+        except ValueError:
+            return geneid, list()
+        simulated_mutations.append(simulated_mutations_sample)
 
-    return geneid, simulated_mutations
+    sim_mut = sum(simulated_mutations, [])
+    
+    return geneid, sim_mut
 
 
 # Deprecated!
@@ -282,7 +297,7 @@ def compute_signature(mutations_file):
     return signatures
 
 
-def randomize_region(number_mutations, input_regions, number_simulations=1,
+def randomize_region(number_mutations, input_regions, samples, number_simulations=1,
                      start_at_0=True, signature=None, cancer_type=None, cores=1):
     """Randomize a single region instead of a dataset. This modules should be imported in a script.
 
@@ -365,7 +380,7 @@ def randomize_region(number_mutations, input_regions, number_simulations=1,
 
     results = []
     geneid, simulated_mutations = simulate(
-        items=list(regions.items())[0], cancer_type=cancer_type, simulations=number_simulations, cores=cores
+        items=list(regions.items())[0], sample_list=samples, cancer_type=cancer_type, simulations=number_simulations, cores=cores
     )
 
     for i, mut in enumerate(simulated_mutations):

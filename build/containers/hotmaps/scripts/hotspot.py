@@ -130,7 +130,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
         struct_chains.extend(struct_info[k])
 
     # separate out mutation info
-    ttypes, mres, mcount, mchains = zip(*structure_mutations)  # if model_mutations else ([], [], [])
+    ttypes, mres, mcount, mchains, samples = zip(*structure_mutations)  # if model_mutations else ([], [], [])
 
     # stratify mutations by their tumor type
     # ttype_ixs is a dictionary that contains
@@ -199,7 +199,7 @@ def process_structure(structure_id, struct_info, quiet, structure_mutations, df_
         # generate empirical null distribution
         #print(structure_id, list_rows, models, struct_info, all_res_centers_of_geometry, total_mutations, opts['num_simulations'], opts['seed'], neighbors, tumour, d_correspondence, opts['stop_criterion'], max_obs_dens)
 
-        sim_null_dist = simulation_signatures.generate_null_dist_sig(structure_id, list_rows, models, struct_info,
+        sim_null_dist = simulation_signatures.generate_null_dist_sig(samples, structure_id, list_rows, models, struct_info,
                                                    all_res_centers_of_geometry,
                                                    total_mutations,
                                                    opts['num_simulations'],
@@ -307,12 +307,20 @@ def main(opts):
             input_file=opts['signatures'],
             load_format='json'
         )
-        _signatures = {'probabilities': {}}
 
-        for key, value in signatures.items():
+        #Edit. Build a nested dictionary 
+        #       {"Sample#": {"probabilities":{(alt_1,ref_1):prob_1,
+        #                                      ..., 
+        #                                     (alt_n,ref_n):prob_n}}}
+        _signatures = dict()
+        
+        for sample in signatures:
+          _signatures[sample] = {'probabilities': {}}
+          for key, value in signatures[sample].items():
             ref, alt = key.split('>')
             key = (ref, ref[0] + alt + ref[-1])
-            _signatures['probabilities'][key] = value
+            _signatures[sample]['probabilities'][key] = value
+        
         signatures = _signatures
 
     # with open(opts['mutations'] + ".signature", 'wb') as fd:
@@ -322,7 +330,12 @@ def main(opts):
 
     steps = 400 * opts['cores']
     chunk_size = int(len(pdb_info) / steps) + 1
-    process_task = partial(process_structures, quiet, opts['mutations'], opts["genomic_coordinates"], signatures)
+    process_task = partial(process_structures, 
+                            quiet, 
+                            opts['mutations'],
+                            opts["genomic_coordinates"],
+                            signatures
+                            )
 
     header = [[
         'Structure', 'Tumor Type', 'Model', 'Chain', 'Mutation Residues',

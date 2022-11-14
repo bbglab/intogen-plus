@@ -38,7 +38,7 @@ def map_generated_mutations(structure_id,list_output,d_correspondence):
         try:
             posn = int(d_correspondence[pdbid+"_"+chain][pos])
         except:
-            print "Error, position" + pos + " " + pdbid + chain + " Not mapped"
+            print ("Error, position" + pos + " " + pdbid + chain + " Not mapped")
             continue
 
         if(sim in dict_results):
