@@ -22,7 +22,7 @@ def main(opts):
 
             # make sure it exists
             if os.path.exists(file_path) == False:
-                print '  does not exist.'
+                print('  does not exist.')
                 continue
 
             # read in data
@@ -34,14 +34,32 @@ def main(opts):
             out_path = os.path.join(opts['data_dir'], 'mutation_tcga.'+tissue+'.txt')
             with open(out_path, 'w') as wf_mutation:
                 # Adding header
-                wf_mutation.write('\t'.join(["structure_id", "tissue", "residues", "occurrence"]) + '\n')
+                ## Edit. Adding samples information to header
+                wf_mutation.write('\t'.join(["structure_id", "tissue", "residues", "occurrence", "samples"]) + '\n')
+
+                ## Edit storing data in a dict
+                f_dict = dict()
                 for tcga_line in tcga_lines:
-                    [pdb, no_sample, tcga_residues] = tcga_line[:-1].split('\t')
+                    [pdb, no_sample, tcga_residues, sample] = tcga_line[:-1].split('\t')
                     tcga_residues_list = tcga_residues.split(', ')
+                    # checking for chains
                     for res_ocur in tcga_residues_list:
                         [res, ocur] = res_ocur.split('_')
-                        tmp_line = '\t'.join([pdb, tissue, res, ocur]) + '\n'
-                        wf_mutation.write(tmp_line)
+                        key_line = pdb+'\t'+tissue+'\t'+res+'\t'+no_sample+'\t'
+
+                        # building dictionary
+                        f_dict[key_line] = f_dict.get(key_line, [])
+
+                        # add samples for each mutation on the specific residue
+                        if sample in f_dict[key_line]:
+                            continue
+                        else:
+                            f_dict[key_line].append(sample)
+
+                # Edit for each line we have a last column that keeps all the samples_id related to that specific mutation
+                for k, v in f_dict.items():
+                    samples = ', '.join(v)
+                    wf_mutation.write(k+samples+'\n')
 
 
 if __name__ == "__main__":
