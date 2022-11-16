@@ -314,12 +314,13 @@ def main(opts):
         #                                     (alt_n,ref_n):prob_n}}}
         _signatures = dict()
         
-        for sample in signatures:
-          _signatures[sample] = {'probabilities': {}}
-          for key, value in signatures[sample].items():
-            ref, alt = key.split('>')
-            key = (ref, ref[0] + alt + ref[-1])
-            _signatures[sample]['probabilities'][key] = value
+        for s in signatures:
+            sample = s[:12]
+            _signatures[sample] = {'probabilities': {}}
+            for key, value in signatures[s].items():
+                ref, alt = key.split('>')
+                key = (ref, ref[0] + alt + ref[-1])
+                _signatures[sample]['probabilities'][key] = value
         
         signatures = _signatures
 
