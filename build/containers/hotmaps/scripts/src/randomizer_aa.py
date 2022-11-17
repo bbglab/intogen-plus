@@ -180,12 +180,17 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
                     pdb_id=geneid, chain=chain,
                 )
             )
-            ## Edit. Check if type is tuple, otherwise it won't iterate.
-            if type(sample_list) is tuple:
-                sample_list = list(set(list(sum(sample_list, []))))
+            ## Edit. Create a dictionary to store num mutation per sample and samples ids.
+            sample_dict = dict()
+            for samples in sample_list:
+                for sample in samples:
+                    if sample not in sample_dict.keys():
+                        sample_dict[sample] = sample_dict.get(sample, 1)
+                    else:
+                        sample_dict[sample] += 1
 
             ## Edit. Add sample list to get info for samples.
-            for sample in sample_list:
+            for sample in sample_dict.keys():
                 if sample not in prob:
                     prob[sample] = [signatures[sample]['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0]
                 else:
@@ -214,20 +219,19 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
     #     for simulated_mutations_ in pool.map(fx, range(simulations), chunksize=100):
     #         simulated_mutations.append(simulated_mutations_)
     simulated_mutations = []
-    for sample in sample_list:         
+    for sample, sample_mut in sample_dict.items():         
         np_prob = np.array(prob[sample])
         p_normalized = np_prob / np.sum(np_prob)
         try:
             simulated_mutations_sample = np.random.choice(
                 a=changes,
-                size=(simulations, num_mutations),
+                size=(simulations, sample_mut),
                 p=p_normalized,
                 replace=True
             ).flatten().tolist()
-        except ValueError:
+            simulated_mutations.append(simulated_mutations_sample)
+        except:
             return geneid, list()
-        simulated_mutations.append(simulated_mutations_sample)
-
     sim_mut = sum(simulated_mutations, [])
     
     return geneid, sim_mut
