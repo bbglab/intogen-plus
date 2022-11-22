@@ -31,7 +31,7 @@ def main(opts):
             num_pdb = len(tcga_lines)
 
             # write the reformatted output to a file
-            out_path = os.path.join(opts['data_dir'], 'mutation_tcga.'+tissue+'.txt')
+            out_path = os.path.join(opts['data_dir'], 'mutation_tcga'+filename[9:])
             with open(out_path, 'w') as wf_mutation:
                 # Adding header
                 ## Edit. Adding samples information to header
@@ -45,7 +45,7 @@ def main(opts):
                     # checking for chains
                     for res_ocur in tcga_residues_list:
                         [res, ocur] = res_ocur.split('_')
-                        key_line = pdb+'\t'+tissue+'\t'+res+'\t'+no_sample+'\t'
+                        key_line = pdb+'\t'+tissue+'\t'+res+'\t'
 
                         # building dictionary
                         f_dict[key_line] = f_dict.get(key_line, [])
@@ -59,7 +59,7 @@ def main(opts):
                 # Edit for each line we have a last column that keeps all the samples_id related to that specific mutation
                 for k, v in f_dict.items():
                     samples = ', '.join(v)
-                    wf_mutation.write(k+samples+'\n')
+                    wf_mutation.write(k+str(len(v))+'\t'+samples+'\n')
 
 
 if __name__ == "__main__":
