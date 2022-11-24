@@ -4,7 +4,7 @@ then evaluates the clustering to detect hotspot residues.
 import numpy as np
 import src.mutations as muts
 import src.pdb_structure as pstruct
-import randomizer_aa
+import src.randomizer_aa
 from src import simulate_mutations_signatures as sig
 import pandas as pd
 NUM_MODEL_DIFF = 0
@@ -112,7 +112,7 @@ def generate_null_dist_sig(samples, struct_id,coordinates,model_info, chain_info
     
     
     # select a position to mutate at random
-    results = randomizer_aa.randomize_region(number_mutations=num_mutations, input_regions=coordinates,samples=samples, number_simulations=num_sims,signature=signatures,cancer_type=cancer_type,cores=4)
+    results = src.randomizer_aa.randomize_region(number_mutations=num_mutations, input_regions=coordinates,samples=samples, number_simulations=num_sims,signature=signatures,cancer_type=cancer_type,cores=4)
     #print results[0]
     mutated_pos_vec = sig.map_generated_mutations(struct_id, results,d_correspondence)
     if len(mutated_pos_vec) == 0:

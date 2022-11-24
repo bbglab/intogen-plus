@@ -181,6 +181,8 @@ def main(opts):
             chrom = row['Chromosome']
             start = row['Position']  # value of Start_Position column
             gene = row['HUGO symbol']
+            if 'Strand' not in row.index:
+                row['Strand'] = 'nan'
 
             # query genome2pdb
             myquery = (
@@ -226,7 +228,7 @@ def main(opts):
                         counted_bio = True
 
                 # write line
-                line_str = '\t'.join([pdbid, chain, seqres, genomic_pos] + map(str, row[out_cols].tolist())) + '\n'
+                line_str = '\t'.join([pdbid, chain, seqres, genomic_pos] + list(map(str, row[out_cols].tolist()))) + '\n'
                 wf.write(line_str)
 
             count += 1
