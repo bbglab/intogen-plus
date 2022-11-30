@@ -5,7 +5,7 @@ import csv
 import itertools as it
 import re
 import gzip
-import src.statistics as mystats
+import statistics as mystats
 
 
 # import modules needed for logging
@@ -193,7 +193,7 @@ def read_structure(pdb_path, structure_id, quiet=True):
     try:
         # handle gziped or uncompressed reading
         if pdb_path.endswith('.gz'):
-            with gzip.open(pdb_path, 'r') as handle:
+            with gzip.open(pdb_path, 'rt', encoding='utf-8') as handle:
                 structure = pdb_parser.get_structure(structure_id, handle)
         else:
             structure = pdb_parser.get_structure(structure_id, pdb_path)
