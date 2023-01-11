@@ -7,7 +7,7 @@ import pandas as pd
 from bgoncotree.main import BGOncoTree
 
 def read_info(folder):
-    info_file = path.join(folder, "info_datasets.csv")
+    info_file = path.join(folder, "info_datasets.tsv")
     df = pd.read_csv(info_file, sep="\t")
     return df
 
@@ -28,6 +28,7 @@ def run(paths, cohorts, dict_label_names, output='cohorts.tsv'):
         d = json.load(f)
 
     tree = BGOncoTree(file=path.join(environ['INTOGEN_DATASETS'], 'oncotree', 'tree.tsv'))
+    # tree = BGOncoTree(file='/workspace/projects/intogen_plus/fixdatasets-20220321/intogen-plus/datasets/oncotree/tree_old.tsv')
     d = {node.id: node.name for node in tree.descendants('CANCER')}
 
     df_final["CANCER_TYPE_NAME"] = df_final["CANCER_TYPE"].map(d)

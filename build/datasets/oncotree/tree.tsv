@@ -557,7 +557,7 @@ NKCLL	TLL	Natural Killer (NK) Cell Lymphoblastic Leukemia/Lymphoma
 NLPHL	HL	Nodular Lymphocyte-Predominant Hodgkin Lymphoma
 NMCHN	OHNCA	NUT Midline Carcinoma of the Head and Neck
 NMZL	MZL	Nodal Marginal Zone Lymphoma
-NON_SOLID	SOLID	Non-solid cancer
+NON_SOLID	CANCER	Non-solid cancer
 NPC	HEAD_NECK	Nasopharyngeal Carcinoma
 NPTLTFH	MTNN	Nodal Peripheral T-Cell Lymphoma with TFH Phenotype
 NSCHL	CHL	Nodular Sclerosis Classical Hodgkin Lymphoma
@@ -770,7 +770,7 @@ SNSC	HNSC	Sinonasal Squamous Cell Carcinoma
 SNUC	OHNCA	Sinonasal Undifferentiated Carcinoma
 SOC	OVT	Serous Ovarian Cancer
 SOFT_TISSUE	SOLID	Soft Tissue
-SOLID	SOLID	Solid cancer
+SOLID	CANCER	Solid cancer
 SPB	MBN	Solitary Plasmacytoma of Bone
 SPC	BRCA	Solid Papillary Carcinoma of the Breast
 SPCC	NSCLC	Spindle Cell Carcinoma of the Lung
