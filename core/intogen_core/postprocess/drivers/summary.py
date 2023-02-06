@@ -85,9 +85,10 @@ def run(mutations, cohorts, files, vet_files):
 @click.command()
 @click.option('--mutations', type=click.Path(exists=True), required=True)
 @click.option('--cohorts', type=click.Path(exists=True), required=True)
-@click.argument('files', nargs=-2)
-@click.argument('vet_files', nargs=-1)
+@click.argument('files', nargs=-1)
+@click.argument('vet_files', nargs=1)
 def cli(mutations, cohorts, files, vet_files):
+    vet_files = tuple(vet_files.split(' '))
     run(mutations, cohorts, files, vet_files)
 
 

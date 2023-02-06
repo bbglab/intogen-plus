@@ -751,7 +751,7 @@ process DriverSummary {
 		drivers-summary \
 			--mutations ${mutations} \
 			--cohorts ${cohortsSummary} \
-			${input} ${input_vet}
+			${input} "${input_vet}"
 		"""
 }
 
