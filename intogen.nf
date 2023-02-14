@@ -739,6 +739,7 @@ process DriverSummary {
 
     input:
         path (input) from DRIVERS.collect()
+        path (input_vet) from VET.collect()
         path (mutations) from MUTATIONS_SUMMARY
         path (cohortsSummary) from COHORT_SUMMARY
 
@@ -750,7 +751,7 @@ process DriverSummary {
 		drivers-summary \
 			--mutations ${mutations} \
 			--cohorts ${cohortsSummary} \
-			${input}
+			${input} "${input_vet}"
 		"""
 }
 

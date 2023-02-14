@@ -6,7 +6,7 @@ DST=$2
 
 tmpdir=`mktemp -d`
 
-wget ftp://salilab.org/databases/modbase/projects/genomes/H_sapiens/2013/ModBase_H_sapiens_2013_refseq.tar.xz -P ${tmpdir}
+wget https://salilab.org/modbase-download/projects/genomes/H_sapiens/2013/ModBase_H_sapiens_2013_refseq.tar.xz -P ${tmpdir}
 tar -C ${tmpdir} -xf ${tmpdir}/ModBase_H_sapiens_2013_refseq.tar.xz ModBase_H_sapiens_2013_refseq/models/model
 
 src=${tmpdir}/ModBase_H_sapiens_2013_refseq/models/model

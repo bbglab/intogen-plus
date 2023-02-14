@@ -3,8 +3,9 @@
 # The following environment variables must be defined
 INTOGEN_DATASETS ?= ../datasets
 export INTOGEN_DATASETS
-# FOLDERS with input datasets
+# FOLDER where info_dataset.tsv is located
 INPUTS = ${INTOGEN_INPUTS}
+# FOLDER where intogen results are located
 PIPELINE = ${INTOGEN_RESULTS}
 
 
@@ -44,7 +45,7 @@ $(OUTPUT_FOLDER_DRIVERS): | $(OUTPUT_FOLDER)
 $(CANCERS): data/dictionary_long_names.json | $(OUTPUT_FOLDER)
 	cp -f $< $@
 
-INFO_DATASETS = $(patsubst %,%/info_datasets.csv, $(INPUTS))
+INFO_DATASETS = $(patsubst %,%/info_datasets.tsv, $(INPUTS))
 
 $(STATS_COHORTS): $(INFO_DATASETS) $(PIPELINE)/cohorts.tsv data/dictionary_long_names.json | $(OUTPUT_FOLDER)
 	python cohorts.py $@ $(PIPELINE)/cohorts.tsv data/dictionary_long_names.json $(INPUTS)

@@ -21,17 +21,27 @@ def load_mutations(mutations):
     return mut_counts
 
 
-def run(mutations, cohorts, files):
+def run(mutations, cohorts, files, vet_files):
     l = []
-    for file in files:
+    lv = []
+    for file, vet in zip(files, vet_files):
         df = pd.read_csv(file, sep="\t")
+        df_vet = pd.read_csv(vet, sep="\t")
+        if (df.empty or df_vet.empty) == False:                        
+            cohort = df["COHORT"].iloc[0]
+            df_vet["COHORT"] = cohort
+
         l.append(df)
+        lv.append(df_vet)
+
     drivers = pd.concat(l, sort=True)
+    drivers_vet = pd.concat(lv, sort=True)
 
     cohort = load_cohorts(cohorts)
 
     muts = load_mutations(mutations)
 
+    # drivers
     df = pd.merge(drivers, cohort, how='left')
     df = pd.merge(df, muts, how='left')
 
@@ -48,6 +58,19 @@ def run(mutations, cohorts, files):
 
     df[columns].sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('drivers.tsv', sep="\t", index=False)
 
+    # drivers vet 
+    df_vet = pd.merge(drivers_vet, cohort, how='left')
+    df_vet = pd.merge(df_vet, muts, how='left')
+
+    columns = ["SYMBOL", "TRANSCRIPT", "COHORT", "CANCER_TYPE", "MUTATIONS", 
+               "SAMPLES_COHORT", "ALL_METHODS", "SIG_METHODS", "QVALUE_COMBINATION", 
+               "QVALUE_CGC_COMBINATION", "RANKING", "TIER", "ROLE", "CGC_GENE", 
+               "TIER_CGC", "CGC_CANCER_GENE", "SIGNATURE9", "SIGNATURE10", "WARNING_EXPRESSION", 
+               "WARNING_GERMLINE", "SAMPLES_3MUTS", "OR_WARNING", "WARNING_ARTIFACT", 
+               "KNOWN_ARTIFACT", "NUM_PAPERS", "WARNING_ENSEMBL_TRANSCRIPTS", "DRIVER", "FILTER"]
+
+    df_vet[columns].sort_values(["SYMBOL", "CANCER_TYPE"]).to_csv('unfiltered_drivers.tsv', sep="\t", index=False)
+
     # Unique drivers
     drivers = df["SYMBOL"].unique()
     # Add the ensembl gene id
@@ -63,8 +86,10 @@ def run(mutations, cohorts, files):
 @click.option('--mutations', type=click.Path(exists=True), required=True)
 @click.option('--cohorts', type=click.Path(exists=True), required=True)
 @click.argument('files', nargs=-1)
-def cli(mutations, cohorts, files):
-    run(mutations, cohorts, files)
+@click.argument('vet_files', nargs=1)
+def cli(mutations, cohorts, files, vet_files):
+    vet_files = tuple(vet_files.split(' '))
+    run(mutations, cohorts, files, vet_files)
 
 
 if __name__ == "__main__":
