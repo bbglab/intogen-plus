@@ -250,8 +250,8 @@ process OncodriveCLUSTL {
         path regions from REGIONS
 
     output:
-        tuple val(cohort), path("${cohort}/elements_results.txt") into OUT_ONCODRIVECLUSTL
-        tuple val(cohort), path("${cohort}/clusters_results.tsv") into OUT_ONCODRIVECLUSTL_CLUSTERS
+        tuple val(cohort), path("${cohort}.elements_results.txt") into OUT_ONCODRIVECLUSTL
+        tuple val(cohort), path("${cohort}.clusters_results.tsv") into OUT_ONCODRIVECLUSTL_CLUSTERS
 
 	script:
 		seedOpt = (params.seed == null)? '': "--seed ${params.seed}"
@@ -264,6 +264,9 @@ process OncodriveCLUSTL {
 				--concatenate \
 				-c ${task.cpus} \
 				-o ${cohort} ${seedOpt} ${debugOpt}
+			
+			mv ${cohort}/elements_results.txt ${cohort}.elements_results.txt
+			mv ${cohort}/clusters_results.tsv ${cohort}.clusters_results.tsv
 			"""
 		else
 			"""
@@ -272,6 +275,9 @@ process OncodriveCLUSTL {
 				-sig ${signature} --concatenate \
 				-c ${task.cpus} \
 				-o ${cohort} ${seedOpt} ${debugOpt}
+
+			mv ${cohort}/elements_results.txt ${cohort}.elements_results.txt
+			mv ${cohort}/clusters_results.tsv ${cohort}.clusters_results.tsv	
 			"""
 }
 
