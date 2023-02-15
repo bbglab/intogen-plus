@@ -1,10 +1,8 @@
-from collections import defaultdict
 from itertools import product
-
+from collections import defaultdict
 import numpy as np
 
-
-CB = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+CB = dict(zip(list('ACGT'), list('TGCA')))
 
 
 def mut_key_generator():

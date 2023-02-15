@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 set -xe
 
@@ -10,25 +10,10 @@ fi
 
 
 ANNOTMUTS=$1
-GENEMUTS=$2
-WEIGHTS=$3
-CORES=$4
-OUTPUT=$5
+SCOPE=$2
+OUTPUT=$3
 
-
-/usr/bin/python3 /mutrate/compute_mutrate.py compute-mutrate \
+python3 /mutrate/compute_mutrate.py mutrate \
                         --annotmuts ${ANNOTMUTS} \
-                        --genemuts ${GENEMUTS} \
-                        --weights ${WEIGHTS} \
-                        --cores ${CORES} \
-                        --output ${OUTPUT}
-
-
-
-FOLDER=`dirname ${WEIGHTS}`
-NAME=`basename ${WEIGHTS} | cut -d '.' -f1`
-ASSIGNMENT_PATH=${FOLDER}/${NAME}.signature_likelihood
-
-/usr/bin/python3 /mutrate/signature_assignment.py \
-                        --input_file ${WEIGHTS} \
-                        --assignment_path ${ASSIGNMENT_PATH}
+                        --scope ${SCOPE} \
+                        --outfolder ${OUTPUT}
