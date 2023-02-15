@@ -761,36 +761,22 @@ process DriverSummary {
 		"""
 }
 
-/*
 process Mutrate {
 	tag "Mutrate ${cohort}"
 	publishDir "${STEPS_FOLDER}/mutrate", mode: "copy"
 
     input:
-        tuple val(cohort), path(weights), path(annotmuts), path(genemuts) from OUT_DECONSTRUCTSIGS.join(OUT_DNDSCV_ANNOTMUTS).join(OUT_DNDSCV_GENEMUTS)
-        path(drivers) from DRIVERS_SUMMARY
-		path(stats_cohorts) from COHORT_SUMMARY
+        tuple val(cohort), path(annotmuts) from OUT_DNDSCV_ANNOTMUTS
 
     output:
-	tuple val(cohort), path(output) into OUT_MUTRATE
-
+		tuple val(cohort), path("*.mutrate.json") into OUT_MUTRATE
 
 	script:
-		output = "${cohort}_mutrate.out.json.gz"
 		"""
-		/usr/local/bin/python /mutrate/compute_mutrate.py \
-			--annotmuts ${annotmuts} \
-			--genemuts ${genemuts} \
-			--weights ${weights} \
-            --drivers ${drivers} \
-            --oncotree /workspace/datasets/transfer/test_mutrate/build/containers/mutrate/oncotree_boostDM.tsv \
-            --cohorts ${stats_cohorts} \
-			--output ${cohort}_mutrate.out.json.gz \
-			--cores ${task.cpus}
+		/bin/bash /mutrate/run.sh ${annotmuts} exome ./
 		"""
 
 }
-*/
 /*
 
 process CreateBoostDMDatasets {
