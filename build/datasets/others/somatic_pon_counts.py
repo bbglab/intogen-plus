@@ -14,11 +14,10 @@ def somatic_filter(input_url, output_file):
     with gzip.open(temp.name, 'rb') as fd, gzip.open(output_file, 'wt') as fo:
         for line in tqdm(fd):
             line = line.decode().strip()
-            if line.startswith("#"):
+            if line.startswith("Chromosome"):
                 continue
-            chrom, pos, _id, ref, alt, qual, _filter, info = line.split('\t')
-            info = dict([j.split('=') for j in [i for i in info.split(';')]])
-            if int(info.get('PON_COUNT', 0)) > 5:
+            chrom, pos, ref, alt, count, _max_reads, _tot_reads = line.split('\t')
+            if int(count) > 5:
                 fo.write(f'{chrom}\t{pos}\t{ref}\t{alt}\n')
 
     temp.close()
