@@ -12,9 +12,18 @@ import pandas as pd
 from utils import complementary
 
 
-
 # load 96-array with triplet counts
-
+trinuc_subs =  [
+    'ACA>A', 'ACA>G', 'ACA>T', 'ACC>A', 'ACC>G', 'ACC>T', 'ACG>A', 'ACG>G', 'ACG>T', 'ACT>A',
+    'ACT>G', 'ACT>T', 'ATA>A', 'ATA>C', 'ATA>G', 'ATC>A', 'ATC>C', 'ATC>G', 'ATG>A', 'ATG>C',
+    'ATG>G', 'ATT>A', 'ATT>C', 'ATT>G', 'CCA>A', 'CCA>G', 'CCA>T', 'CCC>A', 'CCC>G', 'CCC>T', 
+    'CCG>A', 'CCG>G', 'CCG>T', 'CCT>A', 'CCT>G', 'CCT>T', 'CTA>A', 'CTA>C', 'CTA>G', 'CTC>A', 
+    'CTC>C', 'CTC>G', 'CTG>A', 'CTG>C', 'CTG>G', 'CTT>A', 'CTT>C', 'CTT>G', 'GCA>A', 'GCA>G', 
+    'GCA>T', 'GCC>A', 'GCC>G', 'GCC>T', 'GCG>A', 'GCG>G', 'GCG>T', 'GCT>A', 'GCT>G', 'GCT>T', 
+    'GTA>A', 'GTA>C', 'GTA>G', 'GTC>A', 'GTC>C', 'GTC>G', 'GTG>A', 'GTG>C', 'GTG>G', 'GTT>A', 
+    'GTT>C', 'GTT>G', 'TCA>A', 'TCA>G', 'TCA>T', 'TCC>A', 'TCC>G', 'TCC>T', 'TCG>A', 'TCG>G', 
+    'TCG>T', 'TCT>A', 'TCT>G', 'TCT>T', 'TTA>A', 'TTA>C', 'TTA>G', 'TTC>A', 'TTC>C', 'TTC>G', 
+    'TTG>A', 'TTG>C', 'TTG>G', 'TTT>A', 'TTT>C', 'TTT>G']
 
 with open('/mutrate/cds_triplet_abundance.json', 'rt') as f:
     tricount_exome = json.load(f)
@@ -46,6 +55,15 @@ class dNdSOut:
             'ACGT')))].copy()
         df.loc[:, 'context'] = df.apply(self.pyr_context, axis=1)
         catalogue = pd.crosstab(df.sampleID, df.context)
+
+        # check if we are missing some context, if so add it with a 0-filled column.
+        if catalogue.shape[1] < 96:
+            missing_context = set(list(trinuc_subs)).difference(set(catalogue.columns))
+            for context in missing_context:
+                catalogue.loc[:, context] = 0
+            
+            catalogue = catalogue.reindex(sorted(catalogue.columns), axis=1)
+
         return catalogue
 
 
@@ -59,6 +77,7 @@ def cohort_profile(annotmuts_fn):
     dndscv = dNdSOut(annotmuts_fn)
     catalogue = dndscv.catalogue()
     res = np.einsum('ij->j', catalogue.values)
+    print(res)
     return res
 
 
