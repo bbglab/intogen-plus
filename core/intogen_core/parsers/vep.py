@@ -88,6 +88,7 @@ def filter_(file, stats):
     elif ratio_missense > 10:
         raise DatasetError("The ratio of missense / synonymous variants is too high")
 
+    #TODO: filter for MNVs (check test/boostdm_out_needs/get_mnvs.py)
     multiple_matches = {}
     for k, v in data.items():
         # If a (position , sample) (k) lie in more than one gene,
