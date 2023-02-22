@@ -9,9 +9,10 @@ boostdm_data_src = $(src_datasets)/boostdm
 BOOSTDM_PFAM = $(boostdm_dir)/pfam_biomart.tsv.gz
 
 ## STEP 2 - PFAM files
-$(BOOSTDM_PFAM): $(boostdm_data_src)/symlink.sh $$(BIOMART_PFAM) | $(boostdm_dir) 
+$(BOOSTDM_PFAM): $(boostdm_data_src)/symlink.sh $$(BIOMART_PFAM) $(boostdm_data_src)/download.sh | $(boostdm_dir) 
 	@echo Creating biomart symlink
 	$< $(boostdm_dir)/pfam_biomart.tsv.gz ${BIOMART_PFAM}
+	$(boostdm_data_src)/download.sh $(boostdm_dir) 
 
 ## STEP 3 - ptms
 BOOST_INFO_FUNCTIONAL = $(boostdm_dir)/ptms/info_functional_sites.json
