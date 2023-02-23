@@ -763,7 +763,7 @@ process DriverSummary {
 
 process Mutrate {
 	tag "Mutrate ${cohort}"
-	publishDir "${STEPS_FOLDER}/mutrate", mode: "copy"
+	publishDir "${STEPS_FOLDER}/boostDM/mutrate", mode: "copy"
 
     input:
         tuple val(cohort), path(annotmuts) from OUT_DNDSCV_ANNOTMUTS
@@ -780,7 +780,7 @@ process Mutrate {
 
 process DriverSaturation {
 	tag "Driver summary"
-	publishDir "${OUTPUT}/drivers/saturation", mode: "copy"
+	publishDir "${OUTPUT}/boostDM/saturation", mode: "copy"
 	label "core"
 
     input:
@@ -794,6 +794,25 @@ process DriverSaturation {
 
 		drivers-saturation ${input}
 		
+		"""
+}
+
+process MNVSvep {
+	tag "MNVs"
+	publishDir "${OUTPUT}/boostDM", mode: "copy"
+	label "core"
+
+	input:
+		path (input) from PARSED_VEP.collect()
+
+	output:
+		path("mnvs.tsv.gz")
+	
+	script:
+		"""
+		
+		parse-mnvs ${input}
+
 		"""
 }
 /*
