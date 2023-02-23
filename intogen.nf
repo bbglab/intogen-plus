@@ -777,6 +777,25 @@ process Mutrate {
 		"""
 
 }
+
+process DriverSaturation {
+	tag "Driver summary"
+	publishDir "${OUTPUT}/drivers/saturation", mode: "copy"
+	label "core"
+
+    input:
+        path (input) from DRIVERS_SUMMARY
+
+    output:
+		path("*.vep.gz") into DRIVERS_SATURATION
+
+	script:
+		"""
+
+		drivers-saturation ${input}
+		
+		"""
+}
 /*
 
 process CreateBoostDMDatasets {
