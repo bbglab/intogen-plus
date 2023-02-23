@@ -35,7 +35,7 @@ setup(
                 'format-variants = intogen_core.formatters.main:cli',
                 'parse-vep = intogen_core.parsers.vep:cli',
                 'parse-nonsynonymous = intogen_core.parsers.nonsynonymous:cli',
-                'parse-mnvs = intogen_cores.parsers.mnvs:cli',
+                'parse-mnvs = intogen_core.parsers.mnvs:cli',
                 'mutations-summary = intogen_core.postprocess.mutations:cli',
                 'drivers-discovery = intogen_core.postprocess.drivers.discovery:cli',
                 'drivers-summary = intogen_core.postprocess.drivers.summary:cli',

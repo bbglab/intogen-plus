@@ -5,3 +5,4 @@ intervaltree
 numpy
 pandas
 pyliftover
+pytabix

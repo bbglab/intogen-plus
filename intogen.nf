@@ -387,7 +387,7 @@ process ProcessVEPoutput {
 }
 
 
-PARSED_VEP.into { PARSED_VEP1; PARSED_VEP2; PARSED_VEP3; PARSED_VEP4; PARSED_VEP5; PARSED_VEP6 }
+PARSED_VEP.into { PARSED_VEP1; PARSED_VEP2; PARSED_VEP3; PARSED_VEP4; PARSED_VEP5; PARSED_VEP6; PARSED_VEP7 }
 
 process FilterNonSynonymous {
 	tag "Filter non synonymus ${cohort}"
@@ -750,7 +750,9 @@ process DriverSummary {
         path (cohortsSummary) from COHORT_SUMMARY
 
     output:
-		path("*.tsv") into DRIVERS_SUMMARY
+		path("drivers.tsv") into DRIVERS_SUMMARY
+		path("unique_drivers.tsv") into UNIQUE_DRIVERS
+		path("unfiltered_drivers.tsv") into UNFILTER_DRIVERS
 
 	script:
 		"""
@@ -780,11 +782,11 @@ process Mutrate {
 
 process DriverSaturation {
 	tag "Driver summary"
-	publishDir "${OUTPUT}/boostDM/saturation", mode: "copy"
+	publishDir "${STEPS_FOLDER}/boostDM/saturation", mode: "copy"
 	label "core"
 
     input:
-        path (input) from DRIVERS_SUMMARY
+        path (drivers) from DRIVERS_SUMMARY
 
     output:
 		path("*.vep.gz") into DRIVERS_SATURATION
@@ -792,18 +794,18 @@ process DriverSaturation {
 	script:
 		"""
 
-		drivers-saturation ${input}
+		drivers-saturation --drivers ${drivers}
 		
 		"""
 }
 
 process MNVSvep {
 	tag "MNVs"
-	publishDir "${OUTPUT}/boostDM", mode: "copy"
+	publishDir "${STEPS_FOLDER}/boostDM", mode: "copy"
 	label "core"
 
 	input:
-		path (input) from PARSED_VEP.collect()
+		tuple val(cohort), path(input) from PARSED_VEP7.collect()
 
 	output:
 		path("mnvs.tsv.gz")

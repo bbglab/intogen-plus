@@ -65,12 +65,11 @@ def write_out(d, drivers_df):
         df = d[gene]["data"]
         df.to_csv(f'{gene}.{ttype}.vep.gz')    
 
+@click.command()
+@click.option('--drivers', type=click.Path(exists=True), required=True)
+def cli(drivers):
 
-@click.command(context_settings={'help_option_names': ['-h', '--help']})
-@click.argument('drivers_summary', narg=1)
-def cli(drivers_summary):
-
-    drivers_df = pd.read_csv(drivers_summary, sep='\t', low_memory=False)
+    drivers_df = pd.read_csv(drivers, sep='\t', low_memory=False)
     drivers_l = drivers_list(drivers_df)
 
     r_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'cds.regions.gz')
