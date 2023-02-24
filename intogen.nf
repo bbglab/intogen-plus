@@ -668,7 +668,7 @@ COHORT_COUNTS.into{ COHORT_COUNTS1; COHORT_COUNTS2 }
 COHORT_COUNTS_LIST = COHORT_COUNTS1.map{ it -> it[1] }
 
 process CohortSummary {
-	tag "Count variants ${cohort}"
+	tag "Count variants"
 	publishDir "${OUTPUT}", mode: "copy"
 
     input:
@@ -781,7 +781,7 @@ process Mutrate {
 }
 
 process DriverSaturation {
-	tag "Driver summary"
+	tag "Driver saturation"
 	publishDir "${STEPS_FOLDER}/boostDM/saturation", mode: "copy"
 	label "core"
 
@@ -799,16 +799,17 @@ process DriverSaturation {
 		"""
 }
 
-process MNVSvep {
-	tag "MNVs"
+FILT_MNVS_INPUTS = PARSED_VEP7.map { it -> it[1] }
+process FilterMNVS {
+	tag "MNVs filter"
 	publishDir "${STEPS_FOLDER}/boostDM", mode: "copy"
 	label "core"
 
 	input:
-		tuple val(cohort), path(input) from PARSED_VEP7.collect()
+		path(input) from FILT_MNVS_INPUTS.collect()
 
 	output:
-		path("mnvs.tsv.gz")
+		path("mnvs.tsv.gz") into MNVS_FILTER
 	
 	script:
 		"""
@@ -817,28 +818,6 @@ process MNVSvep {
 
 		"""
 }
-/*
 
-process CreateBoostDMDatasets {
-	tag "BoostDM datasets "
-	publishDir "${OUTPUT}", mode: "copy"
-	label "core"
 
-    input:
-        path (input) from DRIVERS.collect()
-        path (mutations) from MUTATIONS_SUMMARY
-        path (cohortsSummary) from COHORT_SUMMARY
-
-    output:
-		path("*.tsv") into DRIVERS_SUMMARY
-
-	script:
-		"""
-		drivers-summary \
-			--mutations ${mutations} \
-			--cohorts ${cohortsSummary} \
-			${input}
-		"""
-}
-*/
 
