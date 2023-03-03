@@ -3,7 +3,7 @@ import csv
 
 import click
 
-from intogen_core.formatters import fml, clustl, vep, signature, dndscv, smregions, cbase,  mutpanning_muts, mutpanning_samples, deconstructsigs, hotmaps
+from intogen_core.formatters import fml, clustl, vep, signature, dndscv, smregions, cbase,  mutpanning_muts, mutpanning_samples, deconstructsigs, hotmaps, seismic
 from intogen_core.utils import out_open
 
 MAP = {
@@ -17,7 +17,8 @@ MAP = {
     'mutpanning-mutations': mutpanning_muts,
     'mutpanning-samples': mutpanning_samples,
     'deconstructsigs': deconstructsigs,
-    'hotmaps': hotmaps
+    'hotmaps': hotmaps,
+    'seismic': seismic
 }
 
 
