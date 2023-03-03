@@ -123,7 +123,7 @@ process ProcessVariants {
 
 }
 
-VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5 }
+VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5,VARIANTS6 }
 
 
 process FormatSignature {
@@ -324,13 +324,32 @@ process dNdScv {
 
 OUT_DNDSCV.into{ OUT_DNDSCV1; OUT_DNDSCV2 }
 
+process FormatSEISMIC {
+	tag "Prepare for SEISMIC ${cohort}"
+	label "core"
+	publishDir "${STEPS_FOLDER}/seismic", mode: "copy"
+
+	input:
+		tuple val(cohort), path(input) from VARIANTS5
+
+	output:
+		tuple val(cohort), path(output) into VARIANTS_SEISMIC
+
+	script:
+		output = "${cohort}.in.tsv.gz"
+		"""
+		format-variants --input ${input} --output ${output} \
+			--format seismic
+		"""
+}
+
 process FormatVEP {
 	tag "Prepare for VEP ${cohort}"
 	label "core"
 	publishDir "${STEPS_FOLDER}/vep", mode: "copy"
 
 	input:
-		tuple val(cohort), path(input) from VARIANTS5
+		tuple val(cohort), path(input) from VARIANTS6
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS_VEP
