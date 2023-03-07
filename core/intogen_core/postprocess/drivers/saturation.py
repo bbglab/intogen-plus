@@ -23,11 +23,13 @@ def get(vep_file, chromosome, start, stop):
 
 def saturation(vep_path, d_list, regions_df):
     """
+    Generator 
+    
     :params vep_path: path where vep.tsv.gz is stored
     :params d_list: list of drivers 
     :regions_df: dataframe of cds.regions.gz
 
-    :return: a dictionary d[gene][dataframe]
+    :yield: a tuple with driver and df
     """
     d = dict()
 
@@ -52,18 +54,20 @@ def saturation(vep_path, d_list, regions_df):
                                    'cDNA_position', 'CDS_position', 'Protein_position', 'Amino_acids', 'Codons', 'Existing_variation', 
                                    'Impact','Distance', 'Strand', 'Flags', 'Symbol', 'Symbol source', 'HGNC_ID', 'Canonical', 'ENSP']
                                 )
-            d[driver] = {"data":df.copy(), "size": df.shape[0]}
+            
+            yield (driver, df)
 
-    return d
 
-def write_out(d, drivers_df):
+def write_out(data, drivers_df):
     """writing output {gene}.{tumortype}.vep.gz"""
 
-    gene_ttypes = list(zip(drivers_df['SYMBOL'], drivers_df['CANCER_TYPE']))
+    drivers_df.drop_duplicates(subset=['SYMBOL', 'CANCER_TYPE'], inplace= True)
+    dic = drivers_df.groupby('SYMBOL')['CANCER_TYPE'].apply(list).to_dict()
 
-    for gene, ttype in gene_ttypes:
-        df = d[gene]["data"]
-        df.to_csv(f'{gene}.{ttype}.vep.gz')    
+    driver, df = data
+
+    for ttype in dic[driver]:
+        df.to_csv(f'{driver}.{ttype}.vep.gz', index=False, compression='gzip', sep='\t')
 
 @click.command()
 @click.option('--drivers', type=click.Path(exists=True), required=True)
@@ -76,9 +80,9 @@ def cli(drivers):
     regions_df = pd.read_csv(r_path, sep='\t', low_memory=False)
 
     vep_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'vep', 'vep.tsv.gz')
-    data = saturation(vep_path, drivers_l, regions_df)
-    
-    write_out(data, drivers_df)
+
+    for data in saturation(vep_path, drivers_l, regions_df):
+        write_out(data, drivers_df)
 
 if __name__ == "__main__":
-    cli()
+    cli()   
