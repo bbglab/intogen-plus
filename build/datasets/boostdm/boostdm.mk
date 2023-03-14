@@ -22,16 +22,13 @@ $(BOOST_INFO_FUNCTIONAL): $(boostdm_data_src)/run_ptms.sh | $(boostdm_dir)
 	mkdir -p $(boostdm_dir)/ptms
 	$< $(boostdm_dir)/ptms $(boostdm_data_src)
 
-## STEP 4 - 
-BOOST_SYMLINKS = $(boostdm_dir)/.symlinks.checkpoint
+## STEP 4 - Symlinks
+BOOST_SYMLINKS = $(boostdm_dir)/shared/.symlinks.checkpoint
 SYMLINK_dir = $(boostdm_dir)/shared
-$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(TRANSCRIPTS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX)| $(boostdm_dir)
+$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(TRANSCRIPTS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX) $$(oncotree_dir)| $(boostdm_dir)
 	@echo Creating symlinks
 	mkdir -p $(SYMLINK_dir)
-	$<  $(SYMLINK_dir)/vep.tsv.gz ${VEP_MUTATIONS}
-	$<  $(SYMLINK_dir)/vep.tsv.gz.tbi ${VEP_MUTATIONS_INDEX}
-	$<  $(SYMLINK_dir)/cds.regions.gz ${REGIONS_CDS}
-	$<  $(SYMLINK_dir)/ensembl_canonical_transcripts.tsv ${TRANSCRIPTS}
+	$^ $(SYMLINK_dir)
 	touch $@
 	
 ## STEP 4 - phylop 
