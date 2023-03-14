@@ -6,17 +6,16 @@ $(boostdm_dir): | $$(INTOGEN_DATASETS)
 
 boostdm_data_src = $(src_datasets)/boostdm
 
-BOOSTDM_PFAM = $(boostdm_dir)/pfam_biomart.tsv.gz
-
-## STEP 2 - PFAM files
-$(BOOSTDM_PFAM): $(boostdm_data_src)/symlink.sh $$(BIOMART_PFAM) $(boostdm_data_src)/download.sh | $(boostdm_dir) 
-	@echo Creating biomart symlink
-	$< $(boostdm_dir)/pfam_biomart.tsv.gz ${BIOMART_PFAM}
+## STEP 1 - PFAM files
+BOOSTDM_PFAM = $(boostdm_dir)/.pfam.checkpoint
+$(BOOSTDM_PFAM): $(boostdm_data_src)/symlink.sh $$(BIOMART_PFAM) $$(REGIONS_PFAM) $(boostdm_data_src)/download.sh | $(boostdm_dir) 
+	@echo Creating pfam_biomart and pfam_regions symlink
+	$<	${REGIONS_PFAM} ${BIOMART_PFAM} $(boostdm_dir)
 	$(boostdm_data_src)/download.sh $(boostdm_dir) 
+	touch $@
 
 ## STEP 3 - ptms
 BOOST_INFO_FUNCTIONAL = $(boostdm_dir)/ptms/info_functional_sites.json
-
 $(BOOST_INFO_FUNCTIONAL): $(boostdm_data_src)/run_ptms.sh | $(boostdm_dir)
 	@echo Creating phosphosite
 	mkdir -p $(boostdm_dir)/ptms
