@@ -12,7 +12,7 @@ From: python:3
 
 %post
 	# Install openVariant
-    pip install open-variant==0.6.16
+    pip install open-variant
     # Install bgparsers
     #pip --no-cache-dir install https://bitbucket.org/bgframework/bgparsers/get/master.tar.gz
 	pip install /core
