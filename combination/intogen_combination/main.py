@@ -74,6 +74,7 @@ def main(outprefix='f', **files):
 @click.option('--smregions')
 @click.option('--cbase')
 @click.option('--mutpanning')
+@click.option('--seismic')
 @click.option('-o', '--output', required=True)
 def cli(output, **kwargs):
     main(output, **{k: v for k, v in kwargs.items() if v is not None})

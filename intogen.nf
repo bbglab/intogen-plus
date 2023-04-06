@@ -599,7 +599,7 @@ process Combination {
 	publishDir "${STEPS_FOLDER}/combination", mode: "copy"
 
     input:
-        tuple val(cohort), path(fml), path(clustl), path(dndscv), path(smregions), path(cbase), path(mutpanning), path(hotmaps) from OUT_ONCODRIVEFML.join(OUT_ONCODRIVECLUSTL).join(OUT_DNDSCV1).join(OUT_SMREGIONS1).join(OUT_CBASE).join(OUT_MUTPANNING).join(OUT_HOTMAPS)
+        tuple val(cohort), path(fml), path(clustl), path(dndscv), path(smregions), path(cbase), path(mutpanning), path(hotmaps), path(seismic) from OUT_ONCODRIVEFML.join(OUT_ONCODRIVECLUSTL).join(OUT_DNDSCV1).join(OUT_SMREGIONS1).join(OUT_CBASE).join(OUT_MUTPANNING).join(OUT_HOTMAPS).join(OUT_SEISMIC)
 
     output:
         tuple val(cohort), path("${cohort}.05.out.gz") into OUT_COMBINATION
@@ -613,7 +613,8 @@ process Combination {
 			--smregions ${smregions} \
 			--cbase ${cbase} \
 			--mutpanning ${mutpanning} \
-			--hotmaps ${hotmaps}
+			--hotmaps ${hotmaps} \
+			--seismic ${seismic}
 		"""
 
 }
