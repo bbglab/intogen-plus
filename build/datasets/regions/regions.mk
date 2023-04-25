@@ -7,7 +7,7 @@ $(regions_dir): | $(INTOGEN_DATASETS)
 
 
 # Ensembl transcripts
-transcripts_sql_query = "SELECT g.stable_id, t.stable_id, x.display_label FROM gene g JOIN transcript t ON (g.canonical_transcript_id = t.transcript_id) JOIN xref x ON (g.display_xref_id = x.xref_id AND g.biotype='protein_coding') LEFT JOIN external_db ed USING (external_db_id) WHERE ed.db_name = 'HGNC';"
+transcripts_sql_query= "SELECT g.stable_id, t.stable_id, x.display_label FROM gene g JOIN transcript t ON (g.canonical_transcript_id = t.transcript_id) JOIN xref x ON (g.display_xref_id = x.xref_id AND g.biotype='protein_coding') LEFT JOIN external_db ed USING (external_db_id) WHERE ed.db_name = 'HGNC' AND x.description NOT LIKE '%readthrough%';"
 TRANSCRIPTS = $(regions_dir)/ensembl_canonical_transcripts.tsv
 
 $(TRANSCRIPTS): $$(ENSEMBL) $$(GENOME) | $(regions_dir)
