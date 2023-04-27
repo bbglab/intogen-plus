@@ -4,7 +4,7 @@
 INTOGEN_DATASETS ?= ../datasets
 export INTOGEN_DATASETS
 # FOLDER where info_dataset.tsv is located
-INPUTS = ${INTOGEN_INPUTS}
+INPUTS = ./data
 # FOLDER where intogen results are located
 PIPELINE = ${INTOGEN_RESULTS}
 
