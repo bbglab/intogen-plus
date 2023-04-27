@@ -1,5 +1,7 @@
 import csv
 
+import time
+from tqdm import tqdm
 import click
 from bgparsers import readers
 from bgreference import hg38
