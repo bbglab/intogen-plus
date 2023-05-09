@@ -14,7 +14,7 @@ file in the build folder.
 
 
 Usage
------
+^^^^^
 
 Once all the prerequisites are available, running the pipeline
 only requires to execute the :file:`intogen.nf` file with the appropiate
@@ -22,39 +22,42 @@ parameters. E.g.:
 
 .. code-block:: bash
 
-   nextflow run intogen.nf --input <input>
+    nextflow run intogen.nf --input <input>
 
 There are a number of parameters and options that can be added.
 
 .. glossary::
 
    **-resume**
-     Nextflow feature to allow for resumable executions.
+      Nextflow feature to allow for resumable executions.
 
-   **--input <path>**
-     Path of the input. See below for more details.
+   **--input** __<path>_
+      Path of the input. See below for more details.
 
-   **--output <path>**
-     Path where to store the output. Default: ``intogen_analysis``.
+   **--output** *<path>*
+      Path where to store the output. Default: ``intogen_analysis``.
 
-   **--containers <path>**
-     Path to the folder containing the singularity images.
-     Default: ``containers``.
+   **--containers** *<path>*
+      Path to the folder containing the singularity images.
+      Default: ``containers``.
 
-   **--datasets <path>**
-     Path to the folder the datasets from
-     Default: ``containers``.
+   **--datasets** *<path>*
+      Path to the folder the datasets from
+      Default: ``containers``.
 
-   **--annotations <file>**
-     Path to the default annotations file.
-     Default: ``config/annotations.txt``.
-     See the input section for more details.
+   **--annotations** *<file>*
+      Path to the default annotations file.
+      Default: ``config/annotations.txt``.
+      See the input section for more details.
 
-   **--debug true**
-     Ask methods for a more verbose output if the option is available.
+   **--seed** *<int>*
+      Seed to be used for reproducibility. This applies to 4 methods: smRegions, OncodriveCLUSTL, OncodriveFML, dNdScv.
+
+   **--debug** *<bool>*
+      Ask methods for a more verbose output if set to True.
 
 Input & output
---------------
+^^^^^^^^^^^^^^
 
 Input
 *****
@@ -81,28 +84,12 @@ In addition, each cohort must be associated with:
 Cohort file names, as well as the fields mentioned above
 must not contain dots.
 
-The way to provide those values is through the use of
-annotations and datasource files supported by the
-`bgparsers package <https://bgparsers.readthedocs.io/en/latest/usage.html#command-groupby>`_.
-
-In the case that you are interesting in analysing a single cohort,
-the cohort filename until the first dot will be used as cohort ID.
-The rest of the fields can be easily provided with an annotations file.
-See :file:`config/annotations.txt` for an example.
-
-When you plan to run multiple cohorts, it is recommended to
-combine the simple annotations that can be achieved with
-an annotations file with the power of :file:`bginfo` files
-(with ``.bginfo`` extension).
-One such file (which can include others), allows to create
-smart annotations and input certain files from your directory structure.
-The pipeline can receive the :file:`bginfo` file or the folder where it is.
-In this case, the **annotations** file (passed using ``--annotations``)
-allows to make some general definitions of variables that
-are used in all :file:`bginfo` files.
-
-See examples of :file:`bginfo` in the
-`bgparsers documentation <https://bgparsers.readthedocs.io/en/latest/datasource.html>`_.
+The way to provide those values is through `OpenVariant <https://github.com/bbglab/openvariant>`__ , 
+a comprehensive Python package that provides different functionalities to read, parse and operate 
+different multiple input file formats (e. g. tsv, csv, vcf, maf, bed). 
+Whether you are planning to run single or multiple cohorts, you would 
+need to provide an annotation file in yaml format to specify the above mentioned structure required by IntOGen. 
+Instructions on how to build an annotation file are documented here: `OpenVariant annotation file <https://openvariant.readthedocs.io/en/latest/user_guide/annotation_structure.html>`__ .
 
 
 Output
@@ -114,6 +101,7 @@ By default this pipeline outputs 4 files:
 - :file:`drivers.tsv`: summary of the results of the driver discovery by cohort
 - :file:`mutations.tsv`: summary of all the mutations analyzed by cohort
 - :file:`unique_drivers.tsv`: information on the genes reported as drivers (in any cohort)
+- :file:`unfiltered_drivers.tsv`: information on the filters applied to the post-processing step: from the output of the combination to the final set of driver genes.
 
 Those files can be found in the path indicated with the
 ``--output`` options.

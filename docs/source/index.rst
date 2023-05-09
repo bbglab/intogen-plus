@@ -15,6 +15,7 @@ Welcome to IntOGen's documentation
    methods_driver_discovery
    drivers_combination
    postprocessing
+   boostdm_connection
    mutational_features
    usage
 

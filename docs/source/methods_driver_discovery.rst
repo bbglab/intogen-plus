@@ -33,8 +33,8 @@ incorporates information about 10 histone marks from 69 cell lines obtained
 in ENCODE project [2]_; iii) the abundance of sites per coding consequence
 type across in the coding region of each gene.
 
-We downloaded (release date 2018/10/12) and built a new reference
-database based on the list canonical transcripts defined by VEP.92
+We downloaded (release date 2023/02/24) and built a new reference
+database based on the list of canonical transcripts defined by VEP.101
 (GRCh38). We then used this reference database to run dNdScv on all
 datasets of somatic mutations using the default setting of the method.
 
@@ -45,7 +45,7 @@ OncodriveFML [3]_ is a tool that aims to detect genes under positive
 selection by analysing the functional impact bias of the observed
 somatic mutations. Briefly, OncodriveFML consists of three steps: in the
 first step, it computes the average Functional Impact (FI) score (in our
-pipeline we used CADD v1.4) of coding somatic mutations observed in gene
+pipeline we used CADD v1.6) of coding somatic mutations observed in gene
 of interest across a cohort of tumor samples. In the next step, sets of
 mutations of the same size as the number of mutations observed in the
 gene of interest are randomly sampled following trinucleotide context
@@ -58,7 +58,7 @@ p-value. The p-values are then adjusted with a multiple testing correction
 using the Benjamini–Hochberg (FDR).
 
 OncodriveCLUSTL
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 OncodriveCLUSTL is a sequence-based clustering algorithm to detect
 significant linear clustering bias of the observed somatic mutations
@@ -73,7 +73,7 @@ signals, mutations are locally randomized using tri- or penta-nucleotide
 context conditional probabilities consistent with the relative frequencies
 of the mutational profile of the cohort.
 
-For this analysis, OncodriveCLUSTL version 1.1.1 was run for the set of
+For this analysis, OncodriveCLUSTL version 1.1.3 was run for the set of
 defined canonical transcripts bearing 2 or more SNVs mapping the
 mutations file. Tuckey-based smoothing was conducted with 11bp windows.
 The different consecutive coding sequences contained on
@@ -182,7 +182,7 @@ the re-sampling.
 
 To create the database of genomic coordinates of Pfam domains we
 followed the next steps: i) we gathered the first and last amino acid
-positions of all Pfam domains for canonical transcripts (VEP.92) from
+positions of all Pfam domains for canonical transcripts (VEP.101) from
 BioMart; ii) for each Pfam domain we mapped the first and last amino
 acid positions into genomic coordinates using TransVar --using GRCh38 as
 reference genome--; iii) we discarded Pfam domains failing to map either
