@@ -31,29 +31,29 @@ There are a number of parameters and options that can be added.
    **-resume**
       Nextflow feature to allow for resumable executions.
 
-   **--input** __<path>_
+   **--input**  *<path>*
       Path of the input. See below for more details.
 
-   **--output** *<path>*
+   **--output**  *<path>*
       Path where to store the output. Default: ``intogen_analysis``.
 
-   **--containers** *<path>*
+   **--containers**  *<path>*
       Path to the folder containing the singularity images.
       Default: ``containers``.
 
-   **--datasets** *<path>*
+   **--datasets**  *<path>*
       Path to the folder the datasets from
       Default: ``containers``.
 
-   **--annotations** *<file>*
+   **--annotations**  *<file>*
       Path to the default annotations file.
       Default: ``config/annotations.txt``.
       See the input section for more details.
 
-   **--seed** *<int>*
+   **--seed**  *<int>*
       Seed to be used for reproducibility. This applies to 4 methods: smRegions, OncodriveCLUSTL, OncodriveFML, dNdScv.
 
-   **--debug** *<bool>*
+   **--debug**  *<bool>*
       Ask methods for a more verbose output if set to True.
 
 Input & output
