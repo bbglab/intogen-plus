@@ -16,7 +16,7 @@ either: i) significant non-CGC genes (q-value < 0.05) with at least two
 significant bidders (methods rendering the genes as significant); ii)
 significant CGC genes (either q-value < 0.05 or CGC q-value < 0.25) from
 individual cohorts. All genes that did not fulfill these requirements
-were discarded.
+were flagged as 'No driver' in the DRIVER column at the unfiltered_drivers.tsv file.
 
 Additionally, candidate driver genes were further filtered using the
 following criteria:
@@ -24,7 +24,7 @@ following criteria:
 1. We discarded non-expressed genes using TCGA expression data. For tumor types directly mapping to cohorts from TCGA --including TCGA cohorts-- we removed non-expressed genes in that tumor type. We used the following criterion for non-expressed genes: genes where at least 80% of the samples showed a negative log2 RSEM. For those tumor types which could not be mapped to TCGA cohorts this filtering step was not done.
 2. We also discarded genes highly tolerant to Single Nucleotide Polymorphisms (SNP) across human populations. Such genes are more susceptible to calling errors and should be taken cautiously. More specifically, we downloaded transcript specific constraints from gnomAD (release 2.1; 2018/02/14) and used the observed-to-expected ratio score (oe) of missense (mys), synonymous (syn) and loss-of-function (lof) variants to detect genes highly tolerant to SNPs. Genes enriched in SNPs (oe_mys > 1.5 or oe_lof > 1.5 or oe_syn > 1.5) with a number of mutations per sample greater than 1 were discarded. Additionally, we discarded mutations overlapping with germline variants (germline count > 5) from a panel of normals (PON) from Hartwig Medical Foundation (\ https://storage.googleapis.com/hmf-public/HMFtools-Resources/dna_pipeline/v5_31/38/variants/SageGermlinePon.98x.38.tsv.gz \ ).
 3. We also discarded genes that are likely false positives according to their known function from the literature. We convened that the following genes are likely false positives: i) known long genes such as TTN, OBSCN, RYR2, etc.; ii) olfactory receptors from HORDE (\ http://bioportal.weizmann.ac.il/HORDE/\ ; Build #44c - 30 July 2019 ); iii) genes not belonging to Tier1 CGC genes lacking literature references according to CancerMine [2]_ (\ http://bionlp.bcgsc.ca/cancermine/\ ; As of 7 December 2021).
-4. We also removed non CGC genes with more than 3 mutations in one sample. This abnormally high number of mutations in a sample may be the result of either a local hypermutation process or cross contamination from germline variants.
+4. We also removed non CGC genes with more than 2 mutations in one sample. This abnormally high number of mutations in a sample may be the result of either a local hypermutation process or cross contamination from germline variants.
 5. Finally we discarded genes whose mutations are likely the result of local hypermutation activity. More specifically, some coding regions might be the target of mutations associated to COSMIC Signature 9 (\ https://cancer.sanger.ac.uk/cosmic/signatures\) which is associated to non-canonical AID activity in lymphoid tumours. In those cancer types were Signature 9 is known to play a significant mutagenic role (i.e., AML, Non-Hodgkin Lymphomas, B-cell Lymphomas, CLL and Myelodysplastic syndromes) we discarded genes where more than 50% of mutations in a cohort of patients were associated with Signature 9.
 
 Candidate driver genes that were not discarded composed the catalog of driver genes.
