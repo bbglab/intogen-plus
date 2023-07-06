@@ -8,7 +8,7 @@ we implemented a pre-processing strategy aiming at reducing
 possible biases. Specifically, we conducted the following filtering
 steps:
 
-1. The pipeline is configured to run using GRCh38 as reference genome. Therefore, for each input dataset the pipeline requires that the reference genome is defined. Datasets using GRCh37 as reference genome were lifted over using PyLiftover (`https://pypi.org/project/pyliftover <https://pypi.org/project/pyliftover/>`__/; version 0.3) to GRCh38. Mutations failing to liftover from GRCh37 to GRCh38 were discarded.
+1. The pipeline is configured to run using GRCh38 as reference genome. Therefore, for each input dataset the pipeline requires that the reference genome is defined. Datasets using GRCh37 as reference genome were lifted over using PyLiftover (`https://pypi.org/project/pyliftover <https://pypi.org/project/pyliftover/>`__/; version 0.4) to GRCh38. Mutations failing to liftover from GRCh37 to GRCh38 were discarded.
 
 2. We removed mutations with equal alternate and reference alleles, duplicated mutations within the sample sample, mutations with ‘N’ as reference or alternative allele, mutations with a reference allele not matching its reference genome and mutations within non-canonical chromosomes (i.e., mutations outside chr1 to chr22, chrX and chrY).
 
@@ -22,6 +22,6 @@ steps:
 
 7. When the Variant Effect Predictor [1]_ (VEP) mapped one mutation into multiple transcripts associated with HUGO symbols, we selected the canonical transcript of the first HUGO symbol in alphabetical order.
 
-8. We also discarded mutations mapping into genes without canonical transcript in VEP.92.
+8. We also discarded mutations mapping into genes without canonical transcript in VEP.101.
 
 .. [1] McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F. The Ensembl Variant Effect Predictor. Genome Biology Jun 6;17(1):122. (2016) doi:10.1186/s13059-016-0974-4

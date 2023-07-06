@@ -783,6 +783,7 @@ process DriverSummary {
 		"""
 }
 
+/*
 process Mutrate {
 	tag "Mutrate ${cohort}"
 	publishDir "${STEPS_FOLDER}/boostDM/mutrate", mode: "copy"
@@ -799,6 +800,7 @@ process Mutrate {
 		"""
 
 }
+*/
 
 process DriverSaturation {
 	tag "Driver saturation"

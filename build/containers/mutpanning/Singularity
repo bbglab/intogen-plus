@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: debian:stretch
+From: debian:buster-slim
 
 %environment
     export LC_ALL=C.UTF-8
@@ -24,7 +24,7 @@ From: debian:stretch
     # Install dependencies
     apt update
     # apt upgrade -y
-    apt install -y openjdk-8-jdk python3 procps
+    apt install -y openjdk-11-jre python3 procps
 
     # Clean unused things
     apt-get clean

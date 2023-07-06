@@ -2,7 +2,7 @@ Data Gathering
 ---------------
 
 TCGA 
-^^^^^
+^^^^
 
 TCGA somatic mutations (mc3.v0.2.8 version) were downloaded from
 (\ https://gdc.cancer.gov/about-data/publications/pancanatlas\ ). We

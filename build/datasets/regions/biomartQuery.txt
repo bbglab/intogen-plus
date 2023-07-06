@@ -15,5 +15,7 @@
 		<Attribute name = "cds_length" />
 		<Attribute name = "strand" />
         <Attribute name = "ensembl_transcript_id" />
+		<Attribute name = "exon_chrom_start" />
+		<Attribute name = "exon_chrom_end" />
 	</Dataset>
 </Query>

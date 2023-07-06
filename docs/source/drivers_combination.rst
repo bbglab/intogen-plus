@@ -35,7 +35,7 @@ Our approach works independently for each cohort: to create a consensus
 list of driver genes for each cohort, we first determine how credible
 each DIM is when applied to this specific cohort, based on how
 many bona-fide cancer genes reported in the COSMIC Cancer Gene Census
-database (CGC) are highly ranked according to the DIM. Once a
+database (`CGC v95 <https://cancer.sanger.ac.uk/census>`__) are highly ranked according to the DIM. Once a
 credibility score has been established, we use a weighted method for combining
 the p-values that each DIM gives for each candidate gene: this
 combination takes the DIMs credibility into account. Based on the
@@ -114,10 +114,14 @@ mutated samples in the cohort under analysis. These genes were
 classified into four groups according to the level of evidence in that
 cohort that the gene harbours positive selection.
 
-1) The first group, named as TIER1, contained genes showing high confidence and agreement in their positive selection signals. Given the ranked list of genes obtained by the Schulze voting, TIER1 comprises all the ranked genes whose ranking is higher than the first gene with combined q-value lower than a specific threshold (by default threshold=0.05). The second group, name as TIER2, was devised to contain known cancer driver genes, showing mild signals of positive selection, that were not included in TIER1. More in detail, we defined TIER2 genes as those CGC genes, not included in TIER2, whose CGC q-value was lower than a given threshold (default CGC q-value=0.25). CGC q-value is computed by performing multiple test correction of combined p-values restricted to CGC genes. The third group, are genes not included in TIER1 or TIER2 with scattered signals of positive selection, frequently coming from one single method. Particularly, given the ranked list of genes by the Schulze voting, TIER3 was composed of all the ranked genes with q-value lower than a given threshold (by default threshold=0.05) whose ranking is higher than TIER1 last gene position and lower than the rejection ranking position. The rejection ranking position is defined as the ranking position for which all elements have a q-value lower than the input threshold (by default threshold=0.05). Finally, other genes not included in the aforementioned classes are considered non-driver genes.
+1) The first group, named as TIER1, contained genes showing high confidence and agreement in their positive selection signals. Given the ranked list of genes obtained by the Schulze voting, TIER1 comprises all the ranked genes whose ranking is higher than the first gene with combined q-value lower than a specific threshold (by default threshold=0.05). 
+2) The second group, name as TIER2, was devised to contain known cancer driver genes, showing mild signals of positive selection, that were not included in TIER1. More in detail, we defined TIER2 genes as those CGC genes, not included in TIER1, whose CGC q-value was lower than a given threshold (default CGC q-value=0.25). CGC q-value is computed by performing multiple test correction of combined p-values restricted to CGC genes. 
+3) The third group, are genes not included in TIER1 or TIER2 with scattered signals of positive selection, frequently coming from one single method. Particularly, given the ranked list of genes by the Schulze voting, TIER3 was composed of all the ranked genes with q-value lower than a given threshold (by default threshold=0.05) whose ranking is higher than TIER1 last gene position and lower than the rejection ranking position. The rejection ranking position is defined as the ranking position for which all elements have a q-value lower than the input threshold (by default threshold=0.05). Finally, other genes not included in the aforementioned classes are considered non-driver genes.
 
 Combination benchmark
 ^^^^^^^^^^^^^^^^^^^^^
+.. warning:: This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2>`__
+
 
 We have assessed the performance of the combination compared to i) each
 of the six individual methods and ii) other strategies to combine the

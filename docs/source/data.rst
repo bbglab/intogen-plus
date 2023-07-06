@@ -50,7 +50,7 @@ Hartwig Medical Foundation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Somatic mutations of metastatic WGS from Hartwig Medical Foundation `https://www.hartwigmedicalfoundation.nl/en/database/ <https://www.hartwigmedicalfoundation.nl/en/database/>`__ were
-downloaded on 2019/05/02 through their platform. Datasets
+downloaded on 2021/10/21 through their platform. Datasets
 were split according to their primary site. Samples from unknown primary
 sites (i.e., None, Nan, Unknown, Cup, Na), double primary or aggregating
 into cohorts of fewer than 5 samples (i.e., Adrenal, Myeloid, Thymus and
@@ -63,7 +63,7 @@ Somatic mutations from Whole Exome Sequencing (WXS) and Whole Genome
 Sequencing (WGS) studies uploaded in ICGC Data Portal
 (`https://dcc.icgc.org/repositories <https://dcc.icgc.org/repositories>`__)
 not overlapping with other projects included in the analysis (i.e.,
-TCGA, PCAWG, CBIOP or St. Jude) were downloaded on 2018/01/09. We then
+TCGA, PCAWG, CBIOP or St. Jude) were downloaded from release 2019 on on 2021/10/21. We then
 created cohorts following the criteria used for the cBioPortal datasets
 (cBioPortal).
 
@@ -91,8 +91,9 @@ cBioPortal dataset (cBioPortal).
 TARGET
 ^^^^^^
 
-Somatic SNVs from WXS and WGS of two TARGET studies, Neuroblastoma (NB)
-and Wilms Tumor (WT), from the TARGET consortium were downloaded on 2019/03/07 from
+Somatic SNVs from WXS and WGS of four TARGET studies, Neuroblastoma (NB)
+and Wilms Tumor (WT), from the TARGET consortium were downloaded on 2019/03/07, 
+Osteosarcoma (OS) and Acute Myeloid Leukemia (AML) we downloaded in 2020/09/17  from
 the `Genomic Data Commons Portal <https://gdc.cancer.gov/>`__.
 
 Beat AML
@@ -111,6 +112,17 @@ Beat AML cohort:
 4. If there were several samples per patient fulfilling the points 1-3, we selected the first in chronological order.
 
 257 independent samples of Beat AML tumors composed our Beat AML cohort.
+
+CGCI
+^^^^
+Somatic mutations from Whole Genome Sequencing (WGS) of the The Cancer Genome Characterization Initiative (`CGCI 
+<https://www.cancer.gov/ccg/research/genome-sequencing/cgci>`__) were downloaded from the Genomic Data Commons (`GDC 
+portal <https://portal.gdc.cancer.gov/projects>`__) on 2021/05/06.
+
+CPTAC
+^^^^^
+Somatic mutations from Whole Exome Sequencing (WXS)  of the Clinical Proteomic Tumor Analysis Consortium (`CPTAC 
+<https://proteomics.cancer.gov/programs/cptac>`__) were downloaded from the `GDC portal <https://portal.gdc.cancer.gov/projects>`__ on 2021/05/06.
 
 Literature
 ^^^^^^^^^^

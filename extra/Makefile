@@ -4,7 +4,7 @@
 INTOGEN_DATASETS ?= ../datasets
 export INTOGEN_DATASETS
 # FOLDER where info_dataset.tsv is located
-INPUTS = ${INTOGEN_INPUTS}
+INPUTS = ./data
 # FOLDER where intogen results are located
 PIPELINE = ${INTOGEN_RESULTS}
 
@@ -12,6 +12,7 @@ PIPELINE = ${INTOGEN_RESULTS}
 CGC = ${INTOGEN_DATASETS}/cgc/cancer_gene_census_parsed.tsv
 BIOMART = ${INTOGEN_DATASETS}/regions/cds_biomart.tsv
 VEP = ${INTOGEN_DATASETS}/vep/vep.tsv.gz
+ONCOTREE_DEF = ${INTOGEN_DATASETS}/oncotree/oncotree-definitions.json
 
 # OUTPUTS
 OUTPUT_FOLDER = output
@@ -42,13 +43,13 @@ $(OUTPUT_FOLDER_DRIVERS): | $(OUTPUT_FOLDER)
 	mkdir $(OUTPUT_FOLDER_DRIVERS)
 
 
-$(CANCERS): data/dictionary_long_names.json | $(OUTPUT_FOLDER)
+$(CANCERS): $(ONCOTREE_DEF) | $(OUTPUT_FOLDER)
 	cp -f $< $@
 
 INFO_DATASETS = $(patsubst %,%/info_datasets.tsv, $(INPUTS))
 
-$(STATS_COHORTS): $(INFO_DATASETS) $(PIPELINE)/cohorts.tsv data/dictionary_long_names.json | $(OUTPUT_FOLDER)
-	python cohorts.py $@ $(PIPELINE)/cohorts.tsv data/dictionary_long_names.json $(INPUTS)
+$(STATS_COHORTS): $(INFO_DATASETS) $(PIPELINE)/cohorts.tsv $(ONCOTREE_DEF) | $(OUTPUT_FOLDER)
+	python cohorts.py $@ $(PIPELINE)/cohorts.tsv $(ONCOTREE_DEF) $(INPUTS)
 
 
 
