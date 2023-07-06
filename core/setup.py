@@ -36,6 +36,7 @@ setup(
                 'parse-vep = intogen_core.parsers.vep:cli',
                 'parse-nonsynonymous = intogen_core.parsers.nonsynonymous:cli',
                 'parse-mnvs = intogen_core.parsers.mnvs:cli',
+                'parse-profile = intogen_core.parsers.mutrate:cli',
                 'mutations-summary = intogen_core.postprocess.mutations:cli',
                 'drivers-discovery = intogen_core.postprocess.drivers.discovery:cli',
                 'drivers-summary = intogen_core.postprocess.drivers.summary:cli',
