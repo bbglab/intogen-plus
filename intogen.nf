@@ -148,8 +148,8 @@ process FormatSignature {
 
 REGIONS_PREFIX = ['WXS': 'cds', 'WGS': 'wg']
 
-process Signature {
-	tag "Signatures ${cohort}"
+process ComputeProfile {
+	tag "ComputeProfile ${cohort}"
 	label "bgsignature"
 	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
@@ -176,7 +176,7 @@ process Signature {
 
 }
 
-SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4 }
+SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4; SIGNATURES5 }
 
 
 process FormatFML {
