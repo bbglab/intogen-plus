@@ -94,6 +94,9 @@ process LoadGenome {
 		"""
 }
 
+GENOMES.into { GENOMES1; GENOMES2 }
+
+
 CUTOFFS = ['WXS': 1000, 'WGS': 10000]
 
 process ProcessVariants {
@@ -103,7 +106,7 @@ process ProcessVariants {
 	publishDir "${STEPS_FOLDER}/variants", mode: "copy"
 
 	input:
-		tuple val(cohort), path(input), val(platform), val(genome) from COHORTS4.join(PLATFORMS1).join(GENOMES)
+		tuple val(cohort), path(input), val(platform), val(genome) from COHORTS4.join(PLATFORMS1).join(GENOMES1)
 
 	output:
 		tuple val(cohort), path(output) into VARIANTS
@@ -123,7 +126,7 @@ process ProcessVariants {
 
 }
 
-VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5,VARIANTS6 }
+VARIANTS.into { VARIANTS1; VARIANTS2; VARIANTS3; VARIANTS4; VARIANTS5; VARIANTS6 }
 
 
 process FormatSignature {
@@ -338,9 +341,29 @@ process FormatSEISMIC {
 	script:
 		output = "${cohort}.in.tsv.gz"
 		"""
-		format-variants --input ${input} --output ${output} \
-			--format seismic
+		format-variants --input ${input} --output ${output} --format seismic
 		"""
+}
+
+
+process SEISMIC {
+	tag "SEISMIC ${cohort}"
+	publishDir "${STEPS_FOLDER}/seismic", mode: "copy"
+
+	input:
+        tuple val(cohort), path(input), val(genomes) from VARIANTS_SEISMIC.join(GENOMES2)
+
+    output:
+        tuple val(cohort), path("${cohort}.seismic.tsv.gz") into OUT_SEISMIC
+	
+	script:
+		"""
+
+		Rscript /seismic/SEISMIC.R ${input} hg38 ${task.cpus}
+
+		gzip -c *.tsv > ${cohort}.seismic.tsv.gz
+		"""
+		
 }
 
 process FormatVEP {
