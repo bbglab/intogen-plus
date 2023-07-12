@@ -148,8 +148,8 @@ process FormatSignature {
 
 REGIONS_PREFIX = ['WXS': 'cds', 'WGS': 'wg']
 
-process Signature {
-	tag "Signatures ${cohort}"
+process ComputeProfile {
+	tag "ComputeProfile ${cohort}"
 	label "bgsignature"
 	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
@@ -176,7 +176,7 @@ process Signature {
 
 }
 
-SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4 }
+SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4; SIGNATURES5 }
 
 
 process FormatFML {
@@ -763,24 +763,25 @@ process DriverSummary {
 		"""
 }
 
-/*
-process Mutrate {
-	tag "Mutrate ${cohort}"
+
+process ParseProfile {
+	tag "Parsing profile ${cohort}"
 	publishDir "${STEPS_FOLDER}/boostDM/mutrate", mode: "copy"
+	label "core"
 
     input:
-        tuple val(cohort), path(annotmuts) from OUT_DNDSCV_ANNOTMUTS
+        tuple val(cohort), path(signature) from SIGNATURES5
 
     output:
 		tuple val(cohort), path("*.mutrate.json") into OUT_MUTRATE
 
 	script:
 		"""
-		/bin/bash /mutrate/run.sh ${annotmuts} exome ./
+		parse-profile -i ${signature} -o ${cohort}
 		"""
 
 }
-*/
+
 
 process DriverSaturation {
 	tag "Driver saturation"
