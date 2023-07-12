@@ -764,8 +764,8 @@ process DriverSummary {
 }
 
 
-process Mutrate {
-	tag "Mutrate ${cohort}"
+process ParseProfile {
+	tag "Parsing profile ${cohort}"
 	publishDir "${STEPS_FOLDER}/boostDM/mutrate", mode: "copy"
 	label "core"
 
