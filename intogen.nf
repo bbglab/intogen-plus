@@ -57,7 +57,7 @@ process LoadCancer {
 		"""
 }
 
-CANCERS.into { CANCERS1; CANCERS2; CANCERS3 }
+CANCERS.into { CANCERS1; CANCERS2; CANCERS3; CANCERS4 }
 
 
 process LoadPlatform {
@@ -351,15 +351,15 @@ process SEISMIC {
 	publishDir "${STEPS_FOLDER}/seismic", mode: "copy"
 
 	input:
-        tuple val(cohort), path(input), val(genomes) from VARIANTS_SEISMIC.join(GENOMES2)
+        tuple val(cohort), path(input), val(genomes), val(cancer) from VARIANTS_SEISMIC.join(GENOMES2).join(CANCERS3)
 
     output:
-        tuple val(cohort), path("${cohort}.seismic.tsv.gz") into OUT_SEISMIC
+        tuple val(cohort), path("${cohort}.seismic.tsv.gz"), optional: true into OUT_SEISMIC 
 	
 	script:
 		"""
 
-		Rscript /seismic/SEISMIC.R ${input} hg38 ${task.cpus}
+		Rscript /seismic/SEISMIC.R ${input} ${cancer} hg38 ${task.cpus} 
 
 		gzip -c *.tsv > ${cohort}.seismic.tsv.gz
 		"""
@@ -757,7 +757,7 @@ process DriverDiscovery {
 	label "core"
 
     input:
-        tuple val(cohort), path(combination), path(deconstruct_in), path(sig_likelihood), path(smregions), path(clustl_clusters), path(hotmaps_clusters), path(dndscv), val(cancer) from OUT_COMBINATION.join(VARIANTS_DECONSTRUCTSIGS2).join(OUT_DECONSTRUCTSIGS_SIGLIKELIHOOD).join(OUT_SMREGIONS2).join(OUT_ONCODRIVECLUSTL_CLUSTERS).join(OUT_HOTMAPS_CLUSTERS).join(OUT_DNDSCV2).join(CANCERS3)
+        tuple val(cohort), path(combination), path(deconstruct_in), path(sig_likelihood), path(smregions), path(clustl_clusters), path(hotmaps_clusters), path(dndscv), val(cancer) from OUT_COMBINATION.join(VARIANTS_DECONSTRUCTSIGS2).join(OUT_DECONSTRUCTSIGS_SIGLIKELIHOOD).join(OUT_SMREGIONS2).join(OUT_ONCODRIVECLUSTL_CLUSTERS).join(OUT_HOTMAPS_CLUSTERS).join(OUT_DNDSCV2).join(CANCERS4)
 
     output:
 		path(output_drivers) into DRIVERS
