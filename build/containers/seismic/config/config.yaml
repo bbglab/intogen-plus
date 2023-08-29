@@ -1,0 +1,46 @@
+mutations_path: "input"
+test_regions_path: "/seismic/data/cds_chr1-22_XY.tsv" #? or cds.regions.tsv? 
+
+out_dir: "" 
+out_base_name: "cohort"
+
+reference_genome: "refgenome" #h19 or h38
+seq_type: "WXS" 
+sig_type: "cohort"
+cancer_type: "TUMOR"
+
+annotate_cds_effects: TRUE
+effects_to_keep:
+  - "m"
+  - "n"
+
+# WXS-specific
+scale_exp_to_repl_reg: FALSE
+scale_exp_to_expr_reg: FALSE
+
+wxs_covered_regions_path: "/seismic/data/cds_chr1-22_XY.tsv"
+
+# Which tests to perform
+# Turn scaling back on if we run the recurrence tests
+test_recurrence_alone: FALSE
+test_cohort_skew_alone: TRUE
+test_combined_model: FALSE
+
+# WGS-specific
+scale_exp_with_silent_muts: FALSE
+# silent_mut_flank_upstream: 10000
+# silent_mut_flank_downstream: 10000
+# min_silent_mutations: 10
+
+
+plotting_max_p: 0.001
+# plot_region_list:
+#   - "AKT1"
+plot_region_list_only: FALSE 
+
+# Filtering test regions
+remove_overlapping_test_regions: FALSE
+min_mutations: 3
+
+no_of_simulations: 10000
+cores: 8
