@@ -360,7 +360,7 @@ process VEP {
 		"""
 		vep -i ${input} -o STDOUT --assembly GRCh38 \
 			--no_stats --cache --offline --symbol \
-			--protein --tab --canonical \
+			--protein --tab --canonical --mane \
 			--dir ${params.datasets}/vep \
 			| grep -v ^## | gzip > ${output}
 		"""
