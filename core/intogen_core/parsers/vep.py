@@ -18,15 +18,6 @@ VALID_CONSEQUENCES = {
     }
 
 
-TRANSCRIPTS = set()
-GENES = set()
-
-transcripts_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'ensembl_canonical_transcripts.tsv')
-with open(transcripts_file) as fd:
-    for r in csv.reader(fd, delimiter='\t'):
-        TRANSCRIPTS.add(r[1])
-        GENES.add(r[0])
-
 
 def valid_consequence(consequences):
     csq_set = {c for c in consequences.split(',')}
@@ -47,10 +38,8 @@ def filter_(file, stats):
             counts['skip_consequence'] += 1
             continue
 
-        if v['Feature'] not in TRANSCRIPTS:
-            if v['Gene'] in GENES:
-                # Selected gene without matching transcript id
-                genes_skipped.add(v['Gene'])
+        if v['MANE_SELECT'] == '-':
+            genes_skipped.add(v['Gene'])
             continue
         genes_processed.add(v['Gene'])
 
