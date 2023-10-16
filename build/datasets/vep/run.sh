@@ -32,7 +32,7 @@ do
 	singularity exec ${VEP_CONTAINER} vep -i ${f} \
 		-o ${tmpdir}/split_${name}.vep.out --assembly GRCh38 \
 		--no_stats --cache --offline --symbol \
-		--protein --tab --canonical --numbers \
+		--protein --tab --canonical --mane --numbers \
 		--no_headers \
 		--dir ${VEP_CACHE_DIR} &
 done
