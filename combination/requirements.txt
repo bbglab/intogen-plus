@@ -1,6 +1,7 @@
-click
-configobj
-numpy
-pandas
-statsmodels
-scipy
+click==8.1.7
+setuptools==58.2.0
+configobj==5.0.8
+numpy==1.26.1
+pandas==2.1.1
+statsmodels==0.14.0
+scipy==1.11.3

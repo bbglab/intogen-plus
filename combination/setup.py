@@ -31,7 +31,7 @@ setup(
     package_data={'intogen_combination': ['*.cfg']},
     install_requires=required,
     setup_requires=[
-        'cython',
+        'cython==0.29.36',
     ],
     ext_modules=[Extension('intogen_combination.schulze_strongest_path_cython', ['intogen_combination/schulze_strongest_path_cython.pyx'])],
     entry_points={
