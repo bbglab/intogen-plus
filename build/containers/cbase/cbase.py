@@ -10,7 +10,7 @@
 # *															 *
 # * License:		Public Domain							 *
 # *															 *
-# * Version:		1.1										 *
+# * Version:	1.1	Adjusted for IntOGen incorporation       *
 # ************************************************************
 
 
@@ -42,5 +42,5 @@ c_mode		= int(sys.argv[3])		#	0 = trinucleotides, 1 = pentanucleotides
 outname		= str(sys.argv[4])		#	name trunk for labeling files
 
 
-subprocess.call(["python", "-W", "ignore", "Auxiliary/CBaSE_v1.1_parameters.py", "%s" %infile, "%s" %filepath, "%s" %c_mode, "%s" %outname])
-subprocess.call(["python", "-W", "ignore", "Auxiliary/CBaSE_v1.1_qvalues.py", "%s" %outname])
+subprocess.call(["python", "-W", "ignore", "/cbase/Auxiliary/CBaSE_v1.1_parameters.py", "%s" %infile, "%s" %filepath, "%s" %c_mode, "%s" %outname])
+subprocess.call(["python", "-W", "ignore", "/cbase/Auxiliary/CBaSE_v1.1_qvalues.py", "%s" %outname])
