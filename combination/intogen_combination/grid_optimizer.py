@@ -5,6 +5,10 @@ from functools import partial
 import numpy as np
 import pandas as pd
 from scipy.optimize import basinhopping
+from scipy.stats import qmc
+
+from skopt.sampler import Lhs
+from skopt import Space
 
 from intogen_combination.config import CONF, REGIONS, METHODS
 from intogen_combination.qc.deviations import Deviation
@@ -12,6 +16,7 @@ from intogen_combination.qc.parser import Parser
 from intogen_combination.schulze_election import combination_ranking
 from intogen_combination.evaluation.enrichment import Evaluation_Enrichment
 
+from typing import Callable, Dict, List, Optional, Union
 
 # Global variables
 LOWER_BOUND = 0.05
@@ -172,16 +177,28 @@ def fill_with_zeros(w, low_quality_index):
     return w_zero_filled
 
 
-def grid_optimize(func, low_quality=None):
+def grid_optimize(func: Callable, low_quality: Optional[List[str]] = None) -> Dict[str, Union[None, float]]:
     """
-    :param: func: function to be optimized
-    :return: best candidates
+    Optimize a given function using Latin Hypercube Sampling (LHS).
 
-    These are the constraints that must be in place:
-    constraint 1: sum w_i = 1
-    constraint 2: w_i >= 0.05 for all w_i may not apply if some w_i is discarded
-    constraint 3: w_i <= 0.3 for all w_i
+    Parameters:
+    - func (callable): The objective function to be optimized.
+    - low_quality (list or None): A list of low-quality method names to be excluded from optimization.
 
+    Returns:
+    - dict: The optimal combination of methods along with their weights and the corresponding objective function value.
+
+    Constraints:
+    1. Sum of weights (w_i) must equal 1.
+    2. w_i must be >= 0.05 for all methods, this could not apply if some methods are discarded.
+    3. w_i must be <= 0.3 for all methods.
+
+    Note: The objective function is minimized, and the result includes the optimal weights for each method.
+
+    Example:
+    ```python
+    optimal_result = grid_optimize(my_objective_function, low_quality=['method_A', 'method_B'])
+    ```
     """
 
     optimum = {k: None for k in METHODS}
@@ -192,16 +209,19 @@ def grid_optimize(func, low_quality=None):
         low_quality_index = [i for i, m in enumerate(METHODS) if m in low_quality]
 
     dim = len(METHODS) - len(low_quality_index)
-    for w in itertools.product(np.linspace(0, 1, 21), repeat=dim-1):
-        if sum(w) <= 1 - LOWER_BOUND:                        # inside the simplex
-            w_dim = list(np.append(w, [1 - sum(w)]))   # consequently len(w_dim) == dim
-            if all_constraints(w_dim):
-                w_all = fill_with_zeros(w_dim, low_quality_index)
-                f = func(w_all)
-                if optimum['Objective_Function'] > f:  # remember we are running a minimization
-                    optimum['Objective_Function'] = f
-                    for i, v in enumerate(METHODS):
-                        optimum[v] = w_all[i]
+    space = Space([(0.0, 1.0)] * dim)
+    
+    lhs = Lhs(lhs_type='centered', criterion='maximin', iterations=1000)
+
+    for w in lhs.generate(dimensions=space.dimensions, n_samples=1000):
+        w_dim = list(np.array(w)/sum(w))
+        if all_constraints(w_dim):
+            w_all = fill_with_zeros(w_dim, low_quality_index)
+            f = func(w_all)
+            if optimum['Objective_Function'] > f:  # remember we are running a minimization
+                optimum['Objective_Function'] = f
+                for i, v in enumerate(METHODS):
+                    optimum[v] = w_all[i]
 
     return optimum
 
