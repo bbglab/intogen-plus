@@ -182,23 +182,36 @@ def filter_out_lowly_mutated(df,path_fml):
     dh = partial_correction(df, fml_data)
     return dh
 
+def select_significant_bidders(row: pd.Series, QVALUE_threshold: float = 0.1) -> str:
+    """
+    Selects significant bidders based on Q-value threshold.
 
-def select_significant_bidders(row,QVALUE_threshold=0.1):
+    Args:
+        row (pd.Series): DataFrame row containing information about bidders and Q-values.
+        QVALUE_threshold (float): Threshold for considering a bidder significant based on Q-value. Default is 0.1.
+
+    Returns:
+        str: Comma-separated list of significant bidder methods.
+
+    Note:
+        The function assumes the existence of columns like "All_Bidders", "QVALUE_MethodName" in the DataFrame.
     """
-    Function to detect the significant bidders based on the
-    :param row:
-    :return:
-    """
-    methods = []
-    if len(str(row["All_Bidders"])) > 3: # Check whether there is a method (not nan)
+    significant_methods = []
+
+    # Check whether there is information about bidders
+    if not pd.isnull(row["All_Bidders"]):
         bidders = str(row["All_Bidders"]).split(",")
         for bidder in bidders:
 
             method_name = bidder.split("_")[0]
-            name_key = "QVALUE_"+method_name
-            if row[name_key] <= QVALUE_threshold:
-                methods.append(method_name)
-        return ",".join(methods)
+            qvalue_column = "QVALUE_" + method_name
+
+            # Check if the Q-value is below the threshold
+            if row[qvalue_column] <= QVALUE_threshold:
+                significant_methods.append(method_name)
+
+        return ",".join(significant_methods)
+
     return ""
 
 
