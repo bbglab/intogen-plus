@@ -1,5 +1,16 @@
 #!/usr/bin/env Rscript
 
+###############################################
+#                                             #
+#             larsson-lab/SEISMIC             #
+#            v0.1.0 commit: 688e961           #
+#                                             #
+#                                             #
+#          Modified for IntOGen use on:       #
+#                Jan 30,2024                  #
+#                                             #
+###############################################
+
 suppressPackageStartupMessages(library(fitdistrplus))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(plyranges))
@@ -68,10 +79,10 @@ main <- function(){
   
   cat("Calculating mutational frequencies\n")
   if(config$sig_type == "patient"){
-    #if(config$seq_type == "WXS"){
-    #  cat("Patient-specific signatures not available for WXS sequencing data. Change sig_type accordingly\n")
-    #  quit()
-    #}
+    if(config$seq_type == "WXS"){
+      cat("Patient-specific signatures not available for WXS sequencing data. Change sig_type accordingly\n")
+      quit()
+    }
     sig_string <- "patient_sig_"
   } else if(config$sig_type == "cohort"){
     sig_string <- "cohort_sig_"
@@ -242,24 +253,18 @@ main <- function(){
       
       
       # Negligible performance difference from defining the function inside the loop, and easier to read.
-      calc_mutprobs_per_base <- function(test_region_mut_effects_tidy.df, combined_mutfreqs.df, effects_to_keep = NULL){
-        # Further filter to effects included in config$effects_to_keep
-        # Most common example: keep only non-silent mutations in a gene
-        test_region_mut_effects_tidy_effect_filtered_combined_varnucs.df <- test_region_mut_effects_tidy.df %>% 
+      calc_mutprobs_per_combined_muttype <- function(test_region_mut_effects_tidy.df, combined_mutfreqs.df, effects_to_keep = NULL){
+        test_region_mut_effects_tidy.df %>% 
           { if(is.null(effects_to_keep)) . else filter(., effect %in% effects_to_keep) } %>% 
           group_by(trinuc, base_no) %>%
           arrange(varnuc) %>%
-          summarise(combined_muttype = paste0(varnuc, collapse = ''), .groups = 'drop')
-        
-        # Get probability of mutation at each base in the test region
-        mutprobs_per_base.df <- test_region_mut_effects_tidy_effect_filtered_combined_varnucs.df %>%
+          summarise(combined_muttype = paste0(varnuc, collapse = ''), .groups = 'drop') %>%
+          count(trinuc, combined_muttype) %>% 
           inner_join(combined_mutfreqs.df, by = c('trinuc', 'combined_muttype')) %>% 
-          select(sampleID, pmut = mutfreq)
-        
-        mutprobs_per_base.df
+          select(sampleID, pmut_per_base = mutfreq, bases_with_same_pmut = n)
       }
       
-      mutprobs_per_base.df <- calc_mutprobs_per_base(test_region_mut_effects_tidy.df, combined_mutfreqs.df, config$effects_to_keep)
+      mutprobs_per_combined_muttype.df <- calc_mutprobs_per_combined_muttype(test_region_mut_effects_tidy.df, combined_mutfreqs.df, config$effects_to_keep)
       
   
       
@@ -284,7 +289,8 @@ main <- function(){
       if(scale_with_regression){
         # Have to redo the probability of mutation at each base to include all mutations (not filtering e.g. silent)
         # when calculating the expected number of mutations, as the observed mutation rate in reglist includes all mutations.
-        no_of_exp_mutations <- calc_mutprobs_per_base(test_region_mut_effects_tidy.df, combined_mutfreqs.df) %>%
+        no_of_exp_mutations <- calc_mutprobs_per_combined_muttype(test_region_mut_effects_tidy.df, combined_mutfreqs.df) %>%
+          mutate(pmut = pmut_per_base * bases_with_same_pmut) %>% 
           pull(pmut) %>%
           sum()
         
@@ -310,9 +316,9 @@ main <- function(){
       
       # Calculate the likelihood of any mutations (with the right effect) in the test region per patient,
       # scaling probabilities if so configured. Also add mutated status.
-      mutprobs_test_region.df <- mutprobs_per_base.df %>%
+      mutprobs_test_region.df <- mutprobs_per_combined_muttype.df %>%
         group_by(sampleID) %>% 
-        summarise(exp_mut_count = sum(pmut * scaling_factor), pmut = 1 - prod(1 - pmut*scaling_factor), .groups = 'drop') %>% # 
+        summarise(exp_mut_count = sum(pmut_per_base * scaling_factor * bases_with_same_pmut), pmut = 1 - prod((1 - pmut_per_base*scaling_factor)^bases_with_same_pmut), .groups = 'drop') %>% # 
         left_join(donor_mutated.df, by = "sampleID") %>% 
         replace_na(list(mutated = 0)) %>% 
         mutate(p_no_mut = 1 - pmut) %>%
@@ -382,21 +388,21 @@ main <- function(){
       if(config$test_cohort_skew_alone){
   
         # To help optimize() find the scaling factor that gets exp_mutated = obs_mutated, we start by estimating what the factor should be, ignoring the non-linearity of the relationship between p(mutated) and exp_no_of_mutations
-        orig_exp_no_of_mutated_patients <- mutprobs_per_base.df %>%
+        orig_exp_no_of_mutated_patients <- mutprobs_per_combined_muttype.df %>%
           group_by(sampleID) %>% 
-          summarise(pmut = 1 - prod(1 - pmut)) %>%
+          summarise(pmut = 1 - prod((1 - pmut_per_base)^bases_with_same_pmut)) %>%
           pull(pmut) %>%
           sum()
         naive_scaling_factor <- obs_no_of_mutated_patients / orig_exp_no_of_mutated_patients
   
         # Try to find a scaling value where the expected number of MUTATED tumours is the same as what's observed.
-        scaling_factor_cohortdist <- optimize(function(x) calc_exp_mutated_with_scaling(x, mutprobs_per_base.df, obs_no_of_mutated_patients), interval = c(0, naive_scaling_factor * 10), tol = 0.01)$minimum
+        scaling_factor_cohortdist <- optimize(function(x) calc_exp_mutated_with_scaling(x, mutprobs_per_combined_muttype.df, obs_no_of_mutated_patients), interval = c(0, naive_scaling_factor * 10), tol = 0.001)$minimum
         
         
         
-        mutprobs_test_region_cohortdist.df <- mutprobs_per_base.df %>%
+        mutprobs_test_region_cohortdist.df <- mutprobs_per_combined_muttype.df %>%
           group_by(sampleID) %>% 
-          summarise(exp_mut_count = sum(pmut * scaling_factor_cohortdist), pmut = 1 - prod(1 - pmut*scaling_factor_cohortdist), .groups = 'drop') %>% # 
+          summarise(exp_mut_count = sum(pmut_per_base * scaling_factor_cohortdist * bases_with_same_pmut), pmut = 1 - prod((1 - pmut_per_base*scaling_factor_cohortdist)^bases_with_same_pmut), .groups = 'drop') %>% # 
           left_join(donor_mutated.df, by = "sampleID") %>% 
           replace_na(list(mutated = 0)) %>% 
           mutate(p_no_mut = 1 - pmut) %>%
@@ -1275,10 +1281,10 @@ scale_exp_to_silent_muts <- function(all_mutations.gr, effect_filtered_mutations
 # Scaling mutation expectations - Cohort distribution
 ################################################
 
-calc_exp_mutated_with_scaling <- function(scaling, mutprobs_per_base.df, observed_mutated_count){
-  new_exp <- mutprobs_per_base.df %>%
+calc_exp_mutated_with_scaling <- function(scaling, mutprobs_per_combined_muttype.df, observed_mutated_count){
+  new_exp <- mutprobs_per_combined_muttype.df %>%
     group_by(sampleID) %>% 
-    summarise(pmut = 1 - prod(1 - pmut*scaling), .groups = 'drop') %>% 
+    summarise(pmut = 1 - prod((1 - pmut_per_base*scaling)^bases_with_same_pmut), .groups = 'drop') %>% 
     pull(pmut) %>% 
     sum()
   abs(log2(new_exp / observed_mutated_count))
