@@ -11,9 +11,17 @@ from intogen_core.utils import out_open
 
 
 VALID_CONSEQUENCES = {
-        "transcript_ablation", "splice_donor_variant", "splice_acceptor_variant", "stop_gained", "frameshift_variant",
-        "stop_lost", "initiator_codon_variant", "transcript_amplification", "inframe_insertion", "inframe_deletion",
-        "missense_variant", "splice_region_variant", "incomplete_terminal_codon_variant", "stop_retained_variant",
+        "transcript_ablation", "splice_donor_variant", 
+        "splice_acceptor_variant", "stop_gained",
+        "frameshift_variant", "stop_lost", "start_lost",
+        "initiator_codon_variant", "transcript_amplification",
+        "feature_elongation", "feature_truncation",
+        "inframe_insertion", "inframe_deletion",
+        "protein_altering_variant",
+        "missense_variant",
+        "splice_donor_5th_base_variant",
+        "splice_region_variant", "incomplete_terminal_codon_variant",
+        "start_retained_variant", "stop_retained_variant",
         "synonymous_variant", "coding_sequence_variant"
     }
 
