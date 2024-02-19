@@ -486,8 +486,10 @@ process CBaSE {
 	script:
 		output = "${cohort}.cbase.tsv.gz"
 		"""
-		python /cbase/cbase.py ${input} ${params.datasets}/cbase 0
-		tail -n+2 q_values_output.txt | gzip > ${output}
+		mkdir -p Output/
+
+		python /cbase/cbase.py ${input} ${params.datasets}/cbase 0 output
+		tail -n+2 Output/q_values_output.txt | gzip > ${output}
 		"""
 }
 
