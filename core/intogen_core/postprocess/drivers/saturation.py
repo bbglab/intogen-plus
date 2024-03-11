@@ -42,15 +42,16 @@ def saturation(vep_path, driver_df, regions_df):
                 end = r["END"]
                 chr_ = str(r["CHROMOSOME"])
                 for data in get(vep_path, chr_, int(start), int(end)):
-                    if ("YES" == data[21]) and (data[18] == driver):
+                    if ("-" != data[22]) and (data[18] == driver):
                         # then it is the canonical transcript
-                        l_cases.append([x for x in data[:23]])   
+                        l_cases.append([x for x in data[:25]])   
             
             df = pd.DataFrame(l_cases, columns=['Chromosome', 'Position', 'Reference', 'Alternate', 'Gene', 
                                                 'Feature', 'Feature_type', 'Consequence', 'cDNA_position', 
                                                 'CDS_position', 'Protein_position', 'Amino_acids', 'Codons', 
                                                 'Existing_variation', 'Impact','Distance', 'Strand', 'Flags', 
-                                                'Symbol', 'Symbol source', 'HGNC_ID', 'Canonical', 'ENSP']
+                                                'Symbol', 'Symbol source', 'HGNC_ID', 'Canonical',
+                                                'Mane_select', 'Mane_plus_clinical', 'ENSP']
                                 )
             
             yield driver, df
