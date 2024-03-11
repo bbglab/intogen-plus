@@ -10,6 +10,7 @@ containers/
 *.iml
 *.ipr
 *.iws
+*.eggs
 
 # Eclipse files
 .classpath
@@ -26,7 +27,11 @@ containers/
 # Python bytecode
 *.pyc
 *.egg-info/
+core/build/lib/
 dist/
+combination/build
+*.c
+*.so
 
 # Build docs
 docs/build
@@ -37,5 +42,7 @@ build/containers/mutpanning/MutPanning.jar
 # Nextflow run files
 .nextflow*
 work
+*timeline*
+*trace*
 
 smregions
