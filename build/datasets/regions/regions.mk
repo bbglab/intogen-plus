@@ -6,26 +6,16 @@ $(regions_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 
-# Ensembl transcripts
-transcripts_sql_query= "SELECT g.stable_id, t.stable_id, x.display_label FROM gene g JOIN transcript t ON (g.canonical_transcript_id = t.transcript_id) JOIN xref x ON (g.display_xref_id = x.xref_id AND g.biotype='protein_coding') LEFT JOIN external_db ed USING (external_db_id) WHERE ed.db_name = 'HGNC' AND x.description NOT LIKE '%readthrough%';"
-TRANSCRIPTS = $(regions_dir)/ensembl_canonical_transcripts.tsv
-
-$(TRANSCRIPTS): $$(ENSEMBL) $$(GENOME) | $(regions_dir)
-	@echo Building ensembl canonical transcripts
-	mysql -u anonymous -h ensembldb.ensembl.org --column-names=FALSE \
-		-e ${transcripts_sql_query} ${ensembl_db} > $@
-
-
 # Biomart Query
 biomart_cds_query_file = ${regions_data_srcdir}/biomartQuery.txt
 biomart_cds_query = `cat ${biomart_cds_query_file}`
 biomart_cds_query_encoded = $(shell python -c "from urllib.parse import quote_plus; query ='''${biomart_cds_query}'''; print(quote_plus(query.replace('\n', '')))")
 BIOMART_CDS = $(regions_dir)/cds_biomart.tsv
 
-$(BIOMART_CDS): $(TRANSCRIPTS) $(biomart_cds_query_file) $$(ENSEMBL) | $(regions_dir)
+$(BIOMART_CDS): $(biomart_cds_query_file) $$(ENSEMBL) | $(regions_dir)
 	@echo Downloading biomart
 	curl -L -s "${biomart_url}?query=${biomart_cds_query_encoded}" |\
-		grep -f <(cut -f2 $(TRANSCRIPTS)) |\
+		tail -n +2 |\
 		awk -F'\t' '($$5!=""){print($$0)}' > $@
 
 
@@ -52,5 +42,5 @@ $(GENOME_FASTA): ${regions_data_srcdir}/build_fasta.sh $$(GENOME) | $(regions_di
 	@echo Build genome fasta file
 	bash $< hg${genome} $@
 
-DATASETS += $(TRANSCRIPTS) $(REGIONS_CDS) $(REGIONS_WG) \
+DATASETS += $(REGIONS_CDS) $(REGIONS_WG) \
 	$(GENOME_FASTA)

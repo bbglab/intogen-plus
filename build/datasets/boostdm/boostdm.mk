@@ -24,7 +24,7 @@ $(BOOST_INFO_FUNCTIONAL): $(boostdm_data_src)/run_ptms.sh | $(boostdm_dir)
 ## STEP 4 - Symlinks
 BOOST_SYMLINKS = $(boostdm_dir)/shared/.symlinks.checkpoint
 SYMLINK_dir = $(boostdm_dir)/shared
-$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(TRANSCRIPTS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX) $$(oncotree_dir)| $(boostdm_dir)
+$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX) $$(oncotree_dir)| $(boostdm_dir)
 	@echo Creating symlinks
 	mkdir -p $(SYMLINK_dir)
 	$^ $(SYMLINK_dir)
