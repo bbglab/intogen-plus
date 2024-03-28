@@ -51,7 +51,7 @@ def main(bm, outf):
     splice_sites = exons_by_transcript.apply(partial(extract_splice_sites))
     splice_sites.sort_values(by=['CHROMOSOME', 'START_EXON', 'END_EXON'], inplace=True)
 
-    with gzip.open(outf + "/canonical.regions.gz", 'wt') as output:
+    with gzip.open(outf + "/cds-25spli.regions.gz", 'wt') as output:
         output.write('\t'.join(['CHROMOSOME', 'START', 'END', 'STRAND', 'GENE_ID', 'TRANSCRIPT_ID', 'SYMBOL']) + '\n')
         for count, line in splice_sites.iterrows():
             output.write( 
