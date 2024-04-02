@@ -46,6 +46,12 @@ def parse(number_top=40, strict=True, **files):
             df = pd.read_csv(file, sep="\t")
 
             if df.shape[0] > 0:
+                
+                #FIXME No gene-name fix
+                if df[c_gene].isna().any():
+                    df[c_gene] = df[c_gene].fillna(df['ENSID'])
+                
+                assert not df[c_gene].isna().any()
 
                 for i, r in df.iterrows():
                     try:

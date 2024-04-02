@@ -34,6 +34,12 @@ class Parser:
         except OSError as e:
             logger.warning('File {} not found'.format(input_file))
             return None
+
+        #FIXME No gene-name fix
+        if df[self.gene_id].isna().any():
+            df[self.gene_id] = df[self.gene_id].fillna(df['ENSID'])
+        
+        assert not df[self.gene_id].isna().any()
         # P-value
         try:
             df = df[np.isfinite(df[self.pvalue])]
