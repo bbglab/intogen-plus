@@ -17,7 +17,7 @@
                         "size": "Large",
                         "weight": "Bolder",
                         "color": "<% if (success) { %>Good<% } else { %>Attention<%} %>",
-                        "text": "bbglab/intogen-plus v${version} - ${runName}",
+                        "text": "bbglab/intogenplus v${version} - ${runName}",
                         "wrap": true
                     },
                     {

@@ -1,4 +1,4 @@
-# bbglab/intogen-plus: Output
+# bbglab/intogenplus: Output
 
 ## Introduction
 

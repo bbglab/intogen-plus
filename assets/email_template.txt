@@ -1,10 +1,10 @@
 Run Name: $runName
 
 <% if (success){
-    out << "## bbglab/intogen-plus execution completed successfully! ##"
+    out << "## bbglab/intogenplus execution completed successfully! ##"
 } else {
     out << """####################################################
-## bbglab/intogen-plus execution completed unsuccessfully! ##
+## bbglab/intogenplus execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -27,5 +27,5 @@ Pipeline Configuration:
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
 --
-bbglab/intogen-plus
-https://github.com/bbglab/intogen-plus
+bbglab/intogenplus
+https://github.com/bbglab/intogenplus

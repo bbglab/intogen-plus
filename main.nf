@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    bbglab/intogen-plus
+    bbglab/intogenplus
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/bbglab/intogen-plus
 ----------------------------------------------------------------------------------------
@@ -15,9 +15,9 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { INTOGEN-PLUS  } from './workflows/intogen-plus'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_intogen-plus_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_intogen-plus_pipeline'
+include { INTOGENPLUS  } from './workflows/intogenplus'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_intogenplus_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_intogenplus_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,7 +28,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_into
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow BBGLAB_INTOGEN-PLUS {
+workflow BBGLAB_INTOGENPLUS {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -38,12 +38,12 @@ workflow BBGLAB_INTOGEN-PLUS {
     //
     // WORKFLOW: Run pipeline
     //
-    INTOGEN-PLUS (
+    INTOGENPLUS (
         samplesheet
     )
 
     emit:
-    multiqc_report = INTOGEN-PLUS.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = INTOGENPLUS.out.multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 /*
@@ -72,7 +72,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    BBGLAB_INTOGEN-PLUS (
+    BBGLAB_INTOGENPLUS (
         PIPELINE_INITIALISATION.out.samplesheet
     )
 
@@ -86,7 +86,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        BBGLAB_INTOGEN-PLUS.out.multiqc_report
+        BBGLAB_INTOGENPLUS.out.multiqc_report
     )
 }
 
