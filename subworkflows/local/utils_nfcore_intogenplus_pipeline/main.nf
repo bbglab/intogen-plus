@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the bbglab/intogen-plus pipeline
+// Subworkflow with functionality specific to the bbglab/intogenplus pipeline
 //
 
 /*

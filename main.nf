@@ -30,21 +30,19 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_into
 //
 workflow BBGLAB_INTOGENPLUS {
 
-    take:
-    samplesheet // channel: samplesheet read in from --input
-
     main:
+
+    INPUT    = Channel.fromPath(params.input.tokenize())
+    REGIONS  = Channel.value("${params.datasets}/regions/cds.regions.gz")
 
     //
     // WORKFLOW: Run pipeline
-    //
+    //nf-core schema build
+    
     INTOGENPLUS (
-        samplesheet
+        INPUT,
+        REGIONS
     )
-
-    emit:
-    multiqc_report = INTOGENPLUS.out.multiqc_report // channel: /path/to/multiqc_report.html
-
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
