@@ -16,8 +16,8 @@ $(VEP_CACHE): $$(VEP_CONTAINER) $$(GENOME) | $(vep_dir)
 
 
 VEP_MUTATIONS = $(vep_dir)/vep.tsv.gz
-$(VEP_MUTATIONS): ${vep_data_srcdir}/run.sh $(vep_data_srcdir)/mutations.py $$(REGIONS_CDS) $$(VEP_CONTAINER) $(VEP_CACHE) | $(vep_dir)
-	$< $(REGIONS_CDS) $(VEP_CONTAINER) $(vep_dir) $@ ${cores}
+$(VEP_MUTATIONS): ${vep_data_srcdir}/run.sh $(vep_data_srcdir)/mutations.py $$(BOOST_ALL_REGION) $$(VEP_CONTAINER) $(VEP_CACHE) | $(vep_dir)
+	$< $(BOOST_ALL_REGION) $(VEP_CONTAINER) $(vep_dir) $@ ${cores}
 
 
 VEP_MUTATIONS_INDEX = $(vep_dir)/vep.tsv.gz.tbi

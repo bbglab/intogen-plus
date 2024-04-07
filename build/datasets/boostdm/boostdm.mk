@@ -24,7 +24,7 @@ $(BOOST_INFO_FUNCTIONAL): $(boostdm_data_src)/run_ptms.sh | $(boostdm_dir)
 ## STEP 4 - Symlinks
 BOOST_SYMLINKS = $(boostdm_dir)/shared/.symlinks.checkpoint
 SYMLINK_dir = $(boostdm_dir)/shared
-$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(TRANSCRIPTS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX) $$(oncotree_dir)| $(boostdm_dir)
+$(BOOST_SYMLINKS): $(boostdm_data_src)/symlink.sh $$(REGIONS_CDS) $$(VEP_MUTATIONS) $$(VEP_MUTATIONS_INDEX) $$(oncotree_dir)| $(boostdm_dir)
 	@echo Creating symlinks
 	mkdir -p $(SYMLINK_dir)
 	$^ $(SYMLINK_dir)
@@ -37,7 +37,7 @@ $(BOOST_PHYLO): $(boostdm_data_src)/hg38.download.sh | $(boostdm_dir)
 	$< $(boostdm_dir)
 
 ## STEP 5 - canonical.regions.gz
-BOOST_ALL_REGION = $(boostdm_dir)/saturation/canonical.regions.gz
+BOOST_ALL_REGION = $(boostdm_dir)/saturation/cds-25spli.regions.gz
 $(BOOST_ALL_REGION): $(boostdm_data_src)/get_all_regions.py $$(BIOMART_CDS)| $(boostdm_dir)
 	@echo Creating phosphosite
 	mkdir -p $(boostdm_dir)/saturation

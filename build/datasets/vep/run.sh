@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -xe
 
 CDS=$1
 VEP_CONTAINER=$2

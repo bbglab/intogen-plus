@@ -521,7 +521,6 @@ process MutPanning {
 
     input:
         tuple val(cohort), path(mutations), path(samples) from VARIANTS_MUTPANNING
-        path regions from REGIONS
 
     output:
         tuple val(cohort), path("out/SignificanceFiltered/Significance${cohort}.txt") into OUT_MUTPANNING
@@ -563,7 +562,6 @@ process HotMAPS {
 
     input:
         tuple val(cohort), path(input), path(signatures) from VARIANTS_HOTMAPS.join(SIGNATURES4)
-        path regions from REGIONS
 
     output:
         tuple val(cohort), path("*.out.gz") into OUT_HOTMAPS
