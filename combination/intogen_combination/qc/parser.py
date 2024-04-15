@@ -22,7 +22,7 @@ class Parser:
         self.gene_id = CONF[method]["GENE_ID"]
         self.pvalue = CONF[method]["PVALUE"]
         self.qvalue = CONF[method]["QVALUE"]
-        self.ensid = CONF[method]["ENSEMBL_ID"]
+        self.ensid = CONF[method].get("ENSEMBL_ID", None)
 
     def read(self, input_file):
         """Read an output file.
@@ -35,8 +35,8 @@ class Parser:
             logger.warning("File {} not found".format(input_file))
             return None
 
-        # Use ensembl ID if no gene-name
-        if df[self.gene_id].isna().any():
+        # Use ensembl ID if no gene-name where applicable
+        if df[self.gene_id].isna().any() and self.ensid:
             df[self.gene_id] = df[self.gene_id].fillna(df[self.ensid])
 
         assert not df[self.gene_id].isna().any()

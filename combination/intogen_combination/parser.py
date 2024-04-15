@@ -60,15 +60,16 @@ def parse(number_top: int = 40, strict: bool = True, **files: Any) -> tuple:
             CONF[method]["GENE_ID"],
             CONF[method]["PVALUE"],
             CONF[method]["QVALUE"],
-            CONF[method]["ENSEMBL_ID"],
+            CONF[method].get("ENSEMBL_ID", None)
         )
+
         if os.path.exists(file):
             df = pd.read_csv(file, sep="\t")
 
             if df.shape[0] > 0:
-                # Use Ensembl ID if no gene-name
-                if df[c_gene].isna().any():
-                    df[c_gene] = df[c_gene].fillna(df[c_ensid])
+                # Use Ensembl ID if no gene-name where applicable
+                if df[c_gene].isna().any() and c_ensid:
+                        df[c_gene] = df[c_gene].fillna(df[c_ensid])
 
                 assert not df[c_gene].isna().any()
 
