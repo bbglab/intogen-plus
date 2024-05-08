@@ -9,7 +9,7 @@ Regarding the expression of the genes:
     * genes are considered not expressed if 80% of the samples are not expressed
 
 Tumor types (ttypes) are updated to new oncotree version (Nov 2021).
-Gene names (symbols) are updated to new ensembl/vep release (101)
+Gene names (symbols) are updated to new ensembl/vep release (110)
 """
 
 # Import modules
