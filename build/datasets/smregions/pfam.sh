@@ -15,11 +15,11 @@ echo -e "CHROMOSOME\tSTART\tEND\tSTRAND\tELEMENT_ID\tSEGMENT\tSYMBOL" \
 tmpdir=$(mktemp -d)
 
 cat $BIOMART_CDS | \
-	awk '{print $1, $11, $2}' | \
+	awk 'BEGIN {FS="\t"; OFS="\t"} {print $1, $11, $2}' | \
 	sort -u \
-	> ${tmpdir}/MANE_TRANSCRIPTS.tsv
+	> ${tmpdir}/MANE_TRANSCRIPTS.tsv.tmp
 
-TRANSCRIPTS=${tmpdir}/MANE_TRANSCRIPTS.tsv
+TRANSCRIPTS=${tmpdir}/MANE_TRANSCRIPTS.tsv.tmp
 
 if [[ "${CORES}" -eq 1 ]]
 then
