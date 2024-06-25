@@ -6,7 +6,7 @@ IntOGen pipeline integrates the generation of files needed to run by BoostDM [1]
 DriverSaturation
 ^^^^^^^^^^^^^^^^
 
-It computes all the possible mutations for a given gene mapping to the canonical transcript. It uses VEP v101. Specifically, it considers both the exons of the transcript and intronic sites within 25 bps distance from the intron-exon junctions.
+It computes all the possible mutations for a given gene mapping to the MANE transcript. It uses VEP v111. Specifically, it considers both the exons of the transcript and intronic sites within 25 bps distance from the intron-exon junctions.
 
 Filter MNVs
 ^^^^^^^^^^^

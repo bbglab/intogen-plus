@@ -74,7 +74,7 @@ context conditional probabilities consistent with the relative frequencies
 of the mutational profile of the cohort.
 
 For this analysis, OncodriveCLUSTL version 1.1.3 was run for the set of
-defined canonical transcripts bearing 2 or more SNVs mapping the
+defined MANE transcripts bearing 2 or more SNVs mapping the
 mutations file. Tuckey-based smoothing was conducted with 11bp windows.
 The different consecutive coding sequences contained on
 each transcript were concatenated to allow the algorithm to detect

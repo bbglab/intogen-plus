@@ -20,8 +20,8 @@ steps:
 
 6. Datasets with filtered synonymous variants are not runnable. Most cancer driver identification methods need synonymous variants to fit a background mutation model. Therefore, datasets with less than 5 synonymous and datasets with a missense/synonymous ratio greater than 10 were excluded .
 
-7. When the Variant Effect Predictor [1]_ (VEP) mapped one mutation into multiple transcripts associated with HUGO symbols, we selected the canonical transcript of the first HUGO symbol in alphabetical order.
+7. When the Variant Effect Predictor [1]_ (VEP) mapped one mutation into multiple transcripts associated with HUGO symbols, we selected the MANE transcript of the first HUGO symbol in alphabetical order.
 
-8. We also discarded mutations mapping into genes without canonical transcript in VEP.101.
+8. We also discarded mutations mapping into genes without MANE transcript in VEP.111.
 
 .. [1] McLaren W, Gil L, Hunt SE, Riat HS, Ritchie GR, Thormann A, Flicek P, Cunningham F. The Ensembl Variant Effect Predictor. Genome Biology Jun 6;17(1):122. (2016) doi:10.1186/s13059-016-0974-4
