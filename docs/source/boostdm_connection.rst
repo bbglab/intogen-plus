@@ -13,4 +13,10 @@ Filter MNVs
 
 Individual SNVs in adjacent positions reported in the same sample are discarded as potential multiple nucleotide variants (MNVs) that are wrongly called as separate SNVs.
 
+Parse Profile
+^^^^^^^^^^^^^
+
+Profile output by ComputeProfile step is parsed in a 96-channel for every trinucleotide context, to ensure consistency and compatibility with BoostDM run.
+
+
 .. [1] Ferran Muiños, et al. In silico saturation mutagenesis of cancer genes; Nature 2021. (https://doi.org/10.1038/s41586-021-03771-1)

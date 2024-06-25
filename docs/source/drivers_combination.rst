@@ -35,7 +35,7 @@ Our approach works independently for each cohort: to create a consensus
 list of driver genes for each cohort, we first determine how credible
 each DIM is when applied to this specific cohort, based on how
 many bona-fide cancer genes reported in the COSMIC Cancer Gene Census
-database (`CGC v95 <https://cancer.sanger.ac.uk/census>`__) are highly ranked according to the DIM. Once a
+database (`CGC v99 <https://cancer.sanger.ac.uk/census>`__) are highly ranked according to the DIM. Once a
 credibility score has been established, we use a weighted method for combining
 the p-values that each DIM gives for each candidate gene: this
 combination takes the DIMs credibility into account. Based on the

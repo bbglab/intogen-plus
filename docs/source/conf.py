@@ -18,11 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'IntOGen'
-copyright = '2023, BBGLab'
+copyright = '2024, BBGLab'
 author = 'BBGLab'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0'
+release = '2024'
 
 
 # -- General configuration ---------------------------------------------------

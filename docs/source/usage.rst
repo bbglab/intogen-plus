@@ -9,7 +9,7 @@ Beside them, a number of different datasets need to be downloaded,
 and other pieces of software installed (as Singularity containers).
 
 For information on how to download and build all these requirements,
-check the `README <https://bitbucket.org/intogen/intogen-plus/src/master/build/>`_
+check the `README <https://github.com/bbglab/intogen-plus/blob/v2024/build/>`_
 file in the build folder.
 
 
