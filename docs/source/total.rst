@@ -230,7 +230,7 @@ steps:
       order.
 
 8. We also discarded mutations mapping into genes without MANE
-      transcript in VEP.92.
+      transcript in VEP.111.
 
 Methods for cancer driver gene identification
 ---------------------------------------------
