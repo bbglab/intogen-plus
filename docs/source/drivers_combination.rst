@@ -120,7 +120,8 @@ cohort that the gene harbours positive selection.
 
 Combination benchmark
 ^^^^^^^^^^^^^^^^^^^^^
-   .. warning:: 
+
+   .. important:: 
       This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
 
 
