@@ -121,157 +121,155 @@ cohort that the gene harbours positive selection.
 Combination benchmark
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. danger:: 
-   This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
+.. important:: This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
 
+   We have assessed the performance of the combination compared to i) each
+   of the six individual methods and ii) other strategies to combine the
+   output from cancer driver identification methods.
 
-We have assessed the performance of the combination compared to i) each
-of the six individual methods and ii) other strategies to combine the
-output from cancer driver identification methods.
+   Datasets for evaluation
+   ~~~~~~~~~~~~~~~~~~~~~~~
 
-Datasets for evaluation
-~~~~~~~~~~~~~~~~~~~~~~~
+   To ensure a reliable evaluation we decided to perform an evaluation
+   based on the 32 Whole-Exome cohorts of the TCGA PanCanAtlas project
+   (downloaded from
+   `*https://gdc.cancer.gov/about-data/publications/pancanatlas* <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__).
+   These cohorts sequence coverage, sequence alignment and somatic mutation
+   calling were performed using the same methodology guaranteeing that
+   biases due to technological and methodological artifacts are minimal.
 
-To ensure a reliable evaluation we decided to perform an evaluation
-based on the 32 Whole-Exome cohorts of the TCGA PanCanAtlas project
-(downloaded from
-`*https://gdc.cancer.gov/about-data/publications/pancanatlas* <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__).
-These cohorts sequence coverage, sequence alignment and somatic mutation
-calling were performed using the same methodology guaranteeing that
-biases due to technological and methodological artifacts are minimal.
+   The Cancer Genes Census --version v87-- was downloaded from the COSMIC
+   data portal
+   (`*https://cancer.sanger.ac.uk/census* <https://cancer.sanger.ac.uk/census>`__)
+   and used as a positive set of known cancer driver genes.
 
-The Cancer Genes Census --version v87-- was downloaded from the COSMIC
-data portal
-(`*https://cancer.sanger.ac.uk/census* <https://cancer.sanger.ac.uk/census>`__)
-and used as a positive set of known cancer driver genes.
+   We created a catalog of genes that are known not to be involved in
+   cancerogenesis. This set includes very long genes (HMCN1, TTN, OBSCN,
+   GPR98, RYR2 and RYR3), and a list of olfactory receptors from Human
+   Olfactory Receptor Data Exploratorium (HORDE)
+   (https://genome.weizmann.ac.il/horde/; download date 14/02/2018).
+   In addition, for all TCGA cohorts, we added non-expressed genes, defined
+   as genes where at least 80% of the samples showed a RSEM expressed in
+   log2 scale smaller or equal to 0. Expression data for TCGA was
+   downloaded from
+   `*https://gdc.cancer.gov/about-data/publications/pancanatlas* <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__.
 
-We created a catalog of genes that are known not to be involved in
-cancerogenesis. This set includes very long genes (HMCN1, TTN, OBSCN,
-GPR98, RYR2 and RYR3), and a list of olfactory receptors from Human
-Olfactory Receptor Data Exploratorium (HORDE)
-(https://genome.weizmann.ac.il/horde/; download date 14/02/2018).
-In addition, for all TCGA cohorts, we added non-expressed genes, defined
-as genes where at least 80% of the samples showed a RSEM expressed in
-log2 scale smaller or equal to 0. Expression data for TCGA was
-downloaded from
-`*https://gdc.cancer.gov/about-data/publications/pancanatlas* <https://gdc.cancer.gov/about-data/publications/pancanatlas>`__.
+   Metrics for evaluation
+   ~~~~~~~~~~~~~~~~~~~~~~
 
-Metrics for evaluation
-~~~~~~~~~~~~~~~~~~~~~~
+   We defined a metric, referred to as CGC-Score, that is intended to
+   measure the quality of a ranking of genes as the enrichment of CGC
+   elements in the top positions of the ranking; specifically given a
+   ranking :math:`R` mapping each element to a rank, we define the
+   CGC-Score of :math:`R` as
 
-We defined a metric, referred to as CGC-Score, that is intended to
-measure the quality of a ranking of genes as the enrichment of CGC
-elements in the top positions of the ranking; specifically given a
-ranking :math:`R` mapping each element to a rank, we define the
-CGC-Score of :math:`R` as
+   :math:`\text{CGC-Score}(R)\  = \sum_{i=1}^N\frac{p_{i}}{log(i + 1)} \; /\; \sum_{i=1}^N\frac{1}{log(i + 1)}`
 
-:math:`\text{CGC-Score}(R)\  = \sum_{i=1}^N\frac{p_{i}}{log(i + 1)} \; /\; \sum_{i=1}^N\frac{1}{log(i + 1)}`
+   where :math:`p_{i}` is the proportion of elements with rank
+   :math:`\leq i` that belong to CGC and :math:`N` is a suitable threshold
+   to consider just the top elements in the ranking (by default N=40).
 
-where :math:`p_{i}` is the proportion of elements with rank
-:math:`\leq i` that belong to CGC and :math:`N` is a suitable threshold
-to consider just the top elements in the ranking (by default N=40).
+   We estimated the CGC-Score across TCGA cohorts for the individual
+   methods ranking and the combined Schulze ranking.
 
-We estimated the CGC-Score across TCGA cohorts for the individual
-methods ranking and the combined Schulze ranking.
+   Similarly, we defined a metric, referred to as Negative-Score, that aims
+   to measure the proportion non-cancer genes among the top positions in
+   the ranking. Particularly, given a ranking :math:`R` mapping each
+   element to a rank, we define the Negative-Score of :math:`R` as:
 
-Similarly, we defined a metric, referred to as Negative-Score, that aims
-to measure the proportion non-cancer genes among the top positions in
-the ranking. Particularly, given a ranking :math:`R` mapping each
-element to a rank, we define the Negative-Score of :math:`R` as:
+   :math:`\text{Negative-Score}(R)\  = \sum_{i=1}^N \frac{p_{i}}{log(i + 1)}\; /\; \sum_{i=1}^N \frac{1}{log(i + 1)}`
 
-:math:`\text{Negative-Score}(R)\  = \sum_{i=1}^N \frac{p_{i}}{log(i + 1)}\; /\; \sum_{i=1}^N \frac{1}{log(i + 1)}`
+   where :math:`p_{i}` is the proportion of elements with rank
+   :math:`\leq i` that belong to the negative set and :math:`N` is a
+   suitable threshold to consider just the top elements in the ranking (by
+   default N = 40). We estimated the Negative-Score across TCGA cohorts for
+   the individual methods ranking and the combined Schulze ranking.
 
-where :math:`p_{i}` is the proportion of elements with rank
-:math:`\leq i` that belong to the negative set and :math:`N` is a
-suitable threshold to consider just the top elements in the ranking (by
-default N = 40). We estimated the Negative-Score across TCGA cohorts for
-the individual methods ranking and the combined Schulze ranking.
+   Comparison with individual methods
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Comparison with individual methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   We compared the CGC-Score and Negative-Score of our combinatorial
+   selection strategy with the individual output from the six driver
+   discovery methods integrated in the pipeline.
 
-We compared the CGC-Score and Negative-Score of our combinatorial
-selection strategy with the individual output from the six driver
-discovery methods integrated in the pipeline.
+   As a result we observed a consistent increase in CGC-Score of the
+   combinatorial strategy compared to individual methods across TCGA
+   cohorts (see Figure below panel A-B). Similarly, we observed a consistent decrease in
+   Negative-Score across TCGA cohorts (see Figure below panel C). In summary, the
+   evaluation shows that the combinatorial strategy increases the True
+   Positive Rate (measured using the CGC-Score) preserving lower False
+   Positive Rate (measured using the Negative-Score) than the six
+   individual methods included in the pipeline.
 
-As a result we observed a consistent increase in CGC-Score of the
-combinatorial strategy compared to individual methods across TCGA
-cohorts (see Figure below panel A-B). Similarly, we observed a consistent decrease in
-Negative-Score across TCGA cohorts (see Figure below panel C). In summary, the
-evaluation shows that the combinatorial strategy increases the True
-Positive Rate (measured using the CGC-Score) preserving lower False
-Positive Rate (measured using the Negative-Score) than the six
-individual methods included in the pipeline.
+   Leave-one-out combination
+   ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Leave-one-out combination
-~~~~~~~~~~~~~~~~~~~~~~~~~
+   We aimed to estimate the contribution of each method’s ranking to the
+   final ranking after Schulze's weighted combination. To tackle this
+   question, we measured the effect of removing one method from the
+   combination by, first, calculating the CGC-Score of the combination
+   excluding the aforementioned method and, next, obtaining its ratio with
+   the original combination (i.e., including all methods). This was
+   iteratively calculated for all method across TCGA cohorts. Methods that
+   positively contributed to the combined ranking quality show a ratio
+   below one, while methods that negatively contributed to the combined
+   ranking show a ratio greater than one.
 
-We aimed to estimate the contribution of each method’s ranking to the
-final ranking after Schulze's weighted combination. To tackle this
-question, we measured the effect of removing one method from the
-combination by, first, calculating the CGC-Score of the combination
-excluding the aforementioned method and, next, obtaining its ratio with
-the original combination (i.e., including all methods). This was
-iteratively calculated for all method across TCGA cohorts. Methods that
-positively contributed to the combined ranking quality show a ratio
-below one, while methods that negatively contributed to the combined
-ranking show a ratio greater than one.
+   We observed that across TCGA cohorts most of the methods contributed
+   positively (i.e., ratio above one) to the weighted combination
+   performance. Moreover, there is substantial variability across TCGA
+   cohorts in the contribution of each method to the combination
+   performance. In summary, all methods contributed positively to the
+   combinatorial performance across TCGA supporting our methodological
+   choice for the individual driver discovery methods (see Figure below panel E).
 
-We observed that across TCGA cohorts most of the methods contributed
-positively (i.e., ratio above one) to the weighted combination
-performance. Moreover, there is substantial variability across TCGA
-cohorts in the contribution of each method to the combination
-performance. In summary, all methods contributed positively to the
-combinatorial performance across TCGA supporting our methodological
-choice for the individual driver discovery methods (see Figure below panel E).
+   Comparison with other combinatorial selection methods
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Comparison with other combinatorial selection methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   We compared the CGC-Score and Negative-Score of our combinatorial
+   selection strategy against other methods frequently used employed to
+   produce ranking combinations, either based on ranking information --such
+   as Borda Count [6]_ -- or based on statistical information --such as
+   Fisher [1]_ or Brown [2]_, [3]_ methods. Hereto, we briefly describe
+   the rationale of the four methods we used to benchmark our ranking. For
+   the sake of compact notation, let’s denote the rank and p-value of gene
+   :math:`g` produced by method :math:`m_{i}` as :math:`r_{i,g}` and
+   :math:`p_{i,g}`, respectively.
 
-We compared the CGC-Score and Negative-Score of our combinatorial
-selection strategy against other methods frequently used employed to
-produce ranking combinations, either based on ranking information --such
-as Borda Count [6]_ -- or based on statistical information --such as
-Fisher [1]_ or Brown [2]_, [3]_ methods. Hereto, we briefly describe
-the rationale of the four methods we used to benchmark our ranking. For
-the sake of compact notation, let’s denote the rank and p-value of gene
-:math:`g` produced by method :math:`m_{i}` as :math:`r_{i,g}` and
-:math:`p_{i,g}`, respectively.
+   *Borda Count:* For each ranked item :math:`g` and method :math:`m_{i},`
+   it assigns a score :math:`s_{i,g} = N - l_{i,g},` where :math:`N`
+   stands for the total number of items to rank and :math:`l_{i,g}` is
+   the number of items ranked below :math:`g` according to method
+   :math:`m_{i}`. For each item :math:`g` an overall score
+   :math:`s_{g}= s_{1,g} + \ldots + s_{k,g}` can then be
+   computed for each :math:`g,` whence a ranking is obtained by descending
+   sort.
 
-*Borda Count:* For each ranked item :math:`g` and method :math:`m_{i},`
-it assigns a score :math:`s_{i,g} = N - l_{i,g},` where :math:`N`
-stands for the total number of items to rank and :math:`l_{i,g}` is
-the number of items ranked below :math:`g` according to method
-:math:`m_{i}`. For each item :math:`g` an overall score
-:math:`s_{g}= s_{1,g} + \ldots + s_{k,g}` can then be
-computed for each :math:`g,` whence a ranking is obtained by descending
-sort.
+   *Fisher:* It is based on the p-values :math:`p_{i,g}`. For each item
+   :math:`g` the method produces a new combined p-value by computing the
+   statistic:
 
-*Fisher:* It is based on the p-values :math:`p_{i,g}`. For each item
-:math:`g` the method produces a new combined p-value by computing the
-statistic:
+   :math:`F_{g} = - 2\log\ p_{i, g} \sim \chi_{2k}^{2}`.
 
-:math:`F_{g} = - 2\log\ p_{i, g} \sim \chi_{2k}^{2}`.
+   Under the null hypothesis, :math:`F_{g}` are distributed as a chi-square
+   with :math:`2k` degrees of freedom, whence a p-value, which in turn
+   yields a raking by ascending sort. Its applicability is limited by the
+   assumption that the methods provide independent significance tests.
 
-Under the null hypothesis, :math:`F_{g}` are distributed as a chi-square
-with :math:`2k` degrees of freedom, whence a p-value, which in turn
-yields a raking by ascending sort. Its applicability is limited by the
-assumption that the methods provide independent significance tests.
+   *Brown:* This method overcomes the independence requirement of Fisher’s
+   method by modeling the dependencies between the statistical tests
+   produced by each method, specifically by estimating the covariance
+   :math:`\Omega_{i,j} = \textrm{cov}( - 2\log p_{i,g}, - 2\log p_{j,g}).`
+   Brown’s method [2]_ and its most recent adaptation [3]_ have been
+   proposed as less biased alternatives to Fisher.
 
-*Brown:* This method overcomes the independence requirement of Fisher’s
-method by modeling the dependencies between the statistical tests
-produced by each method, specifically by estimating the covariance
-:math:`\Omega_{i,j} = \textrm{cov}( - 2\log p_{i,g}, - 2\log p_{j,g}).`
-Brown’s method [2]_ and its most recent adaptation [3]_ have been
-proposed as less biased alternatives to Fisher.
+   We then computed the CGC-Score and Negative-Score based on the consensus
+   ranking from the aforementioned combinatorial methods and compared them
+   to our Schulze’s weighted combination ranking across all TCGA cohorts.
+   Our combinatorial approach met a larger enrichment in known cancer genes
+   for 29/32 (90%) TCGA cohorts (see Figure below panel D).
 
-We then computed the CGC-Score and Negative-Score based on the consensus
-ranking from the aforementioned combinatorial methods and compared them
-to our Schulze’s weighted combination ranking across all TCGA cohorts.
-Our combinatorial approach met a larger enrichment in known cancer genes
-for 29/32 (90%) TCGA cohorts (see Figure below panel D).
-
-|image2|
+   |image2|
 
 
 .. rubric:: Footnotes
