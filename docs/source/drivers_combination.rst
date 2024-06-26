@@ -120,8 +120,8 @@ cohort that the gene harbours positive selection.
 
 Combination benchmark
 ^^^^^^^^^^^^^^^^^^^^^
-.. warning:: 
-   This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
+   .. warning:: 
+      This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
 
 
 We have assessed the performance of the combination compared to i) each
@@ -273,7 +273,7 @@ for 29/32 (90%) TCGA cohorts (see Figure below panel D).
 |image2|
 
 
-
+.. rubric:: Footnotes
 
 .. [1] Fisher R.A. (1948) figure to question 14 on combining independent tests of significance. Am. Statistician , 2, 30–31.
 
