@@ -59,9 +59,10 @@ a cohort of samples) to classify driver genes into the three possible
 roles: Act (activating or oncogene), LoF (loss-of-function or tumor
 suppressor) or Amb (ambiguous or non-defined). We then combined these
 predictions with prior knowledge from the Cancer Genome Census (CGC)
-[1]_ using the following approach: if the inferred mode of action matched the CGC
+[3]_ using the following approach: if the inferred mode of action matched the CGC
 mode of action or if the CGC mode of action was "Unknown", we used the 
 inferred mode of action; otherwise, we used the CGC mode of action.
 
 .. [1] Sondka Z, et al. The COSMIC Cancer Gene Census: describing genetic dysfunction across all human cancers. Nat Rev Cancer. 2018;18(11):696–705. doi:10.1038/s41568-018-0060-1
 .. [2] Lever J, et al. CancerMine: a literature-mined resource for drivers, oncogenes and tumor suppressors in cancer. Nat Methods. 2019 Jun;16(6):505-507. doi: 10.1038/s41592-019-0422-y. Epub 2019 May 20.
+.. [3] See footnote 1
