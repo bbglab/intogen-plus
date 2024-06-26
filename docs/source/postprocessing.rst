@@ -46,7 +46,8 @@ To match the tumor type of our analyzed cohorts and the nomenclature/acronyms of
 2. SOLID node added after TISSUE and before the rest of tissues
 3. ALL node added after LMN and before BLL and TLL
 
-.. note:: The current version of the oncotree used in IntOGen 2023 is available at this GitHub repo: `bbglab/oncotree <https://github.com/bbglab/oncotree>`__ .
+.. note:: 
+    The current version of the oncotree used in IntOGen 2023 is available at this GitHub repo: `bbglab/oncotree <https://github.com/bbglab/oncotree>`__ .
 
 Mode of action of driver genes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
