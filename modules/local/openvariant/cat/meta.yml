@@ -1,0 +1,35 @@
+name: "openvariant_groupby"
+description: Print on the stdout/"output" the parsed files group by a specified field.
+keywords:
+  - cat
+tools:
+  - "openvariant":
+      description: "It reads, parses and operates different multiple input file formats (e. g. tsv, csv, vcf, maf, bed), being able to customize the output."
+      homepage: "https://github.com/bbglab/openvariant"
+      documentation: "https://openvariant.readthedocs.io/en/latest/"
+      licence: "BSD 3-C"
+
+input:
+  - target_file:
+      type: file
+      description: VCF/TSV/MAF/BED/CSV file
+      pattern: "*.{tsv,csv,vcf,bed,maf}"
+
+output:
+  #Only when we have meta
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. [ id:'test', group_key: 'DATASET']
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+  - tsv.gz:
+      type: file
+      description: parsed file
+      pattern: "*.parsed.tsv.gz"
+
+authors:
+  - "@bbglab"
