@@ -41,7 +41,7 @@ def saturation(vep_path, driver_df, regions_df):
                 start = r["START"]
                 end = r["END"]
                 chr_ = str(r["CHROMOSOME"])
-                for data in get(vep_path, chr_, int(start), int(end)):
+                for data in get(vep_path, chr_, int(start) - 1, int(end)):
                     if ("-" != data[22]) and (data[18] == driver):
                         # then it is the canonical transcript
                         l_cases.append([x for x in data[:25]])   
@@ -70,6 +70,7 @@ def cli(drivers):
 
     for driver, df in saturation(vep_path, drivers_df, regions_df):
         df.to_csv(f'{driver}.vep.gz', index=False, compression='gzip', sep='\t')
+        continue
 
 if __name__ == "__main__":
     cli()   
