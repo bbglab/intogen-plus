@@ -25,7 +25,7 @@ following criteria:
 2. We also discarded genes highly tolerant to Single Nucleotide Polymorphisms (SNP) across human populations. Such genes are more susceptible to calling errors and should be taken cautiously. More specifically, we downloaded transcript specific constraints from gnomAD (release 2.1; 2018/02/14) and used the observed-to-expected ratio score (oe) of missense (mys), synonymous (syn) and loss-of-function (lof) variants to detect genes highly tolerant to SNPs. Genes enriched in SNPs (oe_mys > 1.5 or oe_lof > 1.5 or oe_syn > 1.5) with a number of mutations per sample greater than 1 were discarded. Additionally, we discarded mutations overlapping with germline variants (germline count > 5) from a panel of normals (PON) from Hartwig Medical Foundation (\ https://storage.googleapis.com/hmf-public/HMFtools-Resources/dna_pipeline/v5_31/38/variants/SageGermlinePon.98x.38.tsv.gz \ ).
 3. We also discarded genes that are likely false positives according to their known function from the literature. We convened that the following genes are likely false positives: i) known long genes such as TTN, OBSCN, RYR2, etc.; ii) olfactory receptors from HORDE (\ http://bioportal.weizmann.ac.il/HORDE/\ ; Build #44c - 30 July 2019 ); iii) genes not belonging to Tier1 CGC genes lacking literature references according to CancerMine [2]_ (\ http://bionlp.bcgsc.ca/cancermine/\ ; As of 7 December 2021).
 4. We also removed non CGC genes with more than 2 mutations in one sample. This abnormally high number of mutations in a sample may be the result of either a local hypermutation process or cross contamination from germline variants.
-5. Finally we discarded genes whose mutations are likely the result of local hypermutation activity. More specifically, some coding regions might be the target of mutations associated to COSMIC Signature 9 (\ https://cancer.sanger.ac.uk/cosmic/signatures\) which is associated to non-canonical AID activity in lymphoid tumours. In those cancer types were Signature 9 is known to play a significant mutagenic role (i.e., AML, Non-Hodgkin Lymphomas, B-cell Lymphomas, CLL and Myelodysplastic syndromes) we discarded genes where more than 50% of mutations in a cohort of patients were associated with Signature 9.
+5. Finally we discarded genes whose mutations are likely the result of local hypermutation activity. More specifically, some coding regions might be the target of mutations associated to COSMIC Signature 9 (\ https://cancer.sanger.ac.uk/cosmic/signatures\) which is associated to non-canonical AID activity in lymphoid tumours. In those cancer types were Signature 9 is known to play a significant mutagenic role (i.e., LYMPHOID, CLLSLL, DLBCLNOS, NHL, ALL, LNM, TLL, BLL and HL) we discarded genes where more than 50% of mutations in a cohort of patients were associated with Signature 9.
 
 Candidate driver genes that were not discarded composed the catalog of driver genes.
 
@@ -46,27 +46,24 @@ To match the tumor type of our analyzed cohorts and the nomenclature/acronyms of
 2. SOLID node added after TISSUE and before the rest of tissues
 3. ALL node added after LMN and before BLL and TLL
 
-.. note:: The current version of the oncotree used in IntOGen 2023 is available at this GitHub repo: `bbglab/oncotree <https://github.com/bbglab/oncotree>`__ .
+.. note:: 
+    The current version of the oncotree used in IntOGen 2023 is available at this GitHub repo: `bbglab/oncotree <https://github.com/bbglab/oncotree>`__ .
 
 Mode of action of driver genes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We computed the mode of action for highly confident driver genes. To do
-so, we first performed a pan-cancer run of dNdScv across all TCGA
-cohorts. We then applied the aforementioned algorithm (see Mode of
-action section below for more details on how the algorithm determines
+so, we first applied the aforementioned algorithm (see Mode of
+action section in mutational features for more details on how the algorithm determines
 the role of driver genes according to their distribution of mutations in
 a cohort of samples) to classify driver genes into the three possible
 roles: Act (activating or oncogene), LoF (loss-of-function or tumor
 suppressor) or Amb (ambiguous or non-defined). We then combined these
-predictions with prior knowledge from the Cancer Genome Interpreter
-[3]_ according to the following rules: i) when the inferred mode of
-action matched the prior knowledge, we used the consensus mode of
-action; ii) when the gene was not included in the prior knowledge list,
-we selected the inferred mode of action; iii) when the inferred mode of
-action did not match the prior knowledge, we selected that of the prior
-knowledge list.
+predictions with prior knowledge from the Cancer Genome Census (CGC)
+[3]_ using the following approach: if the inferred mode of action matched the CGC
+mode of action or if the CGC mode of action was "Unknown", we used the 
+inferred mode of action; otherwise, we used the CGC mode of action.
 
 .. [1] Sondka Z, et al. The COSMIC Cancer Gene Census: describing genetic dysfunction across all human cancers. Nat Rev Cancer. 2018;18(11):696–705. doi:10.1038/s41568-018-0060-1
 .. [2] Lever J, et al. CancerMine: a literature-mined resource for drivers, oncogenes and tumor suppressors in cancer. Nat Methods. 2019 Jun;16(6):505-507. doi: 10.1038/s41592-019-0422-y. Epub 2019 May 20.
-.. [3] Tamborero D, et al. Cancer Genome Interpreter annotates the biological and clinical relevance of tumor alterations. Genome Med. 2018;10(1):25. Published 2018 Mar 28. doi:10.1186/s13073-018-0531-8
+.. [3] See footnote 1

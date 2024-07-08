@@ -34,7 +34,7 @@ in ENCODE project [2]_; iii) the abundance of sites per coding consequence
 type across in the coding region of each gene.
 
 We downloaded (release date 2023/02/24) and built a new reference
-database based on the list of canonical transcripts defined by VEP.101
+database based on the list of MANE transcripts defined by VEP.111
 (GRCh38). We then used this reference database to run dNdScv on all
 datasets of somatic mutations using the default setting of the method.
 
@@ -74,7 +74,7 @@ context conditional probabilities consistent with the relative frequencies
 of the mutational profile of the cohort.
 
 For this analysis, OncodriveCLUSTL version 1.1.3 was run for the set of
-defined canonical transcripts bearing 2 or more SNVs mapping the
+defined MANE transcripts bearing 2 or more SNVs mapping the
 mutations file. Tuckey-based smoothing was conducted with 11bp windows.
 The different consecutive coding sequences contained on
 each transcript were concatenated to allow the algorithm to detect
@@ -87,7 +87,7 @@ sequence boundaries (e.g., windows overlapping part of an exon and an
 intron were shifted to fit inside the exon). A total number of N = 1,000
 simulations per transcript were performed.
 
-cBaSE
+cBaSE v1.1
 ^^^^^
 
 cBaSE [5]_ asserts gene-specific positive and negative selection by
@@ -182,7 +182,7 @@ the re-sampling.
 
 To create the database of genomic coordinates of Pfam domains we
 followed the next steps: i) we gathered the first and last amino acid
-positions of all Pfam domains for canonical transcripts (VEP.101) from
+positions of all Pfam domains for MANE transcripts (VEP.111) from
 BioMart; ii) for each Pfam domain we mapped the first and last amino
 acid positions into genomic coordinates using TransVar --using GRCh38 as
 reference genome--; iii) we discarded Pfam domains failing to map either
