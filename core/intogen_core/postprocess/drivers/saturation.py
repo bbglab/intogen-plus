@@ -63,7 +63,7 @@ def cli(drivers):
 
     drivers_df = pd.read_csv(drivers, sep='\t', low_memory=False)
 
-    r_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'boostdm', 'saturation','cds-25spli.regions.gz')
+    r_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'boostdm', 'saturation','cds-5spli.regions.gz')
     regions_df = pd.read_csv(r_path, sep='\t', low_memory=False)
 
     vep_path = os.path.join(os.environ['INTOGEN_DATASETS'], 'vep', 'vep.tsv.gz')
