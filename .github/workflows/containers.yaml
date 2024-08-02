@@ -1,0 +1,118 @@
+name: Containers
+
+on:
+  push:
+    tags:
+      - "**"
+    branches:
+      - "**"
+    paths:
+      - "build/containers/**"
+
+jobs:
+  checks:
+    name: Run quality checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install requirements
+        run: |
+          sc_version="stable" # or "v0.4.7", or "latest"
+          hl_version="v2.12.0"
+          case $( uname -m ) in
+            arm64 | aarch64 )
+              sc_platform=aarch64
+              hl_platform=arm64
+              ;;
+            *)
+              sc_platform=$( uname -m )
+              hl_platform="${sc_platform}"
+              ;;
+          esac
+          
+          echo "Installing shellcheck ..."
+          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${sc_version?}/shellcheck-${sc_version?}.linux.${sc_platform}.tar.xz" \
+            | tar -xJv >/dev/null
+          sudo cp "shellcheck-${sc_version}/shellcheck" /usr/bin/
+          shellcheck --version
+
+          echo "Installing hadolint ..."
+          wget -q https://github.com/hadolint/hadolint/releases/download/${hl_version}/hadolint-Linux-${hl_platform}
+          sudo cp "hadolint-Linux-${hl_platform}" /usr/bin/hadolint
+          sudo chmod 755 /usr/bin/hadolint
+          hadolint --version
+
+      - name: Run quality checks
+        run: |
+          make -C build/containers checks
+
+  list:
+    name: List containers
+    runs-on: ubuntu-latest
+    env:
+      IS_TAG: ${{ startsWith(github.ref, 'refs/tags/') }}
+    outputs:
+      containers: ${{ steps.list-containers.outputs.containers }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - id: list-containers
+        name: Determine containers
+        run: |
+          if [ "${IS_TAG}" == "false" ]; then
+            echo "Listing only the containers with changes"
+            containers=$( build/containers/build.sh --changed-containers-as-json)
+          elif [ "${IS_TAG}" == "true" ]; then
+            echo "Listing all the containers"
+            containers=$( build/containers/build.sh --all-containers-as-json)
+          fi
+          echo "containers = ${containers}"
+          echo "containers=${containers}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      - checks
+      - list
+    strategy:
+      max-parallel: 8
+      fail-fast: true
+      matrix:
+        container: ${{ fromJSON(needs.list.outputs.containers) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: build/containers/build.sh --containers ${{ matrix.container }}
+
+  push:
+    name: Push
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+    needs:
+      - build
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        if: ${{ env.DOCKER_USERNAME != '' }}
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      
+      - name: Push Docker images
+        if: ${{ env.DOCKER_USERNAME != '' }}
+        run: |
+          build/containers/build.sh --dry-run --skip-build --push --all-containers
