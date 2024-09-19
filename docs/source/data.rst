@@ -50,11 +50,9 @@ Hartwig Medical Foundation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Somatic mutations of metastatic WGS from Hartwig Medical Foundation `https://www.hartwigmedicalfoundation.nl/en/database/ <https://www.hartwigmedicalfoundation.nl/en/database/>`__ were
-downloaded on 2021/10/21 through their platform. Datasets
-were split according to their primary site. Samples from unknown primary
-sites (i.e., None, Nan, Unknown, Cup, Na), double primary or aggregating
-into cohorts of fewer than 5 samples (i.e., Adrenal, Myeloid, Thymus and
-Eye) were not considered. A total of 25 different cohorts were created.
+downloaded on 2023/09/14 through their platform. Datasets
+were split according to their DOID identification and linked to an oncotree identification. Samples from unknown primary
+sites (i.e., None, Nan, Unknown, Cup, Na) or  double primary  were not considered. When a tumor type groups less than 20 samples, parental oncotree levels were considered up until grouping at least 20 samples per cohort. A total of 38 different cohorts were created. 
 
 ICGC
 ^^^^

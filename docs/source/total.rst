@@ -226,11 +226,11 @@ steps:
 
 7. When the Variant Effect Predictor (VEP) mapped one mutation into
       multiple transcripts associated with HUGO symbols, we selected the
-      canonical transcript of the first HUGO symbol in alphabetical
+      MANE transcript of the first HUGO symbol in alphabetical
       order.
 
-8. We also discarded mutations mapping into genes without canonical
-      transcript in VEP.92.
+8. We also discarded mutations mapping into genes without MANE
+      transcript in VEP.111.
 
 Methods for cancer driver gene identification
 ---------------------------------------------
@@ -270,8 +270,8 @@ CDS per gene, and iii) the regional variability of the background
 mutation rate; it incorporates information about 10 histone marks from
 69 cell lines obtained in ENCODE project [REF].
 
-We downloaded (release date 2018/10/12) and built a new reference
-database based on the list canonical transcripts defined by VEP.92
+We downloaded (release date 2023/02/24) and built a new reference
+database based on the list of MANE transcripts defined by VEP.111
 (GRCh38). We then used this reference database to run dNdScv on all
 datasets of somatic mutations using the default setting of the method.
 
@@ -307,7 +307,7 @@ signals, mutations are locally randomized using tri- or penta-nucleotide
 context probabilities calculated from the input cohort.
 
 For this analysis, OncodriveCLUSTL version 1.1.1 was run for the set of
-defined canonical transcripts bearing 2 or more SNVs mapping the
+defined MANE transcripts bearing 2 or more SNVs mapping the
 mutations file as follows: smoothing, clustering windows were kept as
 default (11bp). The different consecutive coding sequences contained on
 each transcript were concatenated to allow the algorithm to detect
@@ -408,7 +408,7 @@ the re-sampling.
 
 To create the database of genomic coordinates of Pfam domains we
 followed the next steps: i) we gathered the first and last amino acid
-positions of all Pfam domains for canonical transcripts (VEP.92) from
+positions of all Pfam domains for MANE transcripts (VEP.111) from
 BioMart; ii) for each Pfam domain we mapped the first and last amino
 acid positions into genomic coordinates using TransVar --using GRCh38 as
 reference genome--; iii) we discarded Pfam domains failing to map either

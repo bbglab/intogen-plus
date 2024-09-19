@@ -148,8 +148,8 @@ process FormatSignature {
 
 REGIONS_PREFIX = ['WXS': 'cds', 'WGS': 'wg']
 
-process Signature {
-	tag "Signatures ${cohort}"
+process ComputeProfile {
+	tag "ComputeProfile ${cohort}"
 	label "bgsignature"
 	publishDir "${STEPS_FOLDER}/signature", mode: "copy"
 
@@ -176,7 +176,7 @@ process Signature {
 
 }
 
-SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4 }
+SIGNATURES.into{ SIGNATURES1; SIGNATURES2; SIGNATURES3; SIGNATURES4; SIGNATURES5 }
 
 
 process FormatFML {
@@ -360,7 +360,7 @@ process VEP {
 		"""
 		vep -i ${input} -o STDOUT --assembly GRCh38 \
 			--no_stats --cache --offline --symbol \
-			--protein --tab --canonical \
+			--protein --tab --canonical --mane \
 			--dir ${params.datasets}/vep \
 			| grep -v ^## | gzip > ${output}
 		"""
@@ -486,8 +486,10 @@ process CBaSE {
 	script:
 		output = "${cohort}.cbase.tsv.gz"
 		"""
-		python /cbase/cbase.py ${input} ${params.datasets}/cbase 0
-		tail -n+2 q_values_output.txt | gzip > ${output}
+		mkdir -p Output/
+
+		python /cbase/cbase.py ${input} ${params.datasets}/cbase 0 output
+		tail -n+2 Output/q_values_output.txt | gzip > ${output}
 		"""
 }
 
@@ -519,7 +521,6 @@ process MutPanning {
 
     input:
         tuple val(cohort), path(mutations), path(samples) from VARIANTS_MUTPANNING
-        path regions from REGIONS
 
     output:
         tuple val(cohort), path("out/SignificanceFiltered/Significance${cohort}.txt") into OUT_MUTPANNING
@@ -561,7 +562,6 @@ process HotMAPS {
 
     input:
         tuple val(cohort), path(input), path(signatures) from VARIANTS_HOTMAPS.join(SIGNATURES4)
-        path regions from REGIONS
 
     output:
         tuple val(cohort), path("*.out.gz") into OUT_HOTMAPS
@@ -763,24 +763,25 @@ process DriverSummary {
 		"""
 }
 
-/*
-process Mutrate {
-	tag "Mutrate ${cohort}"
+
+process ParseProfile {
+	tag "Parsing profile ${cohort}"
 	publishDir "${STEPS_FOLDER}/boostDM/mutrate", mode: "copy"
+	label "core"
 
     input:
-        tuple val(cohort), path(annotmuts) from OUT_DNDSCV_ANNOTMUTS
+        tuple val(cohort), path(signature) from SIGNATURES5
 
     output:
 		tuple val(cohort), path("*.mutrate.json") into OUT_MUTRATE
 
 	script:
 		"""
-		/bin/bash /mutrate/run.sh ${annotmuts} exome ./
+		parse-profile -i ${signature} -o ${cohort}
 		"""
 
 }
-*/
+
 
 process DriverSaturation {
 	tag "Driver saturation"

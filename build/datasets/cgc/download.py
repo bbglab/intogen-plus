@@ -9,7 +9,7 @@ from homura import download
 
 
 # Currently version v87
-CGC_URL = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v95/cancer_gene_census.csv"
+CGC_URL = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v99/cancer_gene_census.csv"
 COSMIC_KEY = os.getenv("COSMIC_KEY", None)
 
 

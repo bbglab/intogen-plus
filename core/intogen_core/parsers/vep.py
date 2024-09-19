@@ -11,21 +11,20 @@ from intogen_core.utils import out_open
 
 
 VALID_CONSEQUENCES = {
-        "transcript_ablation", "splice_donor_variant", "splice_acceptor_variant", "stop_gained", "frameshift_variant",
-        "stop_lost", "initiator_codon_variant", "transcript_amplification", "inframe_insertion", "inframe_deletion",
-        "missense_variant", "splice_region_variant", "incomplete_terminal_codon_variant", "stop_retained_variant",
+        "transcript_ablation", "splice_donor_variant", 
+        "splice_acceptor_variant", "stop_gained",
+        "frameshift_variant", "stop_lost", "start_lost",
+        "initiator_codon_variant", "transcript_amplification",
+        "feature_elongation", "feature_truncation",
+        "inframe_insertion", "inframe_deletion",
+        "protein_altering_variant",
+        "missense_variant",
+        "splice_donor_5th_base_variant",
+        "splice_region_variant", "incomplete_terminal_codon_variant",
+        "start_retained_variant", "stop_retained_variant",
         "synonymous_variant", "coding_sequence_variant"
     }
 
-
-TRANSCRIPTS = set()
-GENES = set()
-
-transcripts_file = os.path.join(os.environ['INTOGEN_DATASETS'], 'regions', 'ensembl_canonical_transcripts.tsv')
-with open(transcripts_file) as fd:
-    for r in csv.reader(fd, delimiter='\t'):
-        TRANSCRIPTS.add(r[1])
-        GENES.add(r[0])
 
 
 def valid_consequence(consequences):
@@ -47,10 +46,8 @@ def filter_(file, stats):
             counts['skip_consequence'] += 1
             continue
 
-        if v['Feature'] not in TRANSCRIPTS:
-            if v['Gene'] in GENES:
-                # Selected gene without matching transcript id
-                genes_skipped.add(v['Gene'])
+        if v['MANE_SELECT'] == '-':
+            genes_skipped.add(v['Gene'])
             continue
         genes_processed.add(v['Gene'])
 

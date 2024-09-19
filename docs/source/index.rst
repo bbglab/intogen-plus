@@ -18,11 +18,3 @@ Welcome to IntOGen's documentation
    boostdm_connection
    mutational_features
    usage
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

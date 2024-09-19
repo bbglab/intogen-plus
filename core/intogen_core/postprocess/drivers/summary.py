@@ -27,9 +27,7 @@ def run(mutations, cohorts, files, vet_files):
     for file, vet in zip(files, vet_files):
         df = pd.read_csv(file, sep="\t")
         df_vet = pd.read_csv(vet, sep="\t")
-        if (df.empty or df_vet.empty) == False:                        
-            cohort = df["COHORT"].iloc[0]
-            df_vet["COHORT"] = cohort
+        df_vet["COHORT"] = '' if df_vet.empty else vet.split('.')[0] # get cohort name from filename
 
         l.append(df)
         lv.append(df_vet)

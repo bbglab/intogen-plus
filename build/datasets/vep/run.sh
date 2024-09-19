@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -xe
 
 CDS=$1
 VEP_CONTAINER=$2
@@ -31,17 +31,17 @@ do
 	name=${f##*.}
 	singularity exec ${VEP_CONTAINER} vep -i ${f} \
 		-o ${tmpdir}/split_${name}.vep.out --assembly GRCh38 \
-		--no_stats --cache --offline --symbol \
-		--protein --tab --canonical --numbers \
+		--no_stats --cache --offline --symbol --fork 4 \
+		--protein --tab --canonical --mane --numbers \
 		--no_headers \
 		--dir ${VEP_CACHE_DIR} &
 done
 
 wait
 
-# Get only canonical transcripts and most severe consequence types
+# Get only MANE transcripts and most severe consequence types
 cat ${tmpdir}/split_*vep.out |\
-	grep -w YES |\
+	grep "NM_" |\
 	awk -F'[\t_/]' '{print($1"\t"$2"\t"$3"\t"$4"\t"$0)}' |\
 	cut -f-4,8- |\
 	bgzip > ${OUT}

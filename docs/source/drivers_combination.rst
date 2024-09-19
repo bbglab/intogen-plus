@@ -35,7 +35,7 @@ Our approach works independently for each cohort: to create a consensus
 list of driver genes for each cohort, we first determine how credible
 each DIM is when applied to this specific cohort, based on how
 many bona-fide cancer genes reported in the COSMIC Cancer Gene Census
-database (`CGC v95 <https://cancer.sanger.ac.uk/census>`__) are highly ranked according to the DIM. Once a
+database (`CGC v99 <https://cancer.sanger.ac.uk/census>`__) are highly ranked according to the DIM. Once a
 credibility score has been established, we use a weighted method for combining
 the p-values that each DIM gives for each candidate gene: this
 combination takes the DIMs credibility into account. Based on the
@@ -120,7 +120,8 @@ cohort that the gene harbours positive selection.
 
 Combination benchmark
 ^^^^^^^^^^^^^^^^^^^^^
-.. warning:: This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2>`__
+.. important:: 
+   This benchmark was performed on `IntOGen Plus v2020 <https://intogen.readthedocs.io/en/v2020>`__ .
 
 
 We have assessed the performance of the combination compared to i) each
@@ -272,6 +273,7 @@ for 29/32 (90%) TCGA cohorts (see Figure below panel D).
 |image2|
 
 
+.. rubric:: Footnotes
 
 
 .. [1] Fisher R.A. (1948) figure to question 14 on combining independent tests of significance. Am. Statistician , 2, 30–31.
