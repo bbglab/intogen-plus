@@ -1,12 +1,13 @@
 # IntOGen #
 
-> :warning: Please note that IntOGen needs a lot of resources. We strongly suggest to run it in a cluster environment!
+> [!CAUTION]
+> Please note that IntOGen needs a lot of resources. We strongly suggest to run it in a cluster environment!
 
 ### Install requirements
 
 1. Install [singularity](https://sylabs.io/singularity/) (the pipeline has been tested 
 with version 2.x)
-2. Install nextflow  (You can use `conda install nextflow`)
+2. Install nextflow  (You can use `conda install nextflow==22.10.6`)
 3. Clone this repository
 
 ### Download and build prerequisites
@@ -14,14 +15,14 @@ with version 2.x)
 The IntOGen pipeline requires a collection of datasets and
 Singularity containers in order to run.
 
-> :warning: The pipeline has been tested with **hg38** and **vep92** and **vep101**
+> [!WARNING]
+> The pipeline has been tested with **hg38** and **vep111**
 
 See the README.rst file in the ``build`` folder for further details.
 
 Then you can build all the datasets from the original sources. 
 Note that this process can take a very long time and it might fail if the 
 original sources had changed.
-
 
 
 ### Run the pipeline
@@ -35,7 +36,7 @@ In order to execute the pipeline, you only need to execute:
 nextflow run intogen.nf -resume -profile local --input test/ --output ./output
 ```
 
-For further details, please check our documentation: http://intogen.rtfd.io/
+For further details, please check our documentation: http://intogen-plus.rtfd.io/
 
 [comment]: <> (FIXME add example in test)
 
