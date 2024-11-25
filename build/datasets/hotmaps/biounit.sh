@@ -6,7 +6,7 @@ DST=$2
 
 tmpdir=`mktemp -d`
 
-rsync -rptz --copy-links --port=33444 ftp.rcsb.org::ftp_data/biounit/coordinates/all/*.pdb1.gz ${tmpdir}/
+rsync -rptz --copy-links --port=33444 rsync.wwpdb.org::ftp_data/biounit/coordinates/all/*.pdb1.gz ${tmpdir}/
 
 for it in `zcat ${INFO} | cut -f 1 | sort |uniq`
 do
