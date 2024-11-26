@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: python:3
+From: python:3.12-slim
 
 %environment
     export LC_ALL=C.UTF-8
