@@ -1,7 +1,8 @@
 Bootstrap: docker
-From: python:3.9
+From: python:3.9-slim
 
 %environment
+    export DEBIAN_FRONTEND=noninteractive
 
 %runscript
 
@@ -9,7 +10,9 @@ From: python:3.9
 	cp -r ../../../combination ${SINGULARITY_ROOTFS}/combination/
 
 %post
-
+    apt-get update && \
+    apt-get install -y --no-install-recommends --no-install-suggests build-essential=12.9 && \
+    
 	pip install /combination
 
     # Clean unused things

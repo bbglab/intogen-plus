@@ -3,6 +3,7 @@ From: python:3.12-slim
 
 %environment
     export LC_ALL=C.UTF-8
+    export DEBIAN_FRONTEND=noninteractive
 
 %runscript
 
@@ -13,8 +14,13 @@ From: python:3.12-slim
     chmod -R a+rx ${SINGULARITY_ROOTFS}/core/
 
 %post
+    apt-get update && \
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        build-essential=12.9 \
+        zlib1g-dev=1:1.2.13.dfsg-1 && \
+    
 	# Install openVariant
-    pip install open-variant
+    pip install open-variant==1.0.0
     
     # Install intogen-core package
 	pip install /core
