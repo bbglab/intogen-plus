@@ -11,7 +11,7 @@ From: python:3.9-slim
 
 %post
     apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests build-essential=12.9 && \
+    apt-get install -y --no-install-recommends --no-install-suggests build-essential=12.9 procps
     
 	pip install /combination
 
