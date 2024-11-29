@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: python:3.12-slim
+From: python:3.12
 
 %environment
     export LC_ALL=C.UTF-8
@@ -14,13 +14,9 @@ From: python:3.12-slim
     chmod -R a+rx ${SINGULARITY_ROOTFS}/core/
 
 %post
-    apt-get update && \
-    apt-get install -y --no-install-recommends --no-install-suggests \
-        build-essential=12.9 \
-        zlib1g-dev=1:1.2.13.dfsg-1 \
-        procps
-    
 	# Install openVariant
+    pip install setuptools
+
     pip install open-variant==1.0.0
     
     # Install intogen-core package
