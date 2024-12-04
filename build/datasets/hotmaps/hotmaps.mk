@@ -8,11 +8,12 @@ $(hotmaps_dir): | $(INTOGEN_DATASETS)
 # TODO use this file in the code if possible
 HOTMAPS_PDB_INFO = $(hotmaps_dir)/pdb_info.txt.gz
 $(HOTMAPS_PDB_INFO): | $(hotmaps_dir)
-	wget http://karchinlab.org/data/HotMAPS/pdb_info.txt.gz -O $@
+
+	wget 'https://www.dropbox.com/scl/fi/0lklxk9h8fkzzwrz9ge1x/pdb_info.txt.gz?rlkey=uadoiylkv1pcuaed267q751eu&st=n1ds6yhq&dl=1' -O $@
 
 HOTMAPS_DB = $(hotmaps_dir)/mupit_database.db
 $(HOTMAPS_DB): $(HOTMAPS_DB_DUMP) ${hotpmaps_datasets_srcdir}/mysql2sqlite | $(hotmaps_dir)
-	wget http://karchinlab.org/data/HotMAPS/mupit_modbase.sql.gz -O $@.mysql.gz
+	wget 'https://www.dropbox.com/scl/fi/2fvqta3mcpy0jjs8ta3fc/mupit_modbase.sql.gz?rlkey=z2ud0kaqyr1p23kryuxv9o168&st=21vhlb4f&dl=1' -O $@.mysql.gz
 	gunzip -c $@.mysql.gz > $@.mysql
 	${hotpmaps_datasets_srcdir}/mysql2sqlite $@.mysql | sqlite3 $@
 	rm $@.mysql.gz
