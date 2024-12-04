@@ -33,7 +33,7 @@ do
 		-o ${tmpdir}/split_${name}.vep.out --assembly GRCh38 \
 		--no_stats --cache --offline --symbol --fork 4 \
 		--protein --tab --canonical --mane --numbers \
-		--no_headers \
+		--no_headers --plugin NMD \
 		--dir ${VEP_CACHE_DIR} &
 done
 

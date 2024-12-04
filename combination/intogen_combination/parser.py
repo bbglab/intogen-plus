@@ -69,7 +69,10 @@ def parse(number_top: int = 40, strict: bool = True, **files: Any) -> tuple:
             if df.shape[0] > 0:
                 # Use Ensembl ID if no gene-name where applicable
                 if df[c_gene].isna().any() and c_ensid:
-                        df[c_gene] = df[c_gene].fillna(df[c_ensid])
+                    df["tmp_ensid"] = df[c_ensid].str.split(":").str[0]
+                    df[c_gene] = df[c_gene].fillna(df["tmp_ensid"])
+                    df = df.drop(columns=["tmp_ensid"])
+
 
                 assert not df[c_gene].isna().any()
 

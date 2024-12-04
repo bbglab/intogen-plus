@@ -21,7 +21,7 @@ $(SOMATIC_PON): ${others_data_srcdir}/somatic_pon_counts.py | $(others_dir)
 OLFACTORY_RECEPTORS = $(others_dir)/olfactory_receptors.tsv
 
 $(OLFACTORY_RECEPTORS): | $(others_dir)
-	wget https://genome.weizmann.ac.il/horde/download/genes.csv \
+	wget https://genome.weizmann.ac.il/horde/app/webroot/index.php/download/genes.csv \
 		-O $(OLFACTORY_RECEPTORS)
 
 
