@@ -11,7 +11,7 @@ VEP_CACHE = $(vep_dir)/.vep${ensembl}_cache
 $(VEP_CACHE): $$(VEP_CONTAINER) $$(GENOME) | $(vep_dir)
 	@echo Building VEP datasets
 	singularity exec -B $(vep_dir):/opt/vep/.vep $(VEP_CONTAINER) \
-		perl /opt/vep/src/ensembl-vep/INSTALL.pl -a cf -s homo_sapiens -y ${grch} --c /opt/vep/.vep --CONVERT
+		perl /opt/vep/src/ensembl-vep/INSTALL.pl -a cf -s homo_sapiens -y ${grch} --c /opt/vep/.vep --CONVERT -g NMD
 	touch $@
 
 
