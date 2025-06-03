@@ -4,8 +4,7 @@ INPUT = Channel.fromPath(params.input.tokenize())
 OUTPUT = file(params.output)
 STEPS_FOLDER = file(params.stepsFolder)
 ANNOTATIONS = Channel.value(params.annotations)
-REGIONS = Channel.value("${params.datasets}/regions/cds.regions.gz")
-
+REGIONS = Channel.value(params.regions)
 
 
 process ParseInput {
@@ -155,24 +154,19 @@ process Signature {
 
 	input:
 		tuple val(cohort), path(input), val(platform) from VARIANTS_SIG.join(PLATFORMS2)
+		path regions from REGIONS
 
 	output:
 		tuple val(cohort), path(output) into SIGNATURES
 
 	script:
-		prefix = REGIONS_PREFIX[platform]
 		output = "${cohort}.sig.json"
-		if (prefix)
-			"""
-			bgsignature normalize -m ${input} \
-				-r ${params.datasets}/regions/${prefix}.regions.gz \
-				--normalize ${params.datasets}/signature/${prefix}.counts.gz \
-				-s 3 -g hg38 --collapse \
-				--cores ${task.cpus} \
-				-o ${output}
-			"""
-		else
-			error "Invalid prefix. Check platform: $platform"
+		"""
+		bgsignature panels -m ${input} \
+			-r ${regions} \
+			-g hg38 \
+			-o ${output}
+		"""
 
 }
 
@@ -215,8 +209,8 @@ process OncodriveFML {
 		debugOpt =  (params.debug)? '--debug': ''
 		"""
 		oncodrivefml -i ${input} -e ${regions} --signature ${signature} \
-			-c /oncodrivefml/oncodrivefml_v2.conf  --cores ${task.cpus} \
-			-o out ${seedOpt} ${debugOpt}
+			-c /oncodrivefml/oncodrivefml_panels.conf  --cores ${task.cpus} \
+			--sequencing targeted -o out ${seedOpt} ${debugOpt}
 		"""
 }
 
@@ -270,7 +264,7 @@ process OncodriveCLUSTL {
 			oncodriveclustl -i ${input} -r ${regions} \
 				-g hg38 -sim region_restricted -n 1000 -kmer 3 \
 				-sig ${signature} --concatenate \
-				-c ${task.cpus} \
+				-c ${task.cpus} --signature-group SAMPLE \
 				-o ${cohort} ${seedOpt} ${debugOpt}
 			"""
 }

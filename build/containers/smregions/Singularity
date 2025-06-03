@@ -15,4 +15,6 @@ From: python:3
 %post
 
     # Install SMRegions
-    pip --no-cache-dir install https://bitbucket.org/bbglab/smregions/get/master.tar.gz
+    pip --no-cache-dir install git+https://bitbucket.org/bbglab/smregions.git@6f1da91bbd5d8d7a99deee20c660494fb69f764b
+
+    

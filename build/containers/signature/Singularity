@@ -2,4 +2,4 @@ Bootstrap: docker
 From: python:3
 
 %post
-	pip install bgsignature
+	pip install git+https://bitbucket.org/bgframework/bgsignaturepanels.git@57c498ea126918c2290c2f7d5e060ddadec987ac
