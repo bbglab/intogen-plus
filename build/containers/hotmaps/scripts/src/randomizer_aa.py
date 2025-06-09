@@ -93,6 +93,7 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
     missense mutations in accordance with the signature
 
     :param items: tuple, the first element is the geneid and the second element are the regions
+    :param sample_list: list of lists, each list contains the samples for each tumor
     :param cancer_type: str or None, name of the tumor
     :param simulations: int, number of simulations to do
     :param cores: int, number of cores to use

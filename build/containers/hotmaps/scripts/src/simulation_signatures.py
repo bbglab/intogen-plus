@@ -69,6 +69,8 @@ def generate_null_dist_sig(samples, struct_id,coordinates,model_info, chain_info
 
     Parameters
     ----------
+    samples : list
+        list of samples to use for the simulation
     coordinates: list of dictionaries of the coordinates of the query protein
     model_info : list
         list of all possible models in the structure
