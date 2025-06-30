@@ -37,7 +37,9 @@ class Parser:
 
         # Use ensembl ID if no gene-name where applicable
         if df[self.gene_id].isna().any() and self.ensid:
-            df[self.gene_id] = df[self.gene_id].fillna(df[self.ensid])
+            df["tmp_ensid"] = df[self.ensid].str.split(":").str[0]
+            df[self.gene_id] = df[self.gene_id].fillna(df["tmp_ensid"])
+            df = df.drop(columns=["tmp_ensid"])
 
         assert not df[self.gene_id].isna().any()
         
