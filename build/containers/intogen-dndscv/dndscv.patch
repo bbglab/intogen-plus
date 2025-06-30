@@ -1,0 +1,168 @@
+diff --git a/INSTRUCTIONS.loris b/INSTRUCTIONS.loris
+new file mode 100644
+index 0000000..2a1258d
+--- /dev/null
++++ b/INSTRUCTIONS.loris
+@@ -0,0 +1,32 @@
++# Create a dndscv package
++rm dndscv.tar.gz
++tar cvzf dndscv.tar.gz dndscv/
++R CMD INSTALL dndscv.tar.gz
++
++
++# How to run
++$  source activate dndscv
++$  export INTOGEN_DATASETS="/workspace/projects/intogen_2017/pipeline/datasets/hg38_vep92_develop/"
++
++$  R
++
++>>> library("dndscv")
++>>> muts = read.table(gzfile("/workspace/projects/intogen_2017/runs/20190220/work/2d/9b30aa1d8a871b00fc11169696744a/dndscv/TARGET_WGS_WT_US.in.gz"), sep = '\t', header = TRUE)
++>>> dndscv(muts, refdb=file.path(Sys.getenv("INTOGEN_DATASETS"), "dndscv", "RefCDS.rda"))
++
++
++
++writeOutput = 0
++tryCatch({
++    result <- dndscv(muts, refdb=file.path(Sys.getenv("INTOGEN_DATASETS"), "dndscv", "RefCDS.rda"))
++    writeOutput <- 1
++}, error=function(e) {
++    message('dndsCV raised an error')
++    writeOutput <- 2
++})
++
++
++
++write.table(result$sel_cv, gzfile(args[2]), quote=FALSE, sep='\t', row.names = FALSE)
++write.table(result$annotmuts, gzfile(args[3]), sep = "\t", quote = FALSE, row.names = FALSE)
++write.table(result$genemuts, gzfile(args[4]), sep = "\t", quote = FALSE, row.names = FALSE)
+diff --git a/R/dndscv.R b/R/dndscv.R
+index 8c86403..fe3cdb7 100755
+--- a/R/dndscv.R
++++ b/R/dndscv.R
+@@ -399,6 +399,10 @@ dndscv = function(mutations, gene_list = NULL, refdb = "hg19", sm = "192r_3w", k
+     if (outp > 2) {
+         
+         message("[5] Running dNdScv...")
++
++        if (sum(genemuts$n_syn) < 5) {
++            stop('Less then 5 synonymous mutations')
++        }
+     
+         # Covariates
+         if (is.null(cv)) {
+@@ -412,17 +416,26 @@ dndscv = function(mutations, gene_list = NULL, refdb = "hg19", sm = "192r_3w", k
+                 covs = covs[,1:maxcovs]
+             }
+             nbrdf = cbind(genemuts[,c("n_syn","exp_syn")], covs)
+-            
++
+             # Negative binomial regression for substitutions
+             if (nrow(genemuts)<500) { # If there are <500 genes, we run the regression without covariates
+                 model = MASS::glm.nb(n_syn ~ offset(log(exp_syn)) - 1 , data = nbrdf)
+             } else {
+                 model = tryCatch({
++                    message('--normal')
+                     MASS::glm.nb(n_syn ~ offset(log(exp_syn)) + . , data = nbrdf) # We try running the model with covariates
+                 }, warning = function(w){
++                    message('--warning')
+                     MASS::glm.nb(n_syn ~ offset(log(exp_syn)) - 1 , data = nbrdf) # If there are warnings or errors we run the model without covariates
+                 }, error = function(e){
++                    message('--error')
+                     MASS::glm.nb(n_syn ~ offset(log(exp_syn)) - 1 , data = nbrdf) # If there are warnings or errors we run the model without covariates
++
++                    # tryCatch({
++                    #     MASS::glm.nb(n_syn ~ offset(log(exp_syn)) - 1 , data = nbrdf) # If there are warnings or errors we run the model without covariates
++                    # }, error = function(e){
++                    #     stop('MASS::gml.nb ERROR')
++                    # })
+                 })
+             }
+             message(sprintf("    Regression model for substitutions (theta = %0.3g).", model$theta))
+diff --git a/run_dndscv.R b/run_dndscv.R
+new file mode 100644
+index 0000000..94c61c7
+--- /dev/null
++++ b/run_dndscv.R
+@@ -0,0 +1,81 @@
++
++library("dndscv")
++
++muts = read.table(gzfile('/workspace/projects/intogen_2017/runs/20190124/dndscv/CBIOP_WXS_MDS_TOKYO_2011.in.gz'), sep = '\t', header = TRUE)
++
++writeOutput = 0
++result = tryCatch({
++    dndscv(muts, refdb="/workspace/projects/intogen_2017/pipeline/datasets/hg38_vep92_develop/dndscv/RefCDS.rda")
++    writeOutput = 1
++}, error=function(e) {
++    message('There was an error')
++    writeOutput = 2
++})
++
++if (writeOutput == 1) {
++    write.table(result$sel_cv, 'file1.txt', quote=FALSE, sep='\t', row.names = FALSE)
++    write.table(result$annotmuts, 'file2.txt', sep = "\t", quote = FALSE, row.names = FALSE)
++    write.table(result$genemuts, 'file3.txt', sep = "\t", quote = FALSE, row.names = FALSE)
++} else {
++    df = data.frame(
++        gene_name=character(),
++        n_syn=character(),
++        n_mis=character(),
++        n_non=character(),
++        n_spl=character(),
++        n_ind=character(),
++        wmis_cv=character(),
++        wnon_cv=character(),
++        wspl_cv=character(),
++        wind_cv=character(),
++        pmis_cv=character(),
++        ptrunc_cv=character(),
++        pallsubs_cv=character(),
++        pind_cv=character(),
++        qmis_cv=character(),
++        qtrunc_cv=character(),
++        qallsubs_cv=character(),
++        pglobal_cv=character(),
++        qglobal_cv=character(),
++	stringsAsFactors=FALSE
++    )
++    write.table(df, 'file1.txt', sep = "\t", quote = FALSE, row.names = FALSE)
++
++    df = data.frame(
++        sampleID=character(),
++        chr=character(),
++        pos=character(),
++        ref=character(),
++        mut=character(),
++        gene=character(),
++        strand=character(),
++        ref_cod=character(),
++        mut_cod=character(),
++        ref3_cod=character(),
++        mut3_cod=character(),
++        aachange=character(),
++        ntchange=character(),
++        codonsub=character(),
++        impact=character(),
++        pid=character(),
++	stringsAsFactors=FALSE
++    )
++    write.table(df, 'file2.txt', sep = "\t", quote = FALSE, row.names = FALSE)
++
++    df = data.frame(
++        gene_name=character(),
++        n_syn=character(),
++        n_mis=character(),
++        n_non=character(),
++        n_spl=character(),
++        exp_syn=character(),
++        exp_mis=character(),
++        exp_non=character(),
++        exp_spl=character(),
++        exp_syn_cv=character(),
++	stringsAsFactors=FALSE
++    )
++    write.table(df, 'file3.txt', sep = "\t", quote = FALSE, row.names = FALSE)
++}
++
++
