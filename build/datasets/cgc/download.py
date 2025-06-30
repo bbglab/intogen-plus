@@ -1,6 +1,9 @@
 # Import modules
+import gzip
 import os
+import shutil
 import sys
+import tarfile
 
 import bglogs
 import click
@@ -9,7 +12,8 @@ from homura import download
 
 
 # Currently version v87
-CGC_URL = "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh37/cosmic/v99/cancer_gene_census.csv"
+CGC_URL = "https://cancer.sanger.ac.uk/api/mono/products/v1/downloads/scripted?path=grch38/cosmic/v99/Cosmic_CancerGeneCensus_Tsv_v99_GRCh38.tar&bucket=downloads"
+TARGET_MEMBER = "Cosmic_CancerGeneCensus_v99_GRCh38.tsv.gz"
 COSMIC_KEY = os.getenv("COSMIC_KEY", None)
 
 
@@ -35,7 +39,15 @@ def cmdline(download_folder, debug=False):
     if os.path.exists(output_file):
         os.unlink(output_file)
 
-    download(url, path=output_file)
+    tar_path = f"{output_file}.tar"
+    download(url, path=tar_path)
+
+    # Extract and decompress
+    with tarfile.open(tar_path, "r") as tar:
+        with tar.extractfile(TARGET_MEMBER) as compressed_file:
+            with gzip.open(compressed_file, "rt") as uncompressed:
+                with open(output_file, "w") as out_file:
+                    shutil.copyfileobj(uncompressed, out_file)
 
 
 if __name__ == "__main__":

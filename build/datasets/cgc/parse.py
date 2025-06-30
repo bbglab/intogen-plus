@@ -6,6 +6,10 @@ import bglogs
 import click
 import pandas as pd
 
+CGC_COLS = ["Gene Symbol", "Name", "COSMIC_GENE_ID", "CHROMOSOME", "GENOME_START", "GENOME_STOP",
+            "Chr Band", "Somatic", "Germline", "Tumour Types(Somatic)", "Tumour Types(Germline)", "Cancer Syndrome",
+            "Tissue Type", "Molecular Genetics", "Role in Cancer", "Mutation Types", "Translocation Partner",
+            "Other Germline Mut", "Other Syndrome", "Tier", "Synonyms"]
 
 def load_data(path_cgc, dict_mapping_cgc, dict_mapping_cgc_intogen):
     """
@@ -16,7 +20,7 @@ def load_data(path_cgc, dict_mapping_cgc, dict_mapping_cgc_intogen):
     :return:
     """
     # Read data
-    cgc_dataset = pd.read_csv(path_cgc, sep=',', header=0,encoding='latin-1')
+    cgc_dataset = pd.read_csv(path_cgc, names=CGC_COLS, sep='\t', header=0, encoding='latin-1')
     mapping = json.load(open(dict_mapping_cgc, "rb"))
     mapping_cgc_intogen = json.load(open(dict_mapping_cgc_intogen, 'rb'))
     return cgc_dataset, mapping, mapping_cgc_intogen
