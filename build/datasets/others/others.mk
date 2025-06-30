@@ -6,7 +6,7 @@ $(others_dir): | $(INTOGEN_DATASETS)
 	mkdir $@
 
 
-somatic_pon_url = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/dna_pipeline/v5_31/38/variants/SageGermlinePon.98x.38.tsv.gz"
+somatic_pon_url = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/pipeline/oncoanalyser/2.0/38/hmf_pipeline_resources.38_v2.0.0--3.tar.gz"
 SOMATIC_PON = $(others_dir)/somatic_pon_count_filtered.tsv.gz
 $(SOMATIC_PON): ${others_data_srcdir}/somatic_pon_counts.py | $(others_dir)
 	@echo Getting somatic panel of normal counts
