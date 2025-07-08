@@ -1,19 +1,33 @@
 Bootstrap: docker
-From: alpine:3.8
+From: ghcr.io/astral-sh/uv:0.7.19-python3.10-bookworm
 
 %environment
-    export LC_ALL=C.UTF-8
-    
+    export UV_COMPILE_BYTECODE=1
+
+%setup
+    # Stage necessary files
+    mkdir -p ${SINGULARITY_ROOTFS}/hotmaps
+    cp -r uv.lock ${SINGULARITY_ROOTFS}/hotmaps/uv.lock
+    cp -r pyproject.toml ${SINGULARITY_ROOTFS}/hotmaps/pyproject.toml
+    cp -r hotmaps.sh ${SINGULARITY_ROOTFS}/hotmaps/hotmaps.sh
+    cp -r scripts/ ${SINGULARITY_ROOTFS}/hotmaps/scripts/
+    cp README.md ${SINGULARITY_ROOTFS}/hotmaps/
+    cp MANIFEST.in ${SINGULARITY_ROOTFS}/hotmaps/
+
+%post
+    # Install dependencies and build
+    mkdir -p /root/.cache/uv
+    cd /hotmaps
+    uv sync --frozen --no-dev
+
+%environment
+    PATH="/hotmaps/.venv/bin:$PATH"
+
 %runscript
     exec "/bin/sh" "/hotmaps/hotmaps.sh" "$@"
 
-%setup
-    mkdir ${SINGULARITY_ROOTFS}/hotmaps
-    cp -r scripts ${SINGULARITY_ROOTFS}/hotmaps/
-    cp hotmaps.sh ${SINGULARITY_ROOTFS}/hotmaps/
-    chmod -R a+r,a+x ${SINGULARITY_ROOTFS}/hotmaps/
-
-%post
-    apk add --no-cache python-dev py-pip py-curl zlib-dev make ncurses-dev g++ bash procps
-    pip --no-cache-dir install numpy==1.16.5 
-    pip --no-cache-dir install pandas==0.24.2 tqdm futures bgreference biopython==1.76 pyliftover
+%labels
+    Author "BBGLab <bbglab@irbarcelona.org>"
+    Maintainer "Federica Brando <federica.brandoe@irbbarcelona.org>"
+    Version "1.0.0"
+    Description "HotMAPS panel for IntOGen"

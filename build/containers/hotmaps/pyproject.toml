@@ -1,0 +1,37 @@
+[project]
+name = "intogen-hotmaps-2016"
+version = "1.0.0"
+description = "HotMAPS tool for Intogen Plus"
+authors = [
+    { name = "Tokheim C."},
+    { name = "Bhattacharya R."},
+    { name = "Niknafs N"},
+    { name = "Gygax DM" }, 
+    { name = "Kim R."},
+    { name = "Ryan M"},
+    { name = "Masica DL"},
+    { name = "Karchin R."},
+]
+readme = {file = "README.md"}
+license = "Apache-2.0"
+classifiers = ["Private :: Do Not Upload"]
+
+
+requires-python = ">=3.8"
+dependencies = [
+    "bgreference>=0.7",
+    "biopython>=1.79",
+    "numpy==1.21.6",
+    "pandas==1.3.5",
+    "pyliftover>=0.4.1",
+    "scipy>=1.10.1",
+    "tqdm>=4.67.1",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling", "cython==0.29.36"]
+build-backend = "hatchling.build"
+

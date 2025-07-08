@@ -32,7 +32,7 @@ cp ${INPUT_FILE} ${TEMP_FOLDER}/${input_filename}
 ## STEP1. Map to Structure (output: non_filtered_mupit.INPUT_FILENAME)
 if [ ! -f "$TEMP_FOLDER/non_filtered_mupit.${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/map_maf_to_structure.py \
+    python3 $SCRIPTS_FOLDER/map_maf_to_structure.py \
         --data-dir ${TEMP_FOLDER} \
         --match-regex ${input_filename} \
         --output-dir $TEMP_FOLDER \
@@ -43,7 +43,7 @@ fi
 ## STEP2. Convert MAF to MUPIT (output: coverage_info.txt, INPUT_FILENAME.mupit )
 if [ ! -f "$TEMP_FOLDER/${input_filename}.mupit" ]
 then
-    python $SCRIPTS_FOLDER/convert_maf_to_mupit.py \
+    python3 $SCRIPTS_FOLDER/convert_maf_to_mupit.py \
         --maf ${TEMP_FOLDER}/${input_filename} \
         --tumor-type ${name} \
         --no-stratify \
@@ -57,7 +57,7 @@ fi
 ## STEP3. Filter hypermutated (output: mupit.INPUT_FILENAME)
 if [ ! -f "$TEMP_FOLDER/mupit.${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/filter_hypermutated.py \
+    python3 $SCRIPTS_FOLDER/filter_hypermutated.py \
         --raw-dir $TEMP_FOLDER \
         --match-regex ${input_filename} \
         --mut-threshold $HYPERMUT \
@@ -69,7 +69,7 @@ fi
 ## STEP4. Count mutations (input: mupit.* output: collected.INPUT_FILENAME)
 if [ ! -f "$TEMP_FOLDER/collected.${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/count_mutations.py \
+    python3 $SCRIPTS_FOLDER/count_mutations.py \
         --data-dir $TEMP_FOLDER
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
@@ -77,7 +77,7 @@ fi
 ## STEP5. Format mutations table (input: collected.* output: mutation_tcga.INPUT_FILENAME.txt)
 if [ ! -f "$TEMP_FOLDER/mutation_tcga.${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/format_mutations_table.py \
+    python3 $SCRIPTS_FOLDER/format_mutations_table.py \
     	--data-dir $TEMP_FOLDER
     rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 fi
@@ -85,9 +85,9 @@ fi
 ## STEP7. Run HotMAPS (input: mutation_tcga.NAME.txt output:hotspot_INPUT_FILENAME)
 if [ ! -f "$TEMP_FOLDER/hotspot_${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/hotspot.py \
+    python3 $SCRIPTS_FOLDER/hotspot.py \
         --log-level=INFO \
-        -m $TEMP_FOLDER/mutation_tcga.${name}.txt \
+        -m $TEMP_FOLDER/mutation_tcga.${name}.maf \
         -a ${DATA_FOLDER}/fully_described_pdb_info.txt \
         -t EVERY -n 10000 -r 10.0 -c $CORES \
         -o $TEMP_FOLDER/hotspot_${input_filename} \
@@ -103,7 +103,7 @@ fi
 ## STEP8. Multiple test
 if [ ! -f "$TEMP_FOLDER/mtco_${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/multiple_testing_correction.py \
+    python3 $SCRIPTS_FOLDER/multiple_testing_correction.py \
         -i $TEMP_FOLDER/hotspot_${input_filename} \
         -f min -q 0.05 \
         -m $TEMP_FOLDER/${input_filename}.mupit \
@@ -115,7 +115,7 @@ fi
 ## STEP9. Find Hotspots regions gene
 if [ ! -f "$TEMP_FOLDER/hotspot_gene_${input_filename}" ]
 then
-    python $SCRIPTS_FOLDER/find_hotspot_regions_gene.py \
+    python3 $SCRIPTS_FOLDER/find_hotspot_regions_gene.py \
         -m $TEMP_FOLDER/mtco_${input_filename} \
         -a $TEMP_FOLDER/${input_filename}.mupit \
         -p ${DATA_FOLDER}/fully_described_pdb_info.txt \
@@ -128,7 +128,7 @@ fi
 ## STEP10. Output parser
 if [ ! -f "$OUTPUT_FOLDER/${name}.out.gz" ]
 then
-    python ${SCRIPTS_FOLDER}/postprocess.py \
+    python3 ${SCRIPTS_FOLDER}/postprocess.py \
     	${TEMP_FOLDER}/hotspot_gene_${input_filename} \
     	${TEMP_FOLDER}/mtco_${input_filename} \
     	${OUTPUT_FOLDER}/${name}.out.gz \

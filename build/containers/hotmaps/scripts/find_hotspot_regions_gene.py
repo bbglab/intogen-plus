@@ -287,7 +287,7 @@ def main(opts):
                 try:
                    tmp_pos =  (s[col_pos['chain']], int(s[col_pos['pdb_res']]))
                 except:
-                    print 'int error'
+                    print('int error')
                     continue
                 signif_struct_info[tmp_pos] = (s[anot_gene_ix], s[anot_tx_ix], s[anot_res_ix])
 
@@ -311,7 +311,7 @@ def main(opts):
     output += tmp_out
 
     # write output
-    with open(opts['output'], 'wb') as handle:
+    with open(opts['output'], 'w') as handle:
         for line in output:
             handle.write('\t'.join(line)+'\n')
 

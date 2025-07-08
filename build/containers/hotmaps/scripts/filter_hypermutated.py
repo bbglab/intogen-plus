@@ -156,9 +156,9 @@ def main(opts):
             mupit_filename = 'non_filtered_mupit.' + filename
             mupit_filepath = os.path.join(opts['data_dir'], mupit_filename)
             if tissue != 'PANCAN12':
-                print 'Working on {0}'.format(tissue)
+                print('Working on {0}'.format(tissue))
             else:
-                print '{0} is already filtered. Will skip filter.'.format(tissue)
+                print('{0} is already filtered. Will skip filter.'.format(tissue))
 
             # filter out lines with hypermutated samples
             output = []

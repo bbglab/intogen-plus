@@ -37,33 +37,61 @@ def main(opts):
                 if so != 'Missense_Mutation':
                     continue
 
+                ## Edit. python3 format to build dictionary for num sample x tissue
                 # Num sample in each tissue
-                if no_sample.has_key(pdb) == False:
-                    no_sample[pdb] = {}
-                no_sample[pdb][sample] = True
+                if pdb not in no_sample:
+                    no_sample[pdb] = no_sample.get(pdb, {sample: True})
+                else:
+                    no_sample[pdb][sample] = True
 
                 # Num sample in all tissues
-                if no_sample_alltissues.has_key(pdb) == False:
-                    no_sample_alltissues[pdb] = {}
-                no_sample_alltissues[pdb][sample] = True
+                if pdb not in no_sample_alltissues:
+                    no_sample_alltissues[pdb] = no_sample_alltissues.get(pdb, {sample: True})
+                else:
+                    no_sample_alltissues[pdb][sample] = True
 
-                if seqres_by_pdb.has_key(pdb) == False:
-                    seqres_by_pdb[pdb] = {}
                 seqres_chain = seqres + ':' + chain
+
+                ## Edit. Initialize dictionary to count per each sample which residue per chain is mutated. 
+                # ex. {"pdb_id":{                           {12xy:{
+                #           "sample_id":{                       "YTSC-KL-AXYZ":{
+                #                   "res_chain": #                        "16:C_1": 17
+                #                       }                                       }
+                #               }                                  }
+                #      }                                    }
+                seqres_by_pdb[pdb] = seqres_by_pdb.get(pdb, {sample:{seqres_chain:0}})
+            
+                ## Edit. Populate dictionary keeping information per sample
                 # Increases tissue specific occurrence.
-                if seqres_by_pdb[pdb].has_key(seqres_chain) == False:
-                    seqres_by_pdb[pdb][seqres_chain] = 0
-                seqres_by_pdb[pdb][seqres + ':' + chain] += 1
+                if sample not in seqres_by_pdb[pdb]:
+                    seqres_by_pdb[pdb][sample] = seqres_by_pdb[pdb].get(sample, {seqres_chain:0})
+                    if seqres_chain not in seqres_by_pdb[pdb][sample]:
+                        seqres_by_pdb[pdb][sample][seqres_chain] = seqres_by_pdb[pdb][sample].get(seqres_chain, 0) + 1
+                    else:
+                        seqres_by_pdb[pdb][sample][seqres_chain] += 1
+                else:
+                    if seqres_chain not in seqres_by_pdb[pdb][sample]:
+                        seqres_by_pdb[pdb][sample][seqres_chain] = seqres_by_pdb[pdb][sample].get(seqres_chain, 0) + 1
+                    else:
+                        seqres_by_pdb[pdb][sample][seqres_chain] += 1
+
                 # Increases all-tissue occurrence.
-                if seqres_by_pdb_alltissues.has_key(pdb) == False:
-                    seqres_by_pdb_alltissues[pdb] = {}
-                if seqres_by_pdb_alltissues[pdb].has_key(seqres_chain) == False:
-                    seqres_by_pdb_alltissues[pdb][seqres_chain] = 0
-                seqres_by_pdb_alltissues[pdb][seqres_chain] += 1
+                seqres_by_pdb_alltissues[pdb] = seqres_by_pdb_alltissues.get(pdb, {sample:{seqres_chain:0}})
+                if sample not in seqres_by_pdb_alltissues[pdb]:  
+                    seqres_by_pdb_alltissues[pdb][sample] = seqres_by_pdb_alltissues[pdb].get(sample, {seqres_chain:0})
+                    if seqres_chain not in seqres_by_pdb[pdb][sample]:
+                        seqres_by_pdb_alltissues[pdb][sample][seqres_chain] = seqres_by_pdb_alltissues[pdb][sample].get(seqres_chain, 0) + 1
+                    else:
+                        seqres_by_pdb_alltissues[pdb][sample][seqres_chain] += 1
+                else:
+                    if seqres_chain not in seqres_by_pdb_alltissues[pdb][sample]:
+                        seqres_by_pdb_alltissues[pdb][sample][seqres_chain] = seqres_by_pdb_alltissues[pdb][sample].get(seqres_chain, 0) + 1
+                    else:
+                        seqres_by_pdb_alltissues[pdb][sample][seqres_chain] += 1
             f.close()
 
             # sort PDBs
-            pdbs = seqres_by_pdb.keys()
+            pdbs = list(seqres_by_pdb.keys())
             pdbs.sort()
 
             # write to file
@@ -71,12 +99,19 @@ def main(opts):
             out_filepath = os.path.join(opts['data_dir'], out_filename)
             with open(out_filepath, 'w') as wf:
                 for pdb in pdbs:
-                    seqress = seqres_by_pdb[pdb].keys()
-                    seqress.sort()
-                    line_info = [pdb, str(len(no_sample[pdb].keys())),
-                                 ', '.join([seqres + '_' + str(seqres_by_pdb[pdb][seqres])
-                                            for seqres in seqress])]
-                    wf.write('\t'.join(line_info) + '\n')
+                    ## Edit. iterate per sample so each structure is repeted as many times as many sample associated to the mutation
+                    samples = list(seqres_by_pdb[pdb])
+                    samples.sort()
+                    for sample in samples:
+                        seqress = list(seqres_by_pdb[pdb][sample].keys())
+                        seqress.sort()
+                        line_info = [pdb, 
+                                    str(len(no_sample[pdb].keys())),
+                                    ', '.join([seqr + '_' + str(seqres_by_pdb[pdb][sample][seqr])
+                                            for seqr in seqress])
+                                                , sample
+                                                ]
+                        wf.write('\t'.join(line_info) + '\n')
 
 
 if __name__ == '__main__':
