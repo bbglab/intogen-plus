@@ -51,6 +51,18 @@ if you download it first and replace the ``CADD_URL`` variable
 in ``datasets/oncodriverfml/fml.mk`` with the full path where
 you have downloaded the CADD scores.
 
+The dndscv resource requires initialization via git-lfs.
+Before starting the building step, ensure you have git-lfs installed (https://git-lfs.github.com/)
+and run the following command in your repository root:
+
+.. code:: bash
+
+   git lfs install
+   git lfs pull
+
+This will correctly download all large files needed by dndscv build step.
+
+
 Less important notes
 ********************
 
