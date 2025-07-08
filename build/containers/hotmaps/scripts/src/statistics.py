@@ -40,7 +40,7 @@ def bh_fdr(pval):
     n = len(pval)
     logger.debug("Value of n: %s", str(n))
 
-    pval_adj = np.zeros(n)
+    pval_adj = np.zeros(int(n))
     i = np.arange(1, n+1, dtype=float)[::-1]  # largest to smallest
     pval_adj = np.minimum(1, cummin(n/i * pval_array[::-1]))[::-1]
     return pval_adj[original_order]
