@@ -111,6 +111,7 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
     sorted_regions = sorted(regions, key=lambda x: x.chain)
     grouped_regions = groupby(sorted_regions, lambda x: x.chain)
 
+    sample_dict = dict()
     for key, regions in grouped_regions:
         regions = list(regions)
         seq = ''
@@ -182,7 +183,6 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
                 )
             )
             ## Edit. Create a dictionary to store num mutation per sample and samples ids.
-            sample_dict = dict()
             for samples in sample_list:
                 for sample in samples:
                     if sample not in sample_dict.keys():
@@ -196,8 +196,6 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
                     prob[sample] = [signatures[sample]['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0]
                 else:
                     prob[sample].append(signatures[sample]['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0)
-
-            #prob.append(signatures['probabilities'].get((codon, alt), 0) if signatures is not None else 1.0)
 
     # Assumes the length of the sequence is a multiple of 3
     if len(codons) % 3 != 0:
@@ -220,10 +218,11 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
     #     for simulated_mutations_ in pool.map(fx, range(simulations), chunksize=100):
     #         simulated_mutations.append(simulated_mutations_)
     simulated_mutations = []
-    for sample, sample_mut in sample_dict.items():         
-        np_prob = np.array(prob[sample])
-        p_normalized = np_prob / np.sum(np_prob)
-        try:
+    try:
+        for sample, sample_mut in sample_dict.items():
+            np_prob = np.array(prob[sample])
+            p_normalized = np_prob / np.sum(np_prob)
+
             simulated_mutations_sample = np.random.choice(
                 a=changes,
                 size=(simulations, sample_mut),
@@ -231,10 +230,11 @@ def simulate(items, sample_list, cancer_type=None, simulations=1, cores=1):
                 replace=True
             ).flatten().tolist()
             simulated_mutations.append(simulated_mutations_sample)
-        except:
-            return geneid, list()
+    except ValueError:
+        return geneid, list()
+
     sim_mut = sum(simulated_mutations, [])
-    
+
     return geneid, sim_mut
 
 

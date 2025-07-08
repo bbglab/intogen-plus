@@ -89,7 +89,8 @@ def generate_null_dist_sig(samples, struct_id,coordinates,model_info, chain_info
         dictionary of residue ids and list of
         neigbours' residue ids
     signature: 
-    path to the signature file
+        path to the signature file
+
     Returns
     -------
     sim_null_dist : np.array

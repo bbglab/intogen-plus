@@ -38,7 +38,8 @@ def bh_fdr(pval):
 
     # calculate the needed alpha
     n = len(pval)
-    print(n)
+    logger.debug("Value of n: %s", str(n))
+
     pval_adj = np.zeros(n)
     i = np.arange(1, n+1, dtype=float)[::-1]  # largest to smallest
     pval_adj = np.minimum(1, cummin(n/i * pval_array[::-1]))[::-1]
