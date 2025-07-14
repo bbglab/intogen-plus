@@ -295,6 +295,7 @@ process dNdScv {
 
     input:
         tuple val(cohort), path(input) from VARIANTS_DNDSCV
+		path regions from REGIONS
 
     output:
         tuple val(cohort), path("${cohort}.dndscv.tsv.gz") into OUT_DNDSCV
@@ -304,7 +305,7 @@ process dNdScv {
 	script:
 		"""
 		Rscript /dndscv/dndscv.R \
-			${input} ${cohort}.dndscv.tsv.gz \
+			${input} ${regions} ${cohort}.dndscv.tsv.gz \
 			${cohort}.dndscv_annotmuts.tsv.gz \
 			${cohort}.dndscv_genemuts.tsv.gz
 		"""
